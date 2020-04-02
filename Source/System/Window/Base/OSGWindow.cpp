@@ -249,6 +249,9 @@ OSG::Window::Window(void) :
     _ids                (    ),
     _idInfo             (    ),
     _glVersion          (   0),
+    _glVendor           (    ),
+    _glRenderer         (    ),
+    _glslVersion        (   0),
     _extensions         (    ),
     _availExtensions    (    ),
     _extFunctions       (    ),
@@ -281,6 +284,9 @@ OSG::Window::Window(const Window &source) :
     _ids                (source._ids.size(),          0),
     _idInfo             (source._idInfo.size(),       0),
     _glVersion          (                             0),
+    _glslVersion        (                             0),
+    _glVendor           (                              ),
+    _glRenderer         (                              ),
     _extensions         (                              ),
     _availExtensions    (                              ),
     _extFunctions       (                              ),
@@ -1341,13 +1347,43 @@ void OSG::Window::doFrameInit(bool reinitExtFuctions)
             _glVersion = (1 << 8) + 1;
         }
 
-#ifdef __APPLE__
+        version = reinterpret_cast<const char *>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+        
+#if defined(OSG_OGL_ES2) && !defined(OSG_OGL_ES2_SIMGL3)
+        uiVersionOff = 10;
+#else
+        uiVersionOff = 0;
+#endif      
+        if(version != NULL)
+        {
+            int major = atoi(version + uiVersionOff);
+            int minor = atoi(strchr(version + uiVersionOff, '.') + 1);
+        
+            _glslVersion = (major << 8) + minor;
+        }
+        else
+        {
+            FFATAL(("Window::frameInit: Couldn't detect OpenGL shader version "
+                    "assuming version 1.0!\n"));
+            _glslVersion = (1 << 8);
+        }
 
         const char* glVendor   = 
             reinterpret_cast<const char *>(glGetString(GL_VENDOR));
         const char* glRenderer = 
             reinterpret_cast<const char *>(glGetString(GL_RENDERER));
-    
+
+        if (glVendor)
+        {
+            _glVendor = glVendor;
+        }
+
+        if (glRenderer)
+        {
+            _glRenderer = glRenderer;
+        }
+
+#ifdef __APPLE__
         if(glVendor != NULL && glRenderer != NULL)
         {
             // TODO; is there a better way to switch some
@@ -1360,7 +1396,6 @@ void OSG::Window::doFrameInit(bool reinitExtFuctions)
                   ignoreExtensions("GL_ARB_texture_non_power_of_two");
             }
         }
-
 #endif // __APPLE
 
 #if defined(OSG_USE_OGL3_PROTOS) || \
@@ -1399,6 +1434,10 @@ void OSG::Window::doFrameInit(bool reinitExtFuctions)
         FDEBUG(("Window %p: GL Version: %4x ('%s')\n", 
                 static_cast<void *>(this), 
                 _glVersion, glGetString(GL_VERSION) ));
+
+        FDEBUG(("Window %p: GLSL Version: %4x ('%s')\n", 
+                static_cast<void *>(this), 
+                _glslVersion, glGetString(GL_SHADING_LANGUAGE_VERSION) ));
 
         FDEBUG(("Window %p: GL Extensions: %s\n", 
                 static_cast<void *>(this), gl_extensions));
