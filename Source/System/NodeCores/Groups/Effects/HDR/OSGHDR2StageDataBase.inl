@@ -288,11 +288,11 @@ void HDR2StageDataBase::execSync (      HDR2StageDataBase *pFrom,
     if(FieldBits::NoField != (FinalScreenShaderFieldMask & whichField))
         _sfFinalScreenShader.syncWith(pFrom->_sfFinalScreenShader);
 
-    if(FieldBits::NoField != (SharedTextureEnvChunkFieldMask & whichField))
-        _sfSharedTextureEnvChunk.syncWith(pFrom->_sfSharedTextureEnvChunk);
-
     if(FieldBits::NoField != (SharedMaterialChunkFieldMask & whichField))
         _sfSharedMaterialChunk.syncWith(pFrom->_sfSharedMaterialChunk);
+
+    if(FieldBits::NoField != (BackgroundMaterialFieldMask & whichField))
+        _sfBackgroundMaterial.syncWith(pFrom->_sfBackgroundMaterial);
 
     if(FieldBits::NoField != (SceneMaterialFieldMask & whichField))
         _sfSceneMaterial.syncWith(pFrom->_sfSceneMaterial);
@@ -327,11 +327,17 @@ void HDR2StageDataBase::execSync (      HDR2StageDataBase *pFrom,
     if(FieldBits::NoField != (CurrentAdaptLuminanceIdxFieldMask & whichField))
         _sfCurrentAdaptLuminanceIdx.syncWith(pFrom->_sfCurrentAdaptLuminanceIdx);
 
+    if(FieldBits::NoField != (FinalScreenMaterialDepthChunkFieldMask & whichField))
+        _sfFinalScreenMaterialDepthChunk.syncWith(pFrom->_sfFinalScreenMaterialDepthChunk);
+
     if(FieldBits::NoField != (WidthFieldMask & whichField))
         _sfWidth.syncWith(pFrom->_sfWidth);
 
     if(FieldBits::NoField != (HeightFieldMask & whichField))
         _sfHeight.syncWith(pFrom->_sfHeight);
+
+    if(FieldBits::NoField != (BackgroundRenderTargetFieldMask & whichField))
+        _sfBackgroundRenderTarget.syncWith(pFrom->_sfBackgroundRenderTarget);
 
     if(FieldBits::NoField != (SceneRenderTargetFieldMask & whichField))
         _sfSceneRenderTarget.syncWith(pFrom->_sfSceneRenderTarget);

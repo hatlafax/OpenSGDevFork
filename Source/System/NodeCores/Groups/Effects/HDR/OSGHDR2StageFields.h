@@ -87,16 +87,130 @@ struct FieldTraits<HDR2Stage *, nsOSG> :
 
     static OSG_EFFECTGROUPS_DLLMAPPING DataType &getType(void);
 
+    template<typename RefCountPolicy> inline
+    static const Char8    *getSName     (void);
+
+    template<typename RefCountPolicy> inline
+    static const Char8    *getMName     (void);
+
 };
 
+template<> inline
+const Char8 *FieldTraits<HDR2Stage *, nsOSG>::getSName<RecordedRefCountPolicy>(void)
+{
+    return "SFRecHDR2StagePtr"; 
+}
 
+template<> inline
+const Char8 *FieldTraits<HDR2Stage *, nsOSG>::getSName<UnrecordedRefCountPolicy>(void)
+{
+    return "SFUnrecHDR2StagePtr"; 
+}
+
+template<> inline
+const Char8 *FieldTraits<HDR2Stage *, nsOSG>::getSName<WeakRefCountPolicy>(void)
+{
+    return "SFWeakHDR2StagePtr"; 
+}
+
+template<> inline
+const Char8 *FieldTraits<HDR2Stage *, nsOSG>::getSName<NoRefCountPolicy>(void)
+{
+    return "SFUnrefdHDR2StagePtr"; 
+}
+
+template<> inline
+const Char8 *FieldTraits<HDR2Stage *, nsOSG>::getMName<RecordedRefCountPolicy>(void)
+{
+    return "MFRecHDR2StagePtr"; 
+}
+
+template<> inline
+const Char8 *FieldTraits<HDR2Stage *, nsOSG>::getMName<UnrecordedRefCountPolicy>(void)
+{
+    return "MFUnrecHDR2StagePtr"; 
+}
+
+template<> inline
+const Char8 *FieldTraits<HDR2Stage *, nsOSG>::getMName<WeakRefCountPolicy>(void)
+{
+    return "MFWeakHDR2StagePtr"; 
+}
+
+template<> inline
+const Char8 *FieldTraits<HDR2Stage *, nsOSG>::getMName<NoRefCountPolicy>(void)
+{
+    return "MFUnrefdHDR2StagePtr"; 
+}
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+/*! \ingroup GrpEffectsGroupsHDRFieldSFields */
+typedef PointerSField<HDR2Stage *,
+                      RecordedRefCountPolicy, nsOSG  > SFRecHDR2StagePtr;
+/*! \ingroup GrpEffectsGroupsHDRFieldSFields */
+typedef PointerSField<HDR2Stage *,
+                      UnrecordedRefCountPolicy, nsOSG> SFUnrecHDR2StagePtr;
+/*! \ingroup GrpEffectsGroupsHDRFieldSFields */
+typedef PointerSField<HDR2Stage *,
+                      WeakRefCountPolicy, nsOSG      > SFWeakHDR2StagePtr;
+/*! \ingroup GrpEffectsGroupsHDRFieldSFields */
+typedef PointerSField<HDR2Stage *,
+                      NoRefCountPolicy, nsOSG        > SFUncountedHDR2StagePtr;
+
+
+/*! \ingroup GrpEffectsGroupsHDRFieldMFields */
+typedef PointerMField<HDR2Stage *,
+                      RecordedRefCountPolicy, nsOSG  > MFRecHDR2StagePtr;
+/*! \ingroup GrpEffectsGroupsHDRFieldMFields */
+typedef PointerMField<HDR2Stage *,
+                      UnrecordedRefCountPolicy, nsOSG> MFUnrecHDR2StagePtr;
+/*! \ingroup GrpEffectsGroupsHDRFieldMFields */
+typedef PointerMField<HDR2Stage *,
+                      WeakRefCountPolicy, nsOSG      > MFWeakHDR2StagePtr;
+/*! \ingroup GrpEffectsGroupsHDRFieldMFields */
+typedef PointerMField<HDR2Stage *,
+                      NoRefCountPolicy, nsOSG        > MFUncountedHDR2StagePtr;
+
 
 
 
 #else // these are the doxygen hacks
+
+/*! \ingroup GrpEffectsGroupsHDRFieldSFields \ingroup GrpLibOSGEffectGroups */
+struct SFRecHDR2StagePtr : 
+    public PointerSField<HDR2Stage *,
+                         RecordedRefCountPolicy> {};
+/*! \ingroup GrpEffectsGroupsHDRFieldSFields \ingroup GrpLibOSGEffectGroups */
+struct SFUnrecHDR2StagePtr : 
+    public PointerSField<HDR2Stage *,
+                         UnrecordedRefCountPolicy> {};
+/*! \ingroup GrpEffectsGroupsHDRFieldSFields \ingroup GrpLibOSGEffectGroups */
+struct SFWeakHDR2StagePtr :
+    public PointerSField<HDR2Stage *,
+                         WeakRefCountPolicy> {};
+/*! \ingroup GrpEffectsGroupsHDRFieldSFields \ingroup GrpLibOSGEffectGroups */
+struct SFUncountedHDR2StagePtr :
+    public PointerSField<HDR2Stage *,
+                         NoRefCountPolicy> {};
+
+
+/*! \ingroup GrpEffectsGroupsHDRFieldMFields \ingroup GrpLibOSGEffectGroups */
+struct MFRecHDR2StagePtr :
+    public PointerMField<HDR2Stage *,
+                         RecordedRefCountPolicy  > {};
+/*! \ingroup GrpEffectsGroupsHDRFieldMFields \ingroup GrpLibOSGEffectGroups */
+struct MFUnrecHDR2StagePtr :
+    public PointerMField<HDR2Stage *,
+                         UnrecordedRefCountPolicy> {};
+/*! \ingroup GrpEffectsGroupsHDRFieldMFields \ingroup GrpLibOSGEffectGroups */
+struct MFWeakHDR2StagePtr :
+    public PointerMField<HDR2Stage *,
+                         WeakRefCountPolicy      > {};
+/*! \ingroup GrpEffectsGroupsHDRFieldMFields \ingroup GrpLibOSGEffectGroups */
+struct MFUncountedHDR2StagePtr :
+    public PointerMField<HDR2Stage *,
+                         NoRefCountPolicy        > {};
 
 
 

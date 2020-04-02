@@ -74,6 +74,31 @@ OSG::UInt16 HDR2StageBase::getClassGroupId(void)
 
 /*------------------------------ get -----------------------------------*/
 
+//! Get the value of the HDR2Stage::_sfActivate field.
+
+inline
+bool &HDR2StageBase::editActivate(void)
+{
+    editSField(ActivateFieldMask);
+
+    return _sfActivate.getValue();
+}
+
+//! Get the value of the HDR2Stage::_sfActivate field.
+inline
+      bool  HDR2StageBase::getActivate(void) const
+{
+    return _sfActivate.getValue();
+}
+
+//! Set the value of the HDR2Stage::_sfActivate field.
+inline
+void HDR2StageBase::setActivate(const bool value)
+{
+    editSField(ActivateFieldMask);
+
+    _sfActivate.setValue(value);
+}
 //! Get the value of the HDR2Stage::_sfApplyGamma field.
 
 inline
@@ -123,6 +148,31 @@ void HDR2StageBase::setAccurateGamma(const bool value)
     editSField(AccurateGammaFieldMask);
 
     _sfAccurateGamma.setValue(value);
+}
+//! Get the value of the HDR2Stage::_sfGamma field.
+
+inline
+Real32 &HDR2StageBase::editGamma(void)
+{
+    editSField(GammaFieldMask);
+
+    return _sfGamma.getValue();
+}
+
+//! Get the value of the HDR2Stage::_sfGamma field.
+inline
+      Real32  HDR2StageBase::getGamma(void) const
+{
+    return _sfGamma.getValue();
+}
+
+//! Set the value of the HDR2Stage::_sfGamma field.
+inline
+void HDR2StageBase::setGamma(const Real32 value)
+{
+    editSField(GammaFieldMask);
+
+    _sfGamma.setValue(value);
 }
 //! Get the value of the HDR2Stage::_sfAdjustLuminance field.
 
@@ -474,6 +524,81 @@ void HDR2StageBase::setKeyValue(const Real32 value)
 
     _sfKeyValue.setValue(value);
 }
+//! Get the value of the HDR2Stage::_sfApertureFNumber field.
+
+inline
+Real32 &HDR2StageBase::editApertureFNumber(void)
+{
+    editSField(ApertureFNumberFieldMask);
+
+    return _sfApertureFNumber.getValue();
+}
+
+//! Get the value of the HDR2Stage::_sfApertureFNumber field.
+inline
+      Real32  HDR2StageBase::getApertureFNumber(void) const
+{
+    return _sfApertureFNumber.getValue();
+}
+
+//! Set the value of the HDR2Stage::_sfApertureFNumber field.
+inline
+void HDR2StageBase::setApertureFNumber(const Real32 value)
+{
+    editSField(ApertureFNumberFieldMask);
+
+    _sfApertureFNumber.setValue(value);
+}
+//! Get the value of the HDR2Stage::_sfShutterSpeed field.
+
+inline
+Real32 &HDR2StageBase::editShutterSpeed(void)
+{
+    editSField(ShutterSpeedFieldMask);
+
+    return _sfShutterSpeed.getValue();
+}
+
+//! Get the value of the HDR2Stage::_sfShutterSpeed field.
+inline
+      Real32  HDR2StageBase::getShutterSpeed(void) const
+{
+    return _sfShutterSpeed.getValue();
+}
+
+//! Set the value of the HDR2Stage::_sfShutterSpeed field.
+inline
+void HDR2StageBase::setShutterSpeed(const Real32 value)
+{
+    editSField(ShutterSpeedFieldMask);
+
+    _sfShutterSpeed.setValue(value);
+}
+//! Get the value of the HDR2Stage::_sfISO field.
+
+inline
+Real32 &HDR2StageBase::editISO(void)
+{
+    editSField(ISOFieldMask);
+
+    return _sfISO.getValue();
+}
+
+//! Get the value of the HDR2Stage::_sfISO field.
+inline
+      Real32  HDR2StageBase::getISO(void) const
+{
+    return _sfISO.getValue();
+}
+
+//! Set the value of the HDR2Stage::_sfISO field.
+inline
+void HDR2StageBase::setISO(const Real32 value)
+{
+    editSField(ISOFieldMask);
+
+    _sfISO.setValue(value);
+}
 //! Get the value of the HDR2Stage::_sfWhiteLevel field.
 
 inline
@@ -549,180 +674,130 @@ void HDR2StageBase::setUseLinChromCorrection(const bool value)
 
     _sfUseLinChromCorrection.setValue(value);
 }
-//! Get the value of the HDR2Stage::_sfFilmicShoulderStrenght field.
+//! Get the value of the HDR2Stage::_sfFilterColor field.
 
 inline
-Real32 &HDR2StageBase::editFilmicShoulderStrenght(void)
+Color3f &HDR2StageBase::editFilterColor(void)
 {
-    editSField(FilmicShoulderStrenghtFieldMask);
+    editSField(FilterColorFieldMask);
 
-    return _sfFilmicShoulderStrenght.getValue();
+    return _sfFilterColor.getValue();
 }
 
-//! Get the value of the HDR2Stage::_sfFilmicShoulderStrenght field.
+//! Get the value of the HDR2Stage::_sfFilterColor field.
 inline
-      Real32  HDR2StageBase::getFilmicShoulderStrenght(void) const
+const Color3f &HDR2StageBase::getFilterColor(void) const
 {
-    return _sfFilmicShoulderStrenght.getValue();
+    return _sfFilterColor.getValue();
 }
 
-//! Set the value of the HDR2Stage::_sfFilmicShoulderStrenght field.
+//! Set the value of the HDR2Stage::_sfFilterColor field.
 inline
-void HDR2StageBase::setFilmicShoulderStrenght(const Real32 value)
+void HDR2StageBase::setFilterColor(const Color3f &value)
 {
-    editSField(FilmicShoulderStrenghtFieldMask);
+    editSField(FilterColorFieldMask);
 
-    _sfFilmicShoulderStrenght.setValue(value);
+    _sfFilterColor.setValue(value);
 }
-//! Get the value of the HDR2Stage::_sfFilmicLinearStrength field.
+//! Get the value of the HDR2Stage::_sfContrast field.
 
 inline
-Real32 &HDR2StageBase::editFilmicLinearStrength(void)
+Real32 &HDR2StageBase::editContrast(void)
 {
-    editSField(FilmicLinearStrengthFieldMask);
+    editSField(ContrastFieldMask);
 
-    return _sfFilmicLinearStrength.getValue();
-}
-
-//! Get the value of the HDR2Stage::_sfFilmicLinearStrength field.
-inline
-      Real32  HDR2StageBase::getFilmicLinearStrength(void) const
-{
-    return _sfFilmicLinearStrength.getValue();
+    return _sfContrast.getValue();
 }
 
-//! Set the value of the HDR2Stage::_sfFilmicLinearStrength field.
+//! Get the value of the HDR2Stage::_sfContrast field.
 inline
-void HDR2StageBase::setFilmicLinearStrength(const Real32 value)
+      Real32  HDR2StageBase::getContrast(void) const
 {
-    editSField(FilmicLinearStrengthFieldMask);
-
-    _sfFilmicLinearStrength.setValue(value);
-}
-//! Get the value of the HDR2Stage::_sfFilmicLinearAngle field.
-
-inline
-Real32 &HDR2StageBase::editFilmicLinearAngle(void)
-{
-    editSField(FilmicLinearAngleFieldMask);
-
-    return _sfFilmicLinearAngle.getValue();
+    return _sfContrast.getValue();
 }
 
-//! Get the value of the HDR2Stage::_sfFilmicLinearAngle field.
+//! Set the value of the HDR2Stage::_sfContrast field.
 inline
-      Real32  HDR2StageBase::getFilmicLinearAngle(void) const
+void HDR2StageBase::setContrast(const Real32 value)
 {
-    return _sfFilmicLinearAngle.getValue();
+    editSField(ContrastFieldMask);
+
+    _sfContrast.setValue(value);
+}
+//! Get the value of the HDR2Stage::_sfShadowLiftColor field.
+
+inline
+Color3f &HDR2StageBase::editShadowLiftColor(void)
+{
+    editSField(ShadowLiftColorFieldMask);
+
+    return _sfShadowLiftColor.getValue();
 }
 
-//! Set the value of the HDR2Stage::_sfFilmicLinearAngle field.
+//! Get the value of the HDR2Stage::_sfShadowLiftColor field.
 inline
-void HDR2StageBase::setFilmicLinearAngle(const Real32 value)
+const Color3f &HDR2StageBase::getShadowLiftColor(void) const
 {
-    editSField(FilmicLinearAngleFieldMask);
-
-    _sfFilmicLinearAngle.setValue(value);
-}
-//! Get the value of the HDR2Stage::_sfFilmicToeStrength field.
-
-inline
-Real32 &HDR2StageBase::editFilmicToeStrength(void)
-{
-    editSField(FilmicToeStrengthFieldMask);
-
-    return _sfFilmicToeStrength.getValue();
+    return _sfShadowLiftColor.getValue();
 }
 
-//! Get the value of the HDR2Stage::_sfFilmicToeStrength field.
+//! Set the value of the HDR2Stage::_sfShadowLiftColor field.
 inline
-      Real32  HDR2StageBase::getFilmicToeStrength(void) const
+void HDR2StageBase::setShadowLiftColor(const Color3f &value)
 {
-    return _sfFilmicToeStrength.getValue();
+    editSField(ShadowLiftColorFieldMask);
+
+    _sfShadowLiftColor.setValue(value);
+}
+//! Get the value of the HDR2Stage::_sfMidToneGammaColor field.
+
+inline
+Color3f &HDR2StageBase::editMidToneGammaColor(void)
+{
+    editSField(MidToneGammaColorFieldMask);
+
+    return _sfMidToneGammaColor.getValue();
 }
 
-//! Set the value of the HDR2Stage::_sfFilmicToeStrength field.
+//! Get the value of the HDR2Stage::_sfMidToneGammaColor field.
 inline
-void HDR2StageBase::setFilmicToeStrength(const Real32 value)
+const Color3f &HDR2StageBase::getMidToneGammaColor(void) const
 {
-    editSField(FilmicToeStrengthFieldMask);
-
-    _sfFilmicToeStrength.setValue(value);
-}
-//! Get the value of the HDR2Stage::_sfFilmicToeNumerator field.
-
-inline
-Real32 &HDR2StageBase::editFilmicToeNumerator(void)
-{
-    editSField(FilmicToeNumeratorFieldMask);
-
-    return _sfFilmicToeNumerator.getValue();
+    return _sfMidToneGammaColor.getValue();
 }
 
-//! Get the value of the HDR2Stage::_sfFilmicToeNumerator field.
+//! Set the value of the HDR2Stage::_sfMidToneGammaColor field.
 inline
-      Real32  HDR2StageBase::getFilmicToeNumerator(void) const
+void HDR2StageBase::setMidToneGammaColor(const Color3f &value)
 {
-    return _sfFilmicToeNumerator.getValue();
+    editSField(MidToneGammaColorFieldMask);
+
+    _sfMidToneGammaColor.setValue(value);
+}
+//! Get the value of the HDR2Stage::_sfHighlightGainColor field.
+
+inline
+Color3f &HDR2StageBase::editHighlightGainColor(void)
+{
+    editSField(HighlightGainColorFieldMask);
+
+    return _sfHighlightGainColor.getValue();
 }
 
-//! Set the value of the HDR2Stage::_sfFilmicToeNumerator field.
+//! Get the value of the HDR2Stage::_sfHighlightGainColor field.
 inline
-void HDR2StageBase::setFilmicToeNumerator(const Real32 value)
+const Color3f &HDR2StageBase::getHighlightGainColor(void) const
 {
-    editSField(FilmicToeNumeratorFieldMask);
-
-    _sfFilmicToeNumerator.setValue(value);
-}
-//! Get the value of the HDR2Stage::_sfFilmicToeDenominator field.
-
-inline
-Real32 &HDR2StageBase::editFilmicToeDenominator(void)
-{
-    editSField(FilmicToeDenominatorFieldMask);
-
-    return _sfFilmicToeDenominator.getValue();
+    return _sfHighlightGainColor.getValue();
 }
 
-//! Get the value of the HDR2Stage::_sfFilmicToeDenominator field.
+//! Set the value of the HDR2Stage::_sfHighlightGainColor field.
 inline
-      Real32  HDR2StageBase::getFilmicToeDenominator(void) const
+void HDR2StageBase::setHighlightGainColor(const Color3f &value)
 {
-    return _sfFilmicToeDenominator.getValue();
-}
+    editSField(HighlightGainColorFieldMask);
 
-//! Set the value of the HDR2Stage::_sfFilmicToeDenominator field.
-inline
-void HDR2StageBase::setFilmicToeDenominator(const Real32 value)
-{
-    editSField(FilmicToeDenominatorFieldMask);
-
-    _sfFilmicToeDenominator.setValue(value);
-}
-//! Get the value of the HDR2Stage::_sfFilmicLinearWhite field.
-
-inline
-Real32 &HDR2StageBase::editFilmicLinearWhite(void)
-{
-    editSField(FilmicLinearWhiteFieldMask);
-
-    return _sfFilmicLinearWhite.getValue();
-}
-
-//! Get the value of the HDR2Stage::_sfFilmicLinearWhite field.
-inline
-      Real32  HDR2StageBase::getFilmicLinearWhite(void) const
-{
-    return _sfFilmicLinearWhite.getValue();
-}
-
-//! Set the value of the HDR2Stage::_sfFilmicLinearWhite field.
-inline
-void HDR2StageBase::setFilmicLinearWhite(const Real32 value)
-{
-    editSField(FilmicLinearWhiteFieldMask);
-
-    _sfFilmicLinearWhite.setValue(value);
+    _sfHighlightGainColor.setValue(value);
 }
 //! Get the value of the HDR2Stage::_sfDragoBias field.
 
@@ -773,6 +848,31 @@ void HDR2StageBase::setTarget(const UInt32 value)
     editSField(TargetFieldMask);
 
     _sfTarget.setValue(value);
+}
+//! Get the value of the HDR2Stage::_sfPerformDithering field.
+
+inline
+bool &HDR2StageBase::editPerformDithering(void)
+{
+    editSField(PerformDitheringFieldMask);
+
+    return _sfPerformDithering.getValue();
+}
+
+//! Get the value of the HDR2Stage::_sfPerformDithering field.
+inline
+      bool  HDR2StageBase::getPerformDithering(void) const
+{
+    return _sfPerformDithering.getValue();
+}
+
+//! Set the value of the HDR2Stage::_sfPerformDithering field.
+inline
+void HDR2StageBase::setPerformDithering(const bool value)
+{
+    editSField(PerformDitheringFieldMask);
+
+    _sfPerformDithering.setValue(value);
 }
 //! Get the value of the HDR2Stage::_sfCarryDepth field.
 
@@ -1150,6 +1250,21 @@ void HDR2StageBase::setMipmapLevel(const Int32 value)
     _sfMipmapLevel.setValue(value);
 }
 
+//! Get the value of the \a index element the HDR2Stage::_mfFilmicCurveParameters field.
+inline
+      Real32  HDR2StageBase::getFilmicCurveParameters(const UInt32 index) const
+{
+    return _mfFilmicCurveParameters[index];
+}
+
+inline
+MFReal32           ::reference HDR2StageBase::editFilmicCurveParameters(const UInt32 index)
+{
+    editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
+
+    return _mfFilmicCurveParameters[index];
+}
+
 
 #ifdef OSG_MT_CPTR_ASPECT
 inline
@@ -1161,11 +1276,17 @@ void HDR2StageBase::execSync (      HDR2StageBase *pFrom,
 {
     Inherited::execSync(pFrom, whichField, oOffsets, syncMode, uiSyncInfo);
 
+    if(FieldBits::NoField != (ActivateFieldMask & whichField))
+        _sfActivate.syncWith(pFrom->_sfActivate);
+
     if(FieldBits::NoField != (ApplyGammaFieldMask & whichField))
         _sfApplyGamma.syncWith(pFrom->_sfApplyGamma);
 
     if(FieldBits::NoField != (AccurateGammaFieldMask & whichField))
         _sfAccurateGamma.syncWith(pFrom->_sfAccurateGamma);
+
+    if(FieldBits::NoField != (GammaFieldMask & whichField))
+        _sfGamma.syncWith(pFrom->_sfGamma);
 
     if(FieldBits::NoField != (AdjustLuminanceFieldMask & whichField))
         _sfAdjustLuminance.syncWith(pFrom->_sfAdjustLuminance);
@@ -1209,6 +1330,15 @@ void HDR2StageBase::execSync (      HDR2StageBase *pFrom,
     if(FieldBits::NoField != (KeyValueFieldMask & whichField))
         _sfKeyValue.syncWith(pFrom->_sfKeyValue);
 
+    if(FieldBits::NoField != (ApertureFNumberFieldMask & whichField))
+        _sfApertureFNumber.syncWith(pFrom->_sfApertureFNumber);
+
+    if(FieldBits::NoField != (ShutterSpeedFieldMask & whichField))
+        _sfShutterSpeed.syncWith(pFrom->_sfShutterSpeed);
+
+    if(FieldBits::NoField != (ISOFieldMask & whichField))
+        _sfISO.syncWith(pFrom->_sfISO);
+
     if(FieldBits::NoField != (WhiteLevelFieldMask & whichField))
         _sfWhiteLevel.syncWith(pFrom->_sfWhiteLevel);
 
@@ -1218,32 +1348,35 @@ void HDR2StageBase::execSync (      HDR2StageBase *pFrom,
     if(FieldBits::NoField != (UseLinChromCorrectionFieldMask & whichField))
         _sfUseLinChromCorrection.syncWith(pFrom->_sfUseLinChromCorrection);
 
-    if(FieldBits::NoField != (FilmicShoulderStrenghtFieldMask & whichField))
-        _sfFilmicShoulderStrenght.syncWith(pFrom->_sfFilmicShoulderStrenght);
+    if(FieldBits::NoField != (FilterColorFieldMask & whichField))
+        _sfFilterColor.syncWith(pFrom->_sfFilterColor);
 
-    if(FieldBits::NoField != (FilmicLinearStrengthFieldMask & whichField))
-        _sfFilmicLinearStrength.syncWith(pFrom->_sfFilmicLinearStrength);
+    if(FieldBits::NoField != (ContrastFieldMask & whichField))
+        _sfContrast.syncWith(pFrom->_sfContrast);
 
-    if(FieldBits::NoField != (FilmicLinearAngleFieldMask & whichField))
-        _sfFilmicLinearAngle.syncWith(pFrom->_sfFilmicLinearAngle);
+    if(FieldBits::NoField != (ShadowLiftColorFieldMask & whichField))
+        _sfShadowLiftColor.syncWith(pFrom->_sfShadowLiftColor);
 
-    if(FieldBits::NoField != (FilmicToeStrengthFieldMask & whichField))
-        _sfFilmicToeStrength.syncWith(pFrom->_sfFilmicToeStrength);
+    if(FieldBits::NoField != (MidToneGammaColorFieldMask & whichField))
+        _sfMidToneGammaColor.syncWith(pFrom->_sfMidToneGammaColor);
 
-    if(FieldBits::NoField != (FilmicToeNumeratorFieldMask & whichField))
-        _sfFilmicToeNumerator.syncWith(pFrom->_sfFilmicToeNumerator);
+    if(FieldBits::NoField != (HighlightGainColorFieldMask & whichField))
+        _sfHighlightGainColor.syncWith(pFrom->_sfHighlightGainColor);
 
-    if(FieldBits::NoField != (FilmicToeDenominatorFieldMask & whichField))
-        _sfFilmicToeDenominator.syncWith(pFrom->_sfFilmicToeDenominator);
-
-    if(FieldBits::NoField != (FilmicLinearWhiteFieldMask & whichField))
-        _sfFilmicLinearWhite.syncWith(pFrom->_sfFilmicLinearWhite);
+    if(FieldBits::NoField != (FilmicCurveParametersFieldMask & whichField))
+        _mfFilmicCurveParameters.syncWith(pFrom->_mfFilmicCurveParameters,
+                                syncMode,
+                                uiSyncInfo,
+                                oOffsets);
 
     if(FieldBits::NoField != (DragoBiasFieldMask & whichField))
         _sfDragoBias.syncWith(pFrom->_sfDragoBias);
 
     if(FieldBits::NoField != (TargetFieldMask & whichField))
         _sfTarget.syncWith(pFrom->_sfTarget);
+
+    if(FieldBits::NoField != (PerformDitheringFieldMask & whichField))
+        _sfPerformDithering.syncWith(pFrom->_sfPerformDithering);
 
     if(FieldBits::NoField != (CarryDepthFieldMask & whichField))
         _sfCarryDepth.syncWith(pFrom->_sfCarryDepth);

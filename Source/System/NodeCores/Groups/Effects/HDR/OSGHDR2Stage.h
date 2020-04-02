@@ -42,6 +42,8 @@
 #pragma once
 #endif
 
+#include <boost/container/flat_map.hpp>
+
 #include "OSGHDR2StageBase.h"
 #include "OSGAction.h"
 #include "OSGHDR2StageDataFields.h"
@@ -81,12 +83,16 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2Stage : public HDR2StageBase
         REINHARD_TONE_MAPPING,
         REINHARD_MODIFIED_TONE_MAPPING,
         FILMIC_HABLE_TONE_MAPPING,
-        FILMIC_UNCHARTE2D_TONE_MAPPING
+        FILMIC_UNCHARTED2_TONE_MAPPING,
+        FILMIC_ACES_TONE_MAPPING,
+        FILMIC_HEJ2015_TONE_MAPPING,
+        FILMIC_ACES_2_TONE_MAPPING,
     };
 
     enum FinalScreenTarget
     {
-        SCENE_TEXTURE = 0,
+        BACKGROUND_TEXTURE = 0,
+        SCENE_TEXTURE,
         LUMINANCE_TEXTURE,
         ADAPTED_LUMINANCE_TEXTURE,
         THRESHOLD_TEXTURE,
@@ -108,8 +114,31 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2Stage : public HDR2StageBase
     {
         MANUAL = 0,
         KEY_VALUE, 
-        AUTOMATIC
+        AUTOMATIC,
+        SATURATION_BASED,
+        STANDARD_OUTPUT_BASED
     };
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name              Filmic Curve Parameters                         */
+    /*! \{                                                                 */
+
+    Real32 getFilmicShoulderStrenght    () const;
+    Real32 getFilmicLinearStrength      () const;
+    Real32 getFilmicLinearAngle         () const;
+    Real32 getFilmicToeStrength         () const;
+    Real32 getFilmicToeNumerator        () const;
+    Real32 getFilmicToeDenominator      () const;
+    Real32 getFilmicLinearWhite         () const;
+
+    void   setFilmicShoulderStrenght    (Real32 value);
+    void   setFilmicLinearStrength      (Real32 value);
+    void   setFilmicLinearAngle         (Real32 value);
+    void   setFilmicToeStrength         (Real32 value);
+    void   setFilmicToeNumerator        (Real32 value);
+    void   setFilmicToeDenominator      (Real32 value);
+    void   setFilmicLinearWhite         (Real32 value);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -152,6 +181,18 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2Stage : public HDR2StageBase
     /*=========================  PROTECTED  ===============================*/
 
   protected:
+
+    enum FilmicCurveParameterAccessIds
+    {
+        FilmicShoulderStrenghtId = 0,
+        FilmicLinearStrengthId,
+        FilmicLinearAngleId,
+        FilmicToeStrengthId,
+        FilmicToeNumeratorId,
+        FilmicToeDenominatorId,
+        FilmicLinearWhiteId,
+        FilmicCurveParameterAccessNumEntries
+    };
 
     // Variables should all be in HDR2StageBase.
 
@@ -208,57 +249,66 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2Stage : public HDR2StageBase
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
+    /*! \name                     Access                                   */
+    /*! \{                                                                 */
+
+    Vec3f                   getAdjustedShadowLift       () const;
+    Vec3f                   getAdjustedInvMidtoneGamma  () const;
+    Vec3f                   getAdjustedHighlightGain    () const;
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
     /*! \name                StageData Details                             */
     /*! \{                                                                 */
     std::size_t calcUBOBufferSize        ();
     void        fillUBOBuffer            (std::vector<OSG::UInt8>& buffer);
     
-    void setupUBOData                    (HDR2StageData* pHDRData);
-    void updateUBOData                   (HDR2StageData* pHDRData);
+    void setupUBOData                    (HDR2StageData* pData);
+    void updateUBOData                   (HDR2StageData* pData);
 
-    void setupSharedData                 (HDR2StageData* pHDRData);
-    void setupRenderTargets              (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void setupMaterials                  (HDR2StageData* pHDRData);
+    void setupSharedData                 (HDR2StageData* pData);
+    void setupRenderTargets              (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void setupMaterials                  (HDR2StageData* pData);
 
-    void updateSharedData                (HDR2StageData* pHDRData);
-    void updateRenderTargets             (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void updateMaterials                 (HDR2StageData* pHDRData);
+    void updateSharedData                (HDR2StageData* pData);
+    void updateRenderTargets             (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void updateMaterials                 (HDR2StageData* pData);
 
-    void setupSceneRenderTarget          (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void setupLuminanceRenderTarget      (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void setupAdaptLuminanceRenderTarget (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void setupThresholdRenderTarget      (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void setupScaleRenderTarget          (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void setupBlurRenderTarget           (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void setupCompositeRenderTarget      (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
+    void setupBackgroundRenderTarget     (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void setupSceneRenderTarget          (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void setupLuminanceRenderTarget      (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void setupAdaptLuminanceRenderTarget (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void setupThresholdRenderTarget      (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void setupScaleRenderTarget          (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void setupBlurRenderTarget           (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void setupCompositeRenderTarget      (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
 
-    void setupSceneMaterial              (HDR2StageData* pHDRData);
-    void setupLuminanceMapMaterial       (HDR2StageData* pHDRData);
-    void setupAdaptLuminanceMaterial     (HDR2StageData* pHDRData);
-    void setupThresholdMaterial          (HDR2StageData* pHDRData);
-    void setupScaleMaterial              (HDR2StageData* pHDRData);
-    void setupBlurHorizMaterial          (HDR2StageData* pHDRData);
-    void setupBlurVertMaterial           (HDR2StageData* pHDRData);
-    void setupCompositeMaterial          (HDR2StageData* pHDRData);
-    void setupFinalScreenMaterial        (HDR2StageData* pHDRData);
+    void setupLuminanceMapMaterial       (HDR2StageData* pData);
+    void setupAdaptLuminanceMaterial     (HDR2StageData* pData);
+    void setupThresholdMaterial          (HDR2StageData* pData);
+    void setupScaleMaterial              (HDR2StageData* pData);
+    void setupBlurHorizMaterial          (HDR2StageData* pData);
+    void setupBlurVertMaterial           (HDR2StageData* pData);
+    void setupCompositeMaterial          (HDR2StageData* pData);
+    void setupFinalScreenMaterial        (HDR2StageData* pData);
 
-    void updateSceneRenderTarget         (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void updateLuminanceRenderTarget     (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void updateAdaptLuminanceRenderTarget(HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void updateThresholdRenderTarget     (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void updateScaleRenderTarget         (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void updateBlurRenderTarget          (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
-    void updateCompositeRenderTarget     (HDR2StageData* pHDRData, Int32 iWidth, Int32 iHeight);
+    void updateBackgroundRenderTarget    (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void updateSceneRenderTarget         (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void updateLuminanceRenderTarget     (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void updateAdaptLuminanceRenderTarget(HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void updateThresholdRenderTarget     (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void updateScaleRenderTarget         (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void updateBlurRenderTarget          (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
+    void updateCompositeRenderTarget     (HDR2StageData* pData, Int32 iWidth, Int32 iHeight);
 
-    void updateSceneMaterial             (HDR2StageData* pHDRData);
-    void updateLuminanceMapMaterial      (HDR2StageData* pHDRData);
-    void updateAdaptLuminanceMaterial    (HDR2StageData* pHDRData);
-    void updateThresholdMaterial         (HDR2StageData* pHDRData);
-    void updateScaleMaterial             (HDR2StageData* pHDRData);
-    void updateBlurHorizMaterial         (HDR2StageData* pHDRData);
-    void updateBlurVertMaterial          (HDR2StageData* pHDRData);
-    void updateCompositeMaterial         (HDR2StageData* pHDRData);
-    void updateFinalScreenMaterial       (HDR2StageData* pHDRData);
+    void updateLuminanceMapMaterial      (HDR2StageData* pData);
+    void updateAdaptLuminanceMaterial    (HDR2StageData* pData);
+    void updateThresholdMaterial         (HDR2StageData* pData);
+    void updateScaleMaterial             (HDR2StageData* pData);
+    void updateBlurHorizMaterial         (HDR2StageData* pData);
+    void updateBlurVertMaterial          (HDR2StageData* pData);
+    void updateCompositeMaterial         (HDR2StageData* pData);
+    void updateFinalScreenMaterial       (HDR2StageData* pData);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -273,8 +323,12 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2Stage : public HDR2StageBase
     void genFuncPow                      (std::stringstream& ost);
     void genFuncGetAvgLuminance          (std::stringstream& ost);
     void genFuncGetDepthValue            (std::stringstream& ost);
+    void genFuncSaturationBasedExp       (std::stringstream& ost);
+    void genFuncStandardOutputBasedExp   (std::stringstream& ost);
     void genFuncCalcExposedColor         (std::stringstream& ost);
     void genFuncColorCorrection          (std::stringstream& ost);
+    void genFuncContrastCorrection       (std::stringstream& ost);
+    void genFuncLog2Exposure             (std::stringstream& ost);
     void genFuncU2Func                   (std::stringstream& ost);
     void genFuncToneMapLogarithmic       (std::stringstream& ost);
     void genFuncToneMapExponential       (std::stringstream& ost);
@@ -283,10 +337,15 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2Stage : public HDR2StageBase
     void genFuncToneMapReinhardModified  (std::stringstream& ost);
     void genFuncToneMapFilmicALU         (std::stringstream& ost);
     void genFuncToneMapFilmicU2          (std::stringstream& ost);
+    void genFuncToneMapFilmicACES        (std::stringstream& ost);
+    void genFuncToneMapFilmicHejl2015    (std::stringstream& ost);
+    void genFuncToneMapFilmicACES2       (std::stringstream& ost);
     void genFuncToneMap                  (std::stringstream& ost);
     void genFuncCalcGaussianWeight       (std::stringstream& ost);
     void genFuncGetBloomColor            (std::stringstream& ost);
     void genFuncGammaCorrection          (std::stringstream& ost);
+    void genFuncLiftGammaGainCorrection  (std::stringstream& ost);
+    void genFuncDithering                (std::stringstream& ost);
     void genFuncLinearizeZ               (std::stringstream& ost);
 
     void genSharedCode                   (std::stringstream& ost);
@@ -314,24 +373,54 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2Stage : public HDR2StageBase
     /*! \name                Postprocess Toolbox                           */
     /*! \{                                                                 */
 
-    void calcAvgLuminance       (DrawEnv* pEnv, HDR2StageData* pHDRData);
-    void bloomBlur              (DrawEnv* pEnv, HDR2StageData* pHDRData);
-    void composite              (DrawEnv* pEnv, HDR2StageData* pHDRData);
-    void drawToFinalTarget      (DrawEnv* pEnv, HDR2StageData* pHDRData);
+    void calcAvgLuminance       (DrawEnv* pEnv, HDR2StageData* pData);
+    void bloomBlur              (DrawEnv* pEnv, HDR2StageData* pData);
+    void composite              (DrawEnv* pEnv, HDR2StageData* pData);
+    void drawToFinalTarget      (DrawEnv* pEnv, HDR2StageData* pData);
 
-    void bloomBlur_DOWN_SCALED_0              (DrawEnv* pEnv, HDR2StageData* pHDRData);
-    void bloomBlur_DOWN_SCALED_1              (DrawEnv* pEnv, HDR2StageData* pHDRData);
-    void bloomBlur_DOWN_SCALED_2              (DrawEnv* pEnv, HDR2StageData* pHDRData);
-    void bloomBlur_BLUR_TEXTURE              (DrawEnv* pEnv, HDR2StageData* pHDRData);
-    void bloomBlur_UP_SCALED_0              (DrawEnv* pEnv, HDR2StageData* pHDRData);
-    void bloomBlur_UP_SCALED_1              (DrawEnv* pEnv, HDR2StageData* pHDRData);
-
+    void bloomBlur_DOWN_SCALED_0(DrawEnv* pEnv, HDR2StageData* pData);
+    void bloomBlur_DOWN_SCALED_1(DrawEnv* pEnv, HDR2StageData* pData);
+    void bloomBlur_DOWN_SCALED_2(DrawEnv* pEnv, HDR2StageData* pData);
+    void bloomBlur_BLUR_TEXTURE (DrawEnv* pEnv, HDR2StageData* pData);
+    void bloomBlur_UP_SCALED_0  (DrawEnv* pEnv, HDR2StageData* pData);
+    void bloomBlur_UP_SCALED_1  (DrawEnv* pEnv, HDR2StageData* pData);
 
     /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                      sRGB                                    */
+    /*! \{                                                                 */
 
+    Color3f sRGBToLinear        (const Color3f& c) const;
+    Real32  sRGBToLinear        (      Real32   x) const;
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                      Update                                  */
+    /*! \{                                                                 */
+
+    //
+    // Update need to be done for each stage data separately. Since we
+    // do not have (as far as I know) a proper way to push the update
+    // request into the stage data objects, we settle for the map solution.
+    // On Change, all entries in the maps are set to true and on rendering
+    // of the different windows/views we reset the specific entries separately.
+    // StageData objects, that are passed away, are still accounted in the maps.
+    // But since that are not so many, we don't bother. 
+    //
+    typedef boost::container::flat_map<HDR2StageData*, bool> UpdateMapT;
+
+    UpdateMapT  _mapUpdate;
+    UpdateMapT  _mapUpdateUboBuffer;
+
+    /*! \}                                                                 */
     /*==========================  PRIVATE  ================================*/
 
   private:
+#if 0
+    void            write_read_back_images(HDR2StageData* pData) const;
+    void            dump_fbo    (const char* name, FrameBufferObject* fbo, std::stringstream& ss) const;
+    std::string     dump_stage  (HDR2StageData* pData) const;
+#endif
 
     friend class FieldContainer;
     friend class HDR2StageBase;

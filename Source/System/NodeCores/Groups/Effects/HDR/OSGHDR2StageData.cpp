@@ -116,6 +116,17 @@ void HDR2StageData::dump(      UInt32    ,
 
 /*----------------------------- Convenience -------------------------------*/
 
+TextureObjChunk* HDR2StageData::getBackgroundTexObjChunk() const
+{
+    FrameBufferObject* pFBO = getBackgroundRenderTarget();
+
+    TextureBuffer* pTexBuffer = dynamic_cast<TextureBuffer*>(pFBO->getColorAttachments(0));
+    if (!pTexBuffer)
+        return NULL;
+
+    return pTexBuffer->getTexture();
+}
+
 TextureObjChunk* HDR2StageData::getSceneTexObjChunk() const
 {
     FrameBufferObject* pFBO = getSceneRenderTarget();

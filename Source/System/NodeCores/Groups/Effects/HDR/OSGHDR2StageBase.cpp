@@ -99,6 +99,10 @@ OSG_BEGIN_NAMESPACE
  *                        Field Documentation                              *
 \***************************************************************************/
 
+/*! \var bool            HDR2StageBase::_sfActivate
+    If the stage is deactivated it does not perform any action on its own but act as a simple Group core.
+*/
+
 /*! \var bool            HDR2StageBase::_sfApplyGamma
     If set gamma correction is performed just before writing to the final
     draw buffer at the end of the pipeline.
@@ -108,8 +112,13 @@ OSG_BEGIN_NAMESPACE
     If set correct gamma calculation is performed, i.e. respect linear near black.
     This parameter is only in use if parameter applyGamma is set to true.
     See http://www.poynton.com/notes/colour_and_gamma/GammaFAQ.html 
-    https://en.wikipedia.org/wiki/SRGB and https://en.wikipedia.org/wiki/Rec._709
+    https://en.wikipedia.org/wiki/Gamma_correction
+    http://renderwonk.com/blog/index.php/archive/adventures-with-gamma-correct-rendering/
     for reference.
+*/
+
+/*! \var Real32          HDR2StageBase::_sfGamma
+    The gamma value used for the GAMMA correction calculation.
 */
 
 /*! \var bool            HDR2StageBase::_sfAdjustLuminance
@@ -157,7 +166,8 @@ OSG_BEGIN_NAMESPACE
 /*! \var UInt32          HDR2StageBase::_sfToneMappingMode
     Tonemapping technique to use. Valid values are 
     NO_TONE_MAPPING, LOGARITHMIC_TONE_MAPPING, EXPONENTIAL_TONE_MAPPING, DRAGO_LOGARITHMIC_TONE_MAPPING, 
-    REINHARD_TONE_MAPPING, REINHARD_MODIFIED_TONE_MAPPING, FILMIC_HABLE_TONE_MAPPING, FILMIC_UNCHARTE2D_TONE_MAPPING
+    REINHARD_TONE_MAPPING, REINHARD_MODIFIED_TONE_MAPPING, FILMIC_HABLE_TONE_MAPPING, FILMIC_UNCHARTED2_TONE_MAPPING,
+    FILMIC_ACES_TONE_MAPPING, FILMIC_HEJ2015_TONE_MAPPING
 
     For details about the different tone mapping techniques lookup the following references:
     Adaptive Logarithmic Mapping for Displaying High Contrast Scenes
@@ -185,11 +195,8 @@ OSG_BEGIN_NAMESPACE
 */
 
 /*! \var UInt32          HDR2StageBase::_sfAutoExposureMode
-    Three exposure working modes are allowed: MANUAL, KEY_VALUE, AUTOMATIC.
-    If set to manual mode the Exposure parameter is used directly. If key value mode is set the KeyValue is
-    used for calculation of the used exposure value. If mode is set to automatic, then the KeyValue is also
-    automatically calculated from the average luminance of the scene. The key value is a scalar that controls 
-    how brightly or darkly the algorithm will expose your scene.
+    Three exposure working modes are allowed: MANUAL, KEY_VALUE, AUTOMATIC, SATURATION_BASED and
+    STANDARD_OUTPUT_BASED
 */
 
 /*! \var Real32          HDR2StageBase::_sfExposure
@@ -205,6 +212,25 @@ OSG_BEGIN_NAMESPACE
     for calculating a proper exposure value given that the auto exposure mode is set to KEY_VALUE.
     Reasonable values are in the interval [0.f, 1.f]. 
     See http://www.cis.rit.edu/jaf/publications/sig02_paper.pdf for reference.
+*/
+
+/*! \var Real32          HDR2StageBase::_sfApertureFNumber
+    The f-number of an optical system such as a camera lens is the ratio of the system's focal length to 
+    the diameter of the entrance pupil. N = f/D, with focal length of the lens f and diameter of the pupil
+    (effective aperture) D. This value is used only for the autoExposureMode modes SATURATION_BASED and
+    STANDARD_OUTPUT_BASED.
+*/
+
+/*! \var Real32          HDR2StageBase::_sfShutterSpeed
+    A measure of the film exposure time given in reciprocal seconds.
+    This value is used only for the autoExposureMode modes SATURATION_BASED and
+    STANDARD_OUTPUT_BASED.
+*/
+
+/*! \var Real32          HDR2StageBase::_sfISO
+    Film speed is the measure of a photographic film's sensitivity to light.
+    This value is used only for the autoExposureMode modes SATURATION_BASED and
+    STANDARD_OUTPUT_BASED.
 */
 
 /*! \var Real32          HDR2StageBase::_sfWhiteLevel
@@ -226,60 +252,59 @@ OSG_BEGIN_NAMESPACE
     See https://www.cs.ubc.ca/~heidrich/Papers/EG.09_1.pdf for reference.
 */
 
-/*! \var Real32          HDR2StageBase::_sfFilmicShoulderStrenght
-    Approximation parameter of the Kodak film curve.
-    This parameter is only used by the filmic_uncharte2d tone mapping technique.
-    Reasonable values are in the interval [0.f, 2.f]. 
-    See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.
-    for reference.
+/*! \var Color3f         HDR2StageBase::_sfFilterColor
+    The filter color is multiplied to the scene after exposure correction but before to the
+    tone mapping operation.
+    See http://filmicworlds.com/blog/minimal-color-grading-tools/
 */
 
-/*! \var Real32          HDR2StageBase::_sfFilmicLinearStrength
-    Approximation parameter of the Kodak film curve.
-    This parameter is only used by the filmic_uncharte2d tone mapping technique.
-    Reasonable values are in the interval [0.f, 5.f]. 
-    See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.
-    for reference.
+/*! \var Real32          HDR2StageBase::_sfContrast
+    The standard contrast operation simply pushes colors away from grey. The operation is
+    performed before tone mapping in sRGB space.
+    See http://filmicworlds.com/blog/minimal-color-grading-tools/
 */
 
-/*! \var Real32          HDR2StageBase::_sfFilmicLinearAngle
-    Approximation parameter of the Kodak film curve.
-    This parameter is only used by the filmic_uncharte2d tone mapping technique.
-    Reasonable values are in the interval [0.f, 1.f]. 
-    See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.
-    for reference.
+/*! \var Color3f         HDR2StageBase::_sfShadowLiftColor
+    This color allows the adjustment of dark scene colors.
+    The lift color is calculated from this color and the corresponding
+    offset value.
+    See http://filmicworlds.com/blog/minimal-color-grading-tools/
 */
 
-/*! \var Real32          HDR2StageBase::_sfFilmicToeStrength
-    Approximation parameter of the Kodak film curve.
-    This parameter is only used by the filmic_uncharte2d tone mapping technique.
-    Reasonable values are in the interval [0.f, 2.f]. 
-    See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.
-    for reference.
+/*! \var Color3f         HDR2StageBase::_sfMidToneGammaColor
+    This color allows the adjustment of the mid tone scene colors.
+    The mid tone color is calculated from this color and the corresponding
+    offset value.
+    See http://filmicworlds.com/blog/minimal-color-grading-tools/
 */
 
-/*! \var Real32          HDR2StageBase::_sfFilmicToeNumerator
-    Approximation parameter of the Kodak film curve.
-    This parameter is only used by the filmic_uncharte2d tone mapping technique.
-    Reasonable values are in the interval [0.f, 0.5f]. 
-    See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.
-    for reference.
+/*! \var Color3f         HDR2StageBase::_sfHighlightGainColor
+    This color allows the adjustment of highlight scene colors.
+    The gain color is calculated from this color and the corresponding
+    offset value.
+    See http://filmicworlds.com/blog/minimal-color-grading-tools/
 */
 
-/*! \var Real32          HDR2StageBase::_sfFilmicToeDenominator
-    Approx77imation parameter of the Kodak film curve.
-    This parameter is only used by the filmic_uncharte2d tone mapping technique.
-    Reasonable values are in the interval [0.f, 2.f]. 
-    See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.
-    for reference.
-*/
+/*! \var Real32          HDR2StageBase::_mfFilmicCurveParameters
+    This multi real field does contain special parameters for the filmic curve
+    introduced by John Hable which are based on the Kodak film curve. 
+    These parameters are used for the FILMIC_UNCHARTED2_TONE_MAPPING
+    mode. Please do get not to be confused with the FILMIC_HABLE_TONE_MAPPING
+    mode that does not have any external parameters in this implementation.
 
-/*! \var Real32          HDR2StageBase::_sfFilmicLinearWhite
-    Approximation parameter of the Kodak film curve.
-    This parameter is only used by the filmic_uncharte2d tone mapping technique.
-    Reasonable values are in the interval [0.f, 20.f]. 
-    See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.
-    for reference.
+    See:
+    http://filmicgames.com/archives/75
+    http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff
+
+    It is expected that this multi real field does contain the following Real32 entries
+    in the given order with the given default values and reasonable intervals:
+    filmicShoulderStrenght       0.15f  [0.f, 2.f]
+    filmicLinearStrength         0.5f   [0.f, 5.f]
+    filmicLinearAngle            0.1f   [0.f, 1.f]
+    filmicToeStrength            0.2f   [0.f, 2.f]
+    filmicToeNumerator           0.02f  [0.f, 0.5f]
+    filmicToeDenominator         0.3f   [0.f, 2.f]
+    filmicLinearWhite           11.2f   [0.f, 20.f]
 */
 
 /*! \var Real32          HDR2StageBase::_sfDragoBias
@@ -294,9 +319,13 @@ OSG_BEGIN_NAMESPACE
     This convenience parameter allows to redirect the intermediate texture image results
     to the final screen instead of the default COMPOSITE_TEXTURE which represents the
     final rendering result of this stage. This is useful for debugging purpose.
-    Reasonable values are SCENE_TEXTURE, INITIAL_LUMINANCE_TEXTURE, ADAPTED_LUMINANCE_TEXTURE,
-    BLOOM_TEXTURE, BLURRED_TEXTURE, COMPOSITE_TEXTURE, EXPOSURE_TEXTURE, DEPTH_TEXTURE,
-    LINEARIZED_DEPTH_TEXTURE
+    Reasonable values are SCENE_TEXTURE, BACKGROUND_TEXTURE, INITIAL_LUMINANCE_TEXTURE,
+    ADAPTED_LUMINANCE_TEXTURE, BLOOM_TEXTURE, BLURRED_TEXTURE, COMPOSITE_TEXTURE, 
+    EXPOSURE_TEXTURE, DEPTH_TEXTURE, LINEARIZED_DEPTH_TEXTURE
+*/
+
+/*! \var bool            HDR2StageBase::_sfPerformDithering
+    If true the final color will be dithered.
 */
 
 /*! \var bool            HDR2StageBase::_sfCarryDepth
@@ -376,6 +405,14 @@ PointerType FieldTraits<HDR2Stage *, nsOSG>::_type(
 
 OSG_FIELDTRAITS_GETTYPE_NS(HDR2Stage *, nsOSG)
 
+OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
+                           HDR2Stage *,
+                           nsOSG)
+
+OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
+                           HDR2Stage *,
+                           nsOSG)
+
 /***************************************************************************\
  *                         Field Description                               *
 \***************************************************************************/
@@ -384,6 +421,18 @@ void HDR2StageBase::classDescInserter(TypeObject &oType)
 {
     FieldDescriptionBase *pDesc = NULL;
 
+
+    pDesc = new SFBool::Description(
+        SFBool::getClassType(),
+        "activate",
+        "If the stage is deactivated it does not perform any action on its own but act as a simple Group core.\n",
+        ActivateFieldId, ActivateFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleActivate),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleActivate));
+
+    oType.addInitialDesc(pDesc);
 
     pDesc = new SFBool::Description(
         SFBool::getClassType(),
@@ -404,13 +453,26 @@ void HDR2StageBase::classDescInserter(TypeObject &oType)
         "If set correct gamma calculation is performed, i.e. respect linear near black.\n"
         "This parameter is only in use if parameter applyGamma is set to true.\n"
         "See http://www.poynton.com/notes/colour_and_gamma/GammaFAQ.html \n"
-        "https://en.wikipedia.org/wiki/SRGB and https://en.wikipedia.org/wiki/Rec._709\n"
+        "https://en.wikipedia.org/wiki/Gamma_correction\n"
+        "http://renderwonk.com/blog/index.php/archive/adventures-with-gamma-correct-rendering/\n"
         "for reference.\n",
         AccurateGammaFieldId, AccurateGammaFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
         static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleAccurateGamma),
         static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleAccurateGamma));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFReal32::Description(
+        SFReal32::getClassType(),
+        "gamma",
+        "The gamma value used for the GAMMA correction calculation.\n",
+        GammaFieldId, GammaFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleGamma),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleGamma));
 
     oType.addInitialDesc(pDesc);
 
@@ -525,7 +587,8 @@ void HDR2StageBase::classDescInserter(TypeObject &oType)
         "toneMappingMode",
         "Tonemapping technique to use. Valid values are \n"
         "NO_TONE_MAPPING, LOGARITHMIC_TONE_MAPPING, EXPONENTIAL_TONE_MAPPING, DRAGO_LOGARITHMIC_TONE_MAPPING, \n"
-        "REINHARD_TONE_MAPPING, REINHARD_MODIFIED_TONE_MAPPING, FILMIC_HABLE_TONE_MAPPING, FILMIC_UNCHARTE2D_TONE_MAPPING\n"
+        "REINHARD_TONE_MAPPING, REINHARD_MODIFIED_TONE_MAPPING, FILMIC_HABLE_TONE_MAPPING, FILMIC_UNCHARTED2_TONE_MAPPING,\n"
+        "FILMIC_ACES_TONE_MAPPING, FILMIC_HEJ2015_TONE_MAPPING\n"
         "\n"
         "For details about the different tone mapping techniques lookup the following references:\n"
         "Adaptive Logarithmic Mapping for Displaying High Contrast Scenes\n"
@@ -583,11 +646,16 @@ void HDR2StageBase::classDescInserter(TypeObject &oType)
     pDesc = new SFUInt32::Description(
         SFUInt32::getClassType(),
         "autoExposureMode",
-        "Three exposure working modes are allowed: MANUAL, KEY_VALUE, AUTOMATIC.\n"
+        "Three exposure working modes are allowed: MANUAL, KEY_VALUE, AUTOMATIC, SATURATION_BASED and\n"
+        "STANDARD_OUTPUT_BASED\n"
+        "\n"
         "If set to manual mode the Exposure parameter is used directly. If key value mode is set the KeyValue is\n"
         "used for calculation of the used exposure value. If mode is set to automatic, then the KeyValue is also\n"
         "automatically calculated from the average luminance of the scene. The key value is a scalar that controls \n"
-        "how brightly or darkly the algorithm will expose your scene.\n",
+        "how brightly or darkly the algorithm will expose your scene. The remaining modes are based on\n"
+        "the article \n"
+        "https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/\n"
+        "and calculate the exposure value from ApertureFNumber, ShutterSpeedValue and ISO film value.\n",
         AutoExposureModeFieldId, AutoExposureModeFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
@@ -624,6 +692,58 @@ void HDR2StageBase::classDescInserter(TypeObject &oType)
         (Field::SFDefaultFlags | Field::FStdAccess),
         static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleKeyValue),
         static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleKeyValue));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFReal32::Description(
+        SFReal32::getClassType(),
+        "apertureFNumber",
+        "The f-number of an optical system such as a camera lens is the ratio of the system's focal length to \n"
+        "the diameter of the entrance pupil. N = f/D, with focal length of the lens f and diameter of the pupil\n"
+        "(effective aperture) D. This value is used only for the autoExposureMode modes SATURATION_BASED and\n"
+        "STANDARD_OUTPUT_BASED.\n"
+        "\n"
+        "See also: https://en.wikipedia.org/wiki/F-number\n"
+        "https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/\n",
+        ApertureFNumberFieldId, ApertureFNumberFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleApertureFNumber),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleApertureFNumber));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFReal32::Description(
+        SFReal32::getClassType(),
+        "shutterSpeed",
+        "A measure of the film exposure time given in reciprocal seconds.\n"
+        "This value is used only for the autoExposureMode modes SATURATION_BASED and\n"
+        "STANDARD_OUTPUT_BASED.\n"
+        "\n"
+        "See also: https://en.wikipedia.org/wiki/F-number\n"
+        "https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/\n",
+        ShutterSpeedFieldId, ShutterSpeedFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleShutterSpeed),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleShutterSpeed));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFReal32::Description(
+        SFReal32::getClassType(),
+        "ISO",
+        "Film speed is the measure of a photographic film's sensitivity to light.\n"
+        "This value is used only for the autoExposureMode modes SATURATION_BASED and\n"
+        "STANDARD_OUTPUT_BASED.\n"
+        "\n"
+        "See also: https://en.wikipedia.org/wiki/Film_speed\n"
+        "https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/\n",
+        ISOFieldId, ISOFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleISO),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleISO));
 
     oType.addInitialDesc(pDesc);
 
@@ -670,115 +790,109 @@ void HDR2StageBase::classDescInserter(TypeObject &oType)
 
     oType.addInitialDesc(pDesc);
 
-    pDesc = new SFReal32::Description(
-        SFReal32::getClassType(),
-        "filmicShoulderStrenght",
-        "Approximation parameter of the Kodak film curve.\n"
-        "This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-        "Reasonable values are in the interval [0.f, 2.f]. \n"
-        "See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-        "for reference.\n",
-        FilmicShoulderStrenghtFieldId, FilmicShoulderStrenghtFieldMask,
+    pDesc = new SFColor3f::Description(
+        SFColor3f::getClassType(),
+        "filterColor",
+        "The filter color is multiplied to the scene after exposure correction but before to the\n"
+        "tone mapping operation.\n"
+        "See http://filmicworlds.com/blog/minimal-color-grading-tools/\n",
+        FilterColorFieldId, FilterColorFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleFilmicShoulderStrenght),
-        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleFilmicShoulderStrenght));
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleFilterColor),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleFilterColor));
 
     oType.addInitialDesc(pDesc);
 
     pDesc = new SFReal32::Description(
         SFReal32::getClassType(),
-        "filmicLinearStrength",
-        "Approximation parameter of the Kodak film curve.\n"
-        "This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-        "Reasonable values are in the interval [0.f, 5.f]. \n"
-        "See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-        "for reference.\n",
-        FilmicLinearStrengthFieldId, FilmicLinearStrengthFieldMask,
+        "contrast",
+        "The standard contrast operation simply pushes colors away from grey. The operation is\n"
+        "performed before tone mapping in sRGB space.\n"
+        "See http://filmicworlds.com/blog/minimal-color-grading-tools/\n",
+        ContrastFieldId, ContrastFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleFilmicLinearStrength),
-        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleFilmicLinearStrength));
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleContrast),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleContrast));
 
     oType.addInitialDesc(pDesc);
 
-    pDesc = new SFReal32::Description(
-        SFReal32::getClassType(),
-        "filmicLinearAngle",
-        "Approximation parameter of the Kodak film curve.\n"
-        "This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-        "Reasonable values are in the interval [0.f, 1.f]. \n"
-        "See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-        "for reference.\n",
-        FilmicLinearAngleFieldId, FilmicLinearAngleFieldMask,
+    pDesc = new SFColor3f::Description(
+        SFColor3f::getClassType(),
+        "ShadowLiftColor",
+        "This color allows the adjustment of dark scene colors.\n"
+        "The lift color is calculated from this color and the corresponding\n"
+        "offset value.\n"
+        "See http://filmicworlds.com/blog/minimal-color-grading-tools/\n",
+        ShadowLiftColorFieldId, ShadowLiftColorFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleFilmicLinearAngle),
-        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleFilmicLinearAngle));
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleShadowLiftColor),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleShadowLiftColor));
 
     oType.addInitialDesc(pDesc);
 
-    pDesc = new SFReal32::Description(
-        SFReal32::getClassType(),
-        "filmicToeStrength",
-        "Approximation parameter of the Kodak film curve.\n"
-        "This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-        "Reasonable values are in the interval [0.f, 2.f]. \n"
-        "See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-        "for reference.\n",
-        FilmicToeStrengthFieldId, FilmicToeStrengthFieldMask,
+    pDesc = new SFColor3f::Description(
+        SFColor3f::getClassType(),
+        "MidToneGammaColor",
+        "This color allows the adjustment of the mid tone scene colors.\n"
+        "The mid tone color is calculated from this color and the corresponding\n"
+        "offset value.\n"
+        "See http://filmicworlds.com/blog/minimal-color-grading-tools/\n",
+        MidToneGammaColorFieldId, MidToneGammaColorFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleFilmicToeStrength),
-        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleFilmicToeStrength));
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleMidToneGammaColor),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleMidToneGammaColor));
 
     oType.addInitialDesc(pDesc);
 
-    pDesc = new SFReal32::Description(
-        SFReal32::getClassType(),
-        "filmicToeNumerator",
-        "Approximation parameter of the Kodak film curve.\n"
-        "This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-        "Reasonable values are in the interval [0.f, 0.5f]. \n"
-        "See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-        "for reference.\n",
-        FilmicToeNumeratorFieldId, FilmicToeNumeratorFieldMask,
+    pDesc = new SFColor3f::Description(
+        SFColor3f::getClassType(),
+        "HighlightGainColor",
+        "This color allows the adjustment of highlight scene colors.\n"
+        "The gain color is calculated from this color and the corresponding\n"
+        "offset value.\n"
+        "See http://filmicworlds.com/blog/minimal-color-grading-tools/\n",
+        HighlightGainColorFieldId, HighlightGainColorFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleFilmicToeNumerator),
-        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleFilmicToeNumerator));
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleHighlightGainColor),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleHighlightGainColor));
 
     oType.addInitialDesc(pDesc);
 
-    pDesc = new SFReal32::Description(
-        SFReal32::getClassType(),
-        "filmicToeDenominator",
-        "Approx77imation parameter of the Kodak film curve.\n"
-        "This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-        "Reasonable values are in the interval [0.f, 2.f]. \n"
-        "See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-        "for reference.\n",
-        FilmicToeDenominatorFieldId, FilmicToeDenominatorFieldMask,
+    pDesc = new MFReal32::Description(
+        MFReal32::getClassType(),
+        "filmicCurveParameters",
+        "This multi real field does contain special parameters for the filmic curve\n"
+        "introduced by John Hable which are based on the Kodak film curve. \n"
+        "These parameters are used for the FILMIC_UNCHARTED2_TONE_MAPPING\n"
+        "mode. Please do get not to be confused with the FILMIC_HABLE_TONE_MAPPING\n"
+        "mode that does not have any external parameters in this implementation.\n"
+        "\n"
+        "See:\n"
+        "http://filmicgames.com/archives/75\n"
+        "http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff\n"
+        "\n"
+        "It is expected that this multi real field does contain the following Real32 entries\n"
+        "in the given order with the given default values and reasonable intervals:\n"
+        "filmicShoulderStrenght       0.15f  [0.f, 2.f]\n"
+        "filmicLinearStrength         0.5f   [0.f, 5.f]\n"
+        "filmicLinearAngle            0.1f   [0.f, 1.f]\n"
+        "filmicToeStrength            0.2f   [0.f, 2.f]\n"
+        "filmicToeNumerator           0.02f  [0.f, 0.5f]\n"
+        "filmicToeDenominator         0.3f   [0.f, 2.f]\n"
+        "filmicLinearWhite           11.2f   [0.f, 20.f]\n"
+        "\n"
+        "If the multi field is only partial filled the default values are taken for the remaing\n"
+        "parameters. The implementation does provide interfaces to set the parameters separately.\n",
+        FilmicCurveParametersFieldId, FilmicCurveParametersFieldMask,
         false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleFilmicToeDenominator),
-        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleFilmicToeDenominator));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFReal32::Description(
-        SFReal32::getClassType(),
-        "filmicLinearWhite",
-        "Approximation parameter of the Kodak film curve.\n"
-        "This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-        "Reasonable values are in the interval [0.f, 20.f]. \n"
-        "See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-        "for reference.\n",
-        FilmicLinearWhiteFieldId, FilmicLinearWhiteFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleFilmicLinearWhite),
-        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleFilmicLinearWhite));
+        (Field::MFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleFilmicCurveParameters),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleFilmicCurveParameters));
 
     oType.addInitialDesc(pDesc);
 
@@ -804,14 +918,26 @@ void HDR2StageBase::classDescInserter(TypeObject &oType)
         "This convenience parameter allows to redirect the intermediate texture image results\n"
         "to the final screen instead of the default COMPOSITE_TEXTURE which represents the\n"
         "final rendering result of this stage. This is useful for debugging purpose.\n"
-        "Reasonable values are SCENE_TEXTURE, INITIAL_LUMINANCE_TEXTURE, ADAPTED_LUMINANCE_TEXTURE,\n"
-        "BLOOM_TEXTURE, BLURRED_TEXTURE, COMPOSITE_TEXTURE, EXPOSURE_TEXTURE, DEPTH_TEXTURE,\n"
-        "LINEARIZED_DEPTH_TEXTURE\n",
+        "Reasonable values are SCENE_TEXTURE, BACKGROUND_TEXTURE, INITIAL_LUMINANCE_TEXTURE,\n"
+        "ADAPTED_LUMINANCE_TEXTURE, BLOOM_TEXTURE, BLURRED_TEXTURE, COMPOSITE_TEXTURE, \n"
+        "EXPOSURE_TEXTURE, DEPTH_TEXTURE, LINEARIZED_DEPTH_TEXTURE\n",
         TargetFieldId, TargetFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
         static_cast<FieldEditMethodSig>(&HDR2Stage::editHandleTarget),
         static_cast<FieldGetMethodSig >(&HDR2Stage::getHandleTarget));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFBool::Description(
+        SFBool::getClassType(),
+        "performDithering",
+        "If true the final color will be dithered.\n",
+        PerformDitheringFieldId, PerformDitheringFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&HDR2Stage::editHandlePerformDithering),
+        static_cast<FieldGetMethodSig >(&HDR2Stage::getHandlePerformDithering));
 
     oType.addInitialDesc(pDesc);
 
@@ -1014,152 +1140,186 @@ HDR2StageBase::TypeObject HDR2StageBase::_type(
     "<?xml version=\"1.0\"?>\n"
     "\n"
     "<FieldContainer\n"
-    "   name=\"HDR2Stage\"\n"
-    "   parent=\"Stage\"\n"
-    "   library=\"EffectGroups\"\n"
-    "   pointerfieldtypes=\"none\"\n"
-    "   structure=\"concrete\"\n"
-    "   systemcomponent=\"true\"\n"
-    "   parentsystemcomponent=\"true\"\n"
-    "   decoratable=\"false\"\n"
-    "   useLocalIncludes=\"false\"\n"
-    "   isNodeCore=\"true\"\n"
-    "   isBundle=\"false\"\n"
-    "   docGroupBase=\"GrpEffectsGroupsHDR\"\n"
-    "   >\n"
-    "  This HDR stage performs the complete post processing task from rendering into a HDR render buffer, calculating the\n"
-    "  average luminance of the scene, time adapting of the average luminance, tone mapping and blooming. Especially, it\n"
-    "  implements various tone mapping operators allowing to get comfortable with the different techniques available.\n"
+    "    name=\"HDR2Stage\"\n"
+    "    parent=\"Stage\"\n"
+    "    library=\"EffectGroups\"\n"
+    "    pointerfieldtypes=\"both\"\n"
+    "    structure=\"concrete\"\n"
+    "    systemcomponent=\"true\"\n"
+    "    parentsystemcomponent=\"true\"\n"
+    "    decoratable=\"false\"\n"
+    "    useLocalIncludes=\"false\"\n"
+    "    isNodeCore=\"true\"\n"
+    "    isBundle=\"false\"\n"
+    "    docGroupBase=\"GrpEffectsGroupsHDR\"\n"
+    "    >\n"
+    "    This HDR stage performs the complete post processing task from rendering into a HDR render buffer, calculating the\n"
+    "    average luminance of the scene, time adapting of the average luminance, tone mapping and blooming. Especially, it\n"
+    "    implements various tone mapping operators allowing to get comfortable with the different techniques available.\n"
     "\n"
-    "  Currently, only global average (geometric mean) of the luminace is implemented. Future version might implement\n"
-    "  local averaging methods (histogram).\n"
-    "  <Field\n"
-    "\t name=\"applyGamma\"\n"
-    "\t type=\"bool\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"true\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    Currently, only global average (geometric mean) of the luminace is implemented. Future version might implement\n"
+    "    local averaging methods (histogram).\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"activate\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"true\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        If the stage is deactivated it does not perform any action on its own but act as a simple Group core.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"applyGamma\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"true\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        If set gamma correction is performed just before writing to the final\n"
     "        draw buffer at the end of the pipeline.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"accurateGamma\"\n"
-    "\t type=\"bool\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"true\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"accurateGamma\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"true\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        If set correct gamma calculation is performed, i.e. respect linear near black.\n"
     "        This parameter is only in use if parameter applyGamma is set to true.\n"
     "        See http://www.poynton.com/notes/colour_and_gamma/GammaFAQ.html \n"
-    "        https://en.wikipedia.org/wiki/SRGB and https://en.wikipedia.org/wiki/Rec._709\n"
+    "        https://en.wikipedia.org/wiki/Gamma_correction\n"
+    "        http://renderwonk.com/blog/index.php/archive/adventures-with-gamma-correct-rendering/\n"
     "        for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"adjustLuminance\"\n"
-    "\t type=\"bool\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"true\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "    \n"
+    "    <Field\n"
+    "        name=\"gamma\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"2.2f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        The gamma value used for the GAMMA correction calculation.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"adjustLuminance\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"true\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Enable or disable time dependent luminance adaptation.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"tau\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"1.25f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"tau\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"1.25f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Adjusted luminance adaptation time parameter.\n"
     "        Reasonable values are in the interval [0.f, 4.f].\n"
     "        See http://www.cs.ucf.edu/~sumant/publications/sig00.pdf,\n"
     "        http://www.cs.bris.ac.uk/Publications/Papers/2000126.pdf,\n"
     "        and http://www.gamedev.net/topic/659990-adapting-luminance-map-no-adaptation-according-to-my-eye/\n"
     "        for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"performBloom\"\n"
-    "\t type=\"bool\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"true\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"performBloom\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"true\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        If true a bloom / blur pass is performed, which can have a performance impact.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"bloomThreshold\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"2.f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"bloomThreshold\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"2.f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The bloom threshold used in the brightness filter pass. Reasonable values are in the interval\n"
     "        [0.f, 10.f].\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"bloomBackground\"\n"
-    "\t type=\"bool\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"true\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"bloomBackground\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"true\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        If set to true the background, i.e. fragments with depth value 1.0 are also bloomed. If render\n"
     "        background is a solid background it might be preferable to exclude it from the blooming in order\n"
     "        to avoid background color bleeding into the rendered geometry.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"bloomMagnitude\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"bloomMagnitude\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"0.f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        This value determines how much of the blooming is mixed into the final image. Reasonable values\n"
     "        are in the interval [0.f, 2.f].\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"numTaps\"\n"
-    "\t type=\"Int32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"4\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"numTaps\"\n"
+    "        type=\"Int32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"4\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Number if tap iterations used in the Bloom Blur shader. Reasonable values are in the interval [2, 10].\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"blurGaussSigma\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.8f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"blurGaussSigma\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"0.8f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The standard deviation of the gaussian normal distribution used in the blur pass. Reasonable values\n"
     "        are in the interval [0.5f, 1.5f].\n"
-    "  </Field>\n"
+    "    </Field>\n"
     "\n"
-    "  <Field\n"
-    "\t name=\"toneMappingMode\"\n"
-    "\t type=\"UInt32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"4\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    <Field\n"
+    "        name=\"toneMappingMode\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"4\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Tonemapping technique to use. Valid values are \n"
     "        NO_TONE_MAPPING, LOGARITHMIC_TONE_MAPPING, EXPONENTIAL_TONE_MAPPING, DRAGO_LOGARITHMIC_TONE_MAPPING, \n"
-    "        REINHARD_TONE_MAPPING, REINHARD_MODIFIED_TONE_MAPPING, FILMIC_HABLE_TONE_MAPPING, FILMIC_UNCHARTE2D_TONE_MAPPING\n"
+    "        REINHARD_TONE_MAPPING, REINHARD_MODIFIED_TONE_MAPPING, FILMIC_HABLE_TONE_MAPPING, FILMIC_UNCHARTED2_TONE_MAPPING,\n"
+    "        FILMIC_ACES_TONE_MAPPING, FILMIC_HEJ2015_TONE_MAPPING\n"
     "\n"
     "        For details about the different tone mapping techniques lookup the following references:\n"
     "        Adaptive Logarithmic Mapping for Displaying High Contrast Scenes\n"
@@ -1179,402 +1339,487 @@ HDR2StageBase::TypeObject HDR2StageBase::_type(
     "        Erik Reinhard et al.\n"
     "        Second Edition 2010\n"
     "        ISBN 978-0-12-374914-7\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"forceBackground\"\n"
-    "\t type=\"bool\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"false\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"forceBackground\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"false\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        If a normal color background is used it might be desirable to let the background not be paritcipating\n"
     "        in the tone mapping procedure.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"use_ITU_R_BT_709\"\n"
-    "\t type=\"bool\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"true\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"use_ITU_R_BT_709\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"true\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Calculate linear Y luminance from ITU-BT-709 to CIE XYZ if set to true. Otherwise calculate  linearY luminance\n"
     "        according to the American NTSC coding system.\n"
     "        See  http://www.poynton.com/ColorFAQ.html and http://www.poynton.com/PDFs/coloureq.pdf for reference.\n"
-    "  </Field>\n"
+    "    </Field>\n"
     "\n"
-    "  <Field\n"
-    "\t name=\"autoExposureMode\"\n"
-    "\t type=\"UInt32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"2\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
-    "        Three exposure working modes are allowed: MANUAL, KEY_VALUE, AUTOMATIC.\n"
+    "    <Field\n"
+    "        name=\"autoExposureMode\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"2\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        Three exposure working modes are allowed: MANUAL, KEY_VALUE, AUTOMATIC, SATURATION_BASED and\n"
+    "        STANDARD_OUTPUT_BASED\n"
+    "\n"
     "        If set to manual mode the Exposure parameter is used directly. If key value mode is set the KeyValue is\n"
     "        used for calculation of the used exposure value. If mode is set to automatic, then the KeyValue is also\n"
     "        automatically calculated from the average luminance of the scene. The key value is a scalar that controls \n"
-    "        how brightly or darkly the algorithm will expose your scene.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"exposure\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "        how brightly or darkly the algorithm will expose your scene. The remaining modes are based on\n"
+    "        the article \n"
+    "        https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/\n"
+    "        and calculate the exposure value from ApertureFNumber, ShutterSpeedValue and ISO film value.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"exposure\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"0.f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Exposure mimics the camera shutter time. You're controlling how much light hits the film by modifying \n"
     "        how long the shutter stays open. This parameter is only valid if the auto exposure mode is set to MANUAL.\n"
     "        Otherwise it is calculated either by the keyValue parameter or directly by the luminance of the scene.\n"
     "        Reasonable values are in the interval [-10.f, 10.f]. \n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"keyValue\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.18f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"keyValue\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"0.18f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        This parameter is mimics the mood of the scene. It is meant to be chosen based on whether the \n"
     "        scene is high-key (bright, low contrast) or low-key (dark, high contrast). This value is used\n"
     "        for calculating a proper exposure value given that the auto exposure mode is set to KEY_VALUE.\n"
     "        Reasonable values are in the interval [0.f, 1.f]. \n"
     "        See http://www.cis.rit.edu/jaf/publications/sig02_paper.pdf for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"whiteLevel\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"5.f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"apertureFNumber\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"16.0f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        The f-number of an optical system such as a camera lens is the ratio of the system's focal length to \n"
+    "        the diameter of the entrance pupil. N = f/D, with focal length of the lens f and diameter of the pupil\n"
+    "        (effective aperture) D. This value is used only for the autoExposureMode modes SATURATION_BASED and\n"
+    "        STANDARD_OUTPUT_BASED.\n"
+    "\n"
+    "        See also: https://en.wikipedia.org/wiki/F-number\n"
+    "                  https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/\n"
+    "    </Field>\n"
+    "    <Field\n"
+    "        name=\"shutterSpeed\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"0.01f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        A measure of the film exposure time given in reciprocal seconds.\n"
+    "        This value is used only for the autoExposureMode modes SATURATION_BASED and\n"
+    "        STANDARD_OUTPUT_BASED.\n"
+    "\n"
+    "        See also: https://en.wikipedia.org/wiki/F-number\n"
+    "                  https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/\n"
+    "    </Field>\n"
+    "    <Field\n"
+    "        name=\"ISO\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"100.f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        Film speed is the measure of a photographic film's sensitivity to light.\n"
+    "        This value is used only for the autoExposureMode modes SATURATION_BASED and\n"
+    "        STANDARD_OUTPUT_BASED.\n"
+    "\n"
+    "        See also: https://en.wikipedia.org/wiki/Film_speed\n"
+    "                  https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"whiteLevel\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"5.f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        This parameter is the smallest luminance that will be mapped to pure white. It is used in the\n"
     "        following tone mapping techiques: logarithmic, exponential, drago_logarithmic and reinhard_modified.\n"
     "        Reasonable values are in the interval [0.f, 25.f]. \n"
     "        See http://www.cis.rit.edu/jaf/publications/sig02_paper.pdf for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"saturation\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"1.f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"saturation\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"1.f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        This parameter allows to control the satuarion of the tone mapped scene. It allows color\n"
     "        correction applied after tone mapping.\n"
     "        Reasonable values are in the interval [0.f, 4.f]. \n"
     "        See https://www.cs.ubc.ca/~heidrich/Papers/EG.09_1.pdf for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"useLinChromCorrection\"\n"
-    "\t type=\"bool\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"true\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"useLinChromCorrection\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"true\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Use a linear chromatic correction function. This works with parameter 'saturation'.\n"
     "        See https://www.cs.ubc.ca/~heidrich/Papers/EG.09_1.pdf for reference.\n"
-    "  </Field>\n"
+    "    </Field>\n"
     "\n"
-    "  <Field\n"
-    "\t name=\"filmicShoulderStrenght\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.15f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
-    "        Approximation parameter of the Kodak film curve.\n"
-    "        This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-    "        Reasonable values are in the interval [0.f, 2.f]. \n"
-    "        See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-    "        for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"filmicLinearStrength\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.5f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
-    "        Approximation parameter of the Kodak film curve.\n"
-    "        This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-    "        Reasonable values are in the interval [0.f, 5.f]. \n"
-    "        See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-    "        for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"filmicLinearAngle\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.1f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
-    "        Approximation parameter of the Kodak film curve.\n"
-    "        This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-    "        Reasonable values are in the interval [0.f, 1.f]. \n"
-    "        See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-    "        for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"filmicToeStrength\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.2f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
-    "        Approximation parameter of the Kodak film curve.\n"
-    "        This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-    "        Reasonable values are in the interval [0.f, 2.f]. \n"
-    "        See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-    "        for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"filmicToeNumerator\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.02f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
-    "        Approximation parameter of the Kodak film curve.\n"
-    "        This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-    "        Reasonable values are in the interval [0.f, 0.5f]. \n"
-    "        See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-    "        for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"filmicToeDenominator\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.3f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
-    "        Approx77imation parameter of the Kodak film curve.\n"
-    "        This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-    "        Reasonable values are in the interval [0.f, 2.f]. \n"
-    "        See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-    "        for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"filmicLinearWhite\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"11.2f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
-    "        Approximation parameter of the Kodak film curve.\n"
-    "        This parameter is only used by the filmic_uncharte2d tone mapping technique.\n"
-    "        Reasonable values are in the interval [0.f, 20.f]. \n"
-    "        See http://filmicgames.com/archives/75 and  http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff.\n"
-    "        for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"dragoBias\"\n"
-    "\t type=\"Real32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"0.85f\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    <Field\n"
+    "        name=\"filterColor\"\n"
+    "        type=\"Color3f\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"Color3f(1.f,1.f,1.f)\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        The filter color is multiplied to the scene after exposure correction but before to the\n"
+    "        tone mapping operation.\n"
+    "        See http://filmicworlds.com/blog/minimal-color-grading-tools/\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"contrast\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"1.f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        The standard contrast operation simply pushes colors away from grey. The operation is\n"
+    "        performed before tone mapping in sRGB space.\n"
+    "        See http://filmicworlds.com/blog/minimal-color-grading-tools/\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"ShadowLiftColor\"\n"
+    "        type=\"Color3f\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"Color3f(0.5f,0.5f,0.5f)\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        This color allows the adjustment of dark scene colors.\n"
+    "        The lift color is calculated from this color and the corresponding\n"
+    "        offset value.\n"
+    "        See http://filmicworlds.com/blog/minimal-color-grading-tools/\n"
+    "    </Field>\n"
+    "    <Field\n"
+    "        name=\"MidToneGammaColor\"\n"
+    "        type=\"Color3f\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"Color3f(0.5f,0.5f,0.5f)\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        This color allows the adjustment of the mid tone scene colors.\n"
+    "        The mid tone color is calculated from this color and the corresponding\n"
+    "        offset value.\n"
+    "        See http://filmicworlds.com/blog/minimal-color-grading-tools/\n"
+    "    </Field>\n"
+    "    <Field\n"
+    "        name=\"HighlightGainColor\"\n"
+    "        type=\"Color3f\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"Color3f(0.5f,0.5f,0.5f)\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        This color allows the adjustment of highlight scene colors.\n"
+    "        The gain color is calculated from this color and the corresponding\n"
+    "        offset value.\n"
+    "        See http://filmicworlds.com/blog/minimal-color-grading-tools/\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"filmicCurveParameters\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"multi\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"protected\"\n"
+    "        >\n"
+    "        This multi real field does contain special parameters for the filmic curve\n"
+    "        introduced by John Hable which are based on the Kodak film curve. \n"
+    "        These parameters are used for the FILMIC_UNCHARTED2_TONE_MAPPING\n"
+    "        mode. Please do get not to be confused with the FILMIC_HABLE_TONE_MAPPING\n"
+    "        mode that does not have any external parameters in this implementation.\n"
+    "\n"
+    "        See:\n"
+    "            http://filmicgames.com/archives/75\n"
+    "            http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff\n"
+    "\n"
+    "        It is expected that this multi real field does contain the following Real32 entries\n"
+    "        in the given order with the given default values and reasonable intervals:\n"
+    "            filmicShoulderStrenght       0.15f  [0.f, 2.f]\n"
+    "            filmicLinearStrength         0.5f   [0.f, 5.f]\n"
+    "            filmicLinearAngle            0.1f   [0.f, 1.f]\n"
+    "            filmicToeStrength            0.2f   [0.f, 2.f]\n"
+    "            filmicToeNumerator           0.02f  [0.f, 0.5f]\n"
+    "            filmicToeDenominator         0.3f   [0.f, 2.f]\n"
+    "            filmicLinearWhite           11.2f   [0.f, 20.f]\n"
+    "\n"
+    "        If the multi field is only partial filled the default values are taken for the remaing\n"
+    "        parameters. The implementation does provide interfaces to set the parameters separately.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"dragoBias\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"0.85f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The bias function is a power function defined over the unit interval, \n"
     "        an intuitive parameter dragoBias remaps an input value to a higher or lower value.\n"
     "        This parameter is only used by the drago_logarithmic tone mapping technique.\n"
     "        Reasonable values are in the interval [0.f, 1.f]. \n"
     "        See http://resources.mpi-inf.mpg.de/tmo/logmap/logmap.pdf for reference.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"target\"\n"
-    "\t type=\"UInt32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"5\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"target\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"6\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        This convenience parameter allows to redirect the intermediate texture image results\n"
     "        to the final screen instead of the default COMPOSITE_TEXTURE which represents the\n"
     "        final rendering result of this stage. This is useful for debugging purpose.\n"
-    "        Reasonable values are SCENE_TEXTURE, INITIAL_LUMINANCE_TEXTURE, ADAPTED_LUMINANCE_TEXTURE,\n"
-    "        BLOOM_TEXTURE, BLURRED_TEXTURE, COMPOSITE_TEXTURE, EXPOSURE_TEXTURE, DEPTH_TEXTURE,\n"
-    "        LINEARIZED_DEPTH_TEXTURE\n"
-    "  </Field>\n"
+    "        Reasonable values are SCENE_TEXTURE, BACKGROUND_TEXTURE, INITIAL_LUMINANCE_TEXTURE,\n"
+    "        ADAPTED_LUMINANCE_TEXTURE, BLOOM_TEXTURE, BLURRED_TEXTURE, COMPOSITE_TEXTURE, \n"
+    "        EXPOSURE_TEXTURE, DEPTH_TEXTURE, LINEARIZED_DEPTH_TEXTURE\n"
+    "    </Field>\n"
     "\n"
-    "  <Field\n"
-    "\t name=\"carryDepth\"\n"
-    "\t type=\"bool\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"true\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    <Field\n"
+    "        name=\"performDithering\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"false\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        If true the final color will be dithered.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"carryDepth\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"true\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        If set the scene depth values are carried to the final render target. Useful if post rendering operations are necessary.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"colorBufferInternalFormat\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_RGBA16F\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"colorBufferInternalFormat\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_RGBA16F\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Internal format used for hdr color buffer. Defaults to GL_RGBA16F.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"colorBufferPixelFormat\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_RGBA\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"colorBufferPixelFormat\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_RGBA\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Pixel format used for hdr color buffer. Defaults to GL_RGBA.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"colorBufferType\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_FLOAT\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"colorBufferType\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_FLOAT\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Type used for hdr color buffer. Defaults to GL_FLOAT.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"depthBufferInternalFormat\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_DEPTH24_STENCIL8\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"depthBufferInternalFormat\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_DEPTH24_STENCIL8\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Internal format used for depth buffer. Defaults to GL_DEPTH24_STENCIL8.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"depthBufferPixelFormat\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_DEPTH_STENCIL\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"depthBufferPixelFormat\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_DEPTH_STENCIL\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Pixel format used for hdr depth buffer. Defaults to GL_DEPTH_STENCIL.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"depthBufferType\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_UNSIGNED_INT_24_8\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"depthBufferType\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_UNSIGNED_INT_24_8\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Type used for hdr depth buffer. Defaults to GL_UNSIGNED_INT_24_8.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"lumBufferInternalFormat\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_R32F\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"lumBufferInternalFormat\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_R32F\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Internal format used for luminance calculation. Defaults to GL_R32F.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"lumBufferPixelFormat\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_RED\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"lumBufferPixelFormat\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_RED\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Pixel format used for hdr lum buffer. Defaults to GL_RED.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"lumBufferType\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_FLOAT\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"lumBufferType\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_FLOAT\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Type used for hdr lum buffer. Defaults to GL_FLOAT.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"imageBufferInternalFormat\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_RGB16F\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"imageBufferInternalFormat\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_RGB16F\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Internal format used for hdr image color buffer. Defaults to GL_RGBA16F.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"imageBufferPixelFormat\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_RGB\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"imageBufferPixelFormat\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_RGB\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Pixel format used for hdr image color buffer. Defaults to GL_RGB.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"imageBufferType\"\n"
-    "\t type=\"GLenum\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"GL_FLOAT\"\n"
-    "\t defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"imageBufferType\"\n"
+    "        type=\"GLenum\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"GL_FLOAT\"\n"
+    "        defaultHeader=\"&quot;OSGGLEXT.h&quot;\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Type used for hdr image color buffer. Defaults to GL_FLOAT.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"numSamples\"\n"
-    "\t type=\"Int32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"4\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"numSamples\"\n"
+    "        type=\"Int32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"4\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Number of multi samples to use. If 0 no multisampling is performed. which does save the resolve pass.\n"
-    "  </Field>\n"
-    "  <Field\n"
-    "\t name=\"mipmapLevel\"\n"
-    "\t type=\"Int32\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"-1\"\n"
-    "\t access=\"public\"\n"
-    "     >\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"mipmapLevel\"\n"
+    "        type=\"Int32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"-1\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The mipmap Level to use for accessing the average luminance map. Normally, this value is set to -1 which\n"
     "        means that the highest mipmap level is used. This corresponds to the 1 pixel mipmap texture lookup. Other\n"
     "        values are meant for testing purposes only.\n"
-    "  </Field>\n"
+    "    </Field>\n"
+    "\n"
     "</FieldContainer>\n",
     "This HDR stage performs the complete post processing task from rendering into a HDR render buffer, calculating the\n"
     "average luminance of the scene, time adapting of the average luminance, tone mapping and blooming. Especially, it\n"
@@ -1604,6 +1849,19 @@ UInt32 HDR2StageBase::getContainerSize(void) const
 /*------------------------- decorator get ------------------------------*/
 
 
+SFBool *HDR2StageBase::editSFActivate(void)
+{
+    editSField(ActivateFieldMask);
+
+    return &_sfActivate;
+}
+
+const SFBool *HDR2StageBase::getSFActivate(void) const
+{
+    return &_sfActivate;
+}
+
+
 SFBool *HDR2StageBase::editSFApplyGamma(void)
 {
     editSField(ApplyGammaFieldMask);
@@ -1627,6 +1885,19 @@ SFBool *HDR2StageBase::editSFAccurateGamma(void)
 const SFBool *HDR2StageBase::getSFAccurateGamma(void) const
 {
     return &_sfAccurateGamma;
+}
+
+
+SFReal32 *HDR2StageBase::editSFGamma(void)
+{
+    editSField(GammaFieldMask);
+
+    return &_sfGamma;
+}
+
+const SFReal32 *HDR2StageBase::getSFGamma(void) const
+{
+    return &_sfGamma;
 }
 
 
@@ -1812,6 +2083,45 @@ const SFReal32 *HDR2StageBase::getSFKeyValue(void) const
 }
 
 
+SFReal32 *HDR2StageBase::editSFApertureFNumber(void)
+{
+    editSField(ApertureFNumberFieldMask);
+
+    return &_sfApertureFNumber;
+}
+
+const SFReal32 *HDR2StageBase::getSFApertureFNumber(void) const
+{
+    return &_sfApertureFNumber;
+}
+
+
+SFReal32 *HDR2StageBase::editSFShutterSpeed(void)
+{
+    editSField(ShutterSpeedFieldMask);
+
+    return &_sfShutterSpeed;
+}
+
+const SFReal32 *HDR2StageBase::getSFShutterSpeed(void) const
+{
+    return &_sfShutterSpeed;
+}
+
+
+SFReal32 *HDR2StageBase::editSFISO(void)
+{
+    editSField(ISOFieldMask);
+
+    return &_sfISO;
+}
+
+const SFReal32 *HDR2StageBase::getSFISO(void) const
+{
+    return &_sfISO;
+}
+
+
 SFReal32 *HDR2StageBase::editSFWhiteLevel(void)
 {
     editSField(WhiteLevelFieldMask);
@@ -1851,94 +2161,81 @@ const SFBool *HDR2StageBase::getSFUseLinChromCorrection(void) const
 }
 
 
-SFReal32 *HDR2StageBase::editSFFilmicShoulderStrenght(void)
+SFColor3f *HDR2StageBase::editSFFilterColor(void)
 {
-    editSField(FilmicShoulderStrenghtFieldMask);
+    editSField(FilterColorFieldMask);
 
-    return &_sfFilmicShoulderStrenght;
+    return &_sfFilterColor;
 }
 
-const SFReal32 *HDR2StageBase::getSFFilmicShoulderStrenght(void) const
+const SFColor3f *HDR2StageBase::getSFFilterColor(void) const
 {
-    return &_sfFilmicShoulderStrenght;
-}
-
-
-SFReal32 *HDR2StageBase::editSFFilmicLinearStrength(void)
-{
-    editSField(FilmicLinearStrengthFieldMask);
-
-    return &_sfFilmicLinearStrength;
-}
-
-const SFReal32 *HDR2StageBase::getSFFilmicLinearStrength(void) const
-{
-    return &_sfFilmicLinearStrength;
+    return &_sfFilterColor;
 }
 
 
-SFReal32 *HDR2StageBase::editSFFilmicLinearAngle(void)
+SFReal32 *HDR2StageBase::editSFContrast(void)
 {
-    editSField(FilmicLinearAngleFieldMask);
+    editSField(ContrastFieldMask);
 
-    return &_sfFilmicLinearAngle;
+    return &_sfContrast;
 }
 
-const SFReal32 *HDR2StageBase::getSFFilmicLinearAngle(void) const
+const SFReal32 *HDR2StageBase::getSFContrast(void) const
 {
-    return &_sfFilmicLinearAngle;
-}
-
-
-SFReal32 *HDR2StageBase::editSFFilmicToeStrength(void)
-{
-    editSField(FilmicToeStrengthFieldMask);
-
-    return &_sfFilmicToeStrength;
-}
-
-const SFReal32 *HDR2StageBase::getSFFilmicToeStrength(void) const
-{
-    return &_sfFilmicToeStrength;
+    return &_sfContrast;
 }
 
 
-SFReal32 *HDR2StageBase::editSFFilmicToeNumerator(void)
+SFColor3f *HDR2StageBase::editSFShadowLiftColor(void)
 {
-    editSField(FilmicToeNumeratorFieldMask);
+    editSField(ShadowLiftColorFieldMask);
 
-    return &_sfFilmicToeNumerator;
+    return &_sfShadowLiftColor;
 }
 
-const SFReal32 *HDR2StageBase::getSFFilmicToeNumerator(void) const
+const SFColor3f *HDR2StageBase::getSFShadowLiftColor(void) const
 {
-    return &_sfFilmicToeNumerator;
-}
-
-
-SFReal32 *HDR2StageBase::editSFFilmicToeDenominator(void)
-{
-    editSField(FilmicToeDenominatorFieldMask);
-
-    return &_sfFilmicToeDenominator;
-}
-
-const SFReal32 *HDR2StageBase::getSFFilmicToeDenominator(void) const
-{
-    return &_sfFilmicToeDenominator;
+    return &_sfShadowLiftColor;
 }
 
 
-SFReal32 *HDR2StageBase::editSFFilmicLinearWhite(void)
+SFColor3f *HDR2StageBase::editSFMidToneGammaColor(void)
 {
-    editSField(FilmicLinearWhiteFieldMask);
+    editSField(MidToneGammaColorFieldMask);
 
-    return &_sfFilmicLinearWhite;
+    return &_sfMidToneGammaColor;
 }
 
-const SFReal32 *HDR2StageBase::getSFFilmicLinearWhite(void) const
+const SFColor3f *HDR2StageBase::getSFMidToneGammaColor(void) const
 {
-    return &_sfFilmicLinearWhite;
+    return &_sfMidToneGammaColor;
+}
+
+
+SFColor3f *HDR2StageBase::editSFHighlightGainColor(void)
+{
+    editSField(HighlightGainColorFieldMask);
+
+    return &_sfHighlightGainColor;
+}
+
+const SFColor3f *HDR2StageBase::getSFHighlightGainColor(void) const
+{
+    return &_sfHighlightGainColor;
+}
+
+
+MFReal32 *HDR2StageBase::editMFFilmicCurveParameters(void)
+{
+    editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
+
+    return &_mfFilmicCurveParameters;
+}
+
+const MFReal32 *HDR2StageBase::getMFFilmicCurveParameters(void) const
+{
+    return &_mfFilmicCurveParameters;
 }
 
 
@@ -1965,6 +2262,19 @@ SFUInt32 *HDR2StageBase::editSFTarget(void)
 const SFUInt32 *HDR2StageBase::getSFTarget(void) const
 {
     return &_sfTarget;
+}
+
+
+SFBool *HDR2StageBase::editSFPerformDithering(void)
+{
+    editSField(PerformDitheringFieldMask);
+
+    return &_sfPerformDithering;
+}
+
+const SFBool *HDR2StageBase::getSFPerformDithering(void) const
+{
+    return &_sfPerformDithering;
 }
 
 
@@ -2173,6 +2483,10 @@ SizeT HDR2StageBase::getBinSize(ConstFieldMaskArg whichField)
 {
     SizeT returnValue = Inherited::getBinSize(whichField);
 
+    if(FieldBits::NoField != (ActivateFieldMask & whichField))
+    {
+        returnValue += _sfActivate.getBinSize();
+    }
     if(FieldBits::NoField != (ApplyGammaFieldMask & whichField))
     {
         returnValue += _sfApplyGamma.getBinSize();
@@ -2180,6 +2494,10 @@ SizeT HDR2StageBase::getBinSize(ConstFieldMaskArg whichField)
     if(FieldBits::NoField != (AccurateGammaFieldMask & whichField))
     {
         returnValue += _sfAccurateGamma.getBinSize();
+    }
+    if(FieldBits::NoField != (GammaFieldMask & whichField))
+    {
+        returnValue += _sfGamma.getBinSize();
     }
     if(FieldBits::NoField != (AdjustLuminanceFieldMask & whichField))
     {
@@ -2237,6 +2555,18 @@ SizeT HDR2StageBase::getBinSize(ConstFieldMaskArg whichField)
     {
         returnValue += _sfKeyValue.getBinSize();
     }
+    if(FieldBits::NoField != (ApertureFNumberFieldMask & whichField))
+    {
+        returnValue += _sfApertureFNumber.getBinSize();
+    }
+    if(FieldBits::NoField != (ShutterSpeedFieldMask & whichField))
+    {
+        returnValue += _sfShutterSpeed.getBinSize();
+    }
+    if(FieldBits::NoField != (ISOFieldMask & whichField))
+    {
+        returnValue += _sfISO.getBinSize();
+    }
     if(FieldBits::NoField != (WhiteLevelFieldMask & whichField))
     {
         returnValue += _sfWhiteLevel.getBinSize();
@@ -2249,33 +2579,29 @@ SizeT HDR2StageBase::getBinSize(ConstFieldMaskArg whichField)
     {
         returnValue += _sfUseLinChromCorrection.getBinSize();
     }
-    if(FieldBits::NoField != (FilmicShoulderStrenghtFieldMask & whichField))
+    if(FieldBits::NoField != (FilterColorFieldMask & whichField))
     {
-        returnValue += _sfFilmicShoulderStrenght.getBinSize();
+        returnValue += _sfFilterColor.getBinSize();
     }
-    if(FieldBits::NoField != (FilmicLinearStrengthFieldMask & whichField))
+    if(FieldBits::NoField != (ContrastFieldMask & whichField))
     {
-        returnValue += _sfFilmicLinearStrength.getBinSize();
+        returnValue += _sfContrast.getBinSize();
     }
-    if(FieldBits::NoField != (FilmicLinearAngleFieldMask & whichField))
+    if(FieldBits::NoField != (ShadowLiftColorFieldMask & whichField))
     {
-        returnValue += _sfFilmicLinearAngle.getBinSize();
+        returnValue += _sfShadowLiftColor.getBinSize();
     }
-    if(FieldBits::NoField != (FilmicToeStrengthFieldMask & whichField))
+    if(FieldBits::NoField != (MidToneGammaColorFieldMask & whichField))
     {
-        returnValue += _sfFilmicToeStrength.getBinSize();
+        returnValue += _sfMidToneGammaColor.getBinSize();
     }
-    if(FieldBits::NoField != (FilmicToeNumeratorFieldMask & whichField))
+    if(FieldBits::NoField != (HighlightGainColorFieldMask & whichField))
     {
-        returnValue += _sfFilmicToeNumerator.getBinSize();
+        returnValue += _sfHighlightGainColor.getBinSize();
     }
-    if(FieldBits::NoField != (FilmicToeDenominatorFieldMask & whichField))
+    if(FieldBits::NoField != (FilmicCurveParametersFieldMask & whichField))
     {
-        returnValue += _sfFilmicToeDenominator.getBinSize();
-    }
-    if(FieldBits::NoField != (FilmicLinearWhiteFieldMask & whichField))
-    {
-        returnValue += _sfFilmicLinearWhite.getBinSize();
+        returnValue += _mfFilmicCurveParameters.getBinSize();
     }
     if(FieldBits::NoField != (DragoBiasFieldMask & whichField))
     {
@@ -2284,6 +2610,10 @@ SizeT HDR2StageBase::getBinSize(ConstFieldMaskArg whichField)
     if(FieldBits::NoField != (TargetFieldMask & whichField))
     {
         returnValue += _sfTarget.getBinSize();
+    }
+    if(FieldBits::NoField != (PerformDitheringFieldMask & whichField))
+    {
+        returnValue += _sfPerformDithering.getBinSize();
     }
     if(FieldBits::NoField != (CarryDepthFieldMask & whichField))
     {
@@ -2354,6 +2684,10 @@ void HDR2StageBase::copyToBin(BinaryDataHandler &pMem,
 {
     Inherited::copyToBin(pMem, whichField);
 
+    if(FieldBits::NoField != (ActivateFieldMask & whichField))
+    {
+        _sfActivate.copyToBin(pMem);
+    }
     if(FieldBits::NoField != (ApplyGammaFieldMask & whichField))
     {
         _sfApplyGamma.copyToBin(pMem);
@@ -2361,6 +2695,10 @@ void HDR2StageBase::copyToBin(BinaryDataHandler &pMem,
     if(FieldBits::NoField != (AccurateGammaFieldMask & whichField))
     {
         _sfAccurateGamma.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (GammaFieldMask & whichField))
+    {
+        _sfGamma.copyToBin(pMem);
     }
     if(FieldBits::NoField != (AdjustLuminanceFieldMask & whichField))
     {
@@ -2418,6 +2756,18 @@ void HDR2StageBase::copyToBin(BinaryDataHandler &pMem,
     {
         _sfKeyValue.copyToBin(pMem);
     }
+    if(FieldBits::NoField != (ApertureFNumberFieldMask & whichField))
+    {
+        _sfApertureFNumber.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (ShutterSpeedFieldMask & whichField))
+    {
+        _sfShutterSpeed.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (ISOFieldMask & whichField))
+    {
+        _sfISO.copyToBin(pMem);
+    }
     if(FieldBits::NoField != (WhiteLevelFieldMask & whichField))
     {
         _sfWhiteLevel.copyToBin(pMem);
@@ -2430,33 +2780,29 @@ void HDR2StageBase::copyToBin(BinaryDataHandler &pMem,
     {
         _sfUseLinChromCorrection.copyToBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicShoulderStrenghtFieldMask & whichField))
+    if(FieldBits::NoField != (FilterColorFieldMask & whichField))
     {
-        _sfFilmicShoulderStrenght.copyToBin(pMem);
+        _sfFilterColor.copyToBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicLinearStrengthFieldMask & whichField))
+    if(FieldBits::NoField != (ContrastFieldMask & whichField))
     {
-        _sfFilmicLinearStrength.copyToBin(pMem);
+        _sfContrast.copyToBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicLinearAngleFieldMask & whichField))
+    if(FieldBits::NoField != (ShadowLiftColorFieldMask & whichField))
     {
-        _sfFilmicLinearAngle.copyToBin(pMem);
+        _sfShadowLiftColor.copyToBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicToeStrengthFieldMask & whichField))
+    if(FieldBits::NoField != (MidToneGammaColorFieldMask & whichField))
     {
-        _sfFilmicToeStrength.copyToBin(pMem);
+        _sfMidToneGammaColor.copyToBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicToeNumeratorFieldMask & whichField))
+    if(FieldBits::NoField != (HighlightGainColorFieldMask & whichField))
     {
-        _sfFilmicToeNumerator.copyToBin(pMem);
+        _sfHighlightGainColor.copyToBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicToeDenominatorFieldMask & whichField))
+    if(FieldBits::NoField != (FilmicCurveParametersFieldMask & whichField))
     {
-        _sfFilmicToeDenominator.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (FilmicLinearWhiteFieldMask & whichField))
-    {
-        _sfFilmicLinearWhite.copyToBin(pMem);
+        _mfFilmicCurveParameters.copyToBin(pMem);
     }
     if(FieldBits::NoField != (DragoBiasFieldMask & whichField))
     {
@@ -2465,6 +2811,10 @@ void HDR2StageBase::copyToBin(BinaryDataHandler &pMem,
     if(FieldBits::NoField != (TargetFieldMask & whichField))
     {
         _sfTarget.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (PerformDitheringFieldMask & whichField))
+    {
+        _sfPerformDithering.copyToBin(pMem);
     }
     if(FieldBits::NoField != (CarryDepthFieldMask & whichField))
     {
@@ -2533,6 +2883,11 @@ void HDR2StageBase::copyFromBin(BinaryDataHandler &pMem,
 {
     Inherited::copyFromBin(pMem, whichField);
 
+    if(FieldBits::NoField != (ActivateFieldMask & whichField))
+    {
+        editSField(ActivateFieldMask);
+        _sfActivate.copyFromBin(pMem);
+    }
     if(FieldBits::NoField != (ApplyGammaFieldMask & whichField))
     {
         editSField(ApplyGammaFieldMask);
@@ -2542,6 +2897,11 @@ void HDR2StageBase::copyFromBin(BinaryDataHandler &pMem,
     {
         editSField(AccurateGammaFieldMask);
         _sfAccurateGamma.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (GammaFieldMask & whichField))
+    {
+        editSField(GammaFieldMask);
+        _sfGamma.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (AdjustLuminanceFieldMask & whichField))
     {
@@ -2613,6 +2973,21 @@ void HDR2StageBase::copyFromBin(BinaryDataHandler &pMem,
         editSField(KeyValueFieldMask);
         _sfKeyValue.copyFromBin(pMem);
     }
+    if(FieldBits::NoField != (ApertureFNumberFieldMask & whichField))
+    {
+        editSField(ApertureFNumberFieldMask);
+        _sfApertureFNumber.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (ShutterSpeedFieldMask & whichField))
+    {
+        editSField(ShutterSpeedFieldMask);
+        _sfShutterSpeed.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (ISOFieldMask & whichField))
+    {
+        editSField(ISOFieldMask);
+        _sfISO.copyFromBin(pMem);
+    }
     if(FieldBits::NoField != (WhiteLevelFieldMask & whichField))
     {
         editSField(WhiteLevelFieldMask);
@@ -2628,40 +3003,35 @@ void HDR2StageBase::copyFromBin(BinaryDataHandler &pMem,
         editSField(UseLinChromCorrectionFieldMask);
         _sfUseLinChromCorrection.copyFromBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicShoulderStrenghtFieldMask & whichField))
+    if(FieldBits::NoField != (FilterColorFieldMask & whichField))
     {
-        editSField(FilmicShoulderStrenghtFieldMask);
-        _sfFilmicShoulderStrenght.copyFromBin(pMem);
+        editSField(FilterColorFieldMask);
+        _sfFilterColor.copyFromBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicLinearStrengthFieldMask & whichField))
+    if(FieldBits::NoField != (ContrastFieldMask & whichField))
     {
-        editSField(FilmicLinearStrengthFieldMask);
-        _sfFilmicLinearStrength.copyFromBin(pMem);
+        editSField(ContrastFieldMask);
+        _sfContrast.copyFromBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicLinearAngleFieldMask & whichField))
+    if(FieldBits::NoField != (ShadowLiftColorFieldMask & whichField))
     {
-        editSField(FilmicLinearAngleFieldMask);
-        _sfFilmicLinearAngle.copyFromBin(pMem);
+        editSField(ShadowLiftColorFieldMask);
+        _sfShadowLiftColor.copyFromBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicToeStrengthFieldMask & whichField))
+    if(FieldBits::NoField != (MidToneGammaColorFieldMask & whichField))
     {
-        editSField(FilmicToeStrengthFieldMask);
-        _sfFilmicToeStrength.copyFromBin(pMem);
+        editSField(MidToneGammaColorFieldMask);
+        _sfMidToneGammaColor.copyFromBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicToeNumeratorFieldMask & whichField))
+    if(FieldBits::NoField != (HighlightGainColorFieldMask & whichField))
     {
-        editSField(FilmicToeNumeratorFieldMask);
-        _sfFilmicToeNumerator.copyFromBin(pMem);
+        editSField(HighlightGainColorFieldMask);
+        _sfHighlightGainColor.copyFromBin(pMem);
     }
-    if(FieldBits::NoField != (FilmicToeDenominatorFieldMask & whichField))
+    if(FieldBits::NoField != (FilmicCurveParametersFieldMask & whichField))
     {
-        editSField(FilmicToeDenominatorFieldMask);
-        _sfFilmicToeDenominator.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (FilmicLinearWhiteFieldMask & whichField))
-    {
-        editSField(FilmicLinearWhiteFieldMask);
-        _sfFilmicLinearWhite.copyFromBin(pMem);
+        editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
+        _mfFilmicCurveParameters.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (DragoBiasFieldMask & whichField))
     {
@@ -2672,6 +3042,11 @@ void HDR2StageBase::copyFromBin(BinaryDataHandler &pMem,
     {
         editSField(TargetFieldMask);
         _sfTarget.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (PerformDitheringFieldMask & whichField))
+    {
+        editSField(PerformDitheringFieldMask);
+        _sfPerformDithering.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (CarryDepthFieldMask & whichField))
     {
@@ -2873,8 +3248,10 @@ FieldContainerTransitPtr HDR2StageBase::shallowCopy(void) const
 
 HDR2StageBase::HDR2StageBase(void) :
     Inherited(),
+    _sfActivate               (bool(true)),
     _sfApplyGamma             (bool(true)),
     _sfAccurateGamma          (bool(true)),
+    _sfGamma                  (Real32(2.2f)),
     _sfAdjustLuminance        (bool(true)),
     _sfTau                    (Real32(1.25f)),
     _sfPerformBloom           (bool(true)),
@@ -2889,18 +3266,21 @@ HDR2StageBase::HDR2StageBase(void) :
     _sfAutoExposureMode       (UInt32(2)),
     _sfExposure               (Real32(0.f)),
     _sfKeyValue               (Real32(0.18f)),
+    _sfApertureFNumber        (Real32(16.0f)),
+    _sfShutterSpeed           (Real32(0.01f)),
+    _sfISO                    (Real32(100.f)),
     _sfWhiteLevel             (Real32(5.f)),
     _sfSaturation             (Real32(1.f)),
     _sfUseLinChromCorrection  (bool(true)),
-    _sfFilmicShoulderStrenght (Real32(0.15f)),
-    _sfFilmicLinearStrength   (Real32(0.5f)),
-    _sfFilmicLinearAngle      (Real32(0.1f)),
-    _sfFilmicToeStrength      (Real32(0.2f)),
-    _sfFilmicToeNumerator     (Real32(0.02f)),
-    _sfFilmicToeDenominator   (Real32(0.3f)),
-    _sfFilmicLinearWhite      (Real32(11.2f)),
+    _sfFilterColor            (Color3f(Color3f(1.f,1.f,1.f))),
+    _sfContrast               (Real32(1.f)),
+    _sfShadowLiftColor        (Color3f(Color3f(0.5f,0.5f,0.5f))),
+    _sfMidToneGammaColor      (Color3f(Color3f(0.5f,0.5f,0.5f))),
+    _sfHighlightGainColor     (Color3f(Color3f(0.5f,0.5f,0.5f))),
+    _mfFilmicCurveParameters  (),
     _sfDragoBias              (Real32(0.85f)),
-    _sfTarget                 (UInt32(5)),
+    _sfTarget                 (UInt32(6)),
+    _sfPerformDithering       (bool(false)),
     _sfCarryDepth             (bool(true)),
     _sfColorBufferInternalFormat(GLenum(GL_RGBA16F)),
     _sfColorBufferPixelFormat (GLenum(GL_RGBA)),
@@ -2921,8 +3301,10 @@ HDR2StageBase::HDR2StageBase(void) :
 
 HDR2StageBase::HDR2StageBase(const HDR2StageBase &source) :
     Inherited(source),
+    _sfActivate               (source._sfActivate               ),
     _sfApplyGamma             (source._sfApplyGamma             ),
     _sfAccurateGamma          (source._sfAccurateGamma          ),
+    _sfGamma                  (source._sfGamma                  ),
     _sfAdjustLuminance        (source._sfAdjustLuminance        ),
     _sfTau                    (source._sfTau                    ),
     _sfPerformBloom           (source._sfPerformBloom           ),
@@ -2937,18 +3319,21 @@ HDR2StageBase::HDR2StageBase(const HDR2StageBase &source) :
     _sfAutoExposureMode       (source._sfAutoExposureMode       ),
     _sfExposure               (source._sfExposure               ),
     _sfKeyValue               (source._sfKeyValue               ),
+    _sfApertureFNumber        (source._sfApertureFNumber        ),
+    _sfShutterSpeed           (source._sfShutterSpeed           ),
+    _sfISO                    (source._sfISO                    ),
     _sfWhiteLevel             (source._sfWhiteLevel             ),
     _sfSaturation             (source._sfSaturation             ),
     _sfUseLinChromCorrection  (source._sfUseLinChromCorrection  ),
-    _sfFilmicShoulderStrenght (source._sfFilmicShoulderStrenght ),
-    _sfFilmicLinearStrength   (source._sfFilmicLinearStrength   ),
-    _sfFilmicLinearAngle      (source._sfFilmicLinearAngle      ),
-    _sfFilmicToeStrength      (source._sfFilmicToeStrength      ),
-    _sfFilmicToeNumerator     (source._sfFilmicToeNumerator     ),
-    _sfFilmicToeDenominator   (source._sfFilmicToeDenominator   ),
-    _sfFilmicLinearWhite      (source._sfFilmicLinearWhite      ),
+    _sfFilterColor            (source._sfFilterColor            ),
+    _sfContrast               (source._sfContrast               ),
+    _sfShadowLiftColor        (source._sfShadowLiftColor        ),
+    _sfMidToneGammaColor      (source._sfMidToneGammaColor      ),
+    _sfHighlightGainColor     (source._sfHighlightGainColor     ),
+    _mfFilmicCurveParameters  (source._mfFilmicCurveParameters  ),
     _sfDragoBias              (source._sfDragoBias              ),
     _sfTarget                 (source._sfTarget                 ),
+    _sfPerformDithering       (source._sfPerformDithering       ),
     _sfCarryDepth             (source._sfCarryDepth             ),
     _sfColorBufferInternalFormat(source._sfColorBufferInternalFormat),
     _sfColorBufferPixelFormat (source._sfColorBufferPixelFormat ),
@@ -2974,6 +3359,31 @@ HDR2StageBase::~HDR2StageBase(void)
 {
 }
 
+
+GetFieldHandlePtr HDR2StageBase::getHandleActivate        (void) const
+{
+    SFBool::GetHandlePtr returnValue(
+        new  SFBool::GetHandle(
+             &_sfActivate,
+             this->getType().getFieldDesc(ActivateFieldId),
+             const_cast<HDR2StageBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr HDR2StageBase::editHandleActivate       (void)
+{
+    SFBool::EditHandlePtr returnValue(
+        new  SFBool::EditHandle(
+             &_sfActivate,
+             this->getType().getFieldDesc(ActivateFieldId),
+             this));
+
+
+    editSField(ActivateFieldMask);
+
+    return returnValue;
+}
 
 GetFieldHandlePtr HDR2StageBase::getHandleApplyGamma      (void) const
 {
@@ -3021,6 +3431,31 @@ EditFieldHandlePtr HDR2StageBase::editHandleAccurateGamma  (void)
 
 
     editSField(AccurateGammaFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr HDR2StageBase::getHandleGamma           (void) const
+{
+    SFReal32::GetHandlePtr returnValue(
+        new  SFReal32::GetHandle(
+             &_sfGamma,
+             this->getType().getFieldDesc(GammaFieldId),
+             const_cast<HDR2StageBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr HDR2StageBase::editHandleGamma          (void)
+{
+    SFReal32::EditHandlePtr returnValue(
+        new  SFReal32::EditHandle(
+             &_sfGamma,
+             this->getType().getFieldDesc(GammaFieldId),
+             this));
+
+
+    editSField(GammaFieldMask);
 
     return returnValue;
 }
@@ -3375,6 +3810,81 @@ EditFieldHandlePtr HDR2StageBase::editHandleKeyValue       (void)
     return returnValue;
 }
 
+GetFieldHandlePtr HDR2StageBase::getHandleApertureFNumber (void) const
+{
+    SFReal32::GetHandlePtr returnValue(
+        new  SFReal32::GetHandle(
+             &_sfApertureFNumber,
+             this->getType().getFieldDesc(ApertureFNumberFieldId),
+             const_cast<HDR2StageBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr HDR2StageBase::editHandleApertureFNumber(void)
+{
+    SFReal32::EditHandlePtr returnValue(
+        new  SFReal32::EditHandle(
+             &_sfApertureFNumber,
+             this->getType().getFieldDesc(ApertureFNumberFieldId),
+             this));
+
+
+    editSField(ApertureFNumberFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr HDR2StageBase::getHandleShutterSpeed    (void) const
+{
+    SFReal32::GetHandlePtr returnValue(
+        new  SFReal32::GetHandle(
+             &_sfShutterSpeed,
+             this->getType().getFieldDesc(ShutterSpeedFieldId),
+             const_cast<HDR2StageBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr HDR2StageBase::editHandleShutterSpeed   (void)
+{
+    SFReal32::EditHandlePtr returnValue(
+        new  SFReal32::EditHandle(
+             &_sfShutterSpeed,
+             this->getType().getFieldDesc(ShutterSpeedFieldId),
+             this));
+
+
+    editSField(ShutterSpeedFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr HDR2StageBase::getHandleISO             (void) const
+{
+    SFReal32::GetHandlePtr returnValue(
+        new  SFReal32::GetHandle(
+             &_sfISO,
+             this->getType().getFieldDesc(ISOFieldId),
+             const_cast<HDR2StageBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr HDR2StageBase::editHandleISO            (void)
+{
+    SFReal32::EditHandlePtr returnValue(
+        new  SFReal32::EditHandle(
+             &_sfISO,
+             this->getType().getFieldDesc(ISOFieldId),
+             this));
+
+
+    editSField(ISOFieldMask);
+
+    return returnValue;
+}
+
 GetFieldHandlePtr HDR2StageBase::getHandleWhiteLevel      (void) const
 {
     SFReal32::GetHandlePtr returnValue(
@@ -3450,177 +3960,152 @@ EditFieldHandlePtr HDR2StageBase::editHandleUseLinChromCorrection(void)
     return returnValue;
 }
 
-GetFieldHandlePtr HDR2StageBase::getHandleFilmicShoulderStrenght (void) const
+GetFieldHandlePtr HDR2StageBase::getHandleFilterColor     (void) const
 {
-    SFReal32::GetHandlePtr returnValue(
-        new  SFReal32::GetHandle(
-             &_sfFilmicShoulderStrenght,
-             this->getType().getFieldDesc(FilmicShoulderStrenghtFieldId),
+    SFColor3f::GetHandlePtr returnValue(
+        new  SFColor3f::GetHandle(
+             &_sfFilterColor,
+             this->getType().getFieldDesc(FilterColorFieldId),
              const_cast<HDR2StageBase *>(this)));
 
     return returnValue;
 }
 
-EditFieldHandlePtr HDR2StageBase::editHandleFilmicShoulderStrenght(void)
+EditFieldHandlePtr HDR2StageBase::editHandleFilterColor    (void)
 {
-    SFReal32::EditHandlePtr returnValue(
-        new  SFReal32::EditHandle(
-             &_sfFilmicShoulderStrenght,
-             this->getType().getFieldDesc(FilmicShoulderStrenghtFieldId),
+    SFColor3f::EditHandlePtr returnValue(
+        new  SFColor3f::EditHandle(
+             &_sfFilterColor,
+             this->getType().getFieldDesc(FilterColorFieldId),
              this));
 
 
-    editSField(FilmicShoulderStrenghtFieldMask);
+    editSField(FilterColorFieldMask);
 
     return returnValue;
 }
 
-GetFieldHandlePtr HDR2StageBase::getHandleFilmicLinearStrength (void) const
+GetFieldHandlePtr HDR2StageBase::getHandleContrast        (void) const
 {
     SFReal32::GetHandlePtr returnValue(
         new  SFReal32::GetHandle(
-             &_sfFilmicLinearStrength,
-             this->getType().getFieldDesc(FilmicLinearStrengthFieldId),
+             &_sfContrast,
+             this->getType().getFieldDesc(ContrastFieldId),
              const_cast<HDR2StageBase *>(this)));
 
     return returnValue;
 }
 
-EditFieldHandlePtr HDR2StageBase::editHandleFilmicLinearStrength(void)
+EditFieldHandlePtr HDR2StageBase::editHandleContrast       (void)
 {
     SFReal32::EditHandlePtr returnValue(
         new  SFReal32::EditHandle(
-             &_sfFilmicLinearStrength,
-             this->getType().getFieldDesc(FilmicLinearStrengthFieldId),
+             &_sfContrast,
+             this->getType().getFieldDesc(ContrastFieldId),
              this));
 
 
-    editSField(FilmicLinearStrengthFieldMask);
+    editSField(ContrastFieldMask);
 
     return returnValue;
 }
 
-GetFieldHandlePtr HDR2StageBase::getHandleFilmicLinearAngle (void) const
+GetFieldHandlePtr HDR2StageBase::getHandleShadowLiftColor (void) const
 {
-    SFReal32::GetHandlePtr returnValue(
-        new  SFReal32::GetHandle(
-             &_sfFilmicLinearAngle,
-             this->getType().getFieldDesc(FilmicLinearAngleFieldId),
+    SFColor3f::GetHandlePtr returnValue(
+        new  SFColor3f::GetHandle(
+             &_sfShadowLiftColor,
+             this->getType().getFieldDesc(ShadowLiftColorFieldId),
              const_cast<HDR2StageBase *>(this)));
 
     return returnValue;
 }
 
-EditFieldHandlePtr HDR2StageBase::editHandleFilmicLinearAngle(void)
+EditFieldHandlePtr HDR2StageBase::editHandleShadowLiftColor(void)
 {
-    SFReal32::EditHandlePtr returnValue(
-        new  SFReal32::EditHandle(
-             &_sfFilmicLinearAngle,
-             this->getType().getFieldDesc(FilmicLinearAngleFieldId),
+    SFColor3f::EditHandlePtr returnValue(
+        new  SFColor3f::EditHandle(
+             &_sfShadowLiftColor,
+             this->getType().getFieldDesc(ShadowLiftColorFieldId),
              this));
 
 
-    editSField(FilmicLinearAngleFieldMask);
+    editSField(ShadowLiftColorFieldMask);
 
     return returnValue;
 }
 
-GetFieldHandlePtr HDR2StageBase::getHandleFilmicToeStrength (void) const
+GetFieldHandlePtr HDR2StageBase::getHandleMidToneGammaColor (void) const
 {
-    SFReal32::GetHandlePtr returnValue(
-        new  SFReal32::GetHandle(
-             &_sfFilmicToeStrength,
-             this->getType().getFieldDesc(FilmicToeStrengthFieldId),
+    SFColor3f::GetHandlePtr returnValue(
+        new  SFColor3f::GetHandle(
+             &_sfMidToneGammaColor,
+             this->getType().getFieldDesc(MidToneGammaColorFieldId),
              const_cast<HDR2StageBase *>(this)));
 
     return returnValue;
 }
 
-EditFieldHandlePtr HDR2StageBase::editHandleFilmicToeStrength(void)
+EditFieldHandlePtr HDR2StageBase::editHandleMidToneGammaColor(void)
 {
-    SFReal32::EditHandlePtr returnValue(
-        new  SFReal32::EditHandle(
-             &_sfFilmicToeStrength,
-             this->getType().getFieldDesc(FilmicToeStrengthFieldId),
+    SFColor3f::EditHandlePtr returnValue(
+        new  SFColor3f::EditHandle(
+             &_sfMidToneGammaColor,
+             this->getType().getFieldDesc(MidToneGammaColorFieldId),
              this));
 
 
-    editSField(FilmicToeStrengthFieldMask);
+    editSField(MidToneGammaColorFieldMask);
 
     return returnValue;
 }
 
-GetFieldHandlePtr HDR2StageBase::getHandleFilmicToeNumerator (void) const
+GetFieldHandlePtr HDR2StageBase::getHandleHighlightGainColor (void) const
 {
-    SFReal32::GetHandlePtr returnValue(
-        new  SFReal32::GetHandle(
-             &_sfFilmicToeNumerator,
-             this->getType().getFieldDesc(FilmicToeNumeratorFieldId),
+    SFColor3f::GetHandlePtr returnValue(
+        new  SFColor3f::GetHandle(
+             &_sfHighlightGainColor,
+             this->getType().getFieldDesc(HighlightGainColorFieldId),
              const_cast<HDR2StageBase *>(this)));
 
     return returnValue;
 }
 
-EditFieldHandlePtr HDR2StageBase::editHandleFilmicToeNumerator(void)
+EditFieldHandlePtr HDR2StageBase::editHandleHighlightGainColor(void)
 {
-    SFReal32::EditHandlePtr returnValue(
-        new  SFReal32::EditHandle(
-             &_sfFilmicToeNumerator,
-             this->getType().getFieldDesc(FilmicToeNumeratorFieldId),
+    SFColor3f::EditHandlePtr returnValue(
+        new  SFColor3f::EditHandle(
+             &_sfHighlightGainColor,
+             this->getType().getFieldDesc(HighlightGainColorFieldId),
              this));
 
 
-    editSField(FilmicToeNumeratorFieldMask);
+    editSField(HighlightGainColorFieldMask);
 
     return returnValue;
 }
 
-GetFieldHandlePtr HDR2StageBase::getHandleFilmicToeDenominator (void) const
+GetFieldHandlePtr HDR2StageBase::getHandleFilmicCurveParameters (void) const
 {
-    SFReal32::GetHandlePtr returnValue(
-        new  SFReal32::GetHandle(
-             &_sfFilmicToeDenominator,
-             this->getType().getFieldDesc(FilmicToeDenominatorFieldId),
+    MFReal32::GetHandlePtr returnValue(
+        new  MFReal32::GetHandle(
+             &_mfFilmicCurveParameters,
+             this->getType().getFieldDesc(FilmicCurveParametersFieldId),
              const_cast<HDR2StageBase *>(this)));
 
     return returnValue;
 }
 
-EditFieldHandlePtr HDR2StageBase::editHandleFilmicToeDenominator(void)
+EditFieldHandlePtr HDR2StageBase::editHandleFilmicCurveParameters(void)
 {
-    SFReal32::EditHandlePtr returnValue(
-        new  SFReal32::EditHandle(
-             &_sfFilmicToeDenominator,
-             this->getType().getFieldDesc(FilmicToeDenominatorFieldId),
+    MFReal32::EditHandlePtr returnValue(
+        new  MFReal32::EditHandle(
+             &_mfFilmicCurveParameters,
+             this->getType().getFieldDesc(FilmicCurveParametersFieldId),
              this));
 
 
-    editSField(FilmicToeDenominatorFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr HDR2StageBase::getHandleFilmicLinearWhite (void) const
-{
-    SFReal32::GetHandlePtr returnValue(
-        new  SFReal32::GetHandle(
-             &_sfFilmicLinearWhite,
-             this->getType().getFieldDesc(FilmicLinearWhiteFieldId),
-             const_cast<HDR2StageBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr HDR2StageBase::editHandleFilmicLinearWhite(void)
-{
-    SFReal32::EditHandlePtr returnValue(
-        new  SFReal32::EditHandle(
-             &_sfFilmicLinearWhite,
-             this->getType().getFieldDesc(FilmicLinearWhiteFieldId),
-             this));
-
-
-    editSField(FilmicLinearWhiteFieldMask);
+    editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
 
     return returnValue;
 }
@@ -3671,6 +4156,31 @@ EditFieldHandlePtr HDR2StageBase::editHandleTarget         (void)
 
 
     editSField(TargetFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr HDR2StageBase::getHandlePerformDithering (void) const
+{
+    SFBool::GetHandlePtr returnValue(
+        new  SFBool::GetHandle(
+             &_sfPerformDithering,
+             this->getType().getFieldDesc(PerformDitheringFieldId),
+             const_cast<HDR2StageBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr HDR2StageBase::editHandlePerformDithering(void)
+{
+    SFBool::EditHandlePtr returnValue(
+        new  SFBool::EditHandle(
+             &_sfPerformDithering,
+             this->getType().getFieldDesc(PerformDitheringFieldId),
+             this));
+
+
+    editSField(PerformDitheringFieldMask);
 
     return returnValue;
 }
@@ -4087,7 +4597,16 @@ void HDR2StageBase::resolveLinks(void)
 {
     Inherited::resolveLinks();
 
+#ifdef OSG_MT_CPTR_ASPECT
+    AspectOffsetStore oOffsets;
 
+    _pAspectStore->fillOffsetArray(oOffsets, this);
+#endif
+
+#ifdef OSG_MT_CPTR_ASPECT
+    _mfFilmicCurveParameters.terminateShare(Thread::getCurrentAspect(),
+                                      oOffsets);
+#endif
 }
 
 

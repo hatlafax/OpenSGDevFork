@@ -98,6 +98,8 @@ struct Light
 
     Light();
 
+    bool operator==(const Light& rhs) const;
+
     static Light        create_light(Type e);
 
     OSG::Pnt3f   position;           // in object space
@@ -174,26 +176,31 @@ struct HDRShaderData
     static HDRShaderData create_min_shader_data();
     static HDRShaderData create_max_shader_data();
 
-    float bloomThreshold;
-    float bloomMagnitude;
-    int   toneMapTechnique;
-    float exposure;
-    float keyValue;
-    int   autoExposure;
-    float whiteLevel;
-    float shoulderStrength;
-    float linearStrength;
-    float linearAngle;
-    float toeStrength;
-    float toeNumerator;
-    float toeDenominator;
-    float linearWhite;
-    float lumSaturation;
-    float bias;
-    float tau;
-    int   nTaps;
-    float sigma;
-    bool  useLinChromInterp;
+    float        bloomThreshold;
+    float        bloomMagnitude;
+    int          toneMapTechnique;
+    float        exposure;
+    float        keyValue;
+    float        apertureFNumber;
+    float        shutterSpeed;
+    float        iso;
+    int          autoExposure;
+    float        whiteLevel;
+    float        shoulderStrength;
+    float        linearStrength;
+    float        linearAngle;
+    float        toeStrength;
+    float        toeNumerator;
+    float        toeDenominator;
+    float        linearWhite;
+    float        lumSaturation;
+    OSG::Color3f filterColor;
+    float        contrast;
+    float        bias;
+    float        tau;
+    int          nTaps;
+    float        sigma;
+    bool         useLinChromInterp;
 };
 
 /*---- Example ------------------------------------------------------------*/
@@ -281,7 +288,11 @@ public:
     void    SetRenderDiffuse    (bool  value);                  bool                GetRenderDiffuse    () const;
     void    SetRenderSpecular   (bool  value);                  bool                GetRenderSpecular   () const;
     void    SetAccurateGamma    (bool  value);                  bool                GetAccurateGamma    () const;
-    void    SetGamma            (bool  value);                  bool                GetGamma            () const;
+    void    SetApplyGamma       (bool  value);                  bool                GetApplyGamma       () const;
+    void    SetGamma            (float value);                  float               GetGamma            () const;
+    void    SetLiftColor        (const OSG::Color3f& value);    OSG::Color3f        GetLiftColor        () const;
+    void    SetGammaColor       (const OSG::Color3f& value);    OSG::Color3f        GetGammaColor       () const;
+    void    SetGainColor        (const OSG::Color3f& value);    OSG::Color3f        GetGainColor        () const;
     void    SetUseITURBT709     (bool  value);                  bool                GetUseITURBT709     () const;
     void    SetMipmapLevel      (int   value);                  int                 GetMipmapLevel      () const;
     void    SetBloomThreshold   (float value);                  float               GetBloomThreshold   () const;
@@ -289,6 +300,9 @@ public:
     void    SetToneMapTechnique (int   value);                  int                 GetToneMapTechnique () const;
     void    SetExposure         (float value);                  float               GetExposure         () const;
     void    SetKeyValue         (float value);                  float               GetKeyValue         () const;
+    void    SetApertureFNumber  (float value);                  float               GetApertureFNumber  () const;
+    void    SetShutterSpeed     (float value);                  float               GetShutterSpeed     () const;
+    void    SetISO              (float value);                  float               GetISO              () const;
     void    SetAutoExposure     (int   value);                  int                 GetAutoExposure     () const;
     void    SetWhiteLevel       (float value);                  float               GetWhiteLevel       () const;
     void    SetShoulderStrength (float value);                  float               GetShoulderStrength () const;
@@ -299,6 +313,8 @@ public:
     void    SetToeDenominator   (float value);                  float               GetToeDenominator   () const;
     void    SetLinearWhite      (float value);                  float               GetLinearWhite      () const;
     void    SetLumSaturation    (float value);                  float               GetLumSaturation    () const;
+    void    SetFilterColor      (const OSG::Color3f& value);    OSG::Color3f        GetFilterColor      () const;
+    void    SetContrast         (float value);                  float               GetContrast         () const;
     void    SetBias             (float value);                  float               GetBias             () const;
     void    SetTau              (float value);                  float               GetTau              () const;
     void    SetNTaps            (int   value);                  int                 GetNTaps            () const;
@@ -312,6 +328,7 @@ private:
     OSG::SimpleSceneManagerRefPtr           _mgr;
 
     VecLightsT                              _lights;
+    VecLightsT                              _lights_last;
     VecMaterialsT                           _materials;
 
     OSG::NodeRefPtr                         _hdrRoot;
@@ -329,8 +346,14 @@ private:
     HDRShaderData                           _hdrShaderDataMin;
     HDRShaderData                           _hdrShaderDataMax;
 
-    bool                                    _gamma;
+    bool                                    _apply_gamma;
     bool                                    _accurate_gamma;
+    float                                   _gamma;
+
+    OSG::Color3f                            _lift_color;
+    OSG::Color3f                            _gamma_color;
+    OSG::Color3f                            _gain_color;
+
     bool                                    _use_ITU_R_BT_709;
     int                                     _mipmap_level;
     int                                     _num_samples;
@@ -376,6 +399,7 @@ Example* Example::_pExample = NULL;
 Example::Example(int argc, char *argv[])
 : _mgr(NULL)
 , _lights(initialize_lights())
+, _lights_last(_lights)
 , _materials(initialize_materials(num_materials))
 , _hdrRoot(NULL)
 , _hdrStage(NULL)
@@ -385,11 +409,15 @@ Example::Example(int argc, char *argv[])
 , _hdrShaderDataDefault()
 , _hdrShaderDataMin(HDRShaderData::create_min_shader_data())
 , _hdrShaderDataMax(HDRShaderData::create_max_shader_data())
-, _gamma(true)
+, _apply_gamma(true)
 , _accurate_gamma(true)
+, _gamma(2.2f)
+, _lift_color(0.5f, 0.5f, 0.5f)
+, _gamma_color(0.5f, 0.5f, 0.5f)
+, _gain_color(0.5f, 0.5f, 0.5f)
 , _use_ITU_R_BT_709(true)
 , _mipmap_level(-1)
-, _num_samples(4)
+, _num_samples(0)
 , _clear_color(0.0f, 0.0f, 0.4f)
 , _force_bgnd(false)
 , _adjust_luminance(true)
@@ -499,11 +527,11 @@ void Example::initialize_skybackgrounds()
     std::vector<fs::path> extensions;
     extensions += ".jpg", ".jpeg", ".png";
 
-    fs::path skybox_path("data/skybox");
+    fs::path skybox_path("Data/skybox");
     try
     {
         // default hdr cross cube map
-        fs::path file("data/grace_cross.chdr");
+        fs::path file("Data/grace_cross.chdr");
         if (fs::exists(file) && fs::is_regular_file(file))
         {
             std::string skybox_name = file.filename().stem().string();
@@ -801,6 +829,7 @@ void Example::setupScene()
     polygon_chunk->setFrontMode(GL_FILL);
     polygon_chunk->setBackMode(GL_FILL);
     polygon_chunk->setCullFace(GL_NONE);
+    //polygon_chunk->setCullFace(GL_BACK);
 
     OSG::DepthChunkRefPtr depth_chunk = OSG::DepthChunk::create();
     depth_chunk->setEnable(true);
@@ -811,7 +840,6 @@ void Example::setupScene()
     prog_state->addChunk(_prog_chunk);
     prog_state->addChunk(polygon_chunk);
     prog_state->addChunk(depth_chunk);
-
 
     OSG::ShaderProgramVariableChunkRefPtr shader_var_chunk = OSG::ShaderProgramVariableChunk::create();
     shader_var_chunk->addUniformBlock("GeomState", 3);
@@ -825,6 +853,12 @@ void Example::setupScene()
         geom.material_index = OSG::RandomPoolManager::the()->getRandomInt32(0, num_materials-1);
 
         geom_state[i] = OSG::ChunkMaterial::create();
+
+        //OSG::BlendChunkRefPtr blendChunk = OSG::BlendChunk::create();
+        //blendChunk->setSrcFactor (GL_SRC_ALPHA);
+        //blendChunk->setDestFactor(GL_ONE_MINUS_SRC_ALPHA);
+        //geom_state[i]->addChunk(blendChunk);
+        //geom_state[i]->setTransparencyMode(OSG::Material::TransparencyForceTransparent);
 
         _ubo_geom_state[i] = create_geometry_material_state(geom);
 
@@ -882,7 +916,8 @@ int Example::setupGLUT(int *argc, char *argv[])
 void Example::display()
 {
     // light spot direction and light position must be provided in eye space
-    update_light_state(_ubo_light_state, _lights);
+    if (_lights != _lights_last)
+        update_light_state(_ubo_light_state, _lights);
 
     if (!_pause)
     {
@@ -1361,8 +1396,13 @@ void Example::setup_hdr_stage()
 {
     if (_hdrStage)
     {
-        _hdrStage->setApplyGamma                (_gamma);
+        _hdrStage->setApplyGamma                (_apply_gamma);
         _hdrStage->setAccurateGamma             (_accurate_gamma);
+        _hdrStage->setGamma                     (_gamma);
+
+        _hdrStage->setShadowLiftColor           (_lift_color);
+        _hdrStage->setMidToneGammaColor         (_gamma_color);
+        _hdrStage->setHighlightGainColor        (_gain_color);
 
         _hdrStage->setPerformBloom              (_perform_bloom);
         _hdrStage->setBloomBackground           (_bloom_background);
@@ -1397,6 +1437,9 @@ void Example::setup_hdr_stage()
         _hdrStage->setToneMappingMode           (_hdrShaderData.toneMapTechnique);
         _hdrStage->setExposure                  (_hdrShaderData.exposure);
         _hdrStage->setKeyValue                  (_hdrShaderData.keyValue);
+        _hdrStage->setApertureFNumber           (_hdrShaderData.apertureFNumber);
+        _hdrStage->setShutterSpeed              (_hdrShaderData.shutterSpeed);
+        _hdrStage->setISO                       (_hdrShaderData.iso);
         _hdrStage->setAutoExposureMode          (_hdrShaderData.autoExposure);
         _hdrStage->setWhiteLevel                (_hdrShaderData.whiteLevel);
         _hdrStage->setFilmicShoulderStrenght    (_hdrShaderData.shoulderStrength);
@@ -1407,6 +1450,8 @@ void Example::setup_hdr_stage()
         _hdrStage->setFilmicToeDenominator      (_hdrShaderData.toeDenominator);
         _hdrStage->setFilmicLinearWhite         (_hdrShaderData.linearWhite);
         _hdrStage->setSaturation                (_hdrShaderData.lumSaturation);
+        _hdrStage->setFilterColor               (_hdrShaderData.filterColor);
+        _hdrStage->setContrast                  (_hdrShaderData.contrast);
         _hdrStage->setDragoBias                 (_hdrShaderData.bias);
         _hdrStage->setTau                       (_hdrShaderData.tau);
         _hdrStage->setNumTaps                   (_hdrShaderData.nTaps);
@@ -1737,7 +1782,8 @@ std::string Example::get_fp_program()
     << endl << "              +        pointLight(i, geom_state.material_index, N, V, vPositionES) "
     << endl << "              +         spotLight(i, geom_state.material_index, N, V, vPositionES);"
     << endl << "    }"
-    << endl << "    vFragColor = vec4(color, materials.material[geom_state.material_index  ].opacity);"
+    << endl << "    vFragColor = vec4(color, materials.material[geom_state.material_index].opacity);"
+    //<< endl << "    vFragColor = vec4(color, 0.5);"
     << endl << "}"
     << endl << ""
     << endl;
@@ -1758,6 +1804,21 @@ Light::Light()
 , spot_exponent(1.f)
 , type(no_light)
 {}
+
+bool Light::operator==(const Light& rhs) const
+{
+    if (this == &rhs) return true;
+
+    return position == rhs.position
+        && spot_direction == rhs.spot_direction
+        && Ia == rhs.Ia
+        && Id == rhs.Id
+        && Is == rhs.Is
+        && attenuation == rhs.attenuation
+        && spot_cos_cutoff == rhs.spot_cos_cutoff
+        && spot_exponent == rhs.spot_exponent
+        && type == rhs.type;
+}
 
 Light Light::create_light(Type e)
 {
@@ -1828,6 +1889,9 @@ HDRShaderData::HDRShaderData()
 , toneMapTechnique(4)
 , exposure(0.0f)
 , keyValue(0.18f)
+, apertureFNumber(1.4f)
+, shutterSpeed(0.6f)
+, iso(400.f)
 , autoExposure(2)
 , whiteLevel(5.0f)
 , shoulderStrength(0.15f)
@@ -1838,6 +1902,8 @@ HDRShaderData::HDRShaderData()
 , toeDenominator(0.3f)
 , linearWhite(11.2f)
 , lumSaturation(1.0f)
+, filterColor(OSG::Color3f(1.f,1.f,1.f))
+, contrast(1.0f)
 , bias(0.85f)
 , tau(1.25f)
 , nTaps(4)
@@ -1851,6 +1917,9 @@ HDRShaderData::HDRShaderData(const HDRShaderData& rhs)
 , toneMapTechnique(rhs.toneMapTechnique)
 , exposure(rhs.exposure)
 , keyValue(rhs.keyValue)
+, apertureFNumber(rhs.apertureFNumber)
+, shutterSpeed(rhs.shutterSpeed)
+, iso(rhs.iso)
 , autoExposure(rhs.autoExposure)
 , whiteLevel(rhs.whiteLevel)
 , shoulderStrength(rhs.shoulderStrength)
@@ -1861,6 +1930,8 @@ HDRShaderData::HDRShaderData(const HDRShaderData& rhs)
 , toeDenominator(rhs.toeDenominator)
 , linearWhite(rhs.linearWhite)
 , lumSaturation(rhs.lumSaturation)
+, filterColor(rhs.filterColor)
+, contrast(rhs.contrast)
 , bias(rhs.bias)
 , tau(rhs.tau)
 , nTaps(rhs.nTaps)
@@ -1877,6 +1948,9 @@ HDRShaderData& HDRShaderData::operator=(const HDRShaderData& rhs)
     toneMapTechnique = rhs.toneMapTechnique;
     exposure = rhs.exposure;
     keyValue = rhs.keyValue;
+    apertureFNumber = rhs.apertureFNumber;
+    shutterSpeed = rhs.shutterSpeed;
+    iso = rhs.iso;
     autoExposure = rhs.autoExposure;
     whiteLevel = rhs.whiteLevel;
     shoulderStrength = rhs.shoulderStrength;
@@ -1887,6 +1961,8 @@ HDRShaderData& HDRShaderData::operator=(const HDRShaderData& rhs)
     toeDenominator = rhs.toeDenominator;
     linearWhite = rhs.linearWhite;
     lumSaturation = rhs.lumSaturation;
+    filterColor = rhs.filterColor;
+    contrast = rhs.contrast;
     bias = rhs.bias;
     tau = rhs.tau;
     nTaps = rhs.nTaps;
@@ -1900,25 +1976,30 @@ HDRShaderData HDRShaderData::create_min_shader_data()
 {
     HDRShaderData data;
 
-    data.bloomThreshold = 0.0;
-    data.bloomMagnitude = 0.0;
+    data.bloomThreshold = 0.f;
+    data.bloomMagnitude = 0.f;
     data.toneMapTechnique = 0;
-    data.exposure = -10.0;
-    data.keyValue = 0.0;
+    data.exposure = -10.f;
+    data.keyValue = 0.f;
+    data.apertureFNumber = 0.5f;
+    data.shutterSpeed = 1/1000.f;
+    data.iso = 1.f;
     data.autoExposure = 0;
-    data.whiteLevel = 0.0;
-    data.shoulderStrength = 0.0;
-    data.linearStrength = 0.0;
-    data.linearAngle = 0.0;
-    data.toeStrength = 0.0;
-    data.toeNumerator = 0.0;
-    data.toeDenominator = 0.0;
-    data.linearWhite = 0.0;
-    data.lumSaturation = 0.0;
-    data.bias = 0.0;
-    data.tau = 0.0;
+    data.whiteLevel = 0.f;
+    data.shoulderStrength = 0.f;
+    data.linearStrength = 0.f;
+    data.linearAngle = 0.f;
+    data.toeStrength = 0.f;
+    data.toeNumerator = 0.f;
+    data.toeDenominator = 0.f;
+    data.linearWhite = 0.f;
+    data.lumSaturation = 0.f;
+    data.filterColor = OSG::Color3f(0.f,0.f,0.f);
+    data.contrast = 0.5f;
+    data.bias = 0.f;
+    data.tau = 0.f;
     data.nTaps = 2;
-    data.sigma = 0.5;
+    data.sigma = 0.5f;
 
     return data;
 }
@@ -1927,25 +2008,30 @@ HDRShaderData HDRShaderData::create_max_shader_data()
 {
     HDRShaderData data;
 
-    data.bloomThreshold = 10.0;
-    data.bloomMagnitude = 2.0;
+    data.bloomThreshold = 10.f;
+    data.bloomMagnitude = 2.f;
     data.toneMapTechnique = 7;
-    data.exposure = 10.0;
-    data.keyValue = 1.0;
-    data.autoExposure = 2;
-    data.whiteLevel = 25.0;
-    data.shoulderStrength = 2.0;
-    data.linearStrength = 5.0;
-    data.linearAngle = 1.0;
-    data.toeStrength = 2.0;
-    data.toeNumerator = 0.5;
-    data.toeDenominator = 2.0;
-    data.linearWhite = 20.0;
-    data.lumSaturation = 4.0;
-    data.bias = 1.0;
-    data.tau = 40.0;
+    data.exposure = 10.f;
+    data.keyValue = 1.f;
+    data.apertureFNumber = 128.f;
+    data.shutterSpeed = 10.f;
+    data.iso = 16000.f;
+    data.autoExposure = 4;
+    data.whiteLevel = 25.f;
+    data.shoulderStrength = 2.f;
+    data.linearStrength = 5.f;
+    data.linearAngle = 1.f;
+    data.toeStrength = 2.f;
+    data.toeNumerator = 0.5f;
+    data.toeDenominator = 2.f;
+    data.linearWhite = 20.f;
+    data.lumSaturation = 4.f;
+    data.filterColor = OSG::Color3f(1.f,1.f,1.f);
+    data.contrast = 1.5f;
+    data.bias = 1.f;
+    data.tau = 40.f;
     data.nTaps = 10;
-    data.sigma = 1.5;
+    data.sigma = 1.5f;
 
     return data;
 }
@@ -2196,18 +2282,74 @@ void TW_CALL GetAccurateGammaCB(void *value, void *clientData)
     *num = example->GetAccurateGamma();
 }
 
-void TW_CALL SetGammaCB(const void *value, void *clientData)
+void TW_CALL SetApplyGammaCB(const void *value, void *clientData)
 {
     Example* example = reinterpret_cast<Example*>(clientData);
     const bool* num = reinterpret_cast<const bool*>(value);
+    example->SetApplyGamma(*num);
+}
+
+void TW_CALL GetApplyGammaCB(void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    bool* num = reinterpret_cast<bool*>(value);
+    *num = example->GetApplyGamma();
+}
+
+void TW_CALL SetGammaCB(const void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    const float* num = reinterpret_cast<const float*>(value);
     example->SetGamma(*num);
 }
 
 void TW_CALL GetGammaCB(void *value, void *clientData)
 {
     Example* example = reinterpret_cast<Example*>(clientData);
-    bool* num = reinterpret_cast<bool*>(value);
+    float* num = reinterpret_cast<float*>(value);
     *num = example->GetGamma();
+}
+
+void TW_CALL SetLiftColorCB(const void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    const  OSG::Color3f* num = reinterpret_cast<const  OSG::Color3f*>(value);
+    example->SetLiftColor(*num);
+}
+
+void TW_CALL GetLiftColorCB(void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    OSG::Color3f* num = reinterpret_cast<OSG::Color3f*>(value);
+    *num = example->GetLiftColor();
+}
+
+void TW_CALL SetGammaColorCB(const void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    const  OSG::Color3f* num = reinterpret_cast<const  OSG::Color3f*>(value);
+    example->SetGammaColor(*num);
+}
+
+void TW_CALL GetGammaColorCB(void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    OSG::Color3f* num = reinterpret_cast<OSG::Color3f*>(value);
+    *num = example->GetGammaColor();
+}
+
+void TW_CALL SetGainColorCB(const void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    const  OSG::Color3f* num = reinterpret_cast<const  OSG::Color3f*>(value);
+    example->SetGainColor(*num);
+}
+
+void TW_CALL GetGainColorCB(void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    OSG::Color3f* num = reinterpret_cast<OSG::Color3f*>(value);
+    *num = example->GetGainColor();
 }
 
 void TW_CALL SetUseITURBT709CB(const void *value, void *clientData)
@@ -2306,6 +2448,48 @@ void TW_CALL GetKeyValueCB(void *value, void *clientData)
     Example* example = reinterpret_cast<Example*>(clientData);
     float* num = reinterpret_cast<float*>(value);
     *num = example->GetKeyValue();
+}
+
+void TW_CALL SetApertureFNumberCB(const void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    const float* num = reinterpret_cast<const float*>(value);
+    example->SetApertureFNumber(*num);
+}
+
+void TW_CALL GetApertureFNumberCB(void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    float* num = reinterpret_cast<float*>(value);
+    *num = example->GetApertureFNumber();
+}
+
+void TW_CALL SetShutterSpeedCB(const void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    const float* num = reinterpret_cast<const float*>(value);
+    example->SetShutterSpeed(*num);
+}
+
+void TW_CALL GetShutterSpeedCB(void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    float* num = reinterpret_cast<float*>(value);
+    *num = example->GetShutterSpeed();
+}
+
+void TW_CALL SetISOCB(const void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    const float* num = reinterpret_cast<const float*>(value);
+    example->SetISO(*num);
+}
+
+void TW_CALL GetISOCB(void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    float* num = reinterpret_cast<float*>(value);
+    *num = example->GetISO();
 }
 
 void TW_CALL SetAutoExposureCB(const void *value, void *clientData)
@@ -2446,6 +2630,34 @@ void TW_CALL GetLumSaturationCB(void *value, void *clientData)
     Example* example = reinterpret_cast<Example*>(clientData);
     float* num = reinterpret_cast<float*>(value);
     *num = example->GetLumSaturation();
+}
+
+void TW_CALL SetFilterColorCB(const void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    const  OSG::Color3f* num = reinterpret_cast<const  OSG::Color3f*>(value);
+    example->SetFilterColor(*num);
+}
+
+void TW_CALL GetFilterColorCB(void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    OSG::Color3f* num = reinterpret_cast<OSG::Color3f*>(value);
+    *num = example->GetFilterColor();
+}
+
+void TW_CALL SetContrastCB(const void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    const float* num = reinterpret_cast<const float*>(value);
+    example->SetContrast(*num);
+}
+
+void TW_CALL GetContrastCB(void *value, void *clientData)
+{
+    Example* example = reinterpret_cast<Example*>(clientData);
+    float* num = reinterpret_cast<float*>(value);
+    *num = example->GetContrast();
 }
 
 void TW_CALL SetBiasCB(const void *value, void *clientData)
@@ -2772,19 +2984,79 @@ bool Example::GetAccurateGamma() const
     return _accurate_gamma;
 }
 
-void Example::SetGamma(bool value)
+void Example::SetApplyGamma(bool value)
 {
-    _gamma = value;
+    _apply_gamma = value;
 
     if (_hdrStage)
-        _hdrStage->setApplyGamma(_gamma);
+        _hdrStage->setApplyGamma(_apply_gamma);
 
     glutPostRedisplay();
 }
 
-bool Example::GetGamma() const
+bool Example::GetApplyGamma() const
+{
+    return _apply_gamma;
+}
+
+void Example::SetGamma(float value)
+{
+    _gamma = value;
+
+    if (_hdrStage)
+        _hdrStage->setGamma(_gamma);
+
+    glutPostRedisplay();
+}
+
+float Example::GetGamma() const
 {
     return _gamma;
+}
+
+void Example::SetLiftColor(const OSG::Color3f& value)
+{
+    _lift_color = value;
+
+    if (_hdrStage)
+        _hdrStage->setShadowLiftColor(_lift_color);
+
+    glutPostRedisplay();
+}
+
+OSG::Color3f Example::GetLiftColor() const
+{
+    return _lift_color;
+}
+
+void Example::SetGammaColor(const OSG::Color3f& value)
+{
+    _gamma_color = value;
+
+    if (_hdrStage)
+        _hdrStage->setMidToneGammaColor(_gamma_color);
+
+    glutPostRedisplay();
+}
+
+OSG::Color3f Example::GetGammaColor() const
+{
+    return _gamma_color;
+}
+
+void Example::SetGainColor(const OSG::Color3f& value)
+{
+    _gain_color = value;
+
+    if (_hdrStage)
+        _hdrStage->setHighlightGainColor(_gain_color);
+
+    glutPostRedisplay();
+}
+
+OSG::Color3f Example::GetGainColor() const
+{
+    return _gain_color;
 }
 
 void Example::SetUseITURBT709(bool value)
@@ -2890,6 +3162,51 @@ void Example::SetKeyValue(float value)
 float Example::GetKeyValue() const
 {
     return _hdrShaderData.keyValue;
+}
+
+void Example::SetApertureFNumber(float value)
+{
+    _hdrShaderData.apertureFNumber = value;
+
+    if (_hdrStage)
+        _hdrStage->setApertureFNumber(_hdrShaderData.apertureFNumber);
+
+    glutPostRedisplay();
+}
+
+float Example::GetApertureFNumber() const
+{
+    return _hdrShaderData.apertureFNumber;
+}
+
+void Example::SetShutterSpeed(float value)
+{
+    _hdrShaderData.shutterSpeed = value;
+
+    if (_hdrStage)
+        _hdrStage->setShutterSpeed(_hdrShaderData.shutterSpeed);
+
+    glutPostRedisplay();
+}
+
+float Example::GetShutterSpeed() const
+{
+    return _hdrShaderData.shutterSpeed;
+}
+
+void Example::SetISO(float value)
+{
+    _hdrShaderData.iso = value;
+
+    if (_hdrStage)
+        _hdrStage->setISO(_hdrShaderData.iso);
+
+    glutPostRedisplay();
+}
+
+float Example::GetISO() const
+{
+    return _hdrShaderData.iso;
 }
 
 void Example::SetAutoExposure(int value)
@@ -3042,6 +3359,36 @@ float Example::GetLumSaturation() const
     return _hdrShaderData.lumSaturation;
 }
 
+void Example::SetFilterColor(const OSG::Color3f& value)
+{
+    _hdrShaderData.filterColor = value;
+
+    if (_hdrStage)
+        _hdrStage->setFilterColor(_hdrShaderData.filterColor);
+
+    glutPostRedisplay();
+}
+
+OSG::Color3f Example::GetFilterColor() const
+{
+    return _hdrShaderData.filterColor;
+}
+
+void Example::SetContrast(float value)
+{
+    _hdrShaderData.contrast = value;
+
+    if (_hdrStage)
+        _hdrStage->setContrast(_hdrShaderData.contrast);
+
+    glutPostRedisplay();
+}
+
+float Example::GetContrast() const
+{
+    return _hdrShaderData.contrast;
+}
+
 void Example::SetBias(float value)
 {
     _hdrShaderData.bias = value;
@@ -3142,8 +3489,9 @@ void Example::setupTweakBar()
     //
     // Group 'Gamma Correction'
     //
-    TwAddVarCB(_tweakbar, "Gamma",        TW_TYPE_BOOLCPP, SetGammaCB, GetGammaCB, this,          "key=g help='Apply Gamma correction at the end of the pipeline.' group='Gamma Correction'");
+    TwAddVarCB(_tweakbar, "Apply Gamma",  TW_TYPE_BOOLCPP, SetApplyGammaCB,    GetApplyGammaCB,    this, "key=g help='Apply Gamma correction at the end of the pipeline.' group='Gamma Correction'");
     TwAddVarCB(_tweakbar, "Accurate",     TW_TYPE_BOOLCPP, SetAccurateGammaCB, GetAccurateGammaCB, this, "key=G help='Use accurate Gamma to linear mapping.' group='Gamma Correction'");
+    TwAddVarCB(_tweakbar, "Gamma",        TW_TYPE_FLOAT,   SetGammaCB,         GetGammaCB,         this, sGenTwDefinition(1.f, 4.f, 1000, 3, "", "", "The Gamma value to be used", "'Gamma Correction'").c_str());
 
     //
     // Group 'Bloom'
@@ -3161,31 +3509,56 @@ void Example::setupTweakBar()
     TwAddVarCB(_tweakbar, "Luminance ITU-R-BT.709", TW_TYPE_BOOLCPP, SetUseITURBT709CB, GetUseITURBT709CB, this, "help='Calculate relative luminance according to ITU-R-BT.709.' group=Tonemapping");
     TwAddVarCB(_tweakbar, "Mipmap Level",           TW_TYPE_INT32,   SetMipmapLevelCB,  GetMipmapLevelCB,  this, sGenTwDefinition(-1, 12, 1, "z", "Z", "The Mipmap Level addresses the texture to be used for avg. luminance lookup. See Exposure render texture. Default is -1.", "Tonemapping").c_str());
 
-    TwEnumVal toneMappingEnums[] = { {0, "None"}, {1, "Logarithmic"}, {2, "Exponential"}, {3, "Drago Logarithmic"}, {4, "Reinhard"}, {5, "Reinhard Modified"}, {6, "Filmic Hable"}, {7, "Filmic Uncharte2D"} };
-    TwType toneMappingType = TwDefineEnum("ToneMappingType", toneMappingEnums, 8);
+    TwEnumVal toneMappingEnums[] = {
+        {OSG::HDR2Stage::NO_TONE_MAPPING,                   "None"}, 
+        {OSG::HDR2Stage::LOGARITHMIC_TONE_MAPPING,          "Logarithmic"}, 
+        {OSG::HDR2Stage::EXPONENTIAL_TONE_MAPPING,          "Exponential"}, 
+        {OSG::HDR2Stage::DRAGO_LOGARITHMIC_TONE_MAPPING,    "Drago Logarithmic"}, 
+        {OSG::HDR2Stage::REINHARD_TONE_MAPPING,             "Reinhard"}, 
+        {OSG::HDR2Stage::REINHARD_MODIFIED_TONE_MAPPING,    "Reinhard Modified"}, 
+        {OSG::HDR2Stage::FILMIC_HABLE_TONE_MAPPING,         "Filmic Hable"}, 
+        {OSG::HDR2Stage::FILMIC_UNCHARTED2_TONE_MAPPING,    "Filmic Uncharted2"},
+        {OSG::HDR2Stage::FILMIC_ACES_TONE_MAPPING,          "Filmic ACES"},
+        {OSG::HDR2Stage::FILMIC_HEJ2015_TONE_MAPPING,       "Filmic Hej2015"}
+    };
+    TwType toneMappingType = TwDefineEnum("ToneMappingType", toneMappingEnums, 10);
     TwAddVarCB(_tweakbar, "Technique", toneMappingType, SetToneMapTechniqueCB, GetToneMapTechniqueCB, this, "help='The tone mapping algorithm.' group=Tonemapping");
 
-    TwEnumVal autoExposureEnums[] = { {0, "Manual"}, {1, "Geom. mean of lumi. (KeyValue)"}, {2, "Geom. mean of lumi. (Auto KeyValue)"} };
-    TwType autoExposureType = TwDefineEnum("AutoExposureType", autoExposureEnums, 3);
+    TwEnumVal autoExposureEnums[] = { 
+        {OSG::HDR2Stage::MANUAL,                "Manual Exposure"}, 
+        {OSG::HDR2Stage::KEY_VALUE,             "Manual KeyValue"}, 
+        {OSG::HDR2Stage::AUTOMATIC,             "Auto Exposure"},
+        {OSG::HDR2Stage::SATURATION_BASED,      "Manual Saturation-Based Exposure"},
+        {OSG::HDR2Stage::STANDARD_OUTPUT_BASED, "Manual Standard Output Sensitivity Exposure"}
+    };
+    TwType autoExposureType = TwDefineEnum("AutoExposureType", autoExposureEnums, 5);
+
     TwAddVarCB(_tweakbar, "AutoExposure", autoExposureType, SetAutoExposureCB, GetAutoExposureCB, this, "help='Algorithm to determine the exposure value.' group=Tonemapping");
 
-    TwAddVarCB(_tweakbar, "Exposure",           TW_TYPE_FLOAT,   SetExposureCB, GetExposureCB, this,      sGenTwDefinition(_hdrShaderDataMin.exposure,      _hdrShaderDataMax.exposure,      100, 2, "e", "E", "Manual exposure: The HDR pixel value is then scaled by 2^exposure.", "Tonemapping").c_str());
-    TwAddVarCB(_tweakbar, "KeyValue",           TW_TYPE_FLOAT,   SetKeyValueCB, GetKeyValueCB, this,      sGenTwDefinition(_hdrShaderDataMin.keyValue,      _hdrShaderDataMax.keyValue,      100, 2, "k", "K", "Used in the geometric mean calculation of the luminance. a \"key value\" is user-controlled, and is meant to be chosen based on whether the scene is \"high-key\" (bright, low contrast) or \"low-key\" (dark, high contrast).", "Tonemapping").c_str());
-    TwAddVarCB(_tweakbar, "White Level",        TW_TYPE_FLOAT,   SetWhiteLevelCB, GetWhiteLevelCB, this,    sGenTwDefinition(_hdrShaderDataMin.whiteLevel,    _hdrShaderDataMax.whiteLevel,  10000, 4, "w", "W", "Sets what pixels are pure white in the image, producing a result similar to how exposure functions in a camera.", "Tonemapping").c_str());
-    TwAddVarCB(_tweakbar, "Saturation",         TW_TYPE_FLOAT,   SetLumSaturationCB, GetLumSaturationCB, this, sGenTwDefinition(_hdrShaderDataMin.lumSaturation, _hdrShaderDataMax.lumSaturation, 100, 2, "l", "L", "Luminance saturation.", "Tonemapping").c_str());
-    TwAddVarCB(_tweakbar, "Linear Sat Interp.", TW_TYPE_BOOLCPP, SetUseLinChromInterpCB, GetUseLinChromInterpCB, this, "help='Perform linear interpolation on color correction.' group=Tonemapping");
+    TwAddVarCB(_tweakbar, "Exposure",           TW_TYPE_FLOAT,   SetExposureCB,         GetExposureCB,          this, sGenTwDefinition(_hdrShaderDataMin.exposure,          _hdrShaderDataMax.exposure,        1000, 3, "e", "E", "Manual exposure: The HDR pixel value is then scaled by 2^exposure.", "Tonemapping").c_str());
+    TwAddVarCB(_tweakbar, "KeyValue",           TW_TYPE_FLOAT,   SetKeyValueCB,         GetKeyValueCB,          this, sGenTwDefinition(_hdrShaderDataMin.keyValue,          _hdrShaderDataMax.keyValue,        1000, 3, "k", "K", "Used in the geometric mean calculation of the luminance. a \"key value\" is user-controlled, and is meant to be chosen based on whether the scene is \"high-key\" (bright, low contrast) or \"low-key\" (dark, high contrast).", "Tonemapping").c_str());
+    TwAddVarCB(_tweakbar, "F-Number",           TW_TYPE_FLOAT,   SetApertureFNumberCB,  GetApertureFNumberCB,   this, sGenTwDefinition(_hdrShaderDataMin.apertureFNumber,   _hdrShaderDataMax.apertureFNumber, 1000, 1, "", "", "Used in the geometric mean calculation of the luminance. a \"F-number\" is the ratio of the system focal length to the diameter of the entrance pupil.", "Tonemapping").c_str());
+    TwAddVarCB(_tweakbar, "Shutter Speed",      TW_TYPE_FLOAT,   SetShutterSpeedCB,     GetShutterSpeedCB,      this, sGenTwDefinition(_hdrShaderDataMin.shutterSpeed,      _hdrShaderDataMax.shutterSpeed,    1000, 3, "", "", "Used in the geometric mean calculation of the luminance. a \"shutter speed\" is a measure of the film exposure time given in reciprocal seconds.", "Tonemapping").c_str());
+    TwAddVarCB(_tweakbar, "ISO",                TW_TYPE_FLOAT,   SetISOCB,              GetISOCB,               this, sGenTwDefinition(_hdrShaderDataMin.iso,               _hdrShaderDataMax.iso,             1000, 1, "", "", "Used in the geometric mean calculation of the luminance. a \"ISO\" film speed value is the measure of a photographic film its sensitivity to light.", "Tonemapping").c_str());
+    TwAddVarCB(_tweakbar, "White Level",        TW_TYPE_FLOAT,   SetWhiteLevelCB,       GetWhiteLevelCB,        this, sGenTwDefinition(_hdrShaderDataMin.whiteLevel,        _hdrShaderDataMax.whiteLevel,     10000, 4, "w", "W", "Sets what pixels are pure white in the image, producing a result similar to how exposure functions in a camera.", "Tonemapping").c_str());
+    TwAddVarCB(_tweakbar, "Saturation",         TW_TYPE_FLOAT,   SetLumSaturationCB,    GetLumSaturationCB,     this, sGenTwDefinition(_hdrShaderDataMin.lumSaturation,     _hdrShaderDataMax.lumSaturation,    100, 2, "l", "L", "Luminance saturation.", "Tonemapping").c_str());
+    TwAddVarCB(_tweakbar, "Filter Color",       TW_TYPE_COLOR3F, SetFilterColorCB,      GetFilterColorCB,       this, "help='Filter color used for rendering' group=Tonemapping");
+    TwAddVarCB(_tweakbar, "Contrast",           TW_TYPE_FLOAT,   SetContrastCB,         GetContrastCB,          this, sGenTwDefinition(_hdrShaderDataMin.contrast,          _hdrShaderDataMax.contrast,        1000, 3, "", "", "Contrast of the scene.", "Tonemapping").c_str());
+    TwAddVarCB(_tweakbar, "Lift Color",         TW_TYPE_COLOR3F, SetLiftColorCB,        GetLiftColorCB,         this, "help='Lift color used for rendering' group=Tonemapping");
+    TwAddVarCB(_tweakbar, "Gamma Color",        TW_TYPE_COLOR3F, SetGammaColorCB,       GetGammaColorCB,        this, "help='Gamma color used for rendering' group=Tonemapping");
+    TwAddVarCB(_tweakbar, "Gain Color",         TW_TYPE_COLOR3F, SetGainColorCB,        GetGainColorCB,         this, "help='Gain color used for rendering' group=Tonemapping");
+    TwAddVarCB(_tweakbar, "Linear Sat Interp.", TW_TYPE_BOOLCPP, SetUseLinChromInterpCB,GetUseLinChromInterpCB, this, "help='Perform linear interpolation on color correction.' group=Tonemapping");
+    TwAddVarCB(_tweakbar, "Shoulder Strength",  TW_TYPE_FLOAT,   SetShoulderStrengthCB, GetShoulderStrengthCB,  this, sGenTwDefinition(_hdrShaderDataMin.shoulderStrength,  _hdrShaderDataMax.shoulderStrength, 100, 2, "y", "Y", "Shoulder strength used in Uncharted2 Filmic Tonemapping.", "'Filmic Uncharted2'").c_str());
+    TwAddVarCB(_tweakbar, "Linear Strength",    TW_TYPE_FLOAT,   SetLinearStrengthCB,   GetLinearStrengthCB,    this, sGenTwDefinition(_hdrShaderDataMin.linearStrength,    _hdrShaderDataMax.linearStrength,   100, 2, "x", "X", "Linear strength used in Uncharted2 Filmic Tonemapping.", "'Filmic Uncharted2'").c_str());
+    TwAddVarCB(_tweakbar, "Linear Angle",       TW_TYPE_FLOAT,   SetLinearAngleCB,      GetLinearAngleCB,       this, sGenTwDefinition(_hdrShaderDataMin.linearAngle,       _hdrShaderDataMax.linearAngle,      100, 2, "c", "C", "Linear angle used in Uncharted2 Filmic Tonemapping.", "'Filmic Uncharted2'").c_str());
+    TwAddVarCB(_tweakbar, "Toe Strength",       TW_TYPE_FLOAT,   SetToeStrengthCB,      GetToeStrengthCB,       this, sGenTwDefinition(_hdrShaderDataMin.toeStrength,       _hdrShaderDataMax.toeStrength,      100, 2, "v", "V", "Toe strength used in Uncharted2 Filmic Tonemapping.", "'Filmic Uncharted2'").c_str());
+    TwAddVarCB(_tweakbar, "Toe Numerator",      TW_TYPE_FLOAT,   SetToeNumeratorCB,     GetToeNumeratorCB,      this, sGenTwDefinition(_hdrShaderDataMin.toeNumerator,      _hdrShaderDataMax.toeNumerator,     100, 2, "b", "B", "Toe numerator used in Uncharted2 Filmic Tonemapping.", "'Filmic Uncharted2'").c_str());
+    TwAddVarCB(_tweakbar, "Toe Denominator",    TW_TYPE_FLOAT,   SetToeDenominatorCB,   GetToeDenominatorCB,    this, sGenTwDefinition(_hdrShaderDataMin.toeDenominator,    _hdrShaderDataMax.toeDenominator,   100, 2, "n", "N", "Toe denominator used in Uncharted2 Filmic Tonemapping.", "'Filmic Uncharted2'").c_str());
+    TwAddVarCB(_tweakbar, "Linear White",       TW_TYPE_FLOAT,   SetLinearWhiteCB,      GetLinearWhiteCB,       this, sGenTwDefinition(_hdrShaderDataMin.linearWhite,       _hdrShaderDataMax.linearWhite,     1000, 2, "d", "D", "Linear white used in Uncharted2 Filmic Tonemapping.", "'Filmic Uncharted2'").c_str());
 
-    TwAddVarCB(_tweakbar, "Shoulder Strength",  TW_TYPE_FLOAT, SetShoulderStrengthCB, GetShoulderStrengthCB, this, sGenTwDefinition(_hdrShaderDataMin.shoulderStrength, _hdrShaderDataMax.shoulderStrength, 100, 2, "y", "Y", "Shoulder strength used in Uncharte2D Filmic Tonmapping.", "'Filmic Uncharte2D'").c_str());
-    TwAddVarCB(_tweakbar, "Linear Strength",    TW_TYPE_FLOAT, SetLinearStrengthCB, GetLinearStrengthCB, this,   sGenTwDefinition(_hdrShaderDataMin.linearStrength,   _hdrShaderDataMax.linearStrength,   100, 2, "x", "X", "Linear strength used in Uncharte2D Filmic Tonmapping.", "'Filmic Uncharte2D'").c_str());
-    TwAddVarCB(_tweakbar, "Linear Angle",       TW_TYPE_FLOAT, SetLinearAngleCB, GetLinearAngleCB, this,      sGenTwDefinition(_hdrShaderDataMin.linearAngle,      _hdrShaderDataMax.linearAngle,      100, 2, "c", "C", "Linear angle used in Uncharte2D Filmic Tonmapping.", "'Filmic Uncharte2D'").c_str());
-    TwAddVarCB(_tweakbar, "Toe Strength",       TW_TYPE_FLOAT, SetToeStrengthCB, GetToeStrengthCB, this,      sGenTwDefinition(_hdrShaderDataMin.toeStrength,      _hdrShaderDataMax.toeStrength,      100, 2, "v", "V", "Toe strength used in Uncharte2D Filmic Tonmapping.", "'Filmic Uncharte2D'").c_str());
-    TwAddVarCB(_tweakbar, "Toe Numerator",      TW_TYPE_FLOAT, SetToeNumeratorCB, GetToeNumeratorCB, this,     sGenTwDefinition(_hdrShaderDataMin.toeNumerator,     _hdrShaderDataMax.toeNumerator,     100, 2, "b", "B", "Toe numerator used in Uncharte2D Filmic Tonmapping.", "'Filmic Uncharte2D'").c_str());
-    TwAddVarCB(_tweakbar, "Toe Denominator",    TW_TYPE_FLOAT, SetToeDenominatorCB, GetToeDenominatorCB, this,   sGenTwDefinition(_hdrShaderDataMin.toeDenominator,   _hdrShaderDataMax.toeDenominator,   100, 2, "n", "N", "Toe denominator used in Uncharte2D Filmic Tonmapping.", "'Filmic Uncharte2D'").c_str());
-    TwAddVarCB(_tweakbar, "Linear White",       TW_TYPE_FLOAT, SetLinearWhiteCB, GetLinearWhiteCB, this,      sGenTwDefinition(_hdrShaderDataMin.linearWhite,      _hdrShaderDataMax.linearWhite,     1000, 2, "d", "D", "Linear white used in Uncharte2D Filmic Tonmapping.", "'Filmic Uncharte2D'").c_str());
+    TwAddVarCB(_tweakbar, "Bias", TW_TYPE_FLOAT, SetBiasCB, GetBiasCB, this, sGenTwDefinition(_hdrShaderDataMin.bias, _hdrShaderDataMax.bias, 100, 2, "i", "I", "Bias parameter of the Drago Logarithmic Tonemapping.", "'Drago Logarithmic'").c_str());
 
-    TwAddVarCB(_tweakbar, "Bias", TW_TYPE_FLOAT, SetBiasCB, GetBiasCB, this, sGenTwDefinition(_hdrShaderDataMin.bias, _hdrShaderDataMax.bias, 100, 2, "i", "I", "Bias parameter of the Drago Logarithmic Tonmapping.", "'Drago Logarithmic'").c_str());
-
-    TwDefine("TweakBar/'Filmic Uncharte2D'   group=Tonemapping");
+    TwDefine("TweakBar/'Filmic Uncharted2'   group=Tonemapping");
     TwDefine("TweakBar/'Drago Logarithmic'   group=Tonemapping");
 
     //
@@ -3214,6 +3587,7 @@ void Example::setupTweakBar()
     TwAddVarCB(_tweakbar, "SkyBox", skyBoxType, SetSkyBgndIndexCB, GetSkyBgndIndexCB, this, "help='Available sky boxes' group=Environment");
 
     TwEnumVal renderTextureEnums[] = { 
+        { OSG::HDR2Stage::BACKGROUND_TEXTURE,        "Non Post Processed Background"}, 
         { OSG::HDR2Stage::SCENE_TEXTURE,             "Non Post Processed Scene"}, 
         { OSG::HDR2Stage::LUMINANCE_TEXTURE,         "Luminance Map (No exp)"}, 
         { OSG::HDR2Stage::ADAPTED_LUMINANCE_TEXTURE, "Avaraged Luminance Map (exp)"},
@@ -3234,7 +3608,7 @@ void Example::setupTweakBar()
 
 
     };
-    TwType renderTextureType = TwDefineEnum("RenderTextureType", renderTextureEnums, 15);//9);
+    TwType renderTextureType = TwDefineEnum("RenderTextureType", renderTextureEnums, 16);
     TwAddVarCB(_tweakbar, "Render Texture", renderTextureType, SetResultIndexCB, GetResultIndexCB, this, "help='The texture that is finally drawn' group=Environment");
 
     //
