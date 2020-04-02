@@ -16,6 +16,7 @@ SET(${PROJECT_NAME}_DEP_OSG_LIB OSGBase
                                 OSGGroup
                                 OSGState
                                 OSGSystem
+                                OSGEffectGroups
                                 OSGUtil
                                 OSGWindow
                                 OSGContribComputeBase)
@@ -27,6 +28,7 @@ SET(${PROJECT_NAME}_DEP_TEST_OSG_LIB OSGBase
                                      OSGImageFileIO
                                      OSGState
                                      OSGSystem
+                                     OSGEffectGroups
                                      OSGUtil
                                      OSGWindow
                                      OSGWindowGLUT
@@ -46,9 +48,25 @@ OSG_ADD_GLUTPACKAGE(TRUE)
 # dependencies - Additional
 # SET(${PROJECT_NAME}_DEP_ADD_INCDIR)
 
+IF(OSG_WITH_ASSIMP)
+    LIST(APPEND ${PROJECT_NAME}_DEP_LIB    ASSIMP_LIBRARIES)
+    LIST(APPEND ${PROJECT_NAME}_DEP_INCDIR ASSIMP_INCLUDE_DIR)
+    add_definitions(-DOSG_WITH_ASSIMP)
+ENDIF(OSG_WITH_ASSIMP)
+
+OSG_FIND_PACKAGE(Glm_OpenSG)
+OSG_FIND_PACKAGE(Gli_OpenSG)
+
+IF(GLI_FOUND AND GLM_FOUND)
+    INCLUDE_DIRECTORIES(AFTER ${GLM_INCLUDE_DIR})
+    INCLUDE_DIRECTORIES(AFTER ${GLI_INCLUDE_DIR})
+    add_definitions(-DOSG_WITH_GLM)
+    add_definitions(-DOSG_WITH_GLI)
+ENDIF(GLI_FOUND)
+
 SET(${PROJECT_NAME}_CXXFLAGS ${OSG_ADD_CXX_FLAGS})
 
-SET(${PROJECT_NAME}_NO_DOC TRUE)
+SET(${PROJECT_NAME}_NO_DOC FALSE)
 
 OSG_STORE_PROJECT_DEPENDENCIES()
 
@@ -56,7 +74,21 @@ OSG_STORE_PROJECT_DEPENDENCIES()
 # collect sources
 ##############################################################################
 
-OSG_ADD_DIRECTORY("Source/Contrib/Techniques")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/Base")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/FileIO")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/FileIO/Assimp")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/Image")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/Image/FileIO")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/Material")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/Material/Described")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/Material/Factory")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/Material/Manager")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/Material/Shader")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/Material/Shader/Generator")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/NodeCores/Groups/Misc")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/NodeCores/Groups/Stage/Base/AmbientOcclusion")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/NodeCores/Groups/Stage/Base/ClusterShading")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/NodeCores/Groups/Stage/Effects/MultiLightShadowStage")
 
 ##############################################################################
 # setup python bindings
