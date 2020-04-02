@@ -136,13 +136,14 @@ namespace
         bool retVal = true;
 
         if(slot < info.prop->size())
-            info.attribPtr  [slot] = (*info.prop   )[slot];
+            info.attribPtr  [slot] = (*info.prop)[slot];
 
         if(slot < info.propIdx->size())
             info.attribIndex[slot] = (*info.propIdx)[slot];
 
         if(info.attribPtr[slot]              != NULL  &&
-           info.attribPtr[slot]->getIgnore() == false   )
+           info.attribPtr[slot]->getIgnore() == false &&
+           info.attribPtr[slot]->size()      >  0       )
         {
             info.attribData  [slot] = info.attribPtr[slot]->getData();
             info.attribStride[slot] = info.attribPtr[slot]->getStride();
@@ -197,6 +198,10 @@ namespace
         if(slot < info.propIdx->size())
             info.attribIndex[slot] = (*info.propIdx)[slot];
 
+        if (info.attribPtr[slot]         != NULL && 
+            info.attribPtr[slot]->size() == 0      )
+            info.attribPtr[slot] = NULL;
+
         if(info.attribPtr[slot]              != NULL  &&
            info.attribPtr[slot]->getIgnore() == false   )
         {
@@ -227,7 +232,8 @@ namespace
             info.attribIndex[slot] = (*info.propIdx)[slot];
 
         if(info.attribPtr[slot]              != NULL  &&
-           info.attribPtr[slot]->getIgnore() == false   )
+           info.attribPtr[slot]->getIgnore() == false &&
+           info.attribPtr[slot]->size()      > 0        )
         {
             info.attribData  [slot] = info.attribPtr[slot]->getData();
             info.attribStride[slot] = info.attribPtr[slot]->getStride();
@@ -295,7 +301,8 @@ namespace
             info.attribIndex[slot] = (*info.propIdx)[slot];
 
         if(info.attribPtr[slot]              != NULL  &&
-           info.attribPtr[slot]->getIgnore() == false   )
+           info.attribPtr[slot]->getIgnore() == false &&
+           info.attribPtr[slot]->size()      >  0       )
         {
             info.attribData  [slot] = info.attribPtr[slot]->getData();
             info.attribStride[slot] = info.attribPtr[slot]->getStride();

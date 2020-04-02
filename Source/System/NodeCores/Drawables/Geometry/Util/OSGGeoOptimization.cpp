@@ -308,14 +308,14 @@ namespace
     {
         OSG_ASSERT(srcIdx.size() == dstIdx.size());
 
-        UInt32 count = srcIndices.size();
+        std::size_t count = srcIndices.size();
 
-        for(UInt32 i = 0; i < srcIdx.size(); ++i)
+        for(std::size_t i = 0; i < srcIdx.size(); ++i)
         {
             if(dstIdx[i]->size() < (dstOffset + count))
                 dstIdx[i]->resize(dstOffset + count);
 
-            for(UInt32 j = 0; j < count; ++j)
+            for(std::size_t j = 0; j < count; ++j)
             {
                 GeoIntegralProperty::MaxTypeT val;
 
