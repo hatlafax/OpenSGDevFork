@@ -56,8 +56,10 @@
 #include "OSGViewport.h"
 #include "OSGCamera.h"
 #include "OSGWindow.h"
+#include "OSGFrameBufferObject.h"
 #include "OSGBackground.h"
 #include "OSGPassiveBackground.h"
+
 
 OSG_BEGIN_NAMESPACE
 
@@ -99,7 +101,7 @@ void PassiveBackground::initMethod (InitPhase ePhase)
     if(ePhase == TypeObject::SystemPost)
     {
         _uiFramebufferObjectExt   = 
-            Window::registerExtension("GL_EXT_framebuffer_object");
+            Window::registerExtension("GL_ARB_framebuffer_object");
         _uiFramebufferBlitExt   = 
             Window::registerExtension("GL_EXT_framebuffer_blit");
 
@@ -144,8 +146,10 @@ void PassiveBackground::changed(ConstFieldMaskArg whichField,
 
 void PassiveBackground::clear(DrawEnv *pEnv)
 {
+    UInt32 glIdActiveFBO = pEnv->getActiveFBO();
+
     if(_sfClearFrameBufferObject.getValue() == true &&
-        pEnv->getActiveFBO()                != 0     )
+        glIdActiveFBO                       != 0     )
     {
         if(_sfClearCallback.getValue()._func)
         {
@@ -165,27 +169,89 @@ void PassiveBackground::clear(DrawEnv *pEnv)
                                  _uiFuncBlitFramebuffer,
                                   win                  );
 
-            osgGlBindFramebuffer(GL_READ_FRAMEBUFFER_EXT, 
-                                 0);
+            FrameBufferObject* pMediatorFBO = _sfMediator.getValue();
 
-            // FixMe breaks if source size != target size
-            osgGlBlitFramebuffer(pEnv->getPixelLeft  (), 
-                                 pEnv->getPixelBottom(), 
-                                 pEnv->getPixelRight () + 1, 
-                                 pEnv->getPixelTop   () + 1,
-                             
-                                 pEnv->getPixelLeft  (), 
-                                 pEnv->getPixelBottom(), 
-                                 pEnv->getPixelRight () + 1, 
-                                 pEnv->getPixelTop   () + 1,
+            if (pMediatorFBO != NULL && getUseMediator() == true)
+            {
+                //win->validateGLObject(glIdMediatorFBO, pEnv);
+
+                Int32 w = osgMax(2, pEnv->getPixelWidth ());
+                Int32 h = osgMax(2, pEnv->getPixelHeight());
+
+                // If fbo is smaller than 2x2, resize it to vp size.
+                // If autoResize then update img size if vp changed
+
+                if( (pMediatorFBO->getWidth() <= 1 || pMediatorFBO->getHeight() <= 1) ||
+                     (getAutoResize() && (w != pMediatorFBO->getWidth() || h != pMediatorFBO->getHeight())) )
+                {
+                    pMediatorFBO->resizeAll(w, h);
+                }
+
+                UInt32 glIdMediatorFBO = pMediatorFBO->getGLId();
+
+                pMediatorFBO->activate(pEnv);
+                osgGlBindFramebuffer(GL_READ_FRAMEBUFFER_EXT, 0);
+
+                // FixMe breaks if source size != target size
+                osgGlBlitFramebuffer(pEnv->getPixelLeft  (), 
+                                     pEnv->getPixelBottom(), 
+                                     pEnv->getPixelRight () + 1, 
+                                     pEnv->getPixelTop   () + 1,
                                  
-                                 (GL_COLOR_BUFFER_BIT  |
-                                  GL_DEPTH_BUFFER_BIT  |
-                                  GL_STENCIL_BUFFER_BIT),
-                                 GL_NEAREST); 
+                                     pEnv->getPixelLeft  (), 
+                                     pEnv->getPixelBottom(), 
+                                     pEnv->getPixelRight () + 1, 
+                                     pEnv->getPixelTop   () + 1,
+                                     
+                                     (GL_COLOR_BUFFER_BIT  |
+                                      GL_DEPTH_BUFFER_BIT  |
+                                      GL_STENCIL_BUFFER_BIT),
+                                     GL_NEAREST); 
 
-            osgGlBindFramebuffer(GL_READ_FRAMEBUFFER_EXT,
-                                 win->getGLObjectId(pEnv->getActiveFBO()));
+                osgGlBindFramebuffer(GL_READ_FRAMEBUFFER_EXT, win->getGLObjectId(glIdMediatorFBO));
+                osgGlBindFramebuffer(GL_DRAW_FRAMEBUFFER_EXT, win->getGLObjectId(glIdActiveFBO));
+
+                // FixMe breaks if source size != target size
+                osgGlBlitFramebuffer(pEnv->getPixelLeft  (), 
+                                     pEnv->getPixelBottom(), 
+                                     pEnv->getPixelRight () + 1, 
+                                     pEnv->getPixelTop   () + 1,
+                                 
+                                     pEnv->getPixelLeft  (), 
+                                     pEnv->getPixelBottom(), 
+                                     pEnv->getPixelRight () + 1, 
+                                     pEnv->getPixelTop   () + 1,
+                                     
+                                     (GL_COLOR_BUFFER_BIT  |
+                                      GL_DEPTH_BUFFER_BIT  |
+                                      GL_STENCIL_BUFFER_BIT),
+                                     GL_NEAREST); 
+
+                pMediatorFBO->deactivate(pEnv);
+                FrameBufferObject::activateFBOById(pEnv, glIdActiveFBO);
+            }
+            else
+            {
+                osgGlBindFramebuffer(GL_READ_FRAMEBUFFER_EXT, 0);
+
+                // FixMe breaks if source size != target size
+                osgGlBlitFramebuffer(pEnv->getPixelLeft  (), 
+                                     pEnv->getPixelBottom(), 
+                                     pEnv->getPixelRight () + 1, 
+                                     pEnv->getPixelTop   () + 1,
+                                 
+                                     pEnv->getPixelLeft  (), 
+                                     pEnv->getPixelBottom(), 
+                                     pEnv->getPixelRight () + 1, 
+                                     pEnv->getPixelTop   () + 1,
+                                     
+                                     (GL_COLOR_BUFFER_BIT  |
+                                      GL_DEPTH_BUFFER_BIT  |
+                                      GL_STENCIL_BUFFER_BIT),
+                                     GL_NEAREST); 
+
+                osgGlBindFramebuffer(GL_READ_FRAMEBUFFER_EXT, win->getGLObjectId(glIdActiveFBO));
+            }
         }
     }
 }

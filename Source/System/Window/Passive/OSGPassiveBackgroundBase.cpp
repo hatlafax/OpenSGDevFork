@@ -62,6 +62,7 @@
 
 
 
+#include "OSGFrameBufferObject.h"       // Mediator Class
 
 #include "OSGPassiveBackgroundBase.h"
 #include "OSGPassiveBackground.h"
@@ -92,6 +93,21 @@ OSG_BEGIN_NAMESPACE
 
 /*! \var RenderFunctorCallback PassiveBackgroundBase::_sfClearCallback
     Inherited the parent target if none is set  
+*/
+
+/*! \var bool            PassiveBackgroundBase::_sfUseMediator
+    If used inside an FBO blit from the framebuffer
+*/
+
+/*! \var bool            PassiveBackgroundBase::_sfAutoResize
+    Automatically resize the mediator fbo on clearing if necessary.
+*/
+
+/*! \var FrameBufferObject * PassiveBackgroundBase::_sfMediator
+    The FramebufferObject to mediate the blitting from the framebuffer to an FBO.
+    This is important, because no robust way exists for blitting between framebuffer
+    and FBO that are both multisampling. However, the blitting between non multisampling
+    and multisampling framebuffer and FBO is well defined in any combination.
 */
 
 
@@ -146,6 +162,45 @@ void PassiveBackgroundBase::classDescInserter(TypeObject &oType)
         static_cast     <FieldGetMethodSig >(&PassiveBackground::invalidGetField));
 
     oType.addInitialDesc(pDesc);
+
+    pDesc = new SFBool::Description(
+        SFBool::getClassType(),
+        "useMediator",
+        "If used inside an FBO blit from the framebuffer\n",
+        UseMediatorFieldId, UseMediatorFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&PassiveBackground::editHandleUseMediator),
+        static_cast<FieldGetMethodSig >(&PassiveBackground::getHandleUseMediator));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFBool::Description(
+        SFBool::getClassType(),
+        "autoResize",
+        "Automatically resize the mediator fbo on clearing if necessary.\n",
+        AutoResizeFieldId, AutoResizeFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&PassiveBackground::editHandleAutoResize),
+        static_cast<FieldGetMethodSig >(&PassiveBackground::getHandleAutoResize));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFUnrecFrameBufferObjectPtr::Description(
+        SFUnrecFrameBufferObjectPtr::getClassType(),
+        "mediator",
+        "The FramebufferObject to mediate the blitting from the framebuffer to an FBO.\n"
+        "This is important, because no robust way exists for blitting between framebuffer\n"
+        "and FBO that are both multisampling. However, the blitting between non multisampling\n"
+        "and multisampling framebuffer and FBO is well defined in any combination.\n",
+        MediatorFieldId, MediatorFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&PassiveBackground::editHandleMediator),
+        static_cast<FieldGetMethodSig >(&PassiveBackground::getHandleMediator));
+
+    oType.addInitialDesc(pDesc);
 }
 
 
@@ -198,6 +253,41 @@ PassiveBackgroundBase::TypeObject PassiveBackgroundBase::_type(
     "     >\n"
     "    Inherited the parent target if none is set  \n"
     "  </Field>\n"
+    "\n"
+    "  <Field\n"
+    "     name=\"useMediator\"\n"
+    "     type=\"bool\"\n"
+    "     cardinality=\"single\"\n"
+    "     visibility=\"external\"\n"
+    "     defaultValue=\"false\"\n"
+    "     access=\"public\"\n"
+    "    >\n"
+    "    If used inside an FBO blit from the framebuffer\n"
+    "  </Field>\n"
+    "  <Field\n"
+    "     name=\"autoResize\"\n"
+    "     type=\"bool\"\n"
+    "     cardinality=\"single\"\n"
+    "     visibility=\"external\"\n"
+    "     defaultValue=\"false\"\n"
+    "     access=\"public\"\n"
+    "    >\n"
+    "    Automatically resize the mediator fbo on clearing if necessary.\n"
+    "  </Field>\n"
+    "  <Field\n"
+    "\t  name=\"mediator\"\n"
+    "\t  type=\"FrameBufferObjectPtr\"\n"
+    "\t  cardinality=\"single\"\n"
+    "\t  visibility=\"external\"\n"
+    "          defaultValue=\"NULL\"\n"
+    "\t  access=\"public\"\n"
+    "\t  >\n"
+    "    The FramebufferObject to mediate the blitting from the framebuffer to an FBO.\n"
+    "    This is important, because no robust way exists for blitting between framebuffer\n"
+    "    and FBO that are both multisampling. However, the blitting between non multisampling\n"
+    "    and multisampling framebuffer and FBO is well defined in any combination.\n"
+    "  </Field>\n"
+    "\n"
     "</FieldContainer>\n",
     "A background that does nothing within the clear call, thus it also has no\n"
     "Fields at all. It is mainly used to stack viewports on top of each other,\n"
@@ -240,6 +330,60 @@ const SFBool *PassiveBackgroundBase::getSFClearFrameBufferObject(void) const
 
 
 
+SFBool *PassiveBackgroundBase::editSFUseMediator(void)
+{
+    editSField(UseMediatorFieldMask);
+
+    return &_sfUseMediator;
+}
+
+const SFBool *PassiveBackgroundBase::getSFUseMediator(void) const
+{
+    return &_sfUseMediator;
+}
+
+
+SFBool *PassiveBackgroundBase::editSFAutoResize(void)
+{
+    editSField(AutoResizeFieldMask);
+
+    return &_sfAutoResize;
+}
+
+const SFBool *PassiveBackgroundBase::getSFAutoResize(void) const
+{
+    return &_sfAutoResize;
+}
+
+
+//! Get the PassiveBackground::_sfMediator field.
+const SFUnrecFrameBufferObjectPtr *PassiveBackgroundBase::getSFMediator(void) const
+{
+    return &_sfMediator;
+}
+
+SFUnrecFrameBufferObjectPtr *PassiveBackgroundBase::editSFMediator       (void)
+{
+    editSField(MediatorFieldMask);
+
+    return &_sfMediator;
+}
+
+//! Get the value of the PassiveBackground::_sfMediator field.
+FrameBufferObject * PassiveBackgroundBase::getMediator(void) const
+{
+    return _sfMediator.getValue();
+}
+
+//! Set the value of the PassiveBackground::_sfMediator field.
+void PassiveBackgroundBase::setMediator(FrameBufferObject * const value)
+{
+    editSField(MediatorFieldMask);
+
+    _sfMediator.setValue(value);
+}
+
+
 
 
 
@@ -258,6 +402,18 @@ SizeT PassiveBackgroundBase::getBinSize(ConstFieldMaskArg whichField)
     {
         returnValue += _sfClearCallback.getBinSize();
     }
+    if(FieldBits::NoField != (UseMediatorFieldMask & whichField))
+    {
+        returnValue += _sfUseMediator.getBinSize();
+    }
+    if(FieldBits::NoField != (AutoResizeFieldMask & whichField))
+    {
+        returnValue += _sfAutoResize.getBinSize();
+    }
+    if(FieldBits::NoField != (MediatorFieldMask & whichField))
+    {
+        returnValue += _sfMediator.getBinSize();
+    }
 
     return returnValue;
 }
@@ -275,6 +431,18 @@ void PassiveBackgroundBase::copyToBin(BinaryDataHandler &pMem,
     {
         _sfClearCallback.copyToBin(pMem);
     }
+    if(FieldBits::NoField != (UseMediatorFieldMask & whichField))
+    {
+        _sfUseMediator.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (AutoResizeFieldMask & whichField))
+    {
+        _sfAutoResize.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (MediatorFieldMask & whichField))
+    {
+        _sfMediator.copyToBin(pMem);
+    }
 }
 
 void PassiveBackgroundBase::copyFromBin(BinaryDataHandler &pMem,
@@ -291,6 +459,21 @@ void PassiveBackgroundBase::copyFromBin(BinaryDataHandler &pMem,
     {
         editSField(ClearCallbackFieldMask);
         _sfClearCallback.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (UseMediatorFieldMask & whichField))
+    {
+        editSField(UseMediatorFieldMask);
+        _sfUseMediator.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (AutoResizeFieldMask & whichField))
+    {
+        editSField(AutoResizeFieldMask);
+        _sfAutoResize.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (MediatorFieldMask & whichField))
+    {
+        editSField(MediatorFieldMask);
+        _sfMediator.copyFromBin(pMem);
     }
 }
 
@@ -418,14 +601,20 @@ FieldContainerTransitPtr PassiveBackgroundBase::shallowCopy(void) const
 PassiveBackgroundBase::PassiveBackgroundBase(void) :
     Inherited(),
     _sfClearFrameBufferObject (bool(false)),
-    _sfClearCallback          ()
+    _sfClearCallback          (),
+    _sfUseMediator            (bool(false)),
+    _sfAutoResize             (bool(false)),
+    _sfMediator               (NULL)
 {
 }
 
 PassiveBackgroundBase::PassiveBackgroundBase(const PassiveBackgroundBase &source) :
     Inherited(source),
     _sfClearFrameBufferObject (source._sfClearFrameBufferObject ),
-    _sfClearCallback          (source._sfClearCallback          )
+    _sfClearCallback          (source._sfClearCallback          ),
+    _sfUseMediator            (source._sfUseMediator            ),
+    _sfAutoResize             (source._sfAutoResize             ),
+    _sfMediator               (NULL)
 {
 }
 
@@ -436,6 +625,17 @@ PassiveBackgroundBase::~PassiveBackgroundBase(void)
 {
 }
 
+void PassiveBackgroundBase::onCreate(const PassiveBackground *source)
+{
+    Inherited::onCreate(source);
+
+    if(source != NULL)
+    {
+        PassiveBackground *pThis = static_cast<PassiveBackground *>(this);
+
+        pThis->setMediator(source->getMediator());
+    }
+}
 
 GetFieldHandlePtr PassiveBackgroundBase::getHandleClearFrameBufferObject (void) const
 {
@@ -476,6 +676,84 @@ EditFieldHandlePtr PassiveBackgroundBase::editHandleClearCallback  (void)
     return returnValue;
 }
 
+GetFieldHandlePtr PassiveBackgroundBase::getHandleUseMediator     (void) const
+{
+    SFBool::GetHandlePtr returnValue(
+        new  SFBool::GetHandle(
+             &_sfUseMediator,
+             this->getType().getFieldDesc(UseMediatorFieldId),
+             const_cast<PassiveBackgroundBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr PassiveBackgroundBase::editHandleUseMediator    (void)
+{
+    SFBool::EditHandlePtr returnValue(
+        new  SFBool::EditHandle(
+             &_sfUseMediator,
+             this->getType().getFieldDesc(UseMediatorFieldId),
+             this));
+
+
+    editSField(UseMediatorFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr PassiveBackgroundBase::getHandleAutoResize      (void) const
+{
+    SFBool::GetHandlePtr returnValue(
+        new  SFBool::GetHandle(
+             &_sfAutoResize,
+             this->getType().getFieldDesc(AutoResizeFieldId),
+             const_cast<PassiveBackgroundBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr PassiveBackgroundBase::editHandleAutoResize     (void)
+{
+    SFBool::EditHandlePtr returnValue(
+        new  SFBool::EditHandle(
+             &_sfAutoResize,
+             this->getType().getFieldDesc(AutoResizeFieldId),
+             this));
+
+
+    editSField(AutoResizeFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr PassiveBackgroundBase::getHandleMediator        (void) const
+{
+    SFUnrecFrameBufferObjectPtr::GetHandlePtr returnValue(
+        new  SFUnrecFrameBufferObjectPtr::GetHandle(
+             &_sfMediator,
+             this->getType().getFieldDesc(MediatorFieldId),
+             const_cast<PassiveBackgroundBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr PassiveBackgroundBase::editHandleMediator       (void)
+{
+    SFUnrecFrameBufferObjectPtr::EditHandlePtr returnValue(
+        new  SFUnrecFrameBufferObjectPtr::EditHandle(
+             &_sfMediator,
+             this->getType().getFieldDesc(MediatorFieldId),
+             this));
+
+    returnValue->setSetMethod(
+        boost::bind(&PassiveBackground::setMediator,
+                    static_cast<PassiveBackground *>(this), _1));
+
+    editSField(MediatorFieldMask);
+
+    return returnValue;
+}
+
 
 #ifdef OSG_MT_CPTR_ASPECT
 void PassiveBackgroundBase::execSyncV(      FieldContainer    &oFrom,
@@ -512,6 +790,8 @@ FieldContainer *PassiveBackgroundBase::createAspectCopy(
 void PassiveBackgroundBase::resolveLinks(void)
 {
     Inherited::resolveLinks();
+
+    static_cast<PassiveBackground *>(this)->setMediator(NULL);
 
 
 }

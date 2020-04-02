@@ -35,4 +35,39 @@
      >
     Inherited the parent target if none is set  
   </Field>
+
+  <Field
+     name="useMediator"
+     type="bool"
+     cardinality="single"
+     visibility="external"
+     defaultValue="false"
+     access="public"
+    >
+    If used inside an FBO blit from the framebuffer
+  </Field>
+  <Field
+     name="autoResize"
+     type="bool"
+     cardinality="single"
+     visibility="external"
+     defaultValue="false"
+     access="public"
+    >
+    Automatically resize the mediator fbo on clearing if necessary.
+  </Field>
+  <Field
+	  name="mediator"
+	  type="FrameBufferObjectPtr"
+	  cardinality="single"
+	  visibility="external"
+          defaultValue="NULL"
+	  access="public"
+	  >
+    The FramebufferObject to mediate the blitting from the framebuffer to an FBO.
+    This is important, because no robust way exists for blitting between framebuffer
+    and FBO that are both multisampling. However, the blitting between non multisampling
+    and multisampling framebuffer and FBO is well defined in any combination.
+  </Field>
+
 </FieldContainer>
