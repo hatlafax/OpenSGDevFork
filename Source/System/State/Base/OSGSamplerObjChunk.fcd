@@ -1,0 +1,198 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+   name="SamplerObjChunk"
+   parent="StateChunk"
+   library="System"
+   pointerfieldtypes="both"
+   structure="concrete"
+   systemcomponent="true"
+   parentsystemcomponent="true"
+   decoratable="false"
+   useLocalIncludes="false"
+   docGroupBase="GrpSystemState"
+   >
+  See \ref PageSystemSamplerObjChunk for a description.
+
+  A Sampler Object is an OpenGL Object that stores the sampling 
+  parameters for a Texture access inside of a shader.
+
+    <Field
+        name="GLId"
+        type="GLenum"
+        cardinality="single"
+        visibility="internal"
+        access="public"
+        defaultValue="0"
+        fieldFlags="FClusterLocal"
+        >
+        The OpenGL object id for this sampler object.
+    </Field>
+
+    <Field
+	 name="textureUnits"
+	 type="UInt32"
+	 cardinality="multi"
+	 visibility="external"
+	 access="public"
+	 >
+        The texture units to which to bind the sampler.
+    </Field>
+    <Field
+        name="borderColor"
+        type="Color4f"
+        cardinality="single"
+        visibility="external"
+        defaultValue="0,0,0,0"
+        access="public"
+	>
+	Texture border color
+    </Field>
+    <Field
+        name="minFilter"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_LINEAR_MIPMAP_LINEAR"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+        potential_values="GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_LINEAR"
+	>
+        The texture minifying function is used whenever the pixel being textured maps
+        to an area greater than one texture element. Defaults to GL_LINEAR_MIPMAP_LINEAR.
+    </Field>
+    <Field
+        name="magFilter"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_LINEAR"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+        potential_values="GL_NEAREST, GL_LINEAR"
+	>
+        he texture magnification function is used when the pixel being textured maps
+        to an area less than or equal to one texture element. Defaults to GL_LINEAR.
+    </Field>
+    <Field
+        name="wrapS"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_REPEAT"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+        potential_values="GL_CLAMP, GL_CLAMP_TO_EDGE, GL_REPEAT, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT"
+	>
+        Texture coordinate S wrapping, default GL_REPEAT.
+    </Field>
+    <Field
+        name="wrapT"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_REPEAT"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+        potential_values="GL_CLAMP, GL_CLAMP_TO_EDGE, GL_REPEAT, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT"                
+	>
+        Texture coordinate T wrapping, default GL_REPEAT.
+    </Field>
+    <Field
+        name="wrapR"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_REPEAT"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+        potential_values="GL_CLAMP, GL_CLAMP_TO_EDGE, GL_REPEAT, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT"                
+	>
+        Texture coordinate R wrapping, default GL_REPEAT.
+    </Field>
+    <Field
+        name="minLOD"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="-1000.0"
+        access="public"
+	>
+	Sets the minimum level-of-detail parameter. This floating-point value limits the selection
+        of highest resolution mipmap (lowest mipmap level). The initial value is -1000.
+    </Field>
+    <Field
+        name="maxLOD"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="1000.0"
+        access="public"
+	>
+	Sets the maximum level-of-detail parameter.  This floating-point value limits the selection 
+        of the lowest resolution mipmap (highest mipmap level). The initial value is 1000.
+    </Field>
+    <Field
+        name="LODBias"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="0.0"
+        access="public"
+	>
+	OpenGL computes a texture level-of-detail parameter, called lambda in the GL specification,
+        that determines which mipmap levels and their relative mipmap weights for use in mipmapped
+        texture filtering.
+        This extension provides a means to bias the lambda computation by a constant (signed) value.
+        This bias can provide a way to blur or pseudo-sharpen OpenGL's standard texture filtering.
+    </Field>
+    <Field
+        name="compareMode"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_NONE"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+        potential_values="GL_NONE, GL_COMPARE_R_TO_TEXTURE"
+	>
+    Specifies the texture comparison mode for currently bound depth textures.
+    That is, a texture whose internal format is GL_DEPTH_COMPONENT_*.
+    GL_COMPARE_R_TO_TEXTURE : Specifies that the interpolated and clamped r
+        texture coordinate should be compared to the value in the currently 
+        bound depth texture.
+    GL_NONE : Specifies that the luminance, intensity, or alpha (as specified 
+        by GL_DEPTH_TEXTURE_MODE) should be assigned the appropriate value 
+        from the currently bound depth texture.
+    </Field>
+    <Field
+        name="compareFunc"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_LEQUAL"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+        potential_values="GL_LEQUAL, GL_GEQUAL, GL_LESS, GL_GREATER, GL_EQUAL, GL_NOTEQUAL, GL_ALWAYS, GL_NEVER"
+	>
+    Specifies the comparison operator used when GL_TEXTURE_COMPARE_MODE is
+    set to GL_COMPARE_R_TO_TEXTURE.
+    </Field>
+    <Field
+        name="maxAnisotropy"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="1.0"
+        access="public"
+	>
+    Texture mapping using OpenGL's existing mipmap texture filtering modes assumes that the 
+    projection of the pixel filter footprint into texture space is a square (ie, isotropic).
+    In practice however, the footprint may be long and narrow (ie, anisotropic). Consequently,
+    mipmap filtering severely blurs images on surfaces angled obliquely away from the viewer.
+    
+    The extension permits the OpenGL application to specify on a per-texture object basis the
+    maximum degree of anisotropy to account for in texture filtering.
+    </Field>    
+   
+</FieldContainer>
