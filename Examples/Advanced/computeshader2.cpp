@@ -110,7 +110,7 @@ OSG::NodeTransitPtr createPlane(OSG::TextureObjChunk* texObjChunk)
     OSG::GeometryRefPtr geometry = OSG::Geometry::create();
     geometry->setDlistCache(false);
     geometry->setUseVAO(true);
-    geometry->setUseAttribCalls(true);
+    //geometry->setUseAttribCalls(true); // not working on AMD Radeon Rx 580
 
     OSG::NodeRefPtr geomNode = OSG::makeNodeFor(geometry);
 
@@ -180,7 +180,7 @@ OSG::NodeTransitPtr createPlane(OSG::TextureObjChunk* texObjChunk)
 
 OSG::NodeTransitPtr createScene()
 {
-    OSG::ImageRefPtr image = OSG::ImageFileHandler::the()->read("Examples/CSM/Models/Textures/Earth512.png");
+    OSG::ImageRefPtr image = OSG::ImageFileHandler::the()->read("Data/Earth512.png");
 
     OSG::TextureObjChunkRefPtr texObjChunk = OSG::TextureObjChunk::create();
     texObjChunk->setInternalFormat(GL_RGBA32F);
