@@ -653,7 +653,7 @@ Action::ResultE ShadowStage::findTransparent(ShadowStageData *       pData,
     {
         ShadowStageData::NodeStore &vTransparents = pData->getTransparents();
 
-       if(node->getCore()->getType() == Geometry::getClassType() ||
+        if(node->getCore()->getType() == Geometry::getClassType() ||
            node->getCore()->getType() == MaterialGroup::getClassType())
         {
             Material               *mat = NULL;

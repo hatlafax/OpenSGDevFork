@@ -43,7 +43,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <OSGConfig.h>
+#include "OSGConfig.h"
 
 #include "OSGSkeleton.h"
 #include "OSGAction.h"

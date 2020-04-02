@@ -639,7 +639,7 @@ void OSG_APIENTRY CSMNativeWindow::win32MainLoop(void)
     {
         Char8 szClassName[64];
 
-        sprintf(szClassName, "OSG-CSM-%x", *wIt);
+        sprintf(szClassName, "OSG-CSM-%p", *wIt);
 
         fprintf(stderr, "deregister %s\n", szClassName);
 
@@ -706,7 +706,7 @@ bool CSMNativeWindow::init(void)
 #else
     Char8 szClassName[64];
 
-    sprintf(szClassName, "OSG-CSM-%x", this);
+    sprintf(szClassName, "OSG-CSM-%p", this);
 
     fprintf(stderr, "register %s\n", szClassName);
 

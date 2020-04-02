@@ -6,19 +6,19 @@
 // It does show however, how to use the extra options that the Rhino3D loader
 // supports.
 
-#include <OSGGLUT.h>
-#include <OSGConfig.h>
-#include <OSGSimpleGeometry.h>
-#include <OSGPassiveWindow.h>
-#include <OSGSimpleSceneManager.h>
-#include <OSGSceneFileHandler.h>
+#include "OSGGLUT.h"
+#include "OSGConfig.h"
+#include "OSGSimpleGeometry.h"
+#include "OSGPassiveWindow.h"
+#include "OSGSimpleSceneManager.h"
+#include "OSGSceneFileHandler.h"
 
-#include <OSGDrawable.h>
-#include <OSGSimpleStatisticsForeground.h>
-#include <OSGStatElemTypes.h>
-#include <OSGStatCollector.h>
-#include <OSGGradientBackground.h>
-#include <OSGRhinoSceneFileType.h>
+#include "OSGDrawable.h"
+#include "OSGSimpleStatisticsForeground.h"
+#include "OSGStatElemTypes.h"
+#include "OSGStatCollector.h"
+#include "OSGGradientBackground.h"
+#include "OSGRhinoSceneFileType.h"
 
 OSG_USING_NAMESPACE
 

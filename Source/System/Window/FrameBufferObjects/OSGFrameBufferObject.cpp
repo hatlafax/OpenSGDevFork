@@ -60,30 +60,30 @@
             FWARNING(("Unsupported Framebuffer\n"));                   \
             /* choose different formats */                             \
             break;                                                     \
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:                     \
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:                     \
             FWARNING(("Incomplete Attachment\n"));                     \
             break;                                                     \
-		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:             \
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:             \
             FWARNING(("Incomplete Missing Attachment\n"));             \
             break;                                                     \
-		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:                 \
+        case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:                 \
             FWARNING(("Incomplete Dimensions\n"));                     \
             break;                                                     \
-		case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:                    \
+        case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:                    \
             FWARNING(("Incomplete Formats\n"));                        \
             break;                                                     \
-		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:                    \
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:                    \
             FWARNING(("Incomplete Draw Buffer\n"));                    \
             break;                                                     \
-		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:                    \
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:                    \
             FWARNING(("Incomplete Read Buffer\n"));                    \
             break;                                                     \
-		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:                    \
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:                    \
             FWARNING(("Incomplete Multisample\n"));                    \
             break;                                                     \
-		default:                                                       \
-			FWARNING(("Unknown error %x\n", status));                  \
-			break;                                                     \
+        default:                                                       \
+            FWARNING(("Unknown error %x\n", status));                  \
+            break;                                                     \
     }                                                                  \
 }
 
@@ -193,7 +193,11 @@ void FrameBufferObject::resizeAll(UInt32 uiWidth, UInt32 uiHeight)
 
     if(_sfStencilAttachment.getValue() != NULL)
     {
-        _sfStencilAttachment.getValue()->resizeBuffers(uiWidth, uiHeight);
+        // Respect mixed Depth/Stencil attachments
+        if (_sfStencilAttachment.getValue() != _sfDepthAttachment.getValue())
+        {
+            _sfStencilAttachment.getValue()->resizeBuffers(uiWidth, uiHeight);
+        }
     }
 
 
@@ -217,7 +221,11 @@ void FrameBufferObject::resizeAll(UInt32 uiWidth, UInt32 uiHeight)
 
     if(_sfMsaaStencilAttachment.getValue() != NULL)
     {
-        _sfMsaaStencilAttachment.getValue()->resizeBuffers(uiWidth, uiHeight);
+        // Respect mixed Depth/Stencil attachments
+        if(_sfMsaaStencilAttachment.getValue() != _sfMsaaDepthAttachment.getValue())
+        {
+            _sfMsaaStencilAttachment.getValue()->resizeBuffers(uiWidth, uiHeight);
+        }
     }
 
 
@@ -358,8 +366,12 @@ void FrameBufferObject::changed(ConstFieldMaskArg whichField,
 
         if(_sfStencilAttachment.getValue() != NULL)
         {
-            _sfStencilAttachment.getValue()->resize(getWidth (),
-                                                    getHeight());
+            // Respect mixed Depth/Stencil attachments
+            if (_sfStencilAttachment.getValue() != _sfDepthAttachment.getValue())
+            {
+                _sfStencilAttachment.getValue()->resize(getWidth (),
+                                                        getHeight());
+            }
         }
 
         Window::refreshGLObject(getGLId());
@@ -386,8 +398,12 @@ void FrameBufferObject::changed(ConstFieldMaskArg whichField,
 
         if(_sfMsaaStencilAttachment.getValue() != NULL)
         {
-            _sfMsaaStencilAttachment.getValue()->resize(getWidth (),
-                                                        getHeight());
+            // Respect mixed Depth/Stencil attachments
+            if (_sfMsaaStencilAttachment.getValue() != _sfMsaaDepthAttachment.getValue())
+            {
+                _sfMsaaStencilAttachment.getValue()->resize(getWidth (),
+                                                            getHeight());
+            }
         }
 
         Window::refreshGLObject(getMultiSampleGLId());
@@ -427,21 +443,37 @@ void FrameBufferObject::changed(ConstFieldMaskArg whichField,
     {
         if(_sfStencilAttachment.getValue() != NULL)
         {
-            _sfStencilAttachment.getValue()->resize(getWidth (),
-                                                    getHeight());
+            // Respect mixed Depth/Stencil attachments
+            if (_sfStencilAttachment.getValue() != _sfDepthAttachment.getValue())
+            {
+                _sfStencilAttachment.getValue()->resize(getWidth (),
+                                                        getHeight());
+            }
 
             if(_sfMsaaStencilAttachment.getValue() != NULL)
             {
-                _sfMsaaStencilAttachment.getValue()->resize(getWidth (),
-                                                            getHeight());
+                // Respect mixed Depth/Stencil attachments
+                if (_sfMsaaStencilAttachment.getValue() != _sfMsaaDepthAttachment.getValue())
+                {
+                    _sfMsaaStencilAttachment.getValue()->resize(getWidth (),
+                                                                getHeight());
+                }
             }
             else if(_sfEnableMultiSample.getValue() == true)
             {
-                FrameBufferAttachmentUnrecPtr pMsaaBuffer = 
-                    this->createMultiSampleBufferFrom(
-                        _sfStencilAttachment.getValue());
+                // Respect mixed Depth/Stencil attachments
+                if (_sfStencilAttachment.getValue() != _sfDepthAttachment.getValue())
+                {
+                    FrameBufferAttachmentUnrecPtr pMsaaBuffer = 
+                        this->createMultiSampleBufferFrom(
+                            _sfStencilAttachment.getValue());
 
-                this->setMsaaStencilAttachment(pMsaaBuffer);
+                    this->setMsaaStencilAttachment(pMsaaBuffer);
+                }
+                else
+                {
+                    this->setMsaaStencilAttachment(getMsaaDepthAttachment());
+                }
             }
         }
         else
@@ -523,11 +555,19 @@ void FrameBufferObject::changed(ConstFieldMaskArg whichField,
         if(_sfStencilAttachment    .getValue() != NULL &&
            _sfMsaaStencilAttachment.getValue() == NULL)
         {
-            FrameBufferAttachmentUnrecPtr pMsaaBuffer = 
-                this->createMultiSampleBufferFrom(
-                    _sfStencilAttachment.getValue());
+            // Respect mixed Depth/Stencil attachments
+            if (_sfStencilAttachment.getValue() != _sfDepthAttachment.getValue())
+            {
+                FrameBufferAttachmentUnrecPtr pMsaaBuffer = 
+                    this->createMultiSampleBufferFrom(
+                        _sfStencilAttachment.getValue());
 
-            this->setMsaaStencilAttachment(pMsaaBuffer);
+                this->setMsaaStencilAttachment(pMsaaBuffer);
+            }
+            else
+            {
+                this->setMsaaStencilAttachment(getMsaaDepthAttachment());
+            }
         }
 
         MFUnrecFrameBufferAttachmentPtr::const_iterator attIt  =
@@ -598,6 +638,7 @@ void FrameBufferObject::activate(DrawEnv *pEnv,
 
         glId = getMultiSampleGLId();
 
+        glPushAttrib(GL_MULTISAMPLE_BIT);
         glEnable(GL_MULTISAMPLE);
     }
 
@@ -645,7 +686,50 @@ void FrameBufferObject::activate(DrawEnv *pEnv,
     }
 #endif
 
-    CHECK_FRAMEBUFFER_STATUS();
+    //CHECK_FRAMEBUFFER_STATUS();
+    {
+        GLenum status;
+
+        OSGGETGLFUNC_GL3_ES( glCheckFramebufferStatus,
+                             osgGlCheckFramebufferStatus,
+                            _uiFuncCheckFramebufferStatus);
+
+        status = osgGlCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+        switch(status)
+        {
+            case GL_FRAMEBUFFER_COMPLETE:
+                break;
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                FWARNING(("Unsupported Framebuffer\n"));
+                /* choose different formats */
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                FWARNING(("Incomplete Attachment\n"));
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                FWARNING(("Incomplete Missing Attachment\n"));
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
+                FWARNING(("Incomplete Dimensions\n"));
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
+                FWARNING(("Incomplete Formats\n"));
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                FWARNING(("Incomplete Draw Buffer\n"));
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                FWARNING(("Incomplete Read Buffer\n"));
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                FWARNING(("Incomplete Multisample\n"));
+                break;
+            default:
+                FWARNING(("Unknown error %x\n", status));
+                break;
+        }
+    }
 }
 
 void FrameBufferObject::deactivate (DrawEnv *pEnv)
@@ -676,6 +760,7 @@ void FrameBufferObject::deactivate (DrawEnv *pEnv)
 
 //        GLbitfield bufferMask = GL_COLOR_BUFFER_BIT;
         glDisable(GL_MULTISAMPLE);
+        glPopAttrib();
 
         osgGlBindFramebuffer(GL_READ_FRAMEBUFFER, 
                              win->getGLObjectId(getMultiSampleGLId()));
@@ -712,6 +797,7 @@ void FrameBufferObject::deactivate (DrawEnv *pEnv)
         if(_sfDepthAttachment  .getValue() != NULL &&
            _sfStencilAttachment.getValue() != NULL   )
         {
+            // Respect mixed Depth/Stencil attachments
             if(_sfDepthAttachment.getValue() == _sfStencilAttachment.getValue())
             {
                 _sfDepthAttachment.getValue()->processPreDeactivate(
@@ -903,7 +989,11 @@ UInt32 FrameBufferObject::handleGL(DrawEnv                 *pEnv,
 
         if(_sfStencilAttachment.getValue() != NULL)
         {
-            _sfStencilAttachment.getValue()->validate(pEnv);
+            // Respect mixed Depth/Stencil attachments
+            if(_sfStencilAttachment.getValue() != _sfDepthAttachment.getValue())
+            {
+                _sfStencilAttachment.getValue()->validate(pEnv);
+            }
         }
     }
 
@@ -1081,7 +1171,11 @@ UInt32 FrameBufferObject::handleMultiSampleGL(
 
         if(_sfMsaaStencilAttachment.getValue() != NULL)
         {
-            _sfMsaaStencilAttachment.getValue()->validate(pEnv);
+            // Respect mixed Depth/Stencil attachments
+            if (_sfMsaaStencilAttachment.getValue() !=_sfMsaaDepthAttachment.getValue())
+            {
+                _sfMsaaStencilAttachment.getValue()->validate(pEnv);
+            }
         }
     }
 

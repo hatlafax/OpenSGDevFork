@@ -11,7 +11,7 @@
 
 // This code is based on the QT opengl/gear example.
 
-#include <OSGGL.h>
+#include "OSGGL.h"
 
 #include <math.h>
 

@@ -46,12 +46,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <OSGConfig.h>
+#include "OSGConfig.h"
 
 #include <iostream>
 #include <fstream>
 
-#include <OSGLog.h>
+#include "OSGLog.h"
 
 #include "OSGSceneFileHandler.h"
 #include "OSGRhinoSceneFileType.h"

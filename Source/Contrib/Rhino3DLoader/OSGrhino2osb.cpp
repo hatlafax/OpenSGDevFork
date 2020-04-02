@@ -44,18 +44,19 @@
 #pragma GCC diagnostic warning "-Wignored-qualifiers"
 #endif
 
-#include <OSGTime.h>
-#include "OSGrhino2osb.h"
 #include <opennurbs/opennurbs.h>
-#include <OSGSurface.h>
-#include <OSGSwitch.h>
-#include <OSGCoredNodePtr.h>
-#include <OSGBaseFunctions.h>
-//#include <OSGSimpleAttachments.h>
-#include <OSGNameAttachment.h>
-#include <OSGTypedGeoVectorProperty.h>
-#include <OSGTypedGeoIntegralProperty.h>
-#include <OSGConceptPropertyChecks.h>
+
+#include "OSGTime.h"
+#include "OSGrhino2osb.h"
+#include "OSGSurface.h"
+#include "OSGSwitch.h"
+#include "OSGCoredNodePtr.h"
+#include "OSGBaseFunctions.h"
+//#include "OSGSimpleAttachments.h"
+#include "OSGNameAttachment.h"
+#include "OSGTypedGeoVectorProperty.h"
+#include "OSGTypedGeoIntegralProperty.h"
+#include "OSGConceptPropertyChecks.h"
 
 rhino2osb::rhino2osb(int   curveInterpolationSteps, 
                      float tessError, 

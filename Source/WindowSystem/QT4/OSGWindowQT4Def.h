@@ -42,7 +42,7 @@
 #pragma once
 #endif
 
-#include <OSGGL.h>
+#include "OSGGL.h"
 
 #include <QtCore/QObject>
 #include <QtOpenGL/QGLWidget>

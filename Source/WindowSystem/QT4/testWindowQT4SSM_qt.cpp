@@ -1,6 +1,6 @@
 
 #include "OSGConfig.h"
-#include <OSGGL.h>
+#include "OSGGL.h"
 
 #include <iostream>
 

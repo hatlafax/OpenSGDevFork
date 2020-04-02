@@ -43,7 +43,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <OSGConfig.h>
+#include "OSGConfig.h"
 
 #include "OSGAnimMatrixChannel.h"
 #include "OSGAnimMatrixDataSource.h"
