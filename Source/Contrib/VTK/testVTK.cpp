@@ -44,6 +44,7 @@
 #include "OSGTrackball.h"
 #include "OSGOSGWriter.h"
 
+#include "vtkVersionMacros.h"
 #include "vtkStructuredGridReader.h"
 #include "vtkStructuredGrid.h"
 #include "vtkPointData.h"
