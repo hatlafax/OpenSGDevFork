@@ -731,6 +731,7 @@ RenderPartition::RenderPartition(Mode eMode) :
 
     _pStatePool              (     NULL),
     _sStateOverrides         (         ),
+    _bPermitOverride         (true     ),
 
     _pTreeBuilderPool        (     NULL),
 
@@ -833,7 +834,6 @@ void RenderPartition::reset(Mode eMode)
             _sStateOverrides.pop();
         }
 
-
         _iNextLightIndex = 0;
         _uiLightState    = 0;
 
@@ -864,6 +864,8 @@ void RenderPartition::reset(Mode eMode)
 
         _oSimpleDrawCallback = NULL;
     }
+
+    _bPermitOverride = true;
 
     _ubState        = RenderPartitionBase::Full;
 
