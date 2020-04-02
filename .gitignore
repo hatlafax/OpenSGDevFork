@@ -1,4 +1,5 @@
 *.pyc
+*.bak
 CMakeCacheInitial.txt
 Support/CMakeCacheInitial.txt
 Bindings/Python/module
