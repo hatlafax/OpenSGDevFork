@@ -39,6 +39,16 @@
 OSG_BEGIN_NAMESPACE
 
 inline
+bool Polygon::operator==(const Polygon& rhs) const
+{
+    if (&rhs == this)
+        return true;
+
+    return _vertices == rhs._vertices
+        && _normal   == rhs._normal;
+}
+
+inline
 std::size_t Polygon::getNumVertices() const
 {
     return _vertices.size();

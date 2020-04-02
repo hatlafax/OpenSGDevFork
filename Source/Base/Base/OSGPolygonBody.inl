@@ -75,7 +75,35 @@ void PolygonBody::add(Polygon* polygon)
         _polygons.push_back(polygon);
 }
 
+inline
+void PolygonBody::clearPolygons()
+{
+    VecPolygonsT::const_iterator iter = _polygons.begin();
+    VecPolygonsT::const_iterator end  = _polygons.end();
 
+    for (;iter != end; ++iter)
+        delete *iter;
+
+    _polygons.clear();
+}
+
+inline
+void PolygonBody::copyPolygons(const VecPolygonsT& rhs)
+{
+    clearPolygons();
+    addPolygons(rhs);
+}
+
+inline
+void PolygonBody::addPolygons(const VecPolygonsT& rhs)
+{
+    VecPolygonsT::const_iterator iter = rhs.begin();
+    VecPolygonsT::const_iterator end  = rhs.end();
+    for (;iter != end; ++iter)
+    {
+        _polygons.push_back(new Polygon(**iter));
+    }
+}
 
 OSG_END_NAMESPACE
 

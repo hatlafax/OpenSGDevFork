@@ -39,6 +39,25 @@
 OSG_BEGIN_NAMESPACE
 
 inline
+bool Projection::operator==(const Projection& rhs) const
+{
+    if (&rhs == this)
+        return true;
+
+    return _zNear == rhs._zNear && _zFar == rhs._zFar;
+}
+
+inline
+bool Projection::equals(const Projection& rhs, Real32 tol) const
+{
+    if (&rhs == this)
+        return true;
+
+    return (_zNear - rhs._zNear <= tol) && (rhs._zNear - _zNear <= tol)
+        && (_zFar  - rhs._zFar  <= tol) && (rhs._zFar  - _zFar  <= tol);
+}
+
+inline
 Real32 Projection::getZNear() const
 {
     return _zNear;

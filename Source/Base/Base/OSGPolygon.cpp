@@ -112,6 +112,25 @@ Polygon& Polygon::operator=(const Polygon& rhs)
     return *this;
 }
 
+bool Polygon::equals(const Polygon& rhs, Real32 tol) const
+{
+    if (&rhs == this)
+        return true;
+
+    std::size_t sz = _vertices.size();
+    bool result = ( sz == rhs._vertices.size() );
+    if (result)
+    {
+        for (std::size_t i = 0; i < sz; ++i)
+        {
+            result &= _vertices[i].equals(rhs._vertices[i], tol);
+            if (!result) break;
+        }
+    }
+    return result
+        && _normal.equals(rhs._normal, tol);
+}
+
 void Polygon::addUniqueVertex(const Pnt3f& vertex, Real32 tolerance)
 {
     VecVerticesT::const_iterator iter = _vertices.begin();

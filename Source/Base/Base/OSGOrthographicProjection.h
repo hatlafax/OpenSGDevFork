@@ -40,6 +40,7 @@
 #define _OSGORTHOGRAPHICPROJECTION_H_
 
 #include "OSGBaseTypes.h"
+#include "OSGMatrix.h"
 #include "OSGProjection.h"
 
 OSG_BEGIN_NAMESPACE
@@ -70,6 +71,8 @@ class OSG_BASE_DLLMAPPING OrthographicProjection : public Projection
                             Real32 zNear,
                             Real32 zFar
                          );
+  
+    OrthographicProjection(const Matrix& matProjection);
 
     OrthographicProjection(const OrthographicProjection& rhs);
 
@@ -84,7 +87,14 @@ class OSG_BASE_DLLMAPPING OrthographicProjection : public Projection
     /*---------------------------------------------------------------------*/
     /*! \name                    Operators                                 */
     /*! \{                                                                 */
-    OrthographicProjection& operator=(const OrthographicProjection& rhs);
+    OrthographicProjection& operator= ( const OrthographicProjection& rhs);
+    bool                    operator==(
+                                        const OrthographicProjection& rhs
+                                      ) const;
+    bool                    equals    (
+                                        const OrthographicProjection& rhs, 
+                                        Real32 tol
+                                      ) const;
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                    Get/Set                                   */
@@ -102,6 +112,17 @@ class OSG_BASE_DLLMAPPING OrthographicProjection : public Projection
 
     Real32              getTop          () const;
     void                setTop          (Real32 top);
+    
+    void                setValue        (
+                                            Real32 left,
+                                            Real32 right,
+                                            Real32 bottom,
+                                            Real32 top,
+                                            Real32 zNear,
+                                            Real32 zFar
+                                         );
+                                         
+    void                setValue        (const Matrix& matProjection);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

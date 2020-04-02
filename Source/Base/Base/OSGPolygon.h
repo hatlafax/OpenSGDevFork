@@ -96,7 +96,10 @@ class OSG_BASE_DLLMAPPING Polygon
     /*---------------------------------------------------------------------*/
     /*! \name                    Operators                                 */
     /*! \{                                                                 */
-    Polygon&            operator=(const Polygon& rhs);
+    Polygon&            operator=       (const Polygon& rhs);
+    bool                operator==      (const Polygon& rhs) const;
+    bool                equals          (const Polygon& rhs, Real32 tol) const;
+
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                    Set                                       */
@@ -146,7 +149,7 @@ class OSG_BASE_DLLMAPPING Polygon
 
   private:
     VecVerticesT _vertices;
-    Vec3f       _normal;
+    Vec3f        _normal;
 };
 
 OSG_END_NAMESPACE

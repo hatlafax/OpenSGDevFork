@@ -44,11 +44,23 @@
 #include "OSGConfig.h"
 #include "OSGView.h"
 
+//#define CHECK_MATH_CALCULATIONS
+#if CHECK_MATH_CALCULATIONS
+#include "OSGMatrixUtility.h"
+#endif
+
 OSG_BEGIN_NAMESPACE
 
 /*! \class OSG::View
     abstracts a view or vantage point part of a camera.
 */
+
+View::View()
+: _eye   ()
+, _center()
+, _up    ()
+{
+}
 
 View::View(
     const Pnt3f& eye, 
@@ -58,6 +70,14 @@ View::View(
 , _center(center)
 , _up    (up)
 {
+}
+
+View::View(const Matrix& mat, bool isMatWSFromES)
+{
+    if (isMatWSFromES)
+        setByMatWSFromES(mat);
+    else
+        setByMatESFromWS(mat);
 }
 
 View::View(const View& rhs)
@@ -80,6 +100,51 @@ View& View::operator=(const View& rhs)
     _up     = rhs._up;
 
     return *this;
+}
+
+void View::setByMatWSFromES(const Matrix& mat)
+{
+    Pnt3f new_eye (mat[3]);
+    Vec3f new_up  (mat[1]);
+    Vec3f new_look(mat[2]);
+
+    Real32 L = new_eye.subZero().length();
+    Pnt3f new_center = new_eye - L*new_look;
+
+#if CHECK_MATH_CALCULATIONS
+    Matrix matWSFromES;
+    bool result = MatrixLookAt(matWSFromES, new_eye, new_center, new_up);
+    OSG_ASSERT(matWSFromES.equals(mat, 1.E-4f));
+#endif
+
+    _eye    = new_eye;
+    _center = new_center;
+    _up     = new_up;
+}
+
+void View::setByMatESFromWS(const Matrix& mat)
+{
+    Matrix tmp;
+    mat.inverse(tmp);
+
+    Pnt3f new_eye(0,0,0);
+    tmp.mult(new_eye, new_eye);
+
+    Vec3f new_up  (mat[0][1], mat[1][1],mat[2][1]);
+    Vec3f new_look(mat[0][2], mat[1][2],mat[2][2]);
+
+    Real32 L = new_eye.subZero().length();
+    Pnt3f new_center = new_eye - L*new_look;
+
+#if CHECK_MATH_CALCULATIONS
+    Matrix matESFromWS;
+    bool result = MatrixLookAtGL(matESFromWS, new_eye, new_center, new_up);
+    OSG_ASSERT(matESFromWS.equals(mat, 1.E-4f));
+#endif
+    
+    _eye    = new_eye;
+    _center = new_center;
+    _up     = new_up;
 }
 
 OSG_END_NAMESPACE
