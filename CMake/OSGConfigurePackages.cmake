@@ -1198,6 +1198,86 @@ MACRO(OSG_CONFIGURE_QHULL)
 ENDMACRO(OSG_CONFIGURE_QHULL)
 
 ##############################################################################
+# Assimp
+##############################################################################
+
+MACRO(OSG_CONFIGURE_ASSIMP)
+
+    IF(OSG_USE_OSGSUPPORT_LIBS)
+        IF(EXISTS ${OSG_SUPPORT_ROOT}/include${OSG_SUPPORT_INC_SUBDIR}/Assimp/include/assimp/ai_assert.h)
+            SET(ASSIMP_INCLUDE_DIR ${OSG_SUPPORT_ROOT}/include${OSG_SUPPORT_INC_SUBDIR}/Assimp/include CACHE PATH "" FORCE)
+        ENDIF()
+
+        SET(ASSIMP_LIBRARY_RELEASE "" CACHE INTERNAL "" FORCE)
+        SET(ASSIMP_LIBRARY_DEBUG  "" CACHE INTERNAL "" FORCE)
+        SET(ASSIMP_FOUND FALSE CACHE INTERNAL "" FORCE)
+
+    SET(_assimp_name Assimp${_assimp_lib_name_decoration})
+
+        IF(UNIX)
+          IF(EXISTS ${OSG_SUPPORT_ROOT}/lib${OSG_LIBDIR_BASE_SUFFIX}/libassimp.a)
+            SET(ASSIMP_LIBRARY_RELEASE ${OSG_SUPPORT_ROOT}/lib${OSG_LIBDIR_BASE_SUFFIX}/libassimp.a)
+          ENDIF()
+          IF(EXISTS ${OSG_SUPPORT_ROOT}/lib${OSG_LIBDIR_BASE_SUFFIX}/debug/libassimp.a)
+            SET(ASSIMP_LIBRARY_DEBUG ${OSG_SUPPORT_ROOT}/lib${OSG_LIBDIR_BASE_SUFFIX}/debug/libassimp.a)
+          ENDIF()
+        ELSEIF(WIN32)
+          set(_assimp_lib_name_decoration "")
+
+          set(_assimp_msvc_version "")
+          if(MSVC12)
+              set(_assimp_msvc_version "vc120")
+          elseif(MSVC14)
+              set(_assimp_msvc_version "vc140")
+          elseif(MSVC15)
+              set(_assimp_msvc_version "vc141")
+          endif(MSVC12)
+          set(_assimp_lib_name_decoration "-${_assimp_msvc_version}-mt")
+        
+          IF(EXISTS ${OSG_SUPPORT_ROOT}/lib${OSG_LIBDIR_BASE_SUFFIX}/assimp${_assimp_lib_name_decoration}.lib)
+              SET(ASSIMP_LIBRARY_RELEASE ${OSG_SUPPORT_ROOT}/lib${OSG_LIBDIR_BASE_SUFFIX}/assimp${_assimp_lib_name_decoration}.lib)
+          ENDIF()
+          IF(EXISTS ${OSG_SUPPORT_ROOT}/lib${OSG_LIBDIR_BASE_SUFFIX}/assimp${_assimp_lib_name_decoration}d.lib)
+              SET(ASSIMP_LIBRARY_DEBUG ${OSG_SUPPORT_ROOT}/lib${OSG_LIBDIR_BASE_SUFFIX}/assimp${_assimp_lib_name_decoration}d.lib)
+          ENDIF()
+        ENDIF()
+
+        IF(ASSIMP_INCLUDE_DIR)
+            IF(ASSIMP_LIBRARY_DEBUG OR ASSIMP_LIBRARY_RELEASE)
+                SET(ASSIMP_FOUND TRUE CACHE INTERNAL "" FORCE)
+            ENDIF()
+        ENDIF()
+
+        IF(ASSIMP_FOUND)
+          OSG_ADD_IMPORT_LIB(ASSIMP_TARGETS ASSIMP_LIBRARY)
+          SET(ASSIMP_LIBRARIES ${ASSIMP_TARGETS} CACHE STRING "" FORCE)
+        ENDIF(ASSIMP_FOUND)
+
+    ENDIF(OSG_USE_OSGSUPPORT_LIBS)
+
+    IF(NOT OSG_USE_OSGSUPPORT_LIBS OR NOT ASSIMP_FOUND)
+      IF(WIN32)
+        OSG_FIND_PACKAGE(Assimp_OpenSG)
+
+        IF(ASSIMP_FOUND)
+          OSG_ADD_IMPORT_LIB(ASSIMP_TARGETS ASSIMP_LIBRARY)
+
+          SET(ASSIMP_LIBRARIES ${ASSIMP_TARGETS} CACHE STRING "" FORCE)
+        ENDIF(ASSIMP_FOUND)
+
+      ELSE(WIN32)
+        OSG_FIND_PACKAGE(Assimp_OpenSG)
+      ENDIF(WIN32)
+
+    ENDIF(NOT OSG_USE_OSGSUPPORT_LIBS OR NOT ASSIMP_FOUND)
+
+    IF(ASSIMP_FOUND)
+        OSG_SET(OSG_WITH_ASSIMP 1)
+    ENDIF(ASSIMP_FOUND)
+
+ENDMACRO(OSG_CONFIGURE_ASSIMP)
+
+##############################################################################
 # VTK
 ##############################################################################
 
