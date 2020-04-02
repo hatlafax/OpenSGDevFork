@@ -53,6 +53,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
 #include "OSGConfig.h"
 
 
@@ -62,10 +67,6 @@
 #include "OSGCoreGLWindow.h"
 
 #include <boost/bind.hpp>
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -102,11 +103,11 @@ OSG_FIELDTRAITS_GETTYPE_NS(CoreGLWindow *, nsOSG)
 
 OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
                            CoreGLWindow *,
-                           nsOSG);
+                           nsOSG)
 
 OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
                            CoreGLWindow *,
-                           nsOSG);
+                           nsOSG)
 
 /***************************************************************************\
  *                         Field Description                               *
@@ -137,9 +138,10 @@ CoreGLWindowBase::TypeObject CoreGLWindowBase::_type(
     "NULL",
     nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&CoreGLWindowBase::createEmptyLocal),
-    CoreGLWindow::initMethod,
-    CoreGLWindow::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&CoreGLWindow::classDescInserter),
+    reinterpret_cast<InitContainerF>(&CoreGLWindow::initMethod),
+    reinterpret_cast<ExitContainerF>(&CoreGLWindow::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&CoreGLWindow::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\"?>\n"

@@ -53,6 +53,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
 #include "OSGConfig.h"
 
 
@@ -71,10 +76,6 @@
 #include "OSGVTKPolyDataMapper.h"
 
 #include <boost/bind.hpp>
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -147,11 +148,11 @@ OSG_FIELDTRAITS_GETTYPE_NS(VTKPolyDataMapper *, nsOSG)
 
 OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
                            VTKPolyDataMapper *,
-                           nsOSG);
+                           nsOSG)
 
 OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
                            VTKPolyDataMapper *,
-                           nsOSG);
+                           nsOSG)
 
 /***************************************************************************\
  *                         Field Description                               *
@@ -290,9 +291,10 @@ VTKPolyDataMapperBase::TypeObject VTKPolyDataMapperBase::_type(
     "NULL",
     nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&VTKPolyDataMapperBase::createEmptyLocal),
-    VTKPolyDataMapper::initMethod,
-    VTKPolyDataMapper::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&VTKPolyDataMapper::classDescInserter),
+    reinterpret_cast<InitContainerF>(&VTKPolyDataMapper::initMethod),
+    reinterpret_cast<ExitContainerF>(&VTKPolyDataMapper::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&VTKPolyDataMapper::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\" ?>\n"

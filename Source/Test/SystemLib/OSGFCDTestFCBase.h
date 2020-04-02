@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -159,7 +159,7 @@ class OSG_SYSTEM_DLLMAPPING FCDTestFCBase : public NodeCore
                   UInt32              &editFieldSFPub     (void);
                   UInt32               getFieldSFPub      (void) const;
 
-                  UInt32              &editFieldMFPub     (const UInt32 index);
+            MFUInt32           ::reference       editFieldMFPub     (const UInt32 index);
                   UInt32               getFieldMFPub      (const UInt32 index) const;
 
     /*! \}                                                                 */
@@ -260,18 +260,18 @@ class OSG_SYSTEM_DLLMAPPING FCDTestFCBase : public NodeCore
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-    GetFieldHandlePtr  getHandleFieldSFPub      (void) const;
-    EditFieldHandlePtr editHandleFieldSFPub     (void);
-    GetFieldHandlePtr  getHandleFieldSFPro      (void) const;
-    EditFieldHandlePtr editHandleFieldSFPro     (void);
-    GetFieldHandlePtr  getHandleFieldSFNo       (void) const;
-    EditFieldHandlePtr editHandleFieldSFNo      (void);
-    GetFieldHandlePtr  getHandleFieldMFPub      (void) const;
-    EditFieldHandlePtr editHandleFieldMFPub     (void);
-    GetFieldHandlePtr  getHandleFieldMFPro      (void) const;
-    EditFieldHandlePtr editHandleFieldMFPro     (void);
-    GetFieldHandlePtr  getHandleFieldMFNo       (void) const;
-    EditFieldHandlePtr editHandleFieldMFNo      (void);
+     GetFieldHandlePtr  getHandleFieldSFPub      (void) const;
+     EditFieldHandlePtr editHandleFieldSFPub     (void);
+     GetFieldHandlePtr  getHandleFieldSFPro      (void) const;
+     EditFieldHandlePtr editHandleFieldSFPro     (void);
+     GetFieldHandlePtr  getHandleFieldSFNo       (void) const;
+     EditFieldHandlePtr editHandleFieldSFNo      (void);
+     GetFieldHandlePtr  getHandleFieldMFPub      (void) const;
+     EditFieldHandlePtr editHandleFieldMFPub     (void);
+     GetFieldHandlePtr  getHandleFieldMFPro      (void) const;
+     EditFieldHandlePtr editHandleFieldMFPro     (void);
+     GetFieldHandlePtr  getHandleFieldMFNo       (void) const;
+     EditFieldHandlePtr editHandleFieldMFNo      (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -289,7 +289,7 @@ class OSG_SYSTEM_DLLMAPPING FCDTestFCBase : public NodeCore
                   UInt32              &editFieldSFPro     (void);
                   UInt32               getFieldSFPro      (void) const;
 
-                  UInt32              &editFieldMFPro     (const UInt32 index);
+                  MFUInt32           ::reference editFieldMFPro     (const UInt32 index);
                   UInt32               getFieldMFPro      (const UInt32 index) const;
 
     /*! \}                                                                 */

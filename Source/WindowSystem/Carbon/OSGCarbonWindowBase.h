@@ -229,8 +229,8 @@ class OSG_WINDOWCARBON_DLLMAPPING CarbonWindowBase : public Window
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-    GetFieldHandlePtr  getHandleContext         (void) const;
-    EditFieldHandlePtr editHandleContext        (void);
+     GetFieldHandlePtr  getHandleContext         (void) const;
+     EditFieldHandlePtr editHandleContext        (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

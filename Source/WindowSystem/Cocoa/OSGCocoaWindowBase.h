@@ -229,8 +229,8 @@ class OSG_WINDOWCOCOA_DLLMAPPING CocoaWindowBase : public Window
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-    GetFieldHandlePtr  getHandleContext         (void) const;
-    EditFieldHandlePtr editHandleContext        (void);
+     GetFieldHandlePtr  getHandleContext         (void) const;
+     EditFieldHandlePtr editHandleContext        (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

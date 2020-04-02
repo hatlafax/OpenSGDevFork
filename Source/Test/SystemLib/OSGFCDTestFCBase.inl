@@ -2,9 +2,9 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -133,13 +133,12 @@ inline
 }
 
 inline
-UInt32 &FCDTestFCBase::editFieldMFPub(const UInt32 index)
+MFUInt32           ::reference FCDTestFCBase::editFieldMFPub(const UInt32 index)
 {
     editMField(FieldMFPubFieldMask, _mfFieldMFPub);
 
     return _mfFieldMFPub[index];
 }
-
 
 //! Get the value of the \a index element the FCDTestFC::_mfFieldMFPro field.
 inline
@@ -149,13 +148,12 @@ inline
 }
 
 inline
-UInt32 &FCDTestFCBase::editFieldMFPro(const UInt32 index)
+MFUInt32           ::reference FCDTestFCBase::editFieldMFPro(const UInt32 index)
 {
     editMField(FieldMFProFieldMask, _mfFieldMFPro);
 
     return _mfFieldMFPro[index];
 }
-
 
 
 #ifdef OSG_MT_CPTR_ASPECT

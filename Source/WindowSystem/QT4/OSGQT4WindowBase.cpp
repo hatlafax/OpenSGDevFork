@@ -160,7 +160,8 @@ QT4WindowBase::TypeObject QT4WindowBase::_type(
     reinterpret_cast<PrototypeCreateF>(&QT4WindowBase::createEmptyLocal),
     reinterpret_cast<InitContainerF>(&QT4Window::initMethod),
     reinterpret_cast<ExitContainerF>(&QT4Window::exitMethod),
-    reinterpret_cast<InitalInsertDescFunc>(&QT4Window::classDescInserter),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&QT4Window::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\"?>\n"

@@ -2,9 +2,9 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -98,22 +98,6 @@ void InsertTestTaskBase::setMessage(const std::string &value)
     editSField(MessageFieldMask);
 
     _sfMessage.setValue(value);
-}
-
-//! Get the value of the InsertTestTask::_sfWindow field.
-inline
-CSMWindow * InsertTestTaskBase::getWindow(void) const
-{
-    return _sfWindow.getValue();
-}
-
-//! Set the value of the InsertTestTask::_sfWindow field.
-inline
-void InsertTestTaskBase::setWindow(CSMWindow * const value)
-{
-    editSField(WindowFieldMask);
-
-    _sfWindow.setValue(value);
 }
 //! Get the value of the InsertTestTask::_sfTrigger field.
 

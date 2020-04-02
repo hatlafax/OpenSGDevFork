@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -53,6 +53,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
 #include "OSGConfig.h"
 
 
@@ -62,10 +67,6 @@
 #include "OSGFCDTestFC.h"
 
 #include <boost/bind.hpp>
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -122,11 +123,11 @@ OSG_FIELDTRAITS_GETTYPE_NS(FCDTestFC *, nsOSG)
 
 OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
                            FCDTestFC *,
-                           nsOSG);
+                           nsOSG)
 
 OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
                            FCDTestFC *,
-                           nsOSG);
+                           nsOSG)
 
 DataType &FieldTraits< FCDTestFC *, nsOSG + 1 >::getType(void)
 {
@@ -137,13 +138,13 @@ DataType &FieldTraits< FCDTestFC *, nsOSG + 1 >::getType(void)
 OSG_EXPORT_PTR_SFIELD(ChildPointerSField,
                       FCDTestFC *,
                       UnrecordedRefCountPolicy,
-                      nsOSG + 1);
+                      nsOSG + 1)
 
 
 OSG_EXPORT_PTR_MFIELD(ChildPointerMField,
                       FCDTestFC *,
                       UnrecordedRefCountPolicy,
-                      nsOSG + 1);
+                      nsOSG + 1)
 
 
 /***************************************************************************\
@@ -235,9 +236,10 @@ FCDTestFCBase::TypeObject FCDTestFCBase::_type(
     "NULL",
     nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&FCDTestFCBase::createEmptyLocal),
-    FCDTestFC::initMethod,
-    FCDTestFC::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&FCDTestFC::classDescInserter),
+    reinterpret_cast<InitContainerF>(&FCDTestFC::initMethod),
+    reinterpret_cast<ExitContainerF>(&FCDTestFC::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&FCDTestFC::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\" ?>\n"

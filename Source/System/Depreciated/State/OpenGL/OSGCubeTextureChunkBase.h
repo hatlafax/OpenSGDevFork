@@ -273,16 +273,16 @@ class OSG_SYSTEM_DLLMAPPING CubeTextureChunkBase : public TextureChunk
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-    GetFieldHandlePtr  getHandlePosZImage       (void) const;
-    EditFieldHandlePtr editHandlePosZImage      (void);
-    GetFieldHandlePtr  getHandlePosXImage       (void) const;
-    EditFieldHandlePtr editHandlePosXImage      (void);
-    GetFieldHandlePtr  getHandleNegXImage       (void) const;
-    EditFieldHandlePtr editHandleNegXImage      (void);
-    GetFieldHandlePtr  getHandlePosYImage       (void) const;
-    EditFieldHandlePtr editHandlePosYImage      (void);
-    GetFieldHandlePtr  getHandleNegYImage       (void) const;
-    EditFieldHandlePtr editHandleNegYImage      (void);
+     GetFieldHandlePtr  getHandlePosZImage       (void) const;
+     EditFieldHandlePtr editHandlePosZImage      (void);
+     GetFieldHandlePtr  getHandlePosXImage       (void) const;
+     EditFieldHandlePtr editHandlePosXImage      (void);
+     GetFieldHandlePtr  getHandleNegXImage       (void) const;
+     EditFieldHandlePtr editHandleNegXImage      (void);
+     GetFieldHandlePtr  getHandlePosYImage       (void) const;
+     EditFieldHandlePtr editHandlePosYImage      (void);
+     GetFieldHandlePtr  getHandleNegYImage       (void) const;
+     EditFieldHandlePtr editHandleNegYImage      (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

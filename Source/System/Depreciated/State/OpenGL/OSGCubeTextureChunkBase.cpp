@@ -53,6 +53,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
 #include "OSGConfig.h"
 
 
@@ -63,10 +68,6 @@
 #include "OSGCubeTextureChunk.h"
 
 #include <boost/bind.hpp>
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -130,11 +131,11 @@ OSG_FIELDTRAITS_GETTYPE_NS(CubeTextureChunk *, nsOSG)
 
 OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
                            CubeTextureChunk *,
-                           nsOSG);
+                           nsOSG)
 
 OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
                            CubeTextureChunk *,
-                           nsOSG);
+                           nsOSG)
 
 /***************************************************************************\
  *                         Field Description                               *
@@ -213,9 +214,10 @@ CubeTextureChunkBase::TypeObject CubeTextureChunkBase::_type(
     "NULL",
     nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&CubeTextureChunkBase::createEmptyLocal),
-    CubeTextureChunk::initMethod,
-    CubeTextureChunk::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&CubeTextureChunk::classDescInserter),
+    reinterpret_cast<InitContainerF>(&CubeTextureChunk::initMethod),
+    reinterpret_cast<ExitContainerF>(&CubeTextureChunk::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&CubeTextureChunk::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\"?>\n"

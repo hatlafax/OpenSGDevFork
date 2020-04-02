@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -53,6 +53,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
 #include "OSGConfig.h"
 
 
@@ -62,10 +67,6 @@
 #include "OSGTestMultiPartitionStage.h"
 
 #include <boost/bind.hpp>
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -177,9 +178,10 @@ TestMultiPartitionStageBase::TypeObject TestMultiPartitionStageBase::_type(
     "NULL",
     nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&TestMultiPartitionStageBase::createEmptyLocal),
-    TestMultiPartitionStage::initMethod,
-    TestMultiPartitionStage::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&TestMultiPartitionStage::classDescInserter),
+    reinterpret_cast<InitContainerF>(&TestMultiPartitionStage::initMethod),
+    reinterpret_cast<ExitContainerF>(&TestMultiPartitionStage::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&TestMultiPartitionStage::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\"?>\n"

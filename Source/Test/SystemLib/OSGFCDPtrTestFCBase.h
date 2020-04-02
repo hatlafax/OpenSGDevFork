@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -412,54 +412,54 @@ class OSG_SYSTEM_DLLMAPPING FCDPtrTestFCBase : public NodeCore
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-    GetFieldHandlePtr  getHandleFieldSFPub_ptr  (void) const;
-    EditFieldHandlePtr editHandleFieldSFPub_ptr (void);
-    GetFieldHandlePtr  getHandleFieldSFPub_weakptr (void) const;
-    EditFieldHandlePtr editHandleFieldSFPub_weakptr(void);
-    GetFieldHandlePtr  getHandleFieldSFPub_mpchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldSFPub_mpchildptr(void);
-    GetFieldHandlePtr  getHandleFieldSFPro_ptr  (void) const;
-    EditFieldHandlePtr editHandleFieldSFPro_ptr (void);
-    GetFieldHandlePtr  getHandleFieldSFPro_weakptr (void) const;
-    EditFieldHandlePtr editHandleFieldSFPro_weakptr(void);
-    GetFieldHandlePtr  getHandleFieldSFPro_mpchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldSFPro_mpchildptr(void);
-    GetFieldHandlePtr  getHandleFieldSFNo_ptr   (void) const;
-    EditFieldHandlePtr editHandleFieldSFNo_ptr  (void);
-    GetFieldHandlePtr  getHandleFieldSFNo_weakptr (void) const;
-    EditFieldHandlePtr editHandleFieldSFNo_weakptr(void);
-    GetFieldHandlePtr  getHandleFieldSFNo_mpchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldSFNo_mpchildptr(void);
-    GetFieldHandlePtr  getHandleFieldMFPub_ptr  (void) const;
-    EditFieldHandlePtr editHandleFieldMFPub_ptr (void);
-    GetFieldHandlePtr  getHandleFieldMFPub_weakptr (void) const;
-    EditFieldHandlePtr editHandleFieldMFPub_weakptr(void);
-    GetFieldHandlePtr  getHandleFieldMFPub_mpchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldMFPub_mpchildptr(void);
-    GetFieldHandlePtr  getHandleFieldMFPro_ptr  (void) const;
-    EditFieldHandlePtr editHandleFieldMFPro_ptr (void);
-    GetFieldHandlePtr  getHandleFieldMFPro_weakptr (void) const;
-    EditFieldHandlePtr editHandleFieldMFPro_weakptr(void);
-    GetFieldHandlePtr  getHandleFieldMFPro_mpchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldMFPro_mpchildptr(void);
-    GetFieldHandlePtr  getHandleFieldMFNo_ptr   (void) const;
-    EditFieldHandlePtr editHandleFieldMFNo_ptr  (void);
-    GetFieldHandlePtr  getHandleFieldMFNo_weakptr (void) const;
-    EditFieldHandlePtr editHandleFieldMFNo_weakptr(void);
-    GetFieldHandlePtr  getHandleFieldMFNo_mpchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldMFNo_mpchildptr(void);
-    GetFieldHandlePtr  getHandleFieldSFPub_spchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldSFPub_spchildptr(void);
-    GetFieldHandlePtr  getHandleFieldSFPro_spchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldSFPro_spchildptr(void);
-    GetFieldHandlePtr  getHandleFieldSFNo_spchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldSFNo_spchildptr(void);
-    GetFieldHandlePtr  getHandleFieldMFPub_spchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldMFPub_spchildptr(void);
-    GetFieldHandlePtr  getHandleFieldMFPro_spchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldMFPro_spchildptr(void);
-    GetFieldHandlePtr  getHandleFieldMFNo_spchildptr (void) const;
-    EditFieldHandlePtr editHandleFieldMFNo_spchildptr(void);
+     GetFieldHandlePtr  getHandleFieldSFPub_ptr  (void) const;
+     EditFieldHandlePtr editHandleFieldSFPub_ptr (void);
+     GetFieldHandlePtr  getHandleFieldSFPub_weakptr (void) const;
+     EditFieldHandlePtr editHandleFieldSFPub_weakptr(void);
+     GetFieldHandlePtr  getHandleFieldSFPub_mpchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldSFPub_mpchildptr(void);
+     GetFieldHandlePtr  getHandleFieldSFPro_ptr  (void) const;
+     EditFieldHandlePtr editHandleFieldSFPro_ptr (void);
+     GetFieldHandlePtr  getHandleFieldSFPro_weakptr (void) const;
+     EditFieldHandlePtr editHandleFieldSFPro_weakptr(void);
+     GetFieldHandlePtr  getHandleFieldSFPro_mpchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldSFPro_mpchildptr(void);
+     GetFieldHandlePtr  getHandleFieldSFNo_ptr   (void) const;
+     EditFieldHandlePtr editHandleFieldSFNo_ptr  (void);
+     GetFieldHandlePtr  getHandleFieldSFNo_weakptr (void) const;
+     EditFieldHandlePtr editHandleFieldSFNo_weakptr(void);
+     GetFieldHandlePtr  getHandleFieldSFNo_mpchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldSFNo_mpchildptr(void);
+     GetFieldHandlePtr  getHandleFieldMFPub_ptr  (void) const;
+     EditFieldHandlePtr editHandleFieldMFPub_ptr (void);
+     GetFieldHandlePtr  getHandleFieldMFPub_weakptr (void) const;
+     EditFieldHandlePtr editHandleFieldMFPub_weakptr(void);
+     GetFieldHandlePtr  getHandleFieldMFPub_mpchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldMFPub_mpchildptr(void);
+     GetFieldHandlePtr  getHandleFieldMFPro_ptr  (void) const;
+     EditFieldHandlePtr editHandleFieldMFPro_ptr (void);
+     GetFieldHandlePtr  getHandleFieldMFPro_weakptr (void) const;
+     EditFieldHandlePtr editHandleFieldMFPro_weakptr(void);
+     GetFieldHandlePtr  getHandleFieldMFPro_mpchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldMFPro_mpchildptr(void);
+     GetFieldHandlePtr  getHandleFieldMFNo_ptr   (void) const;
+     EditFieldHandlePtr editHandleFieldMFNo_ptr  (void);
+     GetFieldHandlePtr  getHandleFieldMFNo_weakptr (void) const;
+     EditFieldHandlePtr editHandleFieldMFNo_weakptr(void);
+     GetFieldHandlePtr  getHandleFieldMFNo_mpchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldMFNo_mpchildptr(void);
+     GetFieldHandlePtr  getHandleFieldSFPub_spchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldSFPub_spchildptr(void);
+     GetFieldHandlePtr  getHandleFieldSFPro_spchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldSFPro_spchildptr(void);
+     GetFieldHandlePtr  getHandleFieldSFNo_spchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldSFNo_spchildptr(void);
+     GetFieldHandlePtr  getHandleFieldMFPub_spchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldMFPub_spchildptr(void);
+     GetFieldHandlePtr  getHandleFieldMFPro_spchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldMFPro_spchildptr(void);
+     GetFieldHandlePtr  getHandleFieldMFNo_spchildptr (void) const;
+     EditFieldHandlePtr editHandleFieldMFNo_spchildptr(void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

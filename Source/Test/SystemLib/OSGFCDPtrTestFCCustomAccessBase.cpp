@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -53,6 +53,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
 #include "OSGConfig.h"
 
 
@@ -64,10 +69,6 @@
 #include "OSGFCDPtrTestFCCustomAccess.h"
 
 #include <boost/bind.hpp>
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -196,11 +197,11 @@ OSG_FIELDTRAITS_GETTYPE_NS(FCDPtrTestFCCustomAccess *, nsOSG)
 
 OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
                            FCDPtrTestFCCustomAccess *,
-                           nsOSG);
+                           nsOSG)
 
 OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
                            FCDPtrTestFCCustomAccess *,
-                           nsOSG);
+                           nsOSG)
 
 /***************************************************************************\
  *                         Field Description                               *
@@ -507,9 +508,10 @@ FCDPtrTestFCCustomAccessBase::TypeObject FCDPtrTestFCCustomAccessBase::_type(
     "NULL",
     nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&FCDPtrTestFCCustomAccessBase::createEmptyLocal),
-    FCDPtrTestFCCustomAccess::initMethod,
-    FCDPtrTestFCCustomAccess::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&FCDPtrTestFCCustomAccess::classDescInserter),
+    reinterpret_cast<InitContainerF>(&FCDPtrTestFCCustomAccess::initMethod),
+    reinterpret_cast<ExitContainerF>(&FCDPtrTestFCCustomAccess::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&FCDPtrTestFCCustomAccess::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\" ?>\n"
@@ -896,11 +898,27 @@ const SFUnrecFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getSFFieldSFPub_ptr(voi
     return &_sfFieldSFPub_ptr;
 }
 
+//! Get the value of the FCDPtrTestFCCustomAccess::_sfFieldSFPub_ptr field.
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldSFPub_ptr(void) const
+{
+    return _sfFieldSFPub_ptr.getValue();
+}
+
+
+
 //! Get the FCDPtrTestFCCustomAccess::_sfFieldSFPub_weakptr field.
 const SFWeakFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getSFFieldSFPub_weakptr(void) const
 {
     return &_sfFieldSFPub_weakptr;
 }
+
+//! Get the value of the FCDPtrTestFCCustomAccess::_sfFieldSFPub_weakptr field.
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldSFPub_weakptr(void) const
+{
+    return _sfFieldSFPub_weakptr.getValue();
+}
+
+
 
 //! Get the FCDPtrTestFCCustomAccess::_sfFieldSFPub_mpchildptr field.
 const SFUnrecChildFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getSFFieldSFPub_mpchildptr(void) const
@@ -908,11 +926,27 @@ const SFUnrecChildFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getSFFieldSFPub_mp
     return &_sfFieldSFPub_mpchildptr;
 }
 
+//! Get the value of the FCDPtrTestFCCustomAccess::_sfFieldSFPub_mpchildptr field.
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldSFPub_mpchildptr(void) const
+{
+    return _sfFieldSFPub_mpchildptr.getValue();
+}
+
+
+
 //! Get the FCDPtrTestFCCustomAccess::_sfFieldSFPro_ptr field.
 const SFUnrecFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getSFFieldSFPro_ptr(void) const
 {
     return &_sfFieldSFPro_ptr;
 }
+
+//! Get the value of the FCDPtrTestFCCustomAccess::_sfFieldSFPro_ptr field.
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldSFPro_ptr(void) const
+{
+    return _sfFieldSFPro_ptr.getValue();
+}
+
+
 
 //! Get the FCDPtrTestFCCustomAccess::_sfFieldSFPro_weakptr field.
 const SFWeakFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getSFFieldSFPro_weakptr(void) const
@@ -920,11 +954,27 @@ const SFWeakFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getSFFieldSFPro_weakptr(
     return &_sfFieldSFPro_weakptr;
 }
 
+//! Get the value of the FCDPtrTestFCCustomAccess::_sfFieldSFPro_weakptr field.
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldSFPro_weakptr(void) const
+{
+    return _sfFieldSFPro_weakptr.getValue();
+}
+
+
+
 //! Get the FCDPtrTestFCCustomAccess::_sfFieldSFPro_mpchildptr field.
 const SFUnrecChildFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getSFFieldSFPro_mpchildptr(void) const
 {
     return &_sfFieldSFPro_mpchildptr;
 }
+
+//! Get the value of the FCDPtrTestFCCustomAccess::_sfFieldSFPro_mpchildptr field.
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldSFPro_mpchildptr(void) const
+{
+    return _sfFieldSFPro_mpchildptr.getValue();
+}
+
+
 
 
 
@@ -934,11 +984,19 @@ const MFUnrecFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getMFFieldMFPub_ptr(voi
 {
     return &_mfFieldMFPub_ptr;
 }
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldMFPub_ptr(const UInt32 index) const
+{
+    return _mfFieldMFPub_ptr[index];
+}
 
 //! Get the FCDPtrTestFCCustomAccess::_mfFieldMFPub_weakptr field.
 const MFWeakFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getMFFieldMFPub_weakptr(void) const
 {
     return &_mfFieldMFPub_weakptr;
+}
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldMFPub_weakptr(const UInt32 index) const
+{
+    return _mfFieldMFPub_weakptr[index];
 }
 
 //! Get the FCDPtrTestFCCustomAccess::_mfFieldMFPub_mpchildptr field.
@@ -946,11 +1004,19 @@ const MFUnrecChildFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getMFFieldMFPub_mp
 {
     return &_mfFieldMFPub_mpchildptr;
 }
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldMFPub_mpchildptr(const UInt32 index) const
+{
+    return _mfFieldMFPub_mpchildptr[index];
+}
 
 //! Get the FCDPtrTestFCCustomAccess::_mfFieldMFPro_ptr field.
 const MFUnrecFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getMFFieldMFPro_ptr(void) const
 {
     return &_mfFieldMFPro_ptr;
+}
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldMFPro_ptr(const UInt32 index) const
+{
+    return _mfFieldMFPro_ptr[index];
 }
 
 //! Get the FCDPtrTestFCCustomAccess::_mfFieldMFPro_weakptr field.
@@ -958,11 +1024,19 @@ const MFWeakFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getMFFieldMFPro_weakptr(
 {
     return &_mfFieldMFPro_weakptr;
 }
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldMFPro_weakptr(const UInt32 index) const
+{
+    return _mfFieldMFPro_weakptr[index];
+}
 
 //! Get the FCDPtrTestFCCustomAccess::_mfFieldMFPro_mpchildptr field.
 const MFUnrecChildFCDTestFCPtr *FCDPtrTestFCCustomAccessBase::getMFFieldMFPro_mpchildptr(void) const
 {
     return &_mfFieldMFPro_mpchildptr;
+}
+FCDTestFC * FCDPtrTestFCCustomAccessBase::getFieldMFPro_mpchildptr(const UInt32 index) const
+{
+    return _mfFieldMFPro_mpchildptr[index];
 }
 
 
@@ -974,11 +1048,27 @@ const SFUnrecChildFCDSParTestFCPtr *FCDPtrTestFCCustomAccessBase::getSFFieldSFPu
     return &_sfFieldSFPub_spchildptr;
 }
 
+//! Get the value of the FCDPtrTestFCCustomAccess::_sfFieldSFPub_spchildptr field.
+FCDSParTestFC * FCDPtrTestFCCustomAccessBase::getFieldSFPub_spchildptr(void) const
+{
+    return _sfFieldSFPub_spchildptr.getValue();
+}
+
+
+
 //! Get the FCDPtrTestFCCustomAccess::_sfFieldSFPro_spchildptr field.
 const SFUnrecChildFCDSParTestFCPtr *FCDPtrTestFCCustomAccessBase::getSFFieldSFPro_spchildptr(void) const
 {
     return &_sfFieldSFPro_spchildptr;
 }
+
+//! Get the value of the FCDPtrTestFCCustomAccess::_sfFieldSFPro_spchildptr field.
+FCDSParTestFC * FCDPtrTestFCCustomAccessBase::getFieldSFPro_spchildptr(void) const
+{
+    return _sfFieldSFPro_spchildptr.getValue();
+}
+
+
 
 
 //! Get the FCDPtrTestFCCustomAccess::_mfFieldMFPub_spchildptr field.
@@ -986,11 +1076,19 @@ const MFUnrecChildFCDSParTestFCPtr *FCDPtrTestFCCustomAccessBase::getMFFieldMFPu
 {
     return &_mfFieldMFPub_spchildptr;
 }
+FCDSParTestFC * FCDPtrTestFCCustomAccessBase::getFieldMFPub_spchildptr(const UInt32 index) const
+{
+    return _mfFieldMFPub_spchildptr[index];
+}
 
 //! Get the FCDPtrTestFCCustomAccess::_mfFieldMFPro_spchildptr field.
 const MFUnrecChildFCDSParTestFCPtr *FCDPtrTestFCCustomAccessBase::getMFFieldMFPro_spchildptr(void) const
 {
     return &_mfFieldMFPro_spchildptr;
+}
+FCDSParTestFC * FCDPtrTestFCCustomAccessBase::getFieldMFPro_spchildptr(const UInt32 index) const
+{
+    return _mfFieldMFPro_spchildptr[index];
 }
 
 
