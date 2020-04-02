@@ -179,6 +179,7 @@ DotFileGeneratorGraphOp::DotFileGeneratorGraphOp(const char* name) :
     _include_attachment(true),
     _no_name_attachments(true),
     _no_ranks(false),
+    _no_addresses(true),
     _max_node_children(-1),
     _size(""),
     _ranksep("2.5"),
@@ -225,6 +226,7 @@ void DotFileGeneratorGraphOp::setParams(const std::string params)
     ps("include_attachment",    _include_attachment);
     ps("no_name_attachments",   _no_name_attachments);
     ps("no_ranks",              _no_ranks);
+    ps("no_addresses",          _no_addresses);
     ps("max_node_children",     _max_node_children);
     ps("size",                  _size);
     ps("ranksep",               _ranksep);
@@ -248,6 +250,7 @@ std::string DotFileGeneratorGraphOp::usage(void)
     "  include_attachment       (bool, true): include attachments in graph\n"
     "  no_name_attachments      (bool, true): include attachments in graph\n"
     "  no_ranks                 (bool, true): do not use rank statement in graph\n"
+    "  no_addresses             (bool, true): do not object addresses in graph\n"
     "  max_node_children        (Int32,  -1): maximum number of children added to graph\n"
     "  size                     (std::string, \"\"): size attribute of graph\n"
     "  ranksep                  (std::string, \"1.5\"): ranksep attribute of graph\n"
@@ -684,7 +687,7 @@ void DotFileGeneratorGraphOp::HandleSwitchMaterial(
 
     if(switchMat)
     {
-        UInt32 num = switchMat->editMFMaterials()->size();
+        UInt32 num = static_cast<UInt32>(switchMat->editMFMaterials()->size());
 
         for(UInt32 i = 0; i < num; ++i)
         {
@@ -766,7 +769,7 @@ void DotFileGeneratorGraphOp::HandleMultiPassMaterial(
 
     if(multiPassMat)
     {
-        UInt32 num = multiPassMat->editMFMaterials()->size();
+        UInt32 num = static_cast<UInt32>(multiPassMat->editMFMaterials()->size());
 
         for(UInt32 i = 0; i < num; ++i)
         {
@@ -944,6 +947,10 @@ DotFileGeneratorGraphOp::Info &DotFileGeneratorGraphOp::NodeInfo(
         if(OSG::getName(node))
             label << "\\n" << OSG::getName(node);
 
+        if (!_no_addresses)
+            label << "\\n" 
+                  << "0x" << std::hex << node;
+
         Info info;
 
         info.cnt     = _node_cnt;
@@ -979,6 +986,10 @@ DotFileGeneratorGraphOp::Info &DotFileGeneratorGraphOp::CoreInfo(
 
         if(OSG::getName(core))
             label << "\\n" << OSG::getName(core);
+
+        if (!_no_addresses)
+            label << "\\n" 
+                  << "0x" << std::hex << core;
 
         Info info;
 
@@ -1022,6 +1033,10 @@ DotFileGeneratorGraphOp::Info &DotFileGeneratorGraphOp::AttachmentInfo(
         if(attName)
             label << "\\n" << attName->getFieldPtr()->getValue().c_str();
 
+        if (!_no_addresses)
+            label << "\\n" 
+                  << "0x" << std::hex << att;
+
         Info info;
 
         info.cnt     = _attachment_cnt;
@@ -1058,6 +1073,10 @@ DotFileGeneratorGraphOp::Info &DotFileGeneratorGraphOp::MaterialInfo(
         if(OSG::getName(material))
             label << "\\n" << OSG::getName(material);
 
+        if (!_no_addresses)
+            label << "\\n" 
+                  << "0x" << std::hex << material;
+
         Info info;
 
         info.cnt     = _material_cnt;
@@ -1089,6 +1108,10 @@ DotFileGeneratorGraphOp::Info DotFileGeneratorGraphOp::MatrixInfo(
 
         name  << "Matrix_" << _matrix_cnt;
         label << "Matrix" << " " << _matrix_cnt;
+
+        if (!_no_addresses)
+            label << "\\n" 
+                  << "0x" << std::hex << handler;
 
         Info info;
 
@@ -1143,6 +1166,10 @@ DotFileGeneratorGraphOp::Info& DotFileGeneratorGraphOp::ImageInfo(
         name  << "Image_" << _image_cnt;
         label << "Image"  << " " << _image_cnt;
 
+        if (!_no_addresses)
+            label << "\\n" 
+                  << "0x" << std::hex << image;
+
         Info info;
 
         info.cnt     = _image_cnt;
@@ -1178,6 +1205,10 @@ DotFileGeneratorGraphOp::Info &DotFileGeneratorGraphOp::StateChunkInfo(
 
         if(OSG::getName(chunk))
             label << "\\n" << OSG::getName(chunk);
+
+        if (!_no_addresses)
+            label << "\\n" 
+                  << "0x" << std::hex << chunk;
 
         Info info;
 
@@ -1215,6 +1246,10 @@ DotFileGeneratorGraphOp::Info &DotFileGeneratorGraphOp::IntegralPropInfo(
         label << "\\n" << property_name << " " << _integral_prop_cnt;
         label << "\\n" << "size = " << property->size();
 
+        if (!_no_addresses)
+            label << "\\n" 
+                  << "0x" << std::hex << property;
+
         Info info;
 
         info.cnt     = _integral_prop_cnt;
@@ -1250,6 +1285,10 @@ DotFileGeneratorGraphOp::Info &DotFileGeneratorGraphOp::VectorPropInfo(
         label << context;
         label << "\\n" << property_name << " " << _vector_prop_cnt;
         label << "\\n" << "size = " << property->size();
+
+        if (!_no_addresses)
+            label << "\\n" 
+                  << "0x" << std::hex << property;
 
         Info info;
 
