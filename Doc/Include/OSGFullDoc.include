@@ -33,4 +33,5 @@
 #INPUT += ${CMAKE_SOURCE_DIR}/Source/Contrib/PLY/ContribPLYGroups.dox
 #INPUT += ${CMAKE_SOURCE_DIR}/Source/Contrib/ComplexSceneManager/ContribCSMGroups.dox
 #INPUT += ${CMAKE_SOURCE_DIR}/Source/Contrib/ComputeBase/ContribComputeBaseGroups.dox
+#INPUT += ${CMAKE_SOURCE_DIR}/Source/Contrib/Techniques/ContribTechniquesGroups.dox
 
