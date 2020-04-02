@@ -296,7 +296,9 @@ void MaterialChunk::activate(DrawEnv *pEnv, UInt32)
                       _sfSpecular.getValue().getValuesRGBA());
         glMaterialfv(target, GL_EMISSION,
                       _sfEmission.getValue().getValuesRGBA());
-        glMaterialf (target, GL_SHININESS, _sfShininess.getValue());
+        // OpenGL signals error if value is greater than 128
+        glMaterialf (target, GL_SHININESS, 
+                      osgMin(_sfShininess.getValue(), 128.f));
 
         if(getBackMaterial())
         {
@@ -308,7 +310,9 @@ void MaterialChunk::activate(DrawEnv *pEnv, UInt32)
                           _sfBackSpecular.getValue().getValuesRGBA());
             glMaterialfv(GL_BACK, GL_EMISSION,
                           _sfBackEmission.getValue().getValuesRGBA());
-            glMaterialf (GL_BACK, GL_SHININESS, _sfBackShininess.getValue());
+            // OpenGL signals error if value is greater than 128
+            glMaterialf (GL_BACK, GL_SHININESS, 
+                          osgMin(_sfBackShininess.getValue(), 128.f));
         }
         
         glEnable(GL_LIGHTING);
@@ -425,7 +429,11 @@ void MaterialChunk::changeFrom(DrawEnv    *pEnv,
                       _sfEmission.getValue().getValuesRGBA());
         // adjust shininess only if it differs enough
         if(osgAbs(_sfShininess.getValue() - old->getShininess()) > 1e-4)
-            glMaterialf(target, GL_SHININESS, _sfShininess.getValue());
+        {
+            // OpenGL signals error if value is greater than 128
+            glMaterialf(target, GL_SHININESS,
+                      osgMin(_sfShininess.getValue(), 128.f));
+        }
         
         if(getBackMaterial())
         {
@@ -438,11 +446,11 @@ void MaterialChunk::changeFrom(DrawEnv    *pEnv,
             glMaterialfv(GL_BACK, GL_EMISSION,
                           _sfBackEmission.getValue().getValuesRGBA());
             // adjust shininess only if it differs enough
-            if(osgAbs(_sfBackShininess.getValue() - 
-                      old->getBackShininess()      ) > 1e-4)
+            if(osgAbs(_sfBackShininess.getValue() - old->getBackShininess()) > 1e-4)
             {
-                glMaterialf(GL_BACK, GL_SHININESS, 
-                            _sfBackShininess.getValue());
+                // OpenGL signals error if value is greater than 128
+                glMaterialf(GL_BACK, GL_SHININESS,
+                          osgMin(_sfBackShininess.getValue(), 128.f));
             }
         }
     }
