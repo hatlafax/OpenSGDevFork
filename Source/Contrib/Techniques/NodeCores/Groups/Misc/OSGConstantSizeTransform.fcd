@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+
+<FieldContainer
+    name="ConstantSizeTransform"
+    parent="Transform"
+    library="ContribTechniques"
+    structure="concrete"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    isNodeCore="true"
+    >
+    This transform renders its child tree at a constant size.
+
+    <Field
+        name="distance"
+        type="Real32"
+        category="data"
+        cardinality="single"
+        visibility="internal"
+        access="public"
+        defaultValue="1.0f"
+    >
+    The distance allows to adapt the render size of the child tree.
+    Actually, this transformation calculates a scale value from the 
+    quotient of this distance value to the screen space diagonal of
+    a unit cube.
+    </Field>
+
+    <Field
+        name="transform"
+        type="Matrix"
+        cardinality="single"
+        visibility="internal"
+        access="protected"
+    >
+    The final render transform. It is calculated from the user
+    provided matrix transform and the current measure value.
+    </Field>
+
+</FieldContainer>
