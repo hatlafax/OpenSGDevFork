@@ -661,9 +661,15 @@ OSG::MaterialGroupTransitPtr ClippingSceneManager::create_mat_group_fst(int i) c
     mat->addMaterial(mat1);
     mat->addMaterial(mat2);
 
-    mat->setSortKey(2*i + 0);
+    //
+    // Attention: The MulitPassMaterial consumes a sort key for each contained material.
+    //            That is, we have 3 sort states in total for each clip plane.
+    //            I.e. 3*i+0 and 3*i+1 are used for the MultiPassMaterial and 3*i+2 for
+    //            the clipping plane material.
+    //
+    mat->setSortKey(3*i + 0);
 
-    setName(mat, "setSortKey(2*i + 0)");
+    setName(mat, "setSortKey(3*i + 0)");
 
     MaterialGroupUnrecPtr mgrp = MaterialGroup::create();
     mgrp->setMaterial(mat);
@@ -679,9 +685,12 @@ OSG::MaterialGroupTransitPtr ClippingSceneManager::create_mat_group_sec(int i) c
 
     ChunkMaterialUnrecPtr mat = material_3(i);
 
-    mat->setSortKey(2*i + 1);
+    //
+    // See explanation above.
+    // 
+    mat->setSortKey(3*i + 2);
 
-    setName(mat, "setSortKey(2*i + 1)");
+    setName(mat, "setSortKey(3*i + 2)");
 
     MaterialGroupUnrecPtr mgrp = MaterialGroup::create();
     mgrp->setMaterial(mat);
@@ -861,6 +870,8 @@ void create_and_exe_dot_file(OSG::Node*  node)
     go->setParams("max_node_children=10 no_name_attachments=true no_ranks=true");
 
     go->traverse(node);
+
+    go = NULL;
 
     if (!fs::exists(dot_file))
         return;
