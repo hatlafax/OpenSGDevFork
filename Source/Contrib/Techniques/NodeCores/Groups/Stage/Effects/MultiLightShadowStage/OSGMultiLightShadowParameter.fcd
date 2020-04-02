@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="MultiLightShadowParameter"
+    parent="FieldContainer"
+    library="ContribTechniques"
+    pointerfieldtypes="both"
+    structure="concrete"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    childFields="multi"
+    >
+    Shadow parameter that are common for all multi light shadow mapping techniques.
+    The MultiLightShadowStage::SIMPLE_SHADOW_MAP use these parameters.
+
+    <Field
+        name="intensity"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="1.f"
+    >
+        This value allows to increase or decrease the shadow intensity.
+    </Field>
+
+    <Field
+        name="bias"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.5f"
+    >
+        This value allow fighting against the shadow acne problem.
+    </Field>
+
+    <Field
+	 name="filterMode"
+	 type="Int32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="1"
+	 access="public"
+	 >
+	The PCF kernel to use. Valid values are defined in the MultiLightShadowStage::FilterMode enumeration.
+                If no kernel is to use set to MultiLightShadowStage::PCF_MODE_DISABLED (1).
+    </Field>
+
+    <Field
+	 name="filterRadius"
+	 type="Real32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="0.01f"
+	 access="public"
+	 >
+	The PCF and the Percentage-Closer Soft Shadow (PCSS) technique allows to simulate area lights by generating
+                soft shadows. Therefore the light area has to be specified. This is done by the this light radius parameter.
+    </Field>
+
+    <Field
+	 name="randomRotateFilter"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="false"
+	 access="public"
+	 >
+	Perform random rotation of the sampling for the PCF technique.
+    </Field>
+
+    <Field
+	 name="useBlockerSearch"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="false"
+	 access="public"
+	 >
+	Enable the pre search of blockers by a smaller kernel to allow early out of the current filter function.
+    </Field>
+
+    <Field
+	 name="usePCSS"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="false"
+	 access="public"
+	 >
+	Enable the Percentage-Closer Soft Shadow (PCSS) technique.
+    </Field>
+
+</FieldContainer>

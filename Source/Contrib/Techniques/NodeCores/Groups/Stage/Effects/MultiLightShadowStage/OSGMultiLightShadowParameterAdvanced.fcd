@@ -1,0 +1,196 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="MultiLightShadowParameterAdvanced"
+    parent="MultiLightShadowParameter"
+    library="ContribTechniques"
+    pointerfieldtypes="both"
+    structure="concrete"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    childFields="multi"
+    >
+    Shadow parameters that are used for the advanced shadow technique as described in the book
+    'Real-Time Shadows' Elmar Eisemann et al. http://www.realtimeshadows.com/ and its supplemental 
+    code.
+
+    The MultiLightShadowStage::ADVANCED_SHADOW_MAP mode uses these parameters.
+
+    <Field
+        name="numberOfSplits"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="1"
+        access="public"
+        >
+        The number of split frustums. Default number 1 means no splitting at all.
+        Splitting is a global z-paratitioning technique and is named parallel split shadow
+        maps (PSSM).
+    </Field>
+
+    <Field
+        name="useLiSP"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="false"
+        access="public"
+        >
+        Use the Light Space Perspective Shadow Map technique. This is a special warping technique
+        that results from the analysis of the perspective error in shadow mapping. This analysis shows
+        that the required sampling densities near the viewport are higher than far from it. Warping means
+        changing the shadow-map parametrization that maps from (u,v)-coordinates on the world-space
+        shadow map plane to (s,t)-coordinates in the actual shadow-map texture.
+    </Field>
+
+    <Field
+        name="useGeometryShader"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="false"
+        access="public"
+        >
+        Use the geometry shader for shadow map rendering.
+    </Field>
+
+    <Field
+        name="liSPMode"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="2"
+        access="public"
+        >
+        LiSP optimization modes: Allowed values are NOPT = 1, REPARAMETRIZED, ARBITRARY, PSEUDO_NEAR
+        as defined in class LiSPSMTechnique.
+    </Field>
+
+    <Field
+        name="focusing"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="false"
+        access="public"
+        >
+        Focusing tries to improve the shadow-map sampling rate by fitting the shadow-map frustum to encompass the view 
+        frustum. Using the LiSP or splitting, i.e. global partitioning technique, forces focusing. 
+    </Field>
+
+    <Field
+        name="reduceSwimming"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="false"
+        access="public"
+        >
+        Reduce temporal aliasing or so called shadow swimming. Only takes place if not using LiSP and not using light space
+        alignment.
+    </Field>
+
+    <Field
+        name="lightSpaceAlignment"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="false"
+        access="public"
+        >
+        Align the shadow map up vector with the view vector, so that the view frustum
+        near plane is found at the bottom of the shadow map and the far plane at the 
+        top.
+    </Field>
+
+    <Field
+        name="useMinDepth"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="false"
+        access="public"
+        >
+        Determine the minimal near distance by pre rendering a depth map into a mipmap texture
+        and taking the depth value from it.
+    </Field>
+
+    <Field
+        name="useBestResSelection"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="false"
+        access="public"
+        >
+        For the PSSM technique. Determine the optimal split index inside of the fragment shader.
+    </Field>
+
+    <Field
+        name="warpingParameter"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="1.f"
+        >
+        This value allows to increase or decrease the shadow intensity.
+    </Field>
+
+    <Field
+        name="splitParamterLambda"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.5f"
+        >
+        Practial split parameter lambda that medias between logarithmic and equidistance splits positions.
+        In the range [0,1].
+    </Field>
+
+    <Field
+        name="zNear"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.f"
+        >
+        Artificial near plane distance in the range [0,1].
+    </Field>
+
+    <Field
+        name="pseudoNear"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.f"
+        >
+        Many application tend to use a generius far plane and a very tight near plane
+        to avoid near plane clipping. This creates a tension with shadow mapping since
+        perspective error increases as a function of zf/zn. Use a different view frustum
+        near plane distance for the computation of the optimal near plane of directional
+        lights. In the range [0,1].
+    </Field>
+
+    <Field
+        name="pseudoFar"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="1.f"
+        >
+        Many application tend to use a generius far plane and a very tight near plane
+        to avoid near plane clipping. This creates a tension with shadow mapping since
+        perspective error increases as a function of zf/zn. Use a different view frustum
+        far plane distance for the computation of the optimal far plane of directional
+        lights. In the range [0,1].
+    </Field>
+
+</FieldContainer>
