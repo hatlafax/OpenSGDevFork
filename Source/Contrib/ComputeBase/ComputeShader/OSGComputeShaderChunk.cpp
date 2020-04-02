@@ -817,14 +817,9 @@ void ComputeShaderChunk::updateVariableLocations(DrawEnv *pEnv,
         ShaderProgramVariables::MFVariablesType::const_iterator mVarEnd =
             pMFVars->end  ();
         
-        OSGGETGLFUNC_GL3_ES(glGetUniformLocation,
-                            osgGlGetUniformLocation,
-                            ShaderProgram::getFuncIdGetUniformLocation());
-
         for(; mVarIt != mVarEnd; ++mVarIt, ++mLocIt)
         {
-            *mLocIt = osgGlGetUniformLocation(uiProgram,
-                                              (*mVarIt)->getName().c_str());
+            osgUniformShaderVariableLocationSwitch(pEnv, *mVarIt, *mLocIt, uiProgram);
         }
     }
 
@@ -841,14 +836,9 @@ void ComputeShaderChunk::updateVariableLocations(DrawEnv *pEnv,
         ShaderProgramVariables::MFProceduralVariablesType::const_iterator 
             mVarEnd = pMFProcVars->end  ();
         
-        OSGGETGLFUNC_GL3_ES(glGetUniformLocation,
-                            osgGlGetUniformLocation,
-                            ShaderProgram::getFuncIdGetUniformLocation());
-
         for(; mVarIt != mVarEnd; ++mVarIt, ++mLocIt)
         {
-            *mLocIt = osgGlGetUniformLocation(uiProgram,
-                                              (*mVarIt)->getName().c_str());
+            osgUniformShaderVariableLocationSwitch(pEnv, *mVarIt, *mLocIt, uiProgram);
         }
     }
 }
@@ -960,14 +950,7 @@ void ComputeShaderChunk::updateProceduralVariables(
 
                 if(*mLocIt == -1)
                 {
-                    OSGGETGLFUNCBYID_GL3_ES(
-                        glGetUniformLocation,
-                        osgGlGetUniformLocation,
-                        ShaderProgram::getFuncIdGetUniformLocation(),
-                        pWin);
-
-                    *mLocIt = osgGlGetUniformLocation(uiProgram,
-                                                      p->getName().c_str());
+                    osgUniformShaderVariableLocationSwitch(pEnv, p, *mLocIt, uiProgram);
                 }
 
                 p->evaluate(pEnv, *mLocIt);                
@@ -984,14 +967,7 @@ void ComputeShaderChunk::updateProceduralVariables(
 
                 if(*mLocIt == -1)
                 {
-                    OSGGETGLFUNCBYID_GL3_ES(
-                        glGetUniformLocation,
-                        osgGlGetUniformLocation,
-                        ShaderProgram::getFuncIdGetUniformLocation(),
-                        pWin);
-
-                    *mLocIt = osgGlGetUniformLocation(uiProgram,
-                                                      p->getName().c_str());
+                    osgUniformShaderVariableLocationSwitch(pEnv, p, *mLocIt, uiProgram);
                 }
 
                 p->evaluate(pEnv, *mLocIt);                
