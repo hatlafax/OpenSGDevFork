@@ -155,6 +155,7 @@ void osgUniformShaderVariableSwitch(DrawEnv        *pEnv,
             break;
 
         case ShaderVariable::SHVTypeUniformBlock:
+
             osgUniformShaderUniformBlockLocation(pEnv, pVar, loc, uiProgram);
             osgUniformShaderUniformBlockBinding (pEnv, pVar, loc, uiProgram, 
                                                  warnUnknown               );
@@ -179,4 +180,69 @@ void osgUniformShaderVariableSwitch(DrawEnv        *pEnv,
     }
 }
 
+void osgUniformShaderVariableLocationSwitch(DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram)
+{
+    switch(pVar->getTypeId())
+    {
+        case ShaderVariable::SHVTypeUniformBlock:
+            {
+                if(!pEnv->getWindow()->hasExtOrVersion(
+                    ShaderProgram::getExtIdUniformBufferObject(), 0x0201, 0x0200))
+                {
+                    SWARNING << "Uniform blocks are not supported, could not "
+                             << "find extension 'GL_ARB_uniform_buffer_object'!"
+                             << std::endl;
+                    return;
+                }
+
+                OSGGETGLFUNC_GL3_ES(glGetUniformBlockIndex,
+                                    osgGlGetUniformBlockIndex,
+                                    ShaderProgram::getFuncIdGetUniformBlockIndex());
+
+                loc = osgGlGetUniformBlockIndex(uiProgram, pVar->getName().c_str());
+            }
+            break;
+
+        case ShaderVariable::SHVTypeShaderStorageBlock:
+            {
+                if(!pEnv->getWindow()->hasExtOrVersion(
+                    ShaderProgram::getExtIdProgramInterfaceQuery(), 0x0402))
+                {
+                    SWARNING << "Shader Storage are not supported, could not "
+                             << "find extension 'GL_ARB_program_interface_query'!"
+                             << std::endl;
+                    return;
+                }
+
+                if(!pEnv->getWindow()->hasExtOrVersion(
+                    ShaderProgram::getExtIdShaderStorageBufferObject(), 0x0403))
+                {
+                    SWARNING << "Shader Storage are not supported, could not "
+                             << "find extension 'GL_ARB_shader_storage_buffer_object'!"
+                             << std::endl;
+                    return;
+                }
+
+                OSGGETGLFUNC_GL3_ES(glGetProgramResourceIndex,
+                                    osgGlGetProgramResourceIndex,
+                                    ShaderProgram::getFuncIdGetProgramResourceIndex());
+
+                loc = osgGlGetProgramResourceIndex(uiProgram, GL_SHADER_STORAGE_BLOCK, pVar->getName().c_str());
+            }
+            break;
+
+        default:
+            {
+                OSGGETGLFUNC_GL3_ES(glGetUniformLocation,
+                                    osgGlGetUniformLocation,
+                                    ShaderProgram::getFuncIdGetUniformLocation());
+
+                loc = osgGlGetUniformLocation(uiProgram, pVar->getName().c_str());
+            }
+            break;
+    }
+}
 OSG_END_NAMESPACE
