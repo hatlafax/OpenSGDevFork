@@ -275,6 +275,9 @@ TypeT osgMax(const TypeT lValue, const TypeT rValue);
 template <class TypeT> inline
 TypeT osgClamp(const TypeT minVal, const TypeT val, const TypeT maxVal);
 
+template <class TypeT> inline
+TypeT osgSaturate(const TypeT val);
+
 /*---------------------------------------------------------------------*/
 /*                           Equality Comparison                       */
 
@@ -403,6 +406,22 @@ std::ostream &operator<<(std::ostream &os, OSG::Int64  v);
 OSG_BASE_DLLMAPPING
 std::string getCallStack();
 
+
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+osgStep(const FloatTypeT edge, const FloatTypeT x);
+
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+osgMix(const FloatTypeT x, const FloatTypeT y, const FloatTypeT a);
+
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+SRGBToLinear(const FloatTypeT rValue);
+
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+LinearToSRGB(const FloatTypeT rValue);
 
 /*---------------------------------------------------------------------*/
 /*               big/little endian conversion functions                */

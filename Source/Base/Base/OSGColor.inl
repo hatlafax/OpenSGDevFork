@@ -389,8 +389,14 @@ const typename Color3<ValueTypeT>::ValueType *
     return this->getValues();
 }
 
-
-
+template <class ValueTypeT> inline
+bool
+    Color3<ValueTypeT>::isBlack(void) const
+{
+    return std::fabs(red  ()) < TypeTraits<T>::getDefaultEps()
+        && std::fabs(green()) < TypeTraits<T>::getDefaultEps()
+        && std::fabs(blue ()) < TypeTraits<T>::getDefaultEps();
+}
 
 template <class ValueTypeT>
 const Color4<ValueTypeT> Color4<ValueTypeT>::Null;
@@ -582,6 +588,16 @@ const typename Color4<ValueTypeT>::ValueType *
     Color4<ValueTypeT>::getValuesRGBA(void) const
 {
     return this->getValues();
+}
+
+template <class ValueTypeT> inline
+bool
+    Color4<ValueTypeT>::isBlack(void) const
+{
+    // alpha channel does not matter, black is black
+    return std::fabs(red  ()) < TypeTraits<T>::getDefaultEps()
+        && std::fabs(green()) < TypeTraits<T>::getDefaultEps()
+        && std::fabs(blue ()) < TypeTraits<T>::getDefaultEps();
 }
 
 OSG_END_NAMESPACE

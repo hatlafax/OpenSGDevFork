@@ -2084,6 +2084,19 @@ TypeT osgClamp(const TypeT minVal, const TypeT val, const TypeT maxVal)
     return ((val > minVal) ? ((val < maxVal) ? val : maxVal) : minVal);
 }
 
+/*! Restrict val to the range [0; 1], inclusive.
+
+    \param[in] val Value to clamp.
+    \return The value from the given range that is closest to val.
+
+    \ingroup GrpBaseBaseMathFn
+*/
+template <class TypeT> inline
+TypeT osgSaturate(const TypeT val)
+{
+    return ((val > TypeT(0)) ? ((val < TypeT(1)) ? val : TypeT(1)) : TypeT(0));
+}
+
 /*! \}                                                                 */
 /*---------------------------------------------------------------------*/
 /*! \name Equality Comparison                                          */
@@ -2667,6 +2680,248 @@ OSG::UInt32 getMaxIndexAbs3(const VecPntT &v)
             (osgAbs(v[0]) > osgAbs(v[2]) ? 0 : 2) :
             (osgAbs(v[1]) > osgAbs(v[2]) ? 1 : 2);
 }
+
+
+
+#ifdef OSG_GENERAL_TEMPLATE_BEFORE_SPEZ
+/*! \ingroup GrpBaseBaseMathFn
+ */
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+osgStep(const FloatTypeT edge, const FloatTypeT x)
+{
+    typedef typename TypeTraits<FloatTypeT>::RealReturnType RealType;
+
+    return  osgStep(RealType(edge), RealType(x));
+}
+#endif
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real32 osgStep(const OSG::Real32 edge, const OSG::Real32 x)
+{
+    return x < edge ? Real32(0.f) : Real32(1.f);
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real64 osgStep(const OSG::Real64 edge, const OSG::Real64 x)
+{
+    return x < edge ? Real64(0.0) : Real64(1.0);
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real128 osgStep(const OSG::Real128 edge, const OSG::Real128 x)
+{
+    return x < edge ? Real128(0.0) : Real128(1.0);
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Fixed32 osgStep(const OSG::Fixed32 edge, const OSG::Fixed32 x)
+{
+    return x < edge ? Fixed32(0.0) : Fixed32(1.0);
+}
+
+#ifndef OSG_GENERAL_TEMPLATE_BEFORE_SPEZ
+/*! \ingroup GrpBaseBaseMathFn
+ */
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+osgStep(const FloatTypeT edge, const FloatTypeT x)
+{
+    typedef typename TypeTraits<FloatTypeT>::RealReturnType RealType;
+
+    return  osgStep(RealType(edge), RealType(x));
+}
+#endif
+
+#ifdef OSG_GENERAL_TEMPLATE_BEFORE_SPEZ
+/*! \ingroup GrpBaseBaseMathFn
+ */
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+osgMix(const FloatTypeT x, const FloatTypeT y, const FloatTypeT a)
+{
+    typedef typename TypeTraits<FloatTypeT>::RealReturnType RealType;
+
+    return osgMix(RealType(x), RealType(y), RealType(a));
+}
+#endif
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real32 osgMix(const OSG::Real32 x, const OSG::Real32 y, const OSG::Real32 a)
+{
+    return x*(Real32(1.f)-a) + y*a;
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real64 osgMix(const OSG::Real64 x, const OSG::Real64 y, const OSG::Real64 a)
+{
+    return x*(Real64(1.0)-a) + y*a;
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real128 osgMix(const OSG::Real128 x, const OSG::Real128 y, const OSG::Real128 a)
+{
+    return x*(Real128(1.0)-a) + y*a;
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Fixed32 osgMix(const OSG::Fixed32 x, const OSG::Fixed32 y, const OSG::Fixed32 a)
+{
+    return x*(Fixed32(1.0)-a) + y*a;
+}
+
+#ifndef OSG_GENERAL_TEMPLATE_BEFORE_SPEZ
+/*! \ingroup GrpBaseBaseMathFn
+ */
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+osgMix(const FloatTypeT x, const FloatTypeT y, const FloatTypeT a)
+{
+    typedef typename TypeTraits<FloatTypeT>::RealReturnType RealType;
+
+    return osgMix(RealType(x), RealType(y), RealType(a));
+}
+#endif
+
+#ifdef OSG_GENERAL_TEMPLATE_BEFORE_SPEZ
+/*! \ingroup GrpBaseBaseMathFn
+ */
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+SRGBToLinear(const FloatTypeT rValue)
+{
+    typedef typename TypeTraits<FloatTypeT>::RealReturnType RealType;
+
+    return  SRGBToLinear(RealType(rValue));
+}
+#endif
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real32 SRGBToLinear(const OSG::Real32 v)
+{
+    Real32 t = osgStep(Real32(0.04045), v);
+    return osgMix(v / Real32(12.92), osgPow((v + Real32(0.055))/Real32(1.055), Real32(2.4)), t);
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real64 SRGBToLinear(const OSG::Real64 v)
+{
+    Real64 t = osgStep(Real64(0.04045), v);
+    return osgMix(v / Real64(12.92), osgPow((v + Real64(0.055))/Real64(1.055), Real64(2.4)), t);
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real128 SRGBToLinear(const OSG::Real128 v)
+{
+    Real128 t = osgStep(Real128(0.04045), v);
+    return osgMix(v / Real128(12.92), osgPow((v + Real128(0.055))/Real128(1.055), Real128(2.4)), t);
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Fixed32 SRGBToLinear(const OSG::Fixed32 v)
+{
+    Fixed32 t = osgStep(Fixed32(0.04045), v);
+    return osgMix(v / Fixed32(12.92), osgPow((v + Fixed32(0.055))/Fixed32(1.055), Fixed32(2.4)), t);
+}
+
+#ifndef OSG_GENERAL_TEMPLATE_BEFORE_SPEZ
+/*! \ingroup GrpBaseBaseMathFn
+ */
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+SRGBToLinear(const FloatTypeT rValue)
+{
+    typedef typename TypeTraits<FloatTypeT>::RealReturnType RealType;
+
+    return  SRGBToLinear(RealType(rValue));
+}
+#endif
+
+#ifdef OSG_GENERAL_TEMPLATE_BEFORE_SPEZ
+/*! \ingroup GrpBaseBaseMathFn
+ */
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+LinearToSRGB(const FloatTypeT rValue)
+{
+    typedef typename TypeTraits<FloatTypeT>::RealReturnType RealType;
+
+    return LinearToSRGB(RealType(rValue));
+}
+#endif
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real32 LinearToSRGB(const OSG::Real32 v)
+{
+    Real32 t = osgStep(Real32(0.00313067), v);
+    return osgMix(v * Real32(12.92), Real32(1.055) * osgPow(v, Real32(1.0/2.4)) - Real32(0.055), t);
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real64 LinearToSRGB(const OSG::Real64 v)
+{
+    Real64 t = osgStep(Real64(0.00313067), v);
+    return osgMix(v * Real64(12.92), Real64(1.055) * osgPow(v, Real64(1.0/2.4)) - Real64(0.055), t);
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Real128 LinearToSRGB(const OSG::Real128 v)
+{
+    Real128 t = osgStep(Real128(0.00313067), v);
+    return osgMix(v * Real128(12.92), Real128(1.055) * osgPow(v, Real128(1.0/2.4)) - Real128(0.055), t);
+}
+
+/*! \ingroup GrpBaseBaseMathFn
+ */
+inline
+OSG::Fixed32 LinearToSRGB(const OSG::Fixed32 v)
+{
+    Fixed32 t = osgStep(Fixed32(0.00313067), v);
+    return osgMix(v * Fixed32(12.92), Fixed32(1.055) * osgPow(v, Fixed32(1.0/2.4)) - Fixed32(0.055), t);
+}
+
+#ifndef OSG_GENERAL_TEMPLATE_BEFORE_SPEZ
+/*! \ingroup GrpBaseBaseMathFn
+ */
+template <class FloatTypeT> inline
+typename TypeTraits<FloatTypeT>::RealReturnType
+LinearToSRGB(const FloatTypeT rValue)
+{
+    typedef typename TypeTraits<FloatTypeT>::RealReturnType RealType;
+
+    return LinearToSRGB(RealType(rValue));
+}
+#endif
 
 #if !defined(__linux)
 /*! Sets or removes an environment variable. If the \a string is of the form
