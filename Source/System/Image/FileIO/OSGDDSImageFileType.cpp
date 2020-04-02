@@ -371,7 +371,7 @@ bool DDSImageFileType::read(      Image        *pImage,
     CDDSImage ddsImage;
     
     Int32 i,j,w,h,d, mm = 0, components, format,size;
-    Int32 width = 0, height = 0, depth = 0, numMipMaps = 0;
+    Int32 width = 0, height = 0, depth = 0, numMipMaps = 0, num_imgs = 0;
     bool isCompressed, isCubeMap, isVolume;
     UInt8 *data;
     UInt32 dataSize = 0;
@@ -386,6 +386,7 @@ bool DDSImageFileType::read(      Image        *pImage,
         isCompressed = ddsImage.is_compressed();
         isCubeMap    = ddsImage.is_cubemap();
         isVolume     = ddsImage.is_volume();
+        num_imgs     = ddsImage.get_num_images();
         
         SINFO << "cs: "   << components 
               << ", f: "  << format
@@ -463,10 +464,11 @@ bool DDSImageFileType::read(      Image        *pImage,
                     size = ddsImage[i].get_size();
                     memcpy (data, ddsImage[i].get_pixels(), size);
                     data += size;
+
+
                     for(j = 0; j < mm; ++j) 
                     {
                         size = ddsImage[i].get_mipmap(j).get_size();
-
                         memcpy (data, 
                                 ddsImage[i].get_mipmap(j).get_pixels(), 
                                 size);
