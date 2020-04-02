@@ -97,7 +97,7 @@ CounterImpl<DESC>::TypeObject                                           \
         Self::initMethod,                                               \
         Self::exitMethod,                                               \
         reinterpret_cast<InitalInsertDescFunc>(                         \
-            reinterpret_cast<void *>(&Self::classDescInserter)),        \
+            &Self::classDescInserter),                                  \
         false,                                                          \
         (ValueFieldMask),                                               \
         "",                                                             \
