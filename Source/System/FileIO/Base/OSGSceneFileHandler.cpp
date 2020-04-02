@@ -162,12 +162,13 @@ Int32 SceneFileHandlerBase::getSuffixList(std::list<const Char8 *> &suffixList,
 
 
 NodeTransitPtr SceneFileHandlerBase::read(
-          std::istream &is,
-    const Char8        *fileNameOrExtension,
-          GraphOpSeq   *graphOpSeq         ,       
-          Resolver      resolver           )
+          std::istream & is,
+    const Char8        * fileNameOrExtension,
+          GraphOpSeq   * graphOpSeq         ,       
+          Resolver       resolver           ,
+          SceneFileType* sceneFileType      )
 {
-    SceneFileType *type  = getFileType(fileNameOrExtension);
+    SceneFileType* type  = sceneFileType ? sceneFileType : getFileType(fileNameOrExtension);
     NodeUnrecPtr   scene = NULL;
 
     if(!fileNameOrExtension)
@@ -189,7 +190,7 @@ NodeTransitPtr SceneFileHandlerBase::read(
         }
         else
         {
-            if(isGZip(is))
+            if(compressible(type) && isGZip(is))
             {
                 SINFO << "Detected gzip compressed stream." << std::endl;
 
@@ -258,10 +259,12 @@ NodeTransitPtr SceneFileHandlerBase::read(
 }
 
 
-NodeTransitPtr SceneFileHandlerBase::read(const Char8      *fileName,
-                                                GraphOpSeq *graphOpSeq,       
-                                                Resolver    resolver,
-                                                bool        bWarnNotFound )
+NodeTransitPtr SceneFileHandlerBase::read(
+    const Char8        * fileName     ,
+          GraphOpSeq   * graphOpSeq   ,       
+          Resolver       resolver     ,
+          SceneFileType* sceneFileType,
+          bool           bWarnNotFound)
 {
     NodeTransitPtr returnValue(NULL);
 
@@ -279,7 +282,7 @@ NodeTransitPtr SceneFileHandlerBase::read(const Char8      *fileName,
         {
             // that's a fallback could be a url so the callback
             // can handle this correctly.
-            SceneFileType *type = getFileType(fileName);
+            SceneFileType* type = sceneFileType ? sceneFileType : getFileType(fileName);
             if(type != NULL)
             {
                 // create a dummy stream with the bad flag set.
@@ -305,7 +308,7 @@ NodeTransitPtr SceneFileHandlerBase::read(const Char8      *fileName,
     }
 
 
-    SceneFileType *type  = getFileType(fullFilePath.c_str());
+    SceneFileType* type  = sceneFileType ? sceneFileType : getFileType(fullFilePath.c_str());
     NodeUnrecPtr   scene = NULL;
 
     if(type != NULL)
@@ -316,13 +319,20 @@ NodeTransitPtr SceneFileHandlerBase::read(const Char8      *fileName,
         SINFO << "try to read " << fullFilePath
               << " as "         << type->getName() << std::endl;
 
-        std::ifstream in(fullFilePath.c_str(), std::ios::binary);
+        std::ifstream in;
+
+        if (allowStreaming(type))
+            in.open(fullFilePath.c_str(), std::ios::binary);
 
         if(in)
         {
-            scene = read(in, fullFilePath.c_str(), graphOpSeq);
+            if (!allowStreaming(type))
+                in.setstate(std::ios::badbit);
 
-            in.close();
+            scene = read(in, fullFilePath.c_str(), graphOpSeq, resolver, sceneFileType);
+
+            if (in.is_open())
+                in.close();
 
             if(scene != NULL)
             {
@@ -395,7 +405,6 @@ NodeTransitPtr SceneFileHandlerBase::read(const Char8      *fileName,
     return NodeTransitPtr(scene);
 }
 
-
 void SceneFileHandlerBase::setReadCB(FileIOReadCBF fp)
 {
     _readFP = fp;
@@ -406,13 +415,15 @@ SceneFileHandlerBase::FileIOReadCBF SceneFileHandlerBase::getReadCB(void)
     return _readFP;
 }
 
-bool SceneFileHandlerBase::write(Node         * const  node,
-                                 std::ostream         &os,
-                                 Char8          const *fileNameOrExtension,
-                                 bool                  compress           )
+bool SceneFileHandlerBase::write(
+    Node* const    node,
+    std::ostream&  os,
+    Char8 const*   fileNameOrExtension,
+    bool           compress,
+    SceneFileType* sceneFileType)
 {
     bool           retCode = false;
-    SceneFileType *type    = getFileType(fileNameOrExtension);
+    SceneFileType* type    = sceneFileType ? sceneFileType : getFileType(fileNameOrExtension);
 
     if(type != NULL)
     {
@@ -426,7 +437,7 @@ bool SceneFileHandlerBase::write(Node         * const  node,
         }
         else
         {
-            if(compress == true)
+            if(compress == true && compressible(type))
             {
 #ifdef OSG_WITH_ZLIB
                 SINFO << "writing compressed stream." << std::endl;
@@ -456,12 +467,14 @@ bool SceneFileHandlerBase::write(Node         * const  node,
     return retCode;
 }
 
-bool SceneFileHandlerBase::write(Node  * const  node,
-                                 Char8   const *fileName,
-                                 bool           compress)
+bool SceneFileHandlerBase::write(
+    Node* const    node,
+    Char8 const*   fileName,
+    bool           compress,
+    SceneFileType* sceneFileType)
 {
     bool           retCode = false;
-    SceneFileType *type    = getFileType(fileName);
+    SceneFileType* type    = sceneFileType ? sceneFileType : getFileType(fileName);
 
     if(type != NULL)
     {
@@ -474,12 +487,20 @@ bool SceneFileHandlerBase::write(Node  * const  node,
               << type->getName()
               << std::endl;
 
-        std::ofstream out(fileName, std::ios::binary);
+        std::ofstream out;
+
+        if (allowStreaming(type))
+            out.open(fileName, std::ios::binary);
 
         if(out)
         {
-            retCode = write(node, out, fileName, compress);
-            out.close();
+            if (!allowStreaming(type))
+                out.setstate(std::ios::badbit);
+
+            retCode = write(node, out, fileName, compress, sceneFileType);
+
+            if (out.is_open())
+                out.close();
         }
         else
         {
@@ -596,6 +617,16 @@ GraphOpSeq *SceneFileHandlerBase::getDefaultGraphOp(void)
 void SceneFileHandlerBase::setDefaultGraphOp(GraphOpSeq *graphOpSeq)
 {
     setRefd(_defaultgraphOpSeq, graphOpSeq);
+}
+
+MaterialManager* SceneFileHandlerBase::getMaterialManager(void)
+{
+    return _materialManager;
+}
+
+void SceneFileHandlerBase::setMaterialManager(MaterialManager* manager)
+{
+    _materialManager = manager;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -859,8 +890,8 @@ static bool initializeDefaultGraphOps(void)
 {
     GraphOpSeqRefPtr ops = GraphOpSeq::create();
 
-    ops->setGraphOps(
-            "Stripe() SharePtr(includes=Material,StateChunk)");
+    //ops->setGraphOps(
+    //        "Stripe() SharePtr(includes=Material,StateChunk)");
 
     SceneFileHandlerBase *the = SceneFileHandler::the();
     
@@ -893,7 +924,8 @@ SceneFileHandlerBase::SceneFileHandlerBase(void) :
     _defaultPathHandler(              ),
     _readFP            (NULL          ),
     _writeFP           (NULL          ),
-    _oGlobalResolver   (NULL          )
+    _oGlobalResolver   (NULL          ),
+    _materialManager   (NULL          )
 {
     _progressData.length = 0;
     _progressData.is = NULL;
