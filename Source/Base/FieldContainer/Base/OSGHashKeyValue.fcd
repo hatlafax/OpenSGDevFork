@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+
+<FieldContainer
+   name="HashKeyValue"
+   parent="FieldContainer"
+   library="Base"
+   structure="concrete"
+   pointerfieldtypes="both"
+   systemcomponent="true"
+   parentsystemcomponent="true"
+   docGroupBase="GrpBaseFieldContainer"
+>
+  <Field
+	 name="key"
+	 type="UInt64"
+	 cardinality="single"
+	 visibility="external"
+	 access="public"
+         defaultValue="0"
+	 >
+  </Field>
+  <Field
+	 name="value"
+	 type="FieldContainerPtr"
+	 cardinality="single"
+	 visibility="external"
+	 access="public"
+         defaultValue="NULL"
+	 >
+  </Field>
+</FieldContainer>
