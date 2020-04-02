@@ -46,4 +46,16 @@ void GeoVectorBufferRefProperty::setGLId(UInt32 uiGLId)
     Inherited::setGLId(uiGLId);
 }
 
+inline
+UInt32 GeoVectorBufferRefProperty::getOglGLId(void) const
+{
+    return Inherited::getGLId();
+}
+
+inline
+void GeoVectorBufferRefProperty::setOglGLId(UInt32 uiGLId)
+{
+    Inherited::setGLId(uiGLId);
+}
+
 OSG_END_NAMESPACE

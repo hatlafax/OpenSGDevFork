@@ -74,6 +74,31 @@ OSG::UInt16 GeoVectorBufferRefPropertyBase::getClassGroupId(void)
 
 /*------------------------------ get -----------------------------------*/
 
+//! Get the value of the GeoVectorBufferRefProperty::_sfOsgGLId field.
+
+inline
+UInt32 &GeoVectorBufferRefPropertyBase::editOsgGLId(void)
+{
+    editSField(OsgGLIdFieldMask);
+
+    return _sfOsgGLId.getValue();
+}
+
+//! Get the value of the GeoVectorBufferRefProperty::_sfOsgGLId field.
+inline
+      UInt32  GeoVectorBufferRefPropertyBase::getOsgGLId(void) const
+{
+    return _sfOsgGLId.getValue();
+}
+
+//! Set the value of the GeoVectorBufferRefProperty::_sfOsgGLId field.
+inline
+void GeoVectorBufferRefPropertyBase::setOsgGLId(const UInt32 value)
+{
+    editSField(OsgGLIdFieldMask);
+
+    _sfOsgGLId.setValue(value);
+}
 
 
 #ifdef OSG_MT_CPTR_ASPECT
@@ -85,6 +110,9 @@ void GeoVectorBufferRefPropertyBase::execSync (      GeoVectorBufferRefPropertyB
                                   const UInt32             uiSyncInfo)
 {
     Inherited::execSync(pFrom, whichField, oOffsets, syncMode, uiSyncInfo);
+
+    if(FieldBits::NoField != (OsgGLIdFieldMask & whichField))
+        _sfOsgGLId.syncWith(pFrom->_sfOsgGLId);
 }
 #endif
 
