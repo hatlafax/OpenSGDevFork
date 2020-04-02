@@ -49,11 +49,11 @@ OSG_BEGIN_NAMESPACE
 /*! \brief State chunk for cubic textures. See \ref 
            PageSystemCubeTextureObjChunk for a description.
     \ingroup GrpStateOpenGLObj
-    \ingroup GrpLibOSGState
+    \ingroup GrpLibOSGSstem
     \includebasedoc
  */
 
-class OSG_STATE_DLLMAPPING CubeTextureObjChunk : public CubeTextureObjChunkBase
+class OSG_SYSTEM_DLLMAPPING CubeTextureObjChunk : public CubeTextureObjChunkBase
 {
     /*==========================  PUBLIC  =================================*/
 

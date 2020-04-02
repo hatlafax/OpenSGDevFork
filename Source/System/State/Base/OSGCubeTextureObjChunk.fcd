@@ -3,13 +3,13 @@
 <FieldContainer
    name="CubeTextureObjChunk"
    parent="TextureObjChunk"
-   library="State"
+   library="System"
    pointerfieldtypes="both"
    structure="concrete"
    systemcomponent="true"
    parentsystemcomponent="true"
    decoratable="false"
-   docGroupBase="GrpStateOpenGL"
+   docGroupBase="GrpSystemState"
    >
   See \ref PageSystemCubeTextureObjChunk for a description.
 

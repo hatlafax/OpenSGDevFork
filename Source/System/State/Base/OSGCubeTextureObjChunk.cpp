@@ -359,7 +359,17 @@ void CubeTextureObjChunk::activate(DrawEnv *pEnv, UInt32 idx)
 
     pEnv->setActiveTexTarget(idx, GL_TEXTURE_CUBE_MAP_ARB);
 
-    glEnable(GL_TEXTURE_CUBE_MAP_ARB);
+    Real32 ntexunits = win->getConstantValue(GL_MAX_TEXTURE_UNITS_ARB);
+
+    // sgi doesn't support GL_MAX_TEXTURE_UNITS_ARB!
+    if(ntexunits == Window::unknownConstant)
+        ntexunits = 1.0f;
+
+    if(idx < static_cast<UInt32>(ntexunits))
+    {
+        glEnable(GL_TEXTURE_CUBE_MAP_ARB);
+    }
+
     glErr("CubeTextureObjChunk::activate");
 }
 
@@ -499,7 +509,16 @@ void CubeTextureObjChunk::deactivate(DrawEnv *pEnv, UInt32 idx)
 
     TextureBaseChunk::activateTexture(win, idx);
 
-    glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+    Real32 ntexunits = win->getConstantValue(GL_MAX_TEXTURE_UNITS_ARB);
+
+    // sgi doesn't support GL_MAX_TEXTURE_UNITS_ARB!
+    if(ntexunits == Window::unknownConstant)
+        ntexunits = 1.0f;
+
+    if(idx < static_cast<UInt32>(ntexunits))
+    {
+        glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+    }
 
     pEnv->setActiveTexTarget(idx, GL_NONE);
 
