@@ -60,10 +60,9 @@ void LiSPSMTechnique::setCamView(const Matrix& matrix, const View& view)
 }
 
 inline
-void LiSPSMTechnique::setCamProjMat(const Matrix& matrix, Projection::Type type)
+void LiSPSMTechnique::setCamProjMat(const Matrix& matrix)
 {
     _cProjMat = matrix;
-    _cType    = type;
 }
 
 inline
