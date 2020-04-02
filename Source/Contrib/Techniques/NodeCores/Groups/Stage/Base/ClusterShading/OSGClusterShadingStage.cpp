@@ -75,6 +75,11 @@
 #include "OSGComputeShaderAlgorithm.h"
 #include "OSGAlgorithmComputeElement.h"
 
+#include "OSGChunkOverrideGroup.h"
+#include "OSGMaterialChunkOverrideGroup.h"
+#include "OSGMaterialGroup.h"
+#include "OSGMultiLightGroup.h"
+
 OSG_BEGIN_NAMESPACE
 
 // Documentation for this class is emitted in the
@@ -192,58 +197,202 @@ void ClusterShadingStage::dump(      UInt32    ,
 
 Action::ResultE ClusterShadingStage::renderEnter(Action* action)
 {
+    if (getActivate() == false)
+        return Group::renderEnter(action);
+
+    Action::ResultE returnValue = Action::Continue;
+
     RenderAction* a = dynamic_cast<RenderAction*>(action);
+    if (a == NULL)
+        return returnValue;
 
-    if(a != NULL)
+    //
+    // Search for an appropriate MultiLightChunk. If not found we have nothing to do.
+    //
+    bool result = findMultiLightChunk(a->getActNode());
+    if (!result)
+        return returnValue;
+
+    // this->pushPartition(a, RenderPartition::CopyAll); ???
+
+    RenderPartition* pPart = a->getActivePartition();
+
+    DrawEnv& oDrawEnv = pPart->getDrawEnv();
+
+    Int32 iVPLeft   = oDrawEnv.getPixelLeft();
+    Int32 iVPBottom = oDrawEnv.getPixelBottom();
+    Int32 iVPWidth  = oDrawEnv.getPixelWidth();
+    Int32 iVPHeight = oDrawEnv.getPixelHeight();
+
+    this->updateData(a, iVPLeft, iVPBottom, iVPWidth, iVPHeight);
+
+    ClusterShadingStageDataUnrecPtr pData = a->getData<ClusterShadingStageData *>(_iDataSlotId);
+
+    //
+    // Perform the computation
+    //
+    if (!getDisabled())
     {
-// ???       this->pushPartition(a, RenderPartition::CopyAll);
-
-        RenderPartition* pPart = a->getActivePartition();
-
-        DrawEnv& oDrawEnv = pPart->getDrawEnv();
-
-        Int32 iVPLeft   = oDrawEnv.getPixelLeft();
-        Int32 iVPBottom = oDrawEnv.getPixelBottom();
-        Int32 iVPWidth  = oDrawEnv.getPixelWidth();
-        Int32 iVPHeight = oDrawEnv.getPixelHeight();
-
-        this->updateData(a, iVPLeft, iVPBottom, iVPWidth, iVPHeight);
-
-        ClusterShadingStageDataUnrecPtr pData = a->getData<ClusterShadingStageData *>(_iDataSlotId);
-
-        //
-        // Perform the computation
-        //
-        if (!getDisabled())
-        {
-            //std::cout << "compute shader..." << std::endl;
-            this->recurse(action, getFrustNode());
-            a->useNodeList(false);
-        }
-
-        a->pushState();
-
-        a->addOverride(       getMultiLightChunk                ()->getClassId() + getLightBindingPnt(),                         getMultiLightChunk());
-        a->addOverride(       getShaderProgChunk                ()->getClassId(),                                                getShaderProgChunk());
-        a->addOverride(pData->getLightGridTexImgChunkFS         ()->getClassId() + getLightGridBindingPnt(),              pData->getLightGridTexImgChunkFS());
-        a->addOverride(pData->getAffectedLightIndexListSSBOChunk()->getClassId() + getAffectedLightIndexListBindingPnt(), pData->getAffectedLightIndexListSSBOChunk());
-        a->addOverride(pData->getLightIndexListSSBOChunk        ()->getClassId() + getLightIndexListBindingPnt(),         pData->getLightIndexListSSBOChunk());
-        a->addOverride(pData->getCullClusterDatUBOChunk         ()->getClassId() + getClusterDataBindingPnt(),            pData->getCullClusterDatUBOChunk());
-
-        this->recurseFromThis(a);
+        //std::cout << "compute shader..." << std::endl;
+        this->recurse(action, getFrustNode());
         a->useNodeList(false);
-
-        a->popState();
-
-// ???       this->popPartition(a);
     }
+
+    a->pushState();
+
+    a->addOverride(       getMultiLightChunk                ()->getClassId() + getLightBindingPnt(),                         getMultiLightChunk());
+    a->addOverride(       getShaderProgChunk                ()->getClassId(),                                                getShaderProgChunk());
+    a->addOverride(pData->getLightGridTexImgChunkFS         ()->getClassId() + getLightGridBindingPnt(),              pData->getLightGridTexImgChunkFS());
+    a->addOverride(pData->getAffectedLightIndexListSSBOChunk()->getClassId() + getAffectedLightIndexListBindingPnt(), pData->getAffectedLightIndexListSSBOChunk());
+    a->addOverride(pData->getLightIndexListSSBOChunk        ()->getClassId() + getLightIndexListBindingPnt(),         pData->getLightIndexListSSBOChunk());
+    a->addOverride(pData->getCullClusterDatUBOChunk         ()->getClassId() + getClusterDataBindingPnt(),            pData->getCullClusterDatUBOChunk());
+
+    this->recurseFromThis(a);
+    a->useNodeList(false);
+
+    a->popState();
+
+    // this->popPartition(a); ???
 
     return Action::Skip;
 }
 
 Action::ResultE ClusterShadingStage::renderLeave(Action *action)
 {
+    if (getActivate() == false)
+        return Group::renderLeave(action);
+
     return Action::Skip;
+}
+
+//
+// Search for a valid MultiLightChunk in the parent tree. We assume that the
+// MultiLightChunk is either part of a ChunkMaterial or that it is part of
+// a MultiLightGroup in the parent tree. We do not search downward!
+//
+bool ClusterShadingStage::findMultiLightChunk(Node* node)
+{
+    if (getMultiLightChunk() == NULL)
+    {
+        MultiLightChunk* pChunk = NULL;
+
+        while (node != NULL && pChunk == NULL)
+        {
+            NodeCore* core = node->getCore();
+            if (core)
+            {
+                pChunk = findMultiLightChunk(core);
+                if (pChunk)
+                {
+                    setMultiLightChunk(pChunk);
+                    return true;
+                }
+            }
+            node = node->getParent();
+        }
+
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+MultiLightChunk* ClusterShadingStage::findMultiLightChunk(NodeCore* core)
+{
+    MultiLightChunk* pChunk = NULL;
+
+    if (core->getType().isDerivedFrom(MultiCore::getClassType()))
+    {
+        MultiCore* pCore = dynamic_cast<MultiCore*>(core);
+
+        MultiCore::MFCoresType::const_iterator cIt  = pCore->getMFCores()->begin();
+        MultiCore::MFCoresType::const_iterator cEnd = pCore->getMFCores()->end();
+
+        for (; cIt != cEnd; ++cIt)
+        {
+            pChunk = findMultiLightChunk(*cIt);
+            if (pChunk)
+                break;
+        }
+    }
+    else
+    {
+        if (core->getType().isDerivedFrom(MultiLightGroup::getClassType()))
+        {
+            MultiLightGroup* group = dynamic_cast<MultiLightGroup*>(core);
+            pChunk = group->getMultiLightChunk();
+
+            //
+            // If we have found a MultiLightGroup we sync with its light
+            // binding point.
+            //
+            setLightBindingPnt(group->getLightBindingPnt());
+        }
+        else
+        if (core->getType().isDerivedFrom(MaterialGroup::getClassType()))
+        {
+            MaterialGroup* group = dynamic_cast<MaterialGroup*>(core);
+            pChunk = findMultiLightChunk(group->getMaterial());
+        }
+        else
+        if (core->getType().isDerivedFrom(MaterialChunkOverrideGroup::getClassType()))
+        {
+            MaterialChunkOverrideGroup* group = dynamic_cast<MaterialChunkOverrideGroup*>(core);
+            pChunk = findMultiLightChunk(group->getMaterial());
+        }
+        else
+        if (core->getType().isDerivedFrom(ChunkOverrideGroup::getClassType()))
+        {
+            ChunkOverrideGroup* group = dynamic_cast<ChunkOverrideGroup*>(core);
+
+            if (group->getSubOverride() == false)
+            {
+                ChunkBlock* pBlock = group->finalize(0x0000);
+                if (pBlock != NULL)
+                {
+                    MFUnrecStateChunkPtr::const_iterator chIt   = pBlock->beginChunks();
+                    MFUnrecStateChunkPtr::const_iterator chEnd  = pBlock->endChunks  ();
+
+                    while (chIt != chEnd)
+                    {
+                        if (*chIt != NULL && (*chIt)->getIgnore() == false)
+                        {
+                            if (group->getSubOverride() == false)
+                            {
+                                pChunk = dynamic_cast<MultiLightChunk*>(*chIt);
+                                if (pChunk)
+                                    break;
+                            }
+                        }
+
+                        ++chIt;
+                    }
+                }
+            }
+        }
+    }
+    return pChunk;
+}
+
+MultiLightChunk* ClusterShadingStage::findMultiLightChunk(Material* material)
+{
+    MultiLightChunk* pChunk = NULL;
+
+    if (material->getType().isDerivedFrom(ChunkMaterial::getClassType()))
+    {
+        ChunkMaterial* chunkMat = dynamic_cast<ChunkMaterial*>(material);
+        UInt32 numChunks = static_cast<UInt32>(chunkMat->getMFChunks()->size());
+        for (UInt32 i = 0; i < numChunks; ++i)
+        {
+            pChunk = dynamic_cast<MultiLightChunk*>(chunkMat->getChunk(i));
+            if (pChunk)
+                break;
+        }
+    }
+
+    return pChunk;
 }
 
 /*------------------------------ Data -------------------------------------*/
@@ -1844,7 +1993,7 @@ void ClusterShadingStage::calc_affected_lights(
     Real32 n = nlt.z();
     Real32 f = flt.z();
 
-    UInt32 numLights = getMultiLightChunk()->numLights();
+    UInt32 numLights = getMultiLightChunk()->getNumLights();
 
     //
     // We do need the eye space positions and directions of the lights 
@@ -2103,7 +2252,7 @@ std::string ClusterShadingStage::get_persp_frustum_cp_program()
     << endl << ""
     << endl << "const vec3 eyePos = vec3(0, 0, 0);"
     << endl << ""
-    << endl << "Plane computePlane(in const vec3 p0, in const vec3 p1, in const vec3 p2)"
+    << endl << "Plane computePlane(const in vec3 p0, const in vec3 p1, const in vec3 p2)"
     << endl << "{"
     << endl << "    Plane plane;"
     << endl << ""
@@ -2116,7 +2265,7 @@ std::string ClusterShadingStage::get_persp_frustum_cp_program()
     << endl << "    return plane;"
     << endl << "}"
     << endl << ""
-    << endl << "vec4 ndcFromScreen(in const vec3 p_w)"
+    << endl << "vec4 ndcFromScreen(const in vec3 p_w)"
     << endl << "{"
     << endl << "    return vec4("
     << endl << "                2.0 * (p_w.x - dispatchData.viewport.x) / dispatchData.viewport[2] - 1.0,"
@@ -2202,7 +2351,7 @@ std::string ClusterShadingStage::get_ortho_frustum_cp_program()
     << endl << ""
     << getFrustumProgSnippet()
     << endl << ""
-    << endl << "Plane computePlane(in const vec3 p0, in const vec3 p1, in const vec3 p2)"
+    << endl << "Plane computePlane(const in vec3 p0, const in vec3 p1, const in vec3 p2)"
     << endl << "{"
     << endl << "    Plane plane;"
     << endl << ""
@@ -2215,7 +2364,7 @@ std::string ClusterShadingStage::get_ortho_frustum_cp_program()
     << endl << "    return plane;"
     << endl << "}"
     << endl << ""
-    << endl << "vec4 ndcFromScreen(in const vec3 p_w)"
+    << endl << "vec4 ndcFromScreen(const in vec3 p_w)"
     << endl << "{"
     << endl << "    return vec4("
     << endl << "                2.0 * (p_w.x - dispatchData.viewport.x) / dispatchData.viewport[2] - 1.0,"
@@ -2301,7 +2450,7 @@ std::string ClusterShadingStage::get_light_culling_cp_program()
     << endl << ""
     << endl << "const int tile_size = " << tile_size << ";"
     << endl << ""
-    << getMultiLightChunk()->getLightProgSnippet()
+    << getMultiLightChunk()->getFragmentProgramSnippet(false, true)
     << endl << ""
     << endl << "//"
     << endl << "// matTransf is the world to view matrix"
@@ -2363,8 +2512,8 @@ std::string ClusterShadingStage::get_light_culling_cp_program()
     << endl << "// Check to see if a sphere is fully behind (inside the negative halfspace of) a plane."
     << endl << "//"
     << endl << "bool sphereInsidePlane("
-    << endl << "    in const Sphere sphere,"
-    << endl << "    in const Plane plane)"
+    << endl << "    const in Sphere sphere,"
+    << endl << "    const in Plane plane)"
     << endl << "{"
     << endl << "    float val = dot(plane.N, sphere.c) - plane.d;"
     << endl << "    return val < -sphere.r;"
@@ -2374,10 +2523,10 @@ std::string ClusterShadingStage::get_light_culling_cp_program()
     << endl << "// Check to see of a light is partially contained within the frustum."
     << endl << "//"
     << endl << "bool sphereInsideFrustum("
-    << endl << "    in const Sphere sphere,"
-    << endl << "    in const Frustum frustum,"
-    << endl << "    in const float zNear,"
-    << endl << "    in const float zFar)"
+    << endl << "    const in Sphere sphere,"
+    << endl << "    const in Frustum frustum,"
+    << endl << "    const in float zNear,"
+    << endl << "    const in float zFar)"
     << endl << "{"
     << endl << "    bool result = true;"
     << endl << ""
@@ -2401,8 +2550,8 @@ std::string ClusterShadingStage::get_light_culling_cp_program()
     << endl << "// Check to see if a point is fully behind (inside the negative halfspace of) a plane."
     << endl << "//"
     << endl << "bool pointInsidePlane("
-    << endl << "    in const vec3 p,"
-    << endl << "    in const Plane plane)"
+    << endl << "    const in vec3 p,"
+    << endl << "    const in Plane plane)"
     << endl << "{"
     << endl << "    float val = dot(plane.N, p) - plane.d;"
     << endl << "    return val < 0;"
@@ -2412,8 +2561,8 @@ std::string ClusterShadingStage::get_light_culling_cp_program()
     << endl << "// Check to see if a cone if fully behind (inside the negative halfspace of) a plane."
     << endl << "//"
     << endl << "bool coneInsidePlane("
-    << endl << "    in const Cone cone,"
-    << endl << "    in const Plane plane)"
+    << endl << "    const in Cone cone,"
+    << endl << "    const in Plane plane)"
     << endl << "{"
     << endl << "    // Compute the farthest point on the end of the cone to the positive space of the plane."
     << endl << "    vec3 m = cross(cross(plane.N, cone.d), cone.d);"
@@ -2427,10 +2576,10 @@ std::string ClusterShadingStage::get_light_culling_cp_program()
     << endl << "}"
     << endl << ""
     << endl << "bool coneInsideFrustum("
-    << endl << "    in const Cone cone,"
-    << endl << "    in const Frustum frustum,"
-    << endl << "    in const float zNear,"
-    << endl << "    in const float zFar)"
+    << endl << "    const in Cone cone,"
+    << endl << "    const in Frustum frustum,"
+    << endl << "    const in float zNear,"
+    << endl << "    const in float zFar)"
     << endl << "{"
     << endl << "    bool result = true;"
     << endl << ""
@@ -2474,7 +2623,7 @@ std::string ClusterShadingStage::get_light_culling_cp_program()
     << endl << "// this cluster. That is we have to increment the sharedLightCount and"
     << endl << "// to append the light_idx to the sharedLightIndexList."
     << endl << "// "
-    << endl << "void appendLight(in const uint light_idx)"
+    << endl << "void appendLight(const in uint light_idx)"
     << endl << "{"
     << endl << "    uint idx = atomicAdd(sharedLightCount, 1);"
     << endl << "    if (idx < 1024)"
@@ -2508,10 +2657,10 @@ std::string ClusterShadingStage::get_light_culling_cp_program()
     << endl << "    {"
     << endl << "        uint light_index = " << getAffectedLightIndexListVariableName() << ".idx[i];"
     << endl << ""
-    << endl << "        if (" << getMultiLightChunk()->getLightVariableName() << ".light[light_index].enabled)"
-    << endl << "        {"
-    << endl << "            Light light = " << getMultiLightChunk()->getLightVariableName() << ".light[light_index];"
+    << endl << "        Light light = " << getMultiLightChunk()->getLightVariableName() << ".light[light_index];"
     << endl << ""
+    << endl << "        if (light.enabled)"
+    << endl << "        {"
     << endl << "            switch (light.type)"
     << endl << "            {"
     << endl << "                case DIRECTIONAL_LIGHT:"
@@ -2539,7 +2688,20 @@ std::string ClusterShadingStage::get_light_culling_cp_program()
     << endl << "                    vec4 position  = dispatchData.matTransf * vec4(light.position,  1.0);"
     << endl << "                    vec4 direction = dispatchData.matTransf * vec4(light.direction, 0.0);"
     << endl << ""
+    ;
+    if (getMultiLightChunk()->getHasTanSpotlightAngle())
+    {
+        ost
+    << endl << "                    float radius = light.tanSpotlightAngle * light.rangeCutOff;"
+        ;
+    }
+    else
+    {
+        ost
     << endl << "                    float radius = tan(light.spotlightAngle) * light.rangeCutOff;"
+        ;
+    }
+    ost
     << endl << "                    Cone cone = { position.xyz, light.rangeCutOff, direction.xyz, radius };"
     << endl << ""
     << endl << "                    if (coneInsideFrustum(cone, sharedFrustum, sharedFrustumZ.x, sharedFrustumZ.y))"
@@ -2624,7 +2786,7 @@ std::string ClusterShadingStage::get_fragment_cp_program()
 
     ost
     << endl << ""
-    //<< getMultiLightChunk()->getLightProgSnippet()
+    //<< getMultiLightChunk()->getFragmentProgramSnippet(false, true)
     //<< endl << ""
     //<< getClusteringProgSnippet()
     //<< endl << ""
@@ -2650,7 +2812,6 @@ std::string ClusterShadingStage::getDispatchProgSnippet() const
     << endl << "    uvec4 viewport;"
     << endl << "    ivec2 numTiles;"
     << endl << "} dispatchData;"
-    << endl
     ;
 
     return ost.str();
@@ -2717,11 +2878,11 @@ std::string ClusterShadingStage::getClusteringProgSnippet(bool is_frag_shader) c
     {
         ost
         //<< endl << "float cluster_z("
-        //<< endl << "    in const uint  k,      // cluster coordinate, 0 <= k <= c"
-        //<< endl << "    in const float n,      // near plane distance from viewer n > 0"
-        //<< endl << "    in const float f,      //  far plane distance from viewer f > n > 0"
-        //<< endl << "    in const float D,      // near plane offset"
-        //<< endl << "    in const int   c)      // number of cluster planes"
+        //<< endl << "    const in uint  k,      // cluster coordinate, 0 <= k <= c"
+        //<< endl << "    const in float n,      // near plane distance from viewer n > 0"
+        //<< endl << "    const in float f,      //  far plane distance from viewer f > n > 0"
+        //<< endl << "    const in float D,      // near plane offset"
+        //<< endl << "    const in int   c)      // number of cluster planes"
         //<< endl << "{"
         //<< endl << "    if (k == 0)  return -n;"
         //<< endl << "    if (k > c-1) return -f;"
@@ -2731,12 +2892,12 @@ std::string ClusterShadingStage::getClusteringProgSnippet(bool is_frag_shader) c
         //<< endl << "}"
         //<< endl << ""
         << endl << "float cluster_z("
-        << endl << "    in const uint  k,      // cluster coordinate, 0 <= k <= c"
-        << endl << "    in const float n,      // near plane distance from viewer n > 0"
-        << endl << "    in const float f,      //  far plane distance from viewer f > n > 0"
-        << endl << "    in const float nD,     // near plane distance from viewer plus offset, nD = n+D with n > 0, D > 0"
-        << endl << "    in const float b,      // factor log2(f/(n+D))/(c-1)"
-        << endl << "    in const int c_1)      // number of cluster planes"
+        << endl << "    const in uint  k,      // cluster coordinate, 0 <= k <= c"
+        << endl << "    const in float n,      // near plane distance from viewer n > 0"
+        << endl << "    const in float f,      //  far plane distance from viewer f > n > 0"
+        << endl << "    const in float nD,     // near plane distance from viewer plus offset, nD = n+D with n > 0, D > 0"
+        << endl << "    const in float b,      // factor log2(f/(n+D))/(c-1)"
+        << endl << "    const in int c_1)      // number of cluster planes"
         << endl << "{"
         << endl << "    if (k == 0)  return -n;"
         << endl << "    if (k > c_1) return -f;"
@@ -2778,11 +2939,11 @@ std::string ClusterShadingStage::getClusteringProgSnippet(bool is_frag_shader) c
         << endl << "//      k = c-1                                             if z_e <= -f"
         << endl << "//"
         //<< endl << "int cluster_k("
-        //<< endl << "    in const float z_e,    // eye space z-position, z_e < 0"
-        //<< endl << "    in const float n,      // near plane distance from viewer n > 0"
-        //<< endl << "    in const float f,      //  far plane distance from viewer f > n > 0"
-        //<< endl << "    in const float D,      // near plane offset"
-        //<< endl << "    in const int   c)      // number of cluster planes"
+        //<< endl << "    const in float z_e,    // eye space z-position, z_e < 0"
+        //<< endl << "    const in float n,      // near plane distance from viewer n > 0"
+        //<< endl << "    const in float f,      //  far plane distance from viewer f > n > 0"
+        //<< endl << "    const in float D,      // near plane offset"
+        //<< endl << "    const in int   c)      // number of cluster planes"
         //<< endl << "{"
         //<< endl << "    if (z_e >= -(n+D)) return 0;"
         //<< endl << "    if (z_e <= -f)     return c-1;"
@@ -2792,12 +2953,12 @@ std::string ClusterShadingStage::getClusteringProgSnippet(bool is_frag_shader) c
         //<< endl << "}"
         //<< endl << ""
         << endl << "int cluster_k("
-        << endl << "    in const float z_e,  // eye space z-position, z_e < 0"
-        << endl << "    in const float nD,   // near plane distance plus the offset D from viewer n > 0, D > 0"
-        << endl << "    in const float lg_nD,// log2(nD)"
-        << endl << "    in const float f,    //  far plane distance from viewer f > n > 0"
-        << endl << "    in const float a,    // (c-1)/log2(f/(n+D))"
-        << endl << "    in const int   c_1)  // number of cluster planes minus 1"
+        << endl << "    const in float z_e,  // eye space z-position, z_e < 0"
+        << endl << "    const in float nD,   // near plane distance plus the offset D from viewer n > 0, D > 0"
+        << endl << "    const in float lg_nD,// log2(nD)"
+        << endl << "    const in float f,    //  far plane distance from viewer f > n > 0"
+        << endl << "    const in float a,    // (c-1)/log2(f/(n+D))"
+        << endl << "    const in int   c_1)  // number of cluster planes minus 1"
         << endl << "{"
         << endl << "    if (z_e >= -nD) return 0;"
         << endl << "    if (z_e <= -f)  return c_1;"
@@ -2820,8 +2981,8 @@ std::string ClusterShadingStage::getClusteringProgSnippet(bool is_frag_shader) c
         << endl << "//      out    : 3D image coordinate"
         << endl << "//"
         << endl << "ivec3 gridAccessor("
-        << endl << "    in const vec2  p_w,"
-        << endl << "    in const float z_e)"
+        << endl << "    const in vec2  p_w,"
+        << endl << "    const in float z_e)"
         << endl << "{"
         << endl << "    ivec2 q_w = ivec2(p_w - vec2(0.5, 0.5));"
         << endl << "    int k = cluster_k(z_e, " 
@@ -2841,17 +3002,14 @@ std::string ClusterShadingStage::getClusteringProgSnippet(bool is_frag_shader) c
         << endl << "//      out    : (light index list start position, number of lights)"
         << endl << "//"
         << endl << "uvec2 getGridData("
-        << endl << "    in const vec2  p_w,"
-        << endl << "    in const float z_e)"
+        << endl << "    const in vec2  p_w,"
+        << endl << "    const in float z_e)"
         << endl << "{"
         << endl << "    ivec3 accessor = gridAccessor(p_w, z_e);"
         << endl << "    return imageLoad(" << getLightGridVariableName() << ", accessor).xy;"
         << endl << "}"
         ;
     }
-    ost
-    << endl
-    ;
 
     return ost.str();
 }
@@ -2884,7 +3042,6 @@ std::string ClusterShadingStage::getFrustumProgSnippet() const
     << endl << "{"
     << endl << "    Frustum frustum[];"
     << endl << "} frustums;"
-    << endl
     ;
 
     return ost.str();
@@ -2916,13 +3073,12 @@ std::string ClusterShadingStage::getLightIndexProgSnippet() const
     << endl << "{"
     << endl << "    uint idx[];"
     << endl << "} " << getLightIndexListVariableName() << ";"
-    << endl
     ;
 
     return ost.str();
 }
 
-std::string ClusterShadingStage::getFragmentProgramSnippet() const
+std::string ClusterShadingStage::getFragmentProgramSnippet(bool add_attenuation_code, bool add_ubo_code) const
 {
     using namespace std;
 
@@ -2932,7 +3088,7 @@ std::string ClusterShadingStage::getFragmentProgramSnippet() const
     << endl << "//"
     << endl << "//-- ClusterShadingStage::getFragmentProgramSnippet() --"
     << endl << "//"
-    << getMultiLightChunk()->getLightProgSnippet()
+    << getMultiLightChunk()->getFragmentProgramSnippet(add_attenuation_code, add_ubo_code)
     << endl << ""
     << getClusteringProgSnippet(true)
     << endl << ""
@@ -2940,7 +3096,6 @@ std::string ClusterShadingStage::getFragmentProgramSnippet() const
     << endl << ""
     << endl << "//------------------------------------------------------"
     << endl << ""
-    << endl
     ;
 
     return ost.str();

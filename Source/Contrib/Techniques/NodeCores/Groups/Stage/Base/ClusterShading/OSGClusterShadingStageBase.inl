@@ -74,6 +74,31 @@ OSG::UInt16 ClusterShadingStageBase::getClassGroupId(void)
 
 /*------------------------------ get -----------------------------------*/
 
+//! Get the value of the ClusterShadingStage::_sfActivate field.
+
+inline
+bool &ClusterShadingStageBase::editActivate(void)
+{
+    editSField(ActivateFieldMask);
+
+    return _sfActivate.getValue();
+}
+
+//! Get the value of the ClusterShadingStage::_sfActivate field.
+inline
+      bool  ClusterShadingStageBase::getActivate(void) const
+{
+    return _sfActivate.getValue();
+}
+
+//! Set the value of the ClusterShadingStage::_sfActivate field.
+inline
+void ClusterShadingStageBase::setActivate(const bool value)
+{
+    editSField(ActivateFieldMask);
+
+    _sfActivate.setValue(value);
+}
 //! Get the value of the ClusterShadingStage::_sfBlockSize field.
 
 inline
@@ -685,6 +710,9 @@ void ClusterShadingStageBase::execSync (      ClusterShadingStageBase *pFrom,
                                   const UInt32             uiSyncInfo)
 {
     Inherited::execSync(pFrom, whichField, oOffsets, syncMode, uiSyncInfo);
+
+    if(FieldBits::NoField != (ActivateFieldMask & whichField))
+        _sfActivate.syncWith(pFrom->_sfActivate);
 
     if(FieldBits::NoField != (BlockSizeFieldMask & whichField))
         _sfBlockSize.syncWith(pFrom->_sfBlockSize);

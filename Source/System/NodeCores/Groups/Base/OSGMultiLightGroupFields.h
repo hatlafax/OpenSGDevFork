@@ -48,14 +48,14 @@
 \*****************************************************************************/
 
 
-#ifndef _OSGCLUSTERSHADINGSTAGEFIELDS_H_
-#define _OSGCLUSTERSHADINGSTAGEFIELDS_H_
+#ifndef _OSGMULTILIGHTGROUPFIELDS_H_
+#define _OSGMULTILIGHTGROUPFIELDS_H_
 #ifdef __sgi
 #pragma once
 #endif
 
 #include "OSGConfig.h"
-#include "OSGContribTechniquesDef.h"
+#include "OSGSystemDef.h"
 
 #include "OSGFieldContainerFields.h"
 #include "OSGPointerSField.h"
@@ -65,15 +65,15 @@
 OSG_BEGIN_NAMESPACE
 
 
-class ClusterShadingStage;
+class MultiLightGroup;
 
-OSG_GEN_CONTAINERPTR(ClusterShadingStage);
-/*! \ingroup GrpContribTechniquesFieldTraits
-    \ingroup GrpLibOSGContribTechniques
+OSG_GEN_CONTAINERPTR(MultiLightGroup);
+/*! \ingroup GrpSystemFieldTraits
+    \ingroup GrpLibOSGSystem
  */
 template <>
-struct FieldTraits<ClusterShadingStage *, nsOSG> :
-    public FieldTraitsFCPtrBase<ClusterShadingStage *, nsOSG>
+struct FieldTraits<MultiLightGroup *, nsOSG> :
+    public FieldTraitsFCPtrBase<MultiLightGroup *, nsOSG>
 {
   private:
 
@@ -81,11 +81,11 @@ struct FieldTraits<ClusterShadingStage *, nsOSG> :
 
   public:
 
-    typedef FieldTraits<ClusterShadingStage *, nsOSG>  Self;
+    typedef FieldTraits<MultiLightGroup *, nsOSG>  Self;
 
     enum                        { Convertible = NotConvertible };
 
-    static OSG_CONTRIBTECHNIQUES_DLLMAPPING DataType &getType(void);
+    static OSG_SYSTEM_DLLMAPPING DataType &getType(void);
 
     template<typename RefCountPolicy> inline
     static const Char8    *getSName     (void);
@@ -96,120 +96,120 @@ struct FieldTraits<ClusterShadingStage *, nsOSG> :
 };
 
 template<> inline
-const Char8 *FieldTraits<ClusterShadingStage *, nsOSG>::getSName<RecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<MultiLightGroup *, nsOSG>::getSName<RecordedRefCountPolicy>(void)
 {
-    return "SFRecClusterShadingStagePtr"; 
+    return "SFRecMultiLightGroupPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<ClusterShadingStage *, nsOSG>::getSName<UnrecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<MultiLightGroup *, nsOSG>::getSName<UnrecordedRefCountPolicy>(void)
 {
-    return "SFUnrecClusterShadingStagePtr"; 
+    return "SFUnrecMultiLightGroupPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<ClusterShadingStage *, nsOSG>::getSName<WeakRefCountPolicy>(void)
+const Char8 *FieldTraits<MultiLightGroup *, nsOSG>::getSName<WeakRefCountPolicy>(void)
 {
-    return "SFWeakClusterShadingStagePtr"; 
+    return "SFWeakMultiLightGroupPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<ClusterShadingStage *, nsOSG>::getSName<NoRefCountPolicy>(void)
+const Char8 *FieldTraits<MultiLightGroup *, nsOSG>::getSName<NoRefCountPolicy>(void)
 {
-    return "SFUnrefdClusterShadingStagePtr"; 
+    return "SFUnrefdMultiLightGroupPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<ClusterShadingStage *, nsOSG>::getMName<RecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<MultiLightGroup *, nsOSG>::getMName<RecordedRefCountPolicy>(void)
 {
-    return "MFRecClusterShadingStagePtr"; 
+    return "MFRecMultiLightGroupPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<ClusterShadingStage *, nsOSG>::getMName<UnrecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<MultiLightGroup *, nsOSG>::getMName<UnrecordedRefCountPolicy>(void)
 {
-    return "MFUnrecClusterShadingStagePtr"; 
+    return "MFUnrecMultiLightGroupPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<ClusterShadingStage *, nsOSG>::getMName<WeakRefCountPolicy>(void)
+const Char8 *FieldTraits<MultiLightGroup *, nsOSG>::getMName<WeakRefCountPolicy>(void)
 {
-    return "MFWeakClusterShadingStagePtr"; 
+    return "MFWeakMultiLightGroupPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<ClusterShadingStage *, nsOSG>::getMName<NoRefCountPolicy>(void)
+const Char8 *FieldTraits<MultiLightGroup *, nsOSG>::getMName<NoRefCountPolicy>(void)
 {
-    return "MFUnrefdClusterShadingStagePtr"; 
+    return "MFUnrefdMultiLightGroupPtr"; 
 }
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-/*! \ingroup GrpContribTechniquesFieldSFields */
-typedef PointerSField<ClusterShadingStage *,
-                      RecordedRefCountPolicy, nsOSG  > SFRecClusterShadingStagePtr;
-/*! \ingroup GrpContribTechniquesFieldSFields */
-typedef PointerSField<ClusterShadingStage *,
-                      UnrecordedRefCountPolicy, nsOSG> SFUnrecClusterShadingStagePtr;
-/*! \ingroup GrpContribTechniquesFieldSFields */
-typedef PointerSField<ClusterShadingStage *,
-                      WeakRefCountPolicy, nsOSG      > SFWeakClusterShadingStagePtr;
-/*! \ingroup GrpContribTechniquesFieldSFields */
-typedef PointerSField<ClusterShadingStage *,
-                      NoRefCountPolicy, nsOSG        > SFUncountedClusterShadingStagePtr;
+/*! \ingroup GrpSystemFieldSFields */
+typedef PointerSField<MultiLightGroup *,
+                      RecordedRefCountPolicy, nsOSG  > SFRecMultiLightGroupPtr;
+/*! \ingroup GrpSystemFieldSFields */
+typedef PointerSField<MultiLightGroup *,
+                      UnrecordedRefCountPolicy, nsOSG> SFUnrecMultiLightGroupPtr;
+/*! \ingroup GrpSystemFieldSFields */
+typedef PointerSField<MultiLightGroup *,
+                      WeakRefCountPolicy, nsOSG      > SFWeakMultiLightGroupPtr;
+/*! \ingroup GrpSystemFieldSFields */
+typedef PointerSField<MultiLightGroup *,
+                      NoRefCountPolicy, nsOSG        > SFUncountedMultiLightGroupPtr;
 
 
-/*! \ingroup GrpContribTechniquesFieldMFields */
-typedef PointerMField<ClusterShadingStage *,
-                      RecordedRefCountPolicy, nsOSG  > MFRecClusterShadingStagePtr;
-/*! \ingroup GrpContribTechniquesFieldMFields */
-typedef PointerMField<ClusterShadingStage *,
-                      UnrecordedRefCountPolicy, nsOSG> MFUnrecClusterShadingStagePtr;
-/*! \ingroup GrpContribTechniquesFieldMFields */
-typedef PointerMField<ClusterShadingStage *,
-                      WeakRefCountPolicy, nsOSG      > MFWeakClusterShadingStagePtr;
-/*! \ingroup GrpContribTechniquesFieldMFields */
-typedef PointerMField<ClusterShadingStage *,
-                      NoRefCountPolicy, nsOSG        > MFUncountedClusterShadingStagePtr;
+/*! \ingroup GrpSystemFieldMFields */
+typedef PointerMField<MultiLightGroup *,
+                      RecordedRefCountPolicy, nsOSG  > MFRecMultiLightGroupPtr;
+/*! \ingroup GrpSystemFieldMFields */
+typedef PointerMField<MultiLightGroup *,
+                      UnrecordedRefCountPolicy, nsOSG> MFUnrecMultiLightGroupPtr;
+/*! \ingroup GrpSystemFieldMFields */
+typedef PointerMField<MultiLightGroup *,
+                      WeakRefCountPolicy, nsOSG      > MFWeakMultiLightGroupPtr;
+/*! \ingroup GrpSystemFieldMFields */
+typedef PointerMField<MultiLightGroup *,
+                      NoRefCountPolicy, nsOSG        > MFUncountedMultiLightGroupPtr;
 
 
 
 
 #else // these are the doxygen hacks
 
-/*! \ingroup GrpContribTechniquesFieldSFields \ingroup GrpLibOSGContribTechniques */
-struct SFRecClusterShadingStagePtr : 
-    public PointerSField<ClusterShadingStage *,
+/*! \ingroup GrpSystemFieldSFields \ingroup GrpLibOSGSystem */
+struct SFRecMultiLightGroupPtr : 
+    public PointerSField<MultiLightGroup *,
                          RecordedRefCountPolicy> {};
-/*! \ingroup GrpContribTechniquesFieldSFields \ingroup GrpLibOSGContribTechniques */
-struct SFUnrecClusterShadingStagePtr : 
-    public PointerSField<ClusterShadingStage *,
+/*! \ingroup GrpSystemFieldSFields \ingroup GrpLibOSGSystem */
+struct SFUnrecMultiLightGroupPtr : 
+    public PointerSField<MultiLightGroup *,
                          UnrecordedRefCountPolicy> {};
-/*! \ingroup GrpContribTechniquesFieldSFields \ingroup GrpLibOSGContribTechniques */
-struct SFWeakClusterShadingStagePtr :
-    public PointerSField<ClusterShadingStage *,
+/*! \ingroup GrpSystemFieldSFields \ingroup GrpLibOSGSystem */
+struct SFWeakMultiLightGroupPtr :
+    public PointerSField<MultiLightGroup *,
                          WeakRefCountPolicy> {};
-/*! \ingroup GrpContribTechniquesFieldSFields \ingroup GrpLibOSGContribTechniques */
-struct SFUncountedClusterShadingStagePtr :
-    public PointerSField<ClusterShadingStage *,
+/*! \ingroup GrpSystemFieldSFields \ingroup GrpLibOSGSystem */
+struct SFUncountedMultiLightGroupPtr :
+    public PointerSField<MultiLightGroup *,
                          NoRefCountPolicy> {};
 
 
-/*! \ingroup GrpContribTechniquesFieldMFields \ingroup GrpLibOSGContribTechniques */
-struct MFRecClusterShadingStagePtr :
-    public PointerMField<ClusterShadingStage *,
+/*! \ingroup GrpSystemFieldMFields \ingroup GrpLibOSGSystem */
+struct MFRecMultiLightGroupPtr :
+    public PointerMField<MultiLightGroup *,
                          RecordedRefCountPolicy  > {};
-/*! \ingroup GrpContribTechniquesFieldMFields \ingroup GrpLibOSGContribTechniques */
-struct MFUnrecClusterShadingStagePtr :
-    public PointerMField<ClusterShadingStage *,
+/*! \ingroup GrpSystemFieldMFields \ingroup GrpLibOSGSystem */
+struct MFUnrecMultiLightGroupPtr :
+    public PointerMField<MultiLightGroup *,
                          UnrecordedRefCountPolicy> {};
-/*! \ingroup GrpContribTechniquesFieldMFields \ingroup GrpLibOSGContribTechniques */
-struct MFWeakClusterShadingStagePtr :
-    public PointerMField<ClusterShadingStage *,
+/*! \ingroup GrpSystemFieldMFields \ingroup GrpLibOSGSystem */
+struct MFWeakMultiLightGroupPtr :
+    public PointerMField<MultiLightGroup *,
                          WeakRefCountPolicy      > {};
-/*! \ingroup GrpContribTechniquesFieldMFields \ingroup GrpLibOSGContribTechniques */
-struct MFUncountedClusterShadingStagePtr :
-    public PointerMField<ClusterShadingStage *,
+/*! \ingroup GrpSystemFieldMFields \ingroup GrpLibOSGSystem */
+struct MFUncountedMultiLightGroupPtr :
+    public PointerMField<MultiLightGroup *,
                          NoRefCountPolicy        > {};
 
 
@@ -218,4 +218,4 @@ struct MFUncountedClusterShadingStagePtr :
 
 OSG_END_NAMESPACE
 
-#endif /* _OSGCLUSTERSHADINGSTAGEFIELDS_H_ */
+#endif /* _OSGMULTILIGHTGROUPFIELDS_H_ */

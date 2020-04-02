@@ -92,6 +92,16 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ClusterShadingStage : public ClusterShadi
                       const BitVector  bvFlags  = 0) const;
 
     /*! \}                                                                 */
+
+    /*---------------------------------------------------------------------*/
+    /*! \name                     Output                                   */
+    /*! \{                                                                 */
+
+    bool                findMultiLightChunk (Node* node);
+    MultiLightChunk*    findMultiLightChunk (NodeCore* core);
+    MultiLightChunk*    findMultiLightChunk (Material* material);
+
+    /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                        Data                                  */
     /*! \{                                                                 */
@@ -109,12 +119,11 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ClusterShadingStage : public ClusterShadi
                     Int32         iVPHeight);
 
     /*! \}                                                                 */
-
     /*---------------------------------------------------------------------*/
     /*! \name            Shader Program Snippets                           */
     /*! \{                                                                 */
 
-    std::string getFragmentProgramSnippet       () const;
+    std::string getFragmentProgramSnippet       (bool add_attenuation_code, bool add_ubo_code) const;
 
     std::string getClusteringProgSnippet        (bool is_frag_shader = true) const;
     std::string getFrustumProgSnippet           () const;

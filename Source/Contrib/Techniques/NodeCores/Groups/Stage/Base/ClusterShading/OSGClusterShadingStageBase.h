@@ -65,7 +65,7 @@
 
 #include "OSGStage.h" // Parent
 
-#include "OSGSysFields.h"               // BlockSize type
+#include "OSGSysFields.h"               // Activate type
 #include "OSGBaseFields.h"              // AffectedLightIndexListBlockName type
 #include "OSGNodeFields.h"              // FrustNode type
 #include "OSGAlgorithmComputeElementFields.h" // FrustAlgoElement type
@@ -100,7 +100,8 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ClusterShadingStageBase : public Stage
 
     enum
     {
-        BlockSizeFieldId = Inherited::NextFieldId,
+        ActivateFieldId = Inherited::NextFieldId,
+        BlockSizeFieldId = ActivateFieldId + 1,
         TileSizeFieldId = BlockSizeFieldId + 1,
         NumClusterZFieldId = TileSizeFieldId + 1,
         NearPlaneOffsetFieldId = NumClusterZFieldId + 1,
@@ -135,6 +136,8 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ClusterShadingStageBase : public Stage
         NextFieldId = ShaderProgChunkFieldId + 1
     };
 
+    static const OSG::BitVector ActivateFieldMask =
+        (TypeTraits<BitVector>::One << ActivateFieldId);
     static const OSG::BitVector BlockSizeFieldMask =
         (TypeTraits<BitVector>::One << BlockSizeFieldId);
     static const OSG::BitVector TileSizeFieldMask =
@@ -202,6 +205,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ClusterShadingStageBase : public Stage
     static const OSG::BitVector NextFieldMask =
         (TypeTraits<BitVector>::One << NextFieldId);
         
+    typedef SFBool            SFActivateType;
     typedef SFUInt32          SFBlockSizeType;
     typedef SFUInt32          SFTileSizeType;
     typedef SFUInt32          SFNumClusterZType;
@@ -258,6 +262,9 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ClusterShadingStageBase : public Stage
     /*! \name                    Field Get                                 */
     /*! \{                                                                 */
 
+
+                  SFBool              *editSFActivate       (void);
+            const SFBool              *getSFActivate        (void) const;
 
                   SFUInt32            *editSFBlockSize      (void);
             const SFUInt32            *getSFBlockSize       (void) const;
@@ -333,6 +340,9 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ClusterShadingStageBase : public Stage
             const SFUnrecMultiLightChunkPtr *getSFMultiLightChunk(void) const;
                   SFUnrecMultiLightChunkPtr *editSFMultiLightChunk(void);
 
+
+                  bool                &editActivate       (void);
+                  bool                 getActivate        (void) const;
 
                   UInt32              &editBlockSize      (void);
                   UInt32               getBlockSize       (void) const;
@@ -413,6 +423,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ClusterShadingStageBase : public Stage
     /*! \name                    Field Set                                 */
     /*! \{                                                                 */
 
+            void setActivate       (const bool value);
             void setBlockSize      (const UInt32 value);
             void setTileSize       (const UInt32 value);
             void setNumClusterZ    (const UInt32 value);
@@ -502,6 +513,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ClusterShadingStageBase : public Stage
     /*! \name                      Fields                                  */
     /*! \{                                                                 */
 
+    SFBool            _sfActivate;
     SFUInt32          _sfBlockSize;
     SFUInt32          _sfTileSize;
     SFUInt32          _sfNumClusterZ;
@@ -562,6 +574,8 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ClusterShadingStageBase : public Stage
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
+     GetFieldHandlePtr  getHandleActivate        (void) const;
+     EditFieldHandlePtr editHandleActivate       (void);
      GetFieldHandlePtr  getHandleBlockSize       (void) const;
      EditFieldHandlePtr editHandleBlockSize      (void);
      GetFieldHandlePtr  getHandleTileSize        (void) const;

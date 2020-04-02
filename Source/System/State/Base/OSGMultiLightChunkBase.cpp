@@ -82,34 +82,260 @@ OSG_BEGIN_NAMESPACE
     in form of a buffer in OpenGL std430 layout format.
     A shader, binding a shader storage block to the very same binding point, 
     is expected to respect the corresponding block layout. The layout is regulated
-    by the hasXXX fields of the chunk. If one is set to false the corresponding
-    struct entry is omitted.
+    by the feature field of the chunk. If a feature is not set the corresponding struct
+    entries are omitted. The feature attribute is protected, but getter and setters for 
+    each feature are publicly provided.
+
+    The following features are supported:
+
+    HAS_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX
+    This flag determines if the matLSFromWS attribute is part of 
+    the shader storage block, i.e. if the "mat4  matLSFromWS;" 
+    entry is contained in the shader struct for the Light.
+
+    HAS_WORLD_SPACE_FROM_LIGHT_SPACE_MATRIX
+    This flag determines if the matWSFromLS attribute is part of 
+    the shader storage block, i.e. if the "mat4  matWSFromLS;" 
+    entry is contained in the shader struct for the Light.
+
+    HAS_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX
+    This flag determines if the matLSFromES attribute is part of 
+    the shader storage block, i.e. if the "mat4  matLSFromES;" 
+    entry is contained in the shader struct for the Light.
+    Attention: If this flag is set the light shader storage block has to
+    be updated with every redraw operation.
+
+    HAS_EYE_SPACE_FROM_LIGHT_SPACE_MATRIX
+    This flag determines if the matESFromLS attribute is part of 
+    the shader storage block, i.e. if the "mat4  matESFromLS;" 
+    entry is contained in the shader struct for the Light.
+    Attention: If this flag is set the light shader storage block has to
+    be updated with every redraw operation.
+
+    HAS_PROJECTION_MATRIX
+    This flag determines if the matProjection attribute is part of 
+    the shader storage block, i.e. if the "mat4  matProjection;" 
+    entry is contained in the shader struct for the Light.
+    Implicitely set the hasProjection flag.
+
+    HAS_INV_PROJECTION_MATRIX
+    This flag determines if the matInvProjection attribute is part of 
+    the shader storage block, i.e. if the "mat4  matInvProjection;" 
+    entry is contained in the shader struct for the Light.
+    Implicitely set the hasProjection flag.
+
+    HAS_PROJECTION_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX
+    This flag determines if the matProjLSFromWS attribute is part of 
+    the shader storage block, i.e. if the "mat4  matProjLSFromWS;" 
+    entry is contained in the shader struct for the Light.
+    Implicitely set the hasProjection flag.
+
+    HAS_INV_PROJECTION_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX
+    This flag determines if the matInvProjLSFromWS attribute is part of 
+    the shader storage block, i.e. if the "mat4  matInvProjLSFromWS;" 
+    entry is contained in the shader struct for the Light.
+    Implicitely set the hasProjection flag.
+
+    HAS_PROJECTION_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX
+    This flag determines if the matProjLSFromES attribute is part of 
+    the shader storage block, i.e. if the "mat4  matProjLSFromES;" 
+    entry is contained in the shader struct for the Light.
+    Implicitely set the hasProjection flag.
+
+    HAS_INV_PROJECTION_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX
+    This flag determines if the matInvProjLSFromES attribute is part of 
+    the shader storage block, i.e. if the "mat4  matInvProjLSFromES;" 
+    entry is contained in the shader struct for the Light.
+    Implicitely set the hasProjection flag.
+
+    HAS_INTENSITY
+    This flag determines if the color intensity attribute is part of the shader storage block, i.e.
+    if the "vec3 intensity;" entry is contained in the shader struct for the Light.
+
+    HAS_SEPARATE_INTENSITIES
+    This flag determines if the color intensity attributes are part of the shader storage block, i.e.
+    if the "vec3  Ia;", "vec3  Id;" and "vec3 Is;" entries are contained in the shader struct for the Light.
+
+    HAS_ATTENUATION
+    This flag determines if the attenuation attributes are part of the shader storage block, i.e.
+    if the "float constantAttenuation;", "float linearAttenuation;" and "float quadraticAttenuation;"
+    entries are contained in the shader struct for the Light.
+
+    HAS_DECAY_ATTENUATION
+    This flag determines if the attenuation decay attribute  is also part of the shader storage block, i.e.
+    if the "float decayAttenuation" entry is contained in the shader struct for the Light.
+
+    AUTO_CALC_RANGES
+    If this flag is active and the lights have attenuations, then the cut on and cut off ranges
+    are automatically calculated. They are, however, not provided automatically to the shader.
+    For that, you have to set the hasRangeCutOn and hasRangeCutOff flags, respectively.
+
+    HAS_RANGE_CUT_ON
+    This flag determines if the rangeCutOn attribute is part of the shader storage block, i.e.
+    if the "float rangeCutOn;" entry is contained in the shader struct for the Light.
+
+    HAS_RANGE_CUT_OFF
+    This flag determines if the hasRangeCutOff attribute is part of the shader storage block, i.e.
+    if the "float hasRangeCutOff;" entry is contained in the shader struct for the Light.
+
+    HAS_RANGE_NEAR_ZONE
+    This flag determines if the hasRangeNearZone attribute is part of the shader storage block, i.e.
+    if the "float hasRangeNearZone;" entry is contained in the shader struct for the Light.
+
+    HAS_RANGE_FAR_ZONE
+    This flag determines if the hasRangeFarZone attribute is part of the shader storage block, i.e.
+    if the "float hasRangeFarZone;" entry is contained in the shader struct for the Light.
+
+    HAS_SPOTLIGHT_ANGLE
+    This flag determines if the spot light angle attribute is part of the shader storage block, i.e.
+    if the "float spotlightAngle;" entry is contained in the shader struct for the Light.
+    If neither this flag nor the hasCosSpotlightAngle flag is true, then the hasCosSpotlightAngle 
+    flag is treated as if it has value true.
+
+    HAS_COS_SPOTLIGHT_ANGLE
+    This flag determines if the cosine spot light angle attribute is part of the shader storage block, i.e.
+    if the "float cosSpotlightAngle;" entry is contained in the shader struct for the Light.
+    If neither this flag nor the hasSpotlightAngle flag is true, then this flag is treated as if it 
+    has value true.
+
+    HAS_SPOTLIGHT_EXPONENT
+    This flag determines if the spot expenent attribute is part of the shader storage block, i.e.
+    if the "float spotlightExponent;" entry is contained in the shader struct for the Light.
+
+    HAS_SPOTLIGHT_PENUMBRA_ANGLE
+    This flag determines if the spot penumbra angle attribute is part of the shader storage block, i.e.
+    if the "float cosPenumbraCone;" entry is contained in the shader struct for the Light.
+
+    HAS_SPOTLIGHT_PENUMBRA_FACTOR
+    This flag determines if the spot penumbra angle attribute is part of the shader storage block, i.e.
+    if the "float cosPenumbraCone;" entry is contained in the shader struct for the Light. This flag
+    additionally, determines that the penumbra angle is calculated from the spot light cone angle.
+
+    HAS_SPOTLIGHT_PENUMBRA_FROSTBITE
+    This flag determines if the spot light attributes are given in the Frostbite optimized model in the 
+    shader storage block, i.e. if the "float spotScale;"  and "float spotOffset;" entries are contained
+    in the shader struct for the Light.
+
+    HAS_CINEMA_LIGHT
+    This flag determines if the cinema light attributes are part of the shader storage block, i.e.
+    if the "float innerSuperEllipsesWidth;", ... entries are contained in the shader struct for the Light.
+    If true this flag overrides the hasRangeCutOn, hasRangeCutOff, hasRangeNearZone and hasRangeFarZone
+    flags, because cinema lights are described the corresponding attributes.
+    See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html
+    http://www.yaldex.com/open-gl/ch12lev1sec4.html
+    https://en.wikipedia.org/wiki/Superellipse
+
+    HAS_SHADOW
+    This flag determines if the multi light supports shadowing. Is set to true the boolean
+    shadow flag, the shadowIntensity and the shadow index are added to the light struct.
+
+    HAS_GLOBAL_AMBIENT_INTENSITY
+    This flag determines if the multi light supports a global ambient light state, i.e. if a vec3 global color
+    entry 'ambientLight' exists in the light buffer which is to be added to the single light ambient intensities.
+
+    HAS_LENGTH_FACTOR
+    This flag determines if the multi light supports a global length factor light state, i.e. if a float 'lengthFactor'
+    exists in the light buffer which is used for distance attenuation calculations.
+
+    HAS_PROJECTION
+    This flag determines if the multi light contains a projection matrix for each light, that is whether
+    storage is provided for the projection matrix. It does not decide whether a struct entry for the light
+    in the shader is generated. For that use the dedicated hasProjectionMatrix, hasInvProjectionMatrix,
+    hasProjectionLightSpaceFromWorldSpaceMatrix, hasInvProjectionLightSpaceFromWorldSpaceMatrix,
+    hasProjectionLightSpaceFromEyeSpaceMatrix, hasInvProjectionLightSpaceFromEyeSpaceMatrix
+    flags. Usage of these, however, implicitely set this hasProjection flag.
+    Additionally, the projection matrix is not automatically calculated. That is the duty of the user of the
+    chunk. Typically, the multi light shadow stage does take responsibiltiy for the proper calculation and
+    setting the projection matrix.
+
+    EYE_SPACE
+    The lights position and direction are transformed to eye space before loading into the shader. 
+    On default they are provided in world space.
+
+    The following code features are supported:
+    CODE_DISTANCE_ATTENUATION_CLASSIC
+    The classic OpenGL attenuation function is added to the light code snippet.
+
+    CODE_DISTANCE_ATTENUATION_PHYSICAL
+    A physically based attenuation function is added to the light code snippet.
+
+    CODE_DISTANCE_ATTENUATION_DECAY
+    A physically based attenuation function is added to the light code snippet.
+    An additional decay parameter is used by the function.
+
+    CODE_DISTANCE_ATTENUATION_MIX_PHYSICAL
+    A physically based attenuation function is added to the light code snippet that
+    also respect the classic OpenGL attenuation parameters.
+
+    CODE_DISTANCE_ATTENUATION_MIX_DECAY
+    A physically based attenuation function is added to the light code snippet that
+    also respect the classic OpenGL attenuation parameters.
+    An additional decay parameter is used by the function.
+
+    CODE_DISTANCE_ATTENUATION_SMOOTH_HERMITE
+    An attenuation function based on Hermitian smoothing is added to the light code snippet.
+
+    CODE_SPOT_ATTENUATION_CLASSIC
+    The classic OpenGL spot attenuation function is added to the light code snippet.
+    This model uses the cosine cutoff angle and the spot exponent parameter.
+
+    CODE_SPOT_ATTENUATION_SMOOTH_HERMITE
+    A spot attenuation function based on Hermitian smoothing is added to the light code snippet.
+    This model uses the cosine cutoff angle.
+
+    CODE_SPOT_ATTENUATION_SMOOTH_HERMITE_2
+    A spot attenuation function based on Hermitian smoothing is added to the light code snippet.
+    This model uses the cosine cutoff angle and the cosine penumbra angle.
+
+    CODE_SPOT_ATTENUATION_FROSTBITE
+    A spot attenuation function based in accodrance to the Frostbite engine model.
+    This optimized model uses a scale factor and an offset value.
+    scale  := 1.0f / max (0.001f, (penumbraCos  - coneCos));
+    offset := -coneCos * scale;
+
+    Following is the light structure shown that is valid if all layout features are activated. Usually,
+    one is working only with a part of these members. Some members are expected to be set by the application
+    programmer and some are set by internal machinery of OpenSG.
+
+    struct GlobalLight
+    {
+    vec3  ambientIntensity;
+    }
 
     struct Light
     {
-    mat4  worldToLightSpaceMatrix;
-    mat4  lightToWorldSpaceMatrix;
-    mat4  eyeToLightSpaceMatrix;
-    mat4  lightToEyeSpaceMatrix;
-    mat4  lightPerspectiveMatrix;
-    mat4  invLightPerspectiveMatrix;
+    mat4  matLSFromWS;
+    mat4  matWSFromLS;
+    mat4  matLSFromES;
+    mat4  matESFromLS;
+    mat4  matProjection;
+    mat4  matInvProjection;
+    mat4  matProjLSFromWS;
+    mat4  matInvProjLSFromWS;
+    mat4  matProjLSFromES;
+    mat4  matInvProjLSFromES;
     vec3  position;
     vec3  direction;
-    vec3  color;
     vec3  ambientIntensity;
     vec3  diffuseIntensity;
     vec3  specularIntensity;
-    float intensity;
+    vec3  intensity;
     float constantAttenuation;
     float linearAttenuation;
     float quadraticAttenuation;
+    float decayAttenuation;
+    float lengthFactor;
     float rangeCutOn;
     float rangeCutOff;
     float rangeNearZone;
     float rangeFarZone;
     float cosSpotlightAngle;
+    float tanSpotlightAngle;
     float spotlightAngle;
-    float spotExponent;
+    float spotlightExponent;
+    float spotlightScale;
+    float spotlightOffset;
+    float cosSpotlightPenumbraAngle;
     float innerSuperEllipsesWidth;
     float innerSuperEllipsesHeight;
     float outerSuperEllipsesWidth;
@@ -118,11 +344,15 @@ OSG_BEGIN_NAMESPACE
     float superEllipsesTwist;
     int   type;
     bool  enabled;
+    bool  shadow;
+    int   shadowDataIndex;
+    int   shadowParameterIndex;
     };
 
     layout (std430) buffer Lights
     {
-    Light light[];
+    GlobalLight global;
+    Light       light[];
     } lights;
 
     The chunk provides a convenient function that allows to adjust the struct layout
@@ -139,7 +369,7 @@ OSG_BEGIN_NAMESPACE
     float linearAttenuation;
     float quadraticAttenuation;
     float cosSpotlightAngle;
-    float spotExponent;
+    float spotlightExponent;
     int   type;
     bool  enabled;
     };
@@ -150,8 +380,7 @@ OSG_BEGIN_NAMESPACE
     {
     vec3  position;
     vec3  direction;
-    vec3  color;
-    float intensity;
+    vec3  intensity;
     float rangeCutOff;
     float cosSpotlightAngle;
     int   type;
@@ -163,118 +392,22 @@ OSG_BEGIN_NAMESPACE
  *                        Field Documentation                              *
 \***************************************************************************/
 
-/*! \var bool            MultiLightChunkBase::_sfHasWorldToLightSpaceMatrix
-    This flag determines if the worldToLightSpaceMatrix attribute is part of 
-    the shader storage block, i.e. if the "mat4  worldToLightSpaceMatrix;" 
-    entry is contained in the shader struct for the Light.
+/*! \var UInt32          MultiLightChunkBase::_sfFeature
+    This value determines the set of attributes that the light struct encompasses.
+    Some technique classes, e.g. the 'MultiLightShadowTechniqueSimple', automatically
+    set some additional features that they need for their proper operation.
+    The application programmer is expected to use the special 'getFragmentProgramSnippet()'
+    function in order to get a compatible light structure layout for his shader.
+    See the shadow examples for illustration.
 */
 
-/*! \var bool            MultiLightChunkBase::_sfHasLightToWorldSpaceMatrix
-    This flag determines if the lightToWorldSpaceMatrix attribute is part of 
-    the shader storage block, i.e. if the "mat4  lightToWorldSpaceMatrix;" 
-    entry is contained in the shader struct for the Light.
+/*! \var UInt32          MultiLightChunkBase::_sfCodeFeature
+    This value determines the set of attributes that governs the code generation
+    process for the multi light.
 */
 
-/*! \var bool            MultiLightChunkBase::_sfHasEyeToLightSpaceMatrix
-    This flag determines if the eyeToLightSpaceMatrix attribute is part of 
-    the shader storage block, i.e. if the "mat4  eyeToLightSpaceMatrix;" 
-    entry is contained in the shader struct for the Light.
-    Attention: If this flag is set the light shader storage block has to
-    be updated with every redraw operation.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasLightToEyeSpaceMatrix
-    This flag determines if the lightToEyeSpaceMatrix attribute is part of 
-    the shader storage block, i.e. if the "mat4  lightToEyeSpaceMatrix;" 
-    entry is contained in the shader struct for the Light.
-    Attention: If this flag is set the light shader storage block has to
-    be updated with every redraw operation.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasLightPerspectiveMatrix
-    This flag determines if the lightPerspectiveMatrix attribute is part of 
-    the shader storage block, i.e. if the "mat4  lightPerspectiveMatrix;" 
-    entry is contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasInvLightPerspectiveMatrix
-    This flag determines if the lightToEyeSpaceMatrix attribute is part of 
-    the shader storage block, i.e. if the "mat4  invLightToEyeSpaceMatrix;" 
-    entry is contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasColor
-    This flag determines if the color attribute is part of the shader storage block, i.e.
-    if the "vec3  color;" entry is contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasIntensity
-    This flag determines if the intensity attribute is part of the shader storage block, i.e.
-    if the "float intensity;" entry is contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasSeparateIntensities
-    This flag determines if the color intensity attributes are part of the shader storage block, i.e.
-    if the "vec3  Ia;", "vec3  Id;" and "vec3 Is;" entries are contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasAttenuation
-    This flag determines if the attenuation attributes are part of the shader storage block, i.e.
-    if the "float constantAttenuation;", "float linearAttenuation;" and "float quadraticAttenuation;"
-    entries are contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfAutoCalcRanges
-    If this flag is active and the lights have attenuations, then the cut on and cut off ranges
-    are automatically calculated. They are, however, not provided automatically to the shader.
-    For that, you have to set the hasRangeCutOn and hasRangeCutOff flags, respectively.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasRangeCutOn
-    This flag determines if the rangeCutOn attribute is part of the shader storage block, i.e.
-    if the "float rangeCutOn;" entry is contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasRangeCutOff
-    This flag determines if the hasRangeCutOff attribute is part of the shader storage block, i.e.
-    if the "float hasRangeCutOff;" entry is contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasRangeNearZone
-    This flag determines if the hasRangeNearZone attribute is part of the shader storage block, i.e.
-    if the "float hasRangeNearZone;" entry is contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasRangeFarZone
-    This flag determines if the hasRangeFarZone attribute is part of the shader storage block, i.e.
-    if the "float hasRangeFarZone;" entry is contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasCosSpotlightAngle
-    This flag determines if the cosine of the spot light angle attribute is part of the shader storage block, i.e.
-    if the "float  cosSpotlightAngle;" entry is contained in the shader struct for the Light. If neither this flag
-    nor the hasSpotlightAngle flag is true, then this flag is treated as if it has value true.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasSpotlightAngle
-    This flag determines if the spot light angle attribute is part of the shader storage block, i.e.
-    if the "float  spotlightAngle;" entry is contained in the shader struct for the Light. If neither this flag
-    nor the hasCosSpotlightAngle flag is true, then the hasCosSpotlightAngle flag is treated as if it has value true.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasSpotExponent
-    This flag determines if the spot expenent attribute is part of the shader storage block, i.e.
-    if the "float  spotExponent;" entry is contained in the shader struct for the Light.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfHasCinemaLight
-    This flag determines if the cinema light attributes are part of the shader storage block, i.e.
-    if the "float innerSuperEllipsesWidth;", ... entries are contained in the shader struct for the Light.
-    If true this flag overrides the hasRangeCutOn, hasRangeCutOff, hasRangeNearZone and hasRangeFarZone
-    flags, because cinema lights are described the corresponding attributes.
-    See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html
-    http://www.yaldex.com/open-gl/ch12lev1sec4.html
-    https://en.wikipedia.org/wiki/Superellipse
+/*! \var Vec3f           MultiLightChunkBase::_sfGlobalAmbientIntensity
+    The global ambient light intensity, that is to be added to the single light ambient intensities.
 */
 
 /*! \var Pnt3f           MultiLightChunkBase::_mfPosition
@@ -285,11 +418,7 @@ OSG_BEGIN_NAMESPACE
     The light's direction for directional and spotlights in beacon space.
 */
 
-/*! \var Color3f         MultiLightChunkBase::_mfColor
-    The light's color.
-*/
-
-/*! \var Real32          MultiLightChunkBase::_mfIntensity
+/*! \var Vec3f           MultiLightChunkBase::_mfIntensity
     The light's intensity.
 */
 
@@ -309,12 +438,26 @@ OSG_BEGIN_NAMESPACE
     The light's attenuation consiting of the constant, linear and quadratic attenuation parts.
 */
 
+/*! \var Real32          MultiLightChunkBase::_mfDecayAttenuation
+    The light's attenuation consiting of the decay parameter.
+*/
+
+/*! \var Real32          MultiLightChunkBase::_mfLengthFactor
+    All distance attenuation calculation are performed by multiplying the distance with the lengthFactor
+    in order to allow adaptation between differing length unit systems.
+*/
+
 /*! \var Real32          MultiLightChunkBase::_mfSpotlightAngle
     The spot angle in degree.
 */
 
 /*! \var Real32          MultiLightChunkBase::_mfSpotExponent
-    The spot angle in degree.
+    The spotlight parameter. The meaning of this parameter dependes on the following flags:
+    HAS_SPOTLIGHT_EXPONENT, HAS_SPOTLIGHT_PENUMBRA_ANGLE or HAS_SPOTLIGHT_PENUMBRA_FACTOR.
+    In case of flag HAS_SPOTLIGHT_PENUMBRA_ANGLE the parameter is expected to be
+    the spot penumbra angle in dedree. In case of flag HAS_SPOTLIGHT_PENUMBRA_FACTOR
+    the parameter is expected to be in the range [0,1] and is used to calculate the
+    spot penumbra angle from the spotlightAngle.
 */
 
 /*! \var Real32          MultiLightChunkBase::_mfInnerSuperEllipsesWidth
@@ -361,21 +504,15 @@ OSG_BEGIN_NAMESPACE
 */
 
 /*! \var Real32          MultiLightChunkBase::_mfRangeCutOn
-    The cinema light is described among others by a rangeCutOn parameter.
-    In the interval rangeCutOn to rangeCutOff the lighted fragments are
-    fully lit.
-    See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html
-    http://www.yaldex.com/open-gl/ch12lev1sec4.html
-    https://en.wikipedia.org/wiki/Superellipse
+    In the interval rangeCutOn to rangeCutOff the light is active and the
+    fragements are lit. Outside is no light. This parameter can be manually
+    set or automatically calculated.
 */
 
 /*! \var Real32          MultiLightChunkBase::_mfRangeCutOff
-    The cinema light is described among others by a rangeCutOff parameter.
-    In the interval rangeCutOn to rangeCutOff the lighted fragments are
-    fully lit.
-    See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html
-    http://www.yaldex.com/open-gl/ch12lev1sec4.html
-    https://en.wikipedia.org/wiki/Superellipse
+    In the interval rangeCutOn to rangeCutOff the light is active and the
+    fragements are lit. Outside is no light. This parameter can be manually
+    set or automatically calculated.
 */
 
 /*! \var Real32          MultiLightChunkBase::_mfRangeNearZone
@@ -392,6 +529,11 @@ OSG_BEGIN_NAMESPACE
     partly lit.
 */
 
+/*! \var Matrix          MultiLightChunkBase::_mfProjectionMatrix
+    The light projection matrix. This is typically calculated newly for each render pass and
+    this field allows storage of this calculated matrix. Usally, internally set by OpenSG.
+*/
+
 /*! \var UInt8           MultiLightChunkBase::_mfType
     Stores the light's type. This can be any of the set {POINT_LIGHT, DIRECTIONAL_LIGHT, SPOT_LIGHT, CINEMA_LIGHT}.
 */
@@ -400,29 +542,47 @@ OSG_BEGIN_NAMESPACE
     The on/off state of the light.
 */
 
+/*! \var bool            MultiLightChunkBase::_mfShadow
+    The on/off shadow state of the light.
+*/
+
+/*! \var Int32           MultiLightChunkBase::_mfShadowDataIndex
+    The index of the light into the shadow data array. The MultiLightShadowStage does provide an additional
+    shader storage buffer object for each shadowing light. This index points into this array, allowing
+    the shader to access particular runtime information for the shadowing technique at hand.
+    This field is internally set by OpenSG. No user setting necessary.
+*/
+
+/*! \var Int32           MultiLightChunkBase::_mfShadowParameterIndex
+    The index of the light into the shadow parameter array. The MultiLightShadowStage does provide an additional
+    shader storage buffer object for the shadowing parameters that each shadowing lights should use. This index 
+    points into this array, allowing the shader to access particular runtime information for the shadowing 
+    technique at hand. The user adds MultiLightShadowParameter instances to the MultiLightShadowStage stage
+    and uses the index of a particular instance for this field.
+*/
+
 /*! \var Node *          MultiLightChunkBase::_mfBeacon
     The light's beacon determining its position or direction.
 */
 
-/*! \var Matrix          MultiLightChunkBase::_mfBeaconMatrix
-    The beacon matrices used for the last render pass.
-*/
-
-/*! \var bool            MultiLightChunkBase::_sfEyeSpace
-    The lights position and direction are transformed to eye space before loading into the shader. 
-    On default they are provided in world space.
-*/
-
-/*! \var Real32          MultiLightChunkBase::_sfLastCamNear
+/*! \var bool            MultiLightChunkBase::_sfNormalizeDirection
     The camera last near value.
 */
 
+/*! \var Matrix          MultiLightChunkBase::_mfBeaconMatrix
+    The beacon matrices used for the last render pass. Internally set by OpenSG.
+*/
+
+/*! \var Real32          MultiLightChunkBase::_sfLastCamNear
+    The camera last near value. Internally set by OpenSG.
+*/
+
 /*! \var Real32          MultiLightChunkBase::_sfLastCamFar
-    The camera last far value.
+    The camera last far value. Internally set by OpenSG.
 */
 
 /*! \var Matrix          MultiLightChunkBase::_sfLastCamToWorld
-    The camera last to world matrix.
+    The camera last to world matrix. Internally set by OpenSG.
 */
 
 /*! \var std::string     MultiLightChunkBase::_sfLightBlockName
@@ -465,269 +625,45 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
     FieldDescriptionBase *pDesc = NULL;
 
 
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasWorldToLightSpaceMatrix",
-        "This flag determines if the worldToLightSpaceMatrix attribute is part of \n"
-        "the shader storage block, i.e. if the \"mat4  worldToLightSpaceMatrix;\" \n"
-        "entry is contained in the shader struct for the Light.\n",
-        HasWorldToLightSpaceMatrixFieldId, HasWorldToLightSpaceMatrixFieldMask,
+    pDesc = new SFUInt32::Description(
+        SFUInt32::getClassType(),
+        "feature",
+        "This value determines the set of attributes that the light struct encompasses.\n"
+        "Some technique classes, e.g. the 'MultiLightShadowTechniqueSimple', automatically\n"
+        "set some additional features that they need for their proper operation.\n"
+        "The application programmer is expected to use the special 'getFragmentProgramSnippet()'\n"
+        "function in order to get a compatible light structure layout for his shader.\n"
+        "See the shadow examples for illustration.\n",
+        FeatureFieldId, FeatureFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasWorldToLightSpaceMatrix),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasWorldToLightSpaceMatrix));
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleFeature),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleFeature));
 
     oType.addInitialDesc(pDesc);
 
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasLightToWorldSpaceMatrix",
-        "This flag determines if the lightToWorldSpaceMatrix attribute is part of \n"
-        "the shader storage block, i.e. if the \"mat4  lightToWorldSpaceMatrix;\" \n"
-        "entry is contained in the shader struct for the Light.\n",
-        HasLightToWorldSpaceMatrixFieldId, HasLightToWorldSpaceMatrixFieldMask,
+    pDesc = new SFUInt32::Description(
+        SFUInt32::getClassType(),
+        "codeFeature",
+        "This value determines the set of attributes that governs the code generation\n"
+        "process for the multi light.\n",
+        CodeFeatureFieldId, CodeFeatureFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasLightToWorldSpaceMatrix),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasLightToWorldSpaceMatrix));
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleCodeFeature),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleCodeFeature));
 
     oType.addInitialDesc(pDesc);
 
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasEyeToLightSpaceMatrix",
-        "This flag determines if the eyeToLightSpaceMatrix attribute is part of \n"
-        "the shader storage block, i.e. if the \"mat4  eyeToLightSpaceMatrix;\" \n"
-        "entry is contained in the shader struct for the Light.\n"
-        "Attention: If this flag is set the light shader storage block has to\n"
-        "be updated with every redraw operation.\n",
-        HasEyeToLightSpaceMatrixFieldId, HasEyeToLightSpaceMatrixFieldMask,
+    pDesc = new SFVec3f::Description(
+        SFVec3f::getClassType(),
+        "globalAmbientIntensity",
+        "The global ambient light intensity, that is to be added to the single light ambient intensities.\n",
+        GlobalAmbientIntensityFieldId, GlobalAmbientIntensityFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasEyeToLightSpaceMatrix),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasEyeToLightSpaceMatrix));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasLightToEyeSpaceMatrix",
-        "This flag determines if the lightToEyeSpaceMatrix attribute is part of \n"
-        "the shader storage block, i.e. if the \"mat4  lightToEyeSpaceMatrix;\" \n"
-        "entry is contained in the shader struct for the Light.\n"
-        "Attention: If this flag is set the light shader storage block has to\n"
-        "be updated with every redraw operation.\n",
-        HasLightToEyeSpaceMatrixFieldId, HasLightToEyeSpaceMatrixFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasLightToEyeSpaceMatrix),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasLightToEyeSpaceMatrix));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasLightPerspectiveMatrix",
-        "This flag determines if the lightPerspectiveMatrix attribute is part of \n"
-        "the shader storage block, i.e. if the \"mat4  lightPerspectiveMatrix;\" \n"
-        "entry is contained in the shader struct for the Light.\n",
-        HasLightPerspectiveMatrixFieldId, HasLightPerspectiveMatrixFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasLightPerspectiveMatrix),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasLightPerspectiveMatrix));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasInvLightPerspectiveMatrix",
-        "This flag determines if the lightToEyeSpaceMatrix attribute is part of \n"
-        "the shader storage block, i.e. if the \"mat4  invLightToEyeSpaceMatrix;\" \n"
-        "entry is contained in the shader struct for the Light.\n",
-        HasInvLightPerspectiveMatrixFieldId, HasInvLightPerspectiveMatrixFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasInvLightPerspectiveMatrix),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasInvLightPerspectiveMatrix));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasColor",
-        "This flag determines if the color attribute is part of the shader storage block, i.e.\n"
-        "if the \"vec3  color;\" entry is contained in the shader struct for the Light.\n",
-        HasColorFieldId, HasColorFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasColor),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasColor));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasIntensity",
-        "This flag determines if the intensity attribute is part of the shader storage block, i.e.\n"
-        "if the \"float intensity;\" entry is contained in the shader struct for the Light.\n",
-        HasIntensityFieldId, HasIntensityFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasIntensity),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasIntensity));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasSeparateIntensities",
-        "This flag determines if the color intensity attributes are part of the shader storage block, i.e.\n"
-        "if the \"vec3  Ia;\", \"vec3  Id;\" and \"vec3 Is;\" entries are contained in the shader struct for the Light.\n",
-        HasSeparateIntensitiesFieldId, HasSeparateIntensitiesFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasSeparateIntensities),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasSeparateIntensities));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasAttenuation",
-        "This flag determines if the attenuation attributes are part of the shader storage block, i.e.\n"
-        "if the \"float constantAttenuation;\", \"float linearAttenuation;\" and \"float quadraticAttenuation;\"\n"
-        "entries are contained in the shader struct for the Light.\n",
-        HasAttenuationFieldId, HasAttenuationFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasAttenuation),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasAttenuation));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "autoCalcRanges",
-        "If this flag is active and the lights have attenuations, then the cut on and cut off ranges\n"
-        "are automatically calculated. They are, however, not provided automatically to the shader.\n"
-        "For that, you have to set the hasRangeCutOn and hasRangeCutOff flags, respectively.\n",
-        AutoCalcRangesFieldId, AutoCalcRangesFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleAutoCalcRanges),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleAutoCalcRanges));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasRangeCutOn",
-        "This flag determines if the rangeCutOn attribute is part of the shader storage block, i.e.\n"
-        "if the \"float rangeCutOn;\" entry is contained in the shader struct for the Light.\n",
-        HasRangeCutOnFieldId, HasRangeCutOnFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasRangeCutOn),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasRangeCutOn));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasRangeCutOff",
-        "This flag determines if the hasRangeCutOff attribute is part of the shader storage block, i.e.\n"
-        "if the \"float hasRangeCutOff;\" entry is contained in the shader struct for the Light.\n",
-        HasRangeCutOffFieldId, HasRangeCutOffFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasRangeCutOff),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasRangeCutOff));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasRangeNearZone",
-        "This flag determines if the hasRangeNearZone attribute is part of the shader storage block, i.e.\n"
-        "if the \"float hasRangeNearZone;\" entry is contained in the shader struct for the Light.\n",
-        HasRangeNearZoneFieldId, HasRangeNearZoneFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasRangeNearZone),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasRangeNearZone));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasRangeFarZone",
-        "This flag determines if the hasRangeFarZone attribute is part of the shader storage block, i.e.\n"
-        "if the \"float hasRangeFarZone;\" entry is contained in the shader struct for the Light.\n",
-        HasRangeFarZoneFieldId, HasRangeFarZoneFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasRangeFarZone),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasRangeFarZone));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasCosSpotlightAngle",
-        "This flag determines if the cosine of the spot light angle attribute is part of the shader storage block, i.e.\n"
-        "if the \"float  cosSpotlightAngle;\" entry is contained in the shader struct for the Light. If neither this flag\n"
-        "nor the hasSpotlightAngle flag is true, then this flag is treated as if it has value true.\n",
-        HasCosSpotlightAngleFieldId, HasCosSpotlightAngleFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasCosSpotlightAngle),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasCosSpotlightAngle));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasSpotlightAngle",
-        "This flag determines if the spot light angle attribute is part of the shader storage block, i.e.\n"
-        "if the \"float  spotlightAngle;\" entry is contained in the shader struct for the Light. If neither this flag\n"
-        "nor the hasCosSpotlightAngle flag is true, then the hasCosSpotlightAngle flag is treated as if it has value true.\n",
-        HasSpotlightAngleFieldId, HasSpotlightAngleFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasSpotlightAngle),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasSpotlightAngle));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasSpotExponent",
-        "This flag determines if the spot expenent attribute is part of the shader storage block, i.e.\n"
-        "if the \"float  spotExponent;\" entry is contained in the shader struct for the Light.\n",
-        HasSpotExponentFieldId, HasSpotExponentFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasSpotExponent),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasSpotExponent));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "hasCinemaLight",
-        "This flag determines if the cinema light attributes are part of the shader storage block, i.e.\n"
-        "if the \"float innerSuperEllipsesWidth;\", ... entries are contained in the shader struct for the Light.\n"
-        "If true this flag overrides the hasRangeCutOn, hasRangeCutOff, hasRangeNearZone and hasRangeFarZone\n"
-        "flags, because cinema lights are described the corresponding attributes.\n"
-        "See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html\n"
-        "http://www.yaldex.com/open-gl/ch12lev1sec4.html\n"
-        "https://en.wikipedia.org/wiki/Superellipse\n",
-        HasCinemaLightFieldId, HasCinemaLightFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleHasCinemaLight),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleHasCinemaLight));
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleGlobalAmbientIntensity),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleGlobalAmbientIntensity));
 
     oType.addInitialDesc(pDesc);
 
@@ -755,20 +691,8 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
 
     oType.addInitialDesc(pDesc);
 
-    pDesc = new MFColor3f::Description(
-        MFColor3f::getClassType(),
-        "color",
-        "The light's color.\n",
-        ColorFieldId, ColorFieldMask,
-        false,
-        (Field::MFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleColor),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleColor));
-
-    oType.addInitialDesc(pDesc);
-
-    pDesc = new MFReal32::Description(
-        MFReal32::getClassType(),
+    pDesc = new MFVec3f::Description(
+        MFVec3f::getClassType(),
         "intensity",
         "The light's intensity.\n",
         IntensityFieldId, IntensityFieldMask,
@@ -829,6 +753,31 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
 
     pDesc = new MFReal32::Description(
         MFReal32::getClassType(),
+        "decayAttenuation",
+        "The light's attenuation consiting of the decay parameter.\n",
+        DecayAttenuationFieldId, DecayAttenuationFieldMask,
+        false,
+        (Field::MFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleDecayAttenuation),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleDecayAttenuation));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new MFReal32::Description(
+        MFReal32::getClassType(),
+        "lengthFactor",
+        "All distance attenuation calculation are performed by multiplying the distance with the lengthFactor\n"
+        "in order to allow adaptation between differing length unit systems.\n",
+        LengthFactorFieldId, LengthFactorFieldMask,
+        false,
+        (Field::MFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleLengthFactor),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleLengthFactor));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new MFReal32::Description(
+        MFReal32::getClassType(),
         "spotlightAngle",
         "The spot angle in degree.\n",
         SpotlightAngleFieldId, SpotlightAngleFieldMask,
@@ -842,7 +791,12 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
     pDesc = new MFReal32::Description(
         MFReal32::getClassType(),
         "spotExponent",
-        "The spot angle in degree.\n",
+        "The spotlight parameter. The meaning of this parameter dependes on the following flags:\n"
+        "HAS_SPOTLIGHT_EXPONENT, HAS_SPOTLIGHT_PENUMBRA_ANGLE or HAS_SPOTLIGHT_PENUMBRA_FACTOR.\n"
+        "In case of flag HAS_SPOTLIGHT_PENUMBRA_ANGLE the parameter is expected to be\n"
+        "the spot penumbra angle in dedree. In case of flag HAS_SPOTLIGHT_PENUMBRA_FACTOR\n"
+        "the parameter is expected to be in the range [0,1] and is used to calculate the\n"
+        "spot penumbra angle from the spotlightAngle.\n",
         SpotExponentFieldId, SpotExponentFieldMask,
         false,
         (Field::MFDefaultFlags | Field::FStdAccess),
@@ -945,12 +899,9 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
     pDesc = new MFReal32::Description(
         MFReal32::getClassType(),
         "rangeCutOn",
-        "The cinema light is described among others by a rangeCutOn parameter.\n"
-        "In the interval rangeCutOn to rangeCutOff the lighted fragments are\n"
-        "fully lit.\n"
-        "See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html\n"
-        "http://www.yaldex.com/open-gl/ch12lev1sec4.html\n"
-        "https://en.wikipedia.org/wiki/Superellipse\n",
+        "In the interval rangeCutOn to rangeCutOff the light is active and the\n"
+        "fragements are lit. Outside is no light. This parameter can be manually\n"
+        "set or automatically calculated.\n",
         RangeCutOnFieldId, RangeCutOnFieldMask,
         false,
         (Field::MFDefaultFlags | Field::FStdAccess),
@@ -962,12 +913,9 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
     pDesc = new MFReal32::Description(
         MFReal32::getClassType(),
         "rangeCutOff",
-        "The cinema light is described among others by a rangeCutOff parameter.\n"
-        "In the interval rangeCutOn to rangeCutOff the lighted fragments are\n"
-        "fully lit.\n"
-        "See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html\n"
-        "http://www.yaldex.com/open-gl/ch12lev1sec4.html\n"
-        "https://en.wikipedia.org/wiki/Superellipse\n",
+        "In the interval rangeCutOn to rangeCutOff the light is active and the\n"
+        "fragements are lit. Outside is no light. This parameter can be manually\n"
+        "set or automatically calculated.\n",
         RangeCutOffFieldId, RangeCutOffFieldMask,
         false,
         (Field::MFDefaultFlags | Field::FStdAccess),
@@ -1006,6 +954,19 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
 
     oType.addInitialDesc(pDesc);
 
+    pDesc = new MFMatrix::Description(
+        MFMatrix::getClassType(),
+        "projectionMatrix",
+        "The light projection matrix. This is typically calculated newly for each render pass and\n"
+        "this field allows storage of this calculated matrix. Usally, internally set by OpenSG.\n",
+        ProjectionMatrixFieldId, ProjectionMatrixFieldMask,
+        false,
+        (Field::MFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleProjectionMatrix),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleProjectionMatrix));
+
+    oType.addInitialDesc(pDesc);
+
     pDesc = new MFUInt8::Description(
         MFUInt8::getClassType(),
         "type",
@@ -1030,6 +991,49 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
 
     oType.addInitialDesc(pDesc);
 
+    pDesc = new MFBool::Description(
+        MFBool::getClassType(),
+        "shadow",
+        "The on/off shadow state of the light.\n",
+        ShadowFieldId, ShadowFieldMask,
+        false,
+        (Field::MFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleShadow),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleShadow));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new MFInt32::Description(
+        MFInt32::getClassType(),
+        "shadowDataIndex",
+        "The index of the light into the shadow data array. The MultiLightShadowStage does provide an additional\n"
+        "shader storage buffer object for each shadowing light. This index points into this array, allowing\n"
+        "the shader to access particular runtime information for the shadowing technique at hand.\n"
+        "This field is internally set by OpenSG. No user setting necessary.\n",
+        ShadowDataIndexFieldId, ShadowDataIndexFieldMask,
+        false,
+        (Field::MFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleShadowDataIndex),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleShadowDataIndex));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new MFInt32::Description(
+        MFInt32::getClassType(),
+        "shadowParameterIndex",
+        "The index of the light into the shadow parameter array. The MultiLightShadowStage does provide an additional\n"
+        "shader storage buffer object for the shadowing parameters that each shadowing lights should use. This index \n"
+        "points into this array, allowing the shader to access particular runtime information for the shadowing \n"
+        "technique at hand. The user adds MultiLightShadowParameter instances to the MultiLightShadowStage stage\n"
+        "and uses the index of a particular instance for this field.\n",
+        ShadowParameterIndexFieldId, ShadowParameterIndexFieldMask,
+        false,
+        (Field::MFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleShadowParameterIndex),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleShadowParameterIndex));
+
+    oType.addInitialDesc(pDesc);
+
     pDesc = new MFWeakNodePtr::Description(
         MFWeakNodePtr::getClassType(),
         "beacon",
@@ -1042,10 +1046,22 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
 
     oType.addInitialDesc(pDesc);
 
+    pDesc = new SFBool::Description(
+        SFBool::getClassType(),
+        "normalizeDirection",
+        "The camera last near value.\n",
+        NormalizeDirectionFieldId, NormalizeDirectionFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleNormalizeDirection),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleNormalizeDirection));
+
+    oType.addInitialDesc(pDesc);
+
     pDesc = new MFMatrix::Description(
         MFMatrix::getClassType(),
         "beaconMatrix",
-        "The beacon matrices used for the last render pass.\n",
+        "The beacon matrices used for the last render pass. Internally set by OpenSG.\n",
         BeaconMatrixFieldId, BeaconMatrixFieldMask,
         true,
         (Field::MFDefaultFlags | Field::FStdAccess),
@@ -1054,23 +1070,10 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
 
     oType.addInitialDesc(pDesc);
 
-    pDesc = new SFBool::Description(
-        SFBool::getClassType(),
-        "eyeSpace",
-        "The lights position and direction are transformed to eye space before loading into the shader. \n"
-        "On default they are provided in world space.\n",
-        EyeSpaceFieldId, EyeSpaceFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleEyeSpace),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleEyeSpace));
-
-    oType.addInitialDesc(pDesc);
-
     pDesc = new SFReal32::Description(
         SFReal32::getClassType(),
         "lastCamNear",
-        "The camera last near value.\n",
+        "The camera last near value. Internally set by OpenSG.\n",
         LastCamNearFieldId, LastCamNearFieldMask,
         true,
         (Field::SFDefaultFlags | Field::FStdAccess),
@@ -1082,7 +1085,7 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
     pDesc = new SFReal32::Description(
         SFReal32::getClassType(),
         "lastCamFar",
-        "The camera last far value.\n",
+        "The camera last far value. Internally set by OpenSG.\n",
         LastCamFarFieldId, LastCamFarFieldMask,
         true,
         (Field::SFDefaultFlags | Field::FStdAccess),
@@ -1094,7 +1097,7 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
     pDesc = new SFMatrix::Description(
         SFMatrix::getClassType(),
         "lastCamToWorld",
-        "The camera last to world matrix.\n",
+        "The camera last to world matrix. Internally set by OpenSG.\n",
         LastCamToWorldFieldId, LastCamToWorldFieldMask,
         true,
         (Field::SFDefaultFlags | Field::FStdAccess),
@@ -1161,34 +1164,260 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "in form of a buffer in OpenGL std430 layout format.\n"
     "A shader, binding a shader storage block to the very same binding point, \n"
     "is expected to respect the corresponding block layout. The layout is regulated\n"
-    "by the hasXXX fields of the chunk. If one is set to false the corresponding\n"
-    "struct entry is omitted.\n"
+    "by the feature field of the chunk. If a feature is not set the corresponding struct\n"
+    "entries are omitted. The feature attribute is protected, but getter and setters for \n"
+    "each feature are publicly provided.\n"
+    "\n"
+    "The following features are supported:\n"
+    "\n"
+    "    HAS_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX\n"
+    "        This flag determines if the matLSFromWS attribute is part of \n"
+    "        the shader storage block, i.e. if the \"mat4  matLSFromWS;\" \n"
+    "        entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_WORLD_SPACE_FROM_LIGHT_SPACE_MATRIX\n"
+    "        This flag determines if the matWSFromLS attribute is part of \n"
+    "        the shader storage block, i.e. if the \"mat4  matWSFromLS;\" \n"
+    "        entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX\n"
+    "        This flag determines if the matLSFromES attribute is part of \n"
+    "        the shader storage block, i.e. if the \"mat4  matLSFromES;\" \n"
+    "        entry is contained in the shader struct for the Light.\n"
+    "        Attention: If this flag is set the light shader storage block has to\n"
+    "        be updated with every redraw operation.\n"
+    "\n"
+    "    HAS_EYE_SPACE_FROM_LIGHT_SPACE_MATRIX\n"
+    "        This flag determines if the matESFromLS attribute is part of \n"
+    "        the shader storage block, i.e. if the \"mat4  matESFromLS;\" \n"
+    "        entry is contained in the shader struct for the Light.\n"
+    "        Attention: If this flag is set the light shader storage block has to\n"
+    "        be updated with every redraw operation.\n"
+    "\n"
+    "    HAS_PROJECTION_MATRIX\n"
+    "        This flag determines if the matProjection attribute is part of \n"
+    "        the shader storage block, i.e. if the \"mat4  matProjection;\" \n"
+    "        entry is contained in the shader struct for the Light.\n"
+    "        Implicitely set the hasProjection flag.\n"
+    "\n"
+    "    HAS_INV_PROJECTION_MATRIX\n"
+    "        This flag determines if the matInvProjection attribute is part of \n"
+    "        the shader storage block, i.e. if the \"mat4  matInvProjection;\" \n"
+    "        entry is contained in the shader struct for the Light.\n"
+    "        Implicitely set the hasProjection flag.\n"
+    "\n"
+    "    HAS_PROJECTION_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX\n"
+    "        This flag determines if the matProjLSFromWS attribute is part of \n"
+    "        the shader storage block, i.e. if the \"mat4  matProjLSFromWS;\" \n"
+    "        entry is contained in the shader struct for the Light.\n"
+    "        Implicitely set the hasProjection flag.\n"
+    "\n"
+    "    HAS_INV_PROJECTION_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX\n"
+    "        This flag determines if the matInvProjLSFromWS attribute is part of \n"
+    "        the shader storage block, i.e. if the \"mat4  matInvProjLSFromWS;\" \n"
+    "        entry is contained in the shader struct for the Light.\n"
+    "        Implicitely set the hasProjection flag.\n"
+    "\n"
+    "    HAS_PROJECTION_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX\n"
+    "        This flag determines if the matProjLSFromES attribute is part of \n"
+    "        the shader storage block, i.e. if the \"mat4  matProjLSFromES;\" \n"
+    "        entry is contained in the shader struct for the Light.\n"
+    "        Implicitely set the hasProjection flag.\n"
+    "\n"
+    "    HAS_INV_PROJECTION_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX\n"
+    "        This flag determines if the matInvProjLSFromES attribute is part of \n"
+    "        the shader storage block, i.e. if the \"mat4  matInvProjLSFromES;\" \n"
+    "        entry is contained in the shader struct for the Light.\n"
+    "        Implicitely set the hasProjection flag.\n"
+    "\n"
+    "    HAS_INTENSITY\n"
+    "        This flag determines if the color intensity attribute is part of the shader storage block, i.e.\n"
+    "        if the \"vec3 intensity;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_SEPARATE_INTENSITIES\n"
+    "        This flag determines if the color intensity attributes are part of the shader storage block, i.e.\n"
+    "        if the \"vec3  Ia;\", \"vec3  Id;\" and \"vec3 Is;\" entries are contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_ATTENUATION\n"
+    "        This flag determines if the attenuation attributes are part of the shader storage block, i.e.\n"
+    "        if the \"float constantAttenuation;\", \"float linearAttenuation;\" and \"float quadraticAttenuation;\"\n"
+    "        entries are contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_DECAY_ATTENUATION\n"
+    "        This flag determines if the attenuation decay attribute  is also part of the shader storage block, i.e.\n"
+    "        if the \"float decayAttenuation\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "    AUTO_CALC_RANGES\n"
+    "        If this flag is active and the lights have attenuations, then the cut on and cut off ranges\n"
+    "        are automatically calculated. They are, however, not provided automatically to the shader.\n"
+    "        For that, you have to set the hasRangeCutOn and hasRangeCutOff flags, respectively.\n"
+    "\n"
+    "    HAS_RANGE_CUT_ON\n"
+    "        This flag determines if the rangeCutOn attribute is part of the shader storage block, i.e.\n"
+    "        if the \"float rangeCutOn;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_RANGE_CUT_OFF\n"
+    "        This flag determines if the hasRangeCutOff attribute is part of the shader storage block, i.e.\n"
+    "        if the \"float hasRangeCutOff;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_RANGE_NEAR_ZONE\n"
+    "        This flag determines if the hasRangeNearZone attribute is part of the shader storage block, i.e.\n"
+    "        if the \"float hasRangeNearZone;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_RANGE_FAR_ZONE\n"
+    "        This flag determines if the hasRangeFarZone attribute is part of the shader storage block, i.e.\n"
+    "        if the \"float hasRangeFarZone;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_SPOTLIGHT_ANGLE\n"
+    "        This flag determines if the spot light angle attribute is part of the shader storage block, i.e.\n"
+    "        if the \"float spotlightAngle;\" entry is contained in the shader struct for the Light.\n"
+    "        If neither this flag nor the hasCosSpotlightAngle flag is true, then the hasCosSpotlightAngle \n"
+    "        flag is treated as if it has value true.\n"
+    "\n"
+    "    HAS_COS_SPOTLIGHT_ANGLE\n"
+    "        This flag determines if the cosine spot light angle attribute is part of the shader storage block, i.e.\n"
+    "        if the \"float cosSpotlightAngle;\" entry is contained in the shader struct for the Light.\n"
+    "        If neither this flag nor the hasSpotlightAngle flag is true, then this flag is treated as if it \n"
+    "        has value true.\n"
+    "\n"
+    "    HAS_SPOTLIGHT_EXPONENT\n"
+    "        This flag determines if the spot expenent attribute is part of the shader storage block, i.e.\n"
+    "        if the \"float spotlightExponent;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_SPOTLIGHT_PENUMBRA_ANGLE\n"
+    "        This flag determines if the spot penumbra angle attribute is part of the shader storage block, i.e.\n"
+    "        if the \"float cosPenumbraCone;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_SPOTLIGHT_PENUMBRA_FACTOR\n"
+    "        This flag determines if the spot penumbra angle attribute is part of the shader storage block, i.e.\n"
+    "        if the \"float cosPenumbraCone;\" entry is contained in the shader struct for the Light. This flag\n"
+    "        additionally, determines that the penumbra angle is calculated from the spot light cone angle.\n"
+    "\n"
+    "    HAS_SPOTLIGHT_PENUMBRA_FROSTBITE\n"
+    "        This flag determines if the spot light attributes are given in the Frostbite optimized model in the \n"
+    "        shader storage block, i.e. if the \"float spotScale;\"  and \"float spotOffset;\" entries are contained\n"
+    "        in the shader struct for the Light.\n"
+    "\n"
+    "    HAS_CINEMA_LIGHT\n"
+    "        This flag determines if the cinema light attributes are part of the shader storage block, i.e.\n"
+    "        if the \"float innerSuperEllipsesWidth;\", ... entries are contained in the shader struct for the Light.\n"
+    "        If true this flag overrides the hasRangeCutOn, hasRangeCutOff, hasRangeNearZone and hasRangeFarZone\n"
+    "        flags, because cinema lights are described the corresponding attributes.\n"
+    "        See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html\n"
+    "             http://www.yaldex.com/open-gl/ch12lev1sec4.html\n"
+    "             https://en.wikipedia.org/wiki/Superellipse\n"
+    "\n"
+    "    HAS_SHADOW\n"
+    "        This flag determines if the multi light supports shadowing. Is set to true the boolean\n"
+    "        shadow flag, the shadowIntensity and the shadow index are added to the light struct.\n"
+    "\n"
+    "    HAS_GLOBAL_AMBIENT_INTENSITY\n"
+    "        This flag determines if the multi light supports a global ambient light state, i.e. if a vec3 global color\n"
+    "        entry 'ambientLight' exists in the light buffer which is to be added to the single light ambient intensities.\n"
+    "\n"
+    "    HAS_LENGTH_FACTOR\n"
+    "        This flag determines if the multi light supports a global length factor light state, i.e. if a float 'lengthFactor'\n"
+    "        exists in the light buffer which is used for distance attenuation calculations.\n"
+    "        \n"
+    "    HAS_PROJECTION\n"
+    "        This flag determines if the multi light contains a projection matrix for each light, that is whether\n"
+    "        storage is provided for the projection matrix. It does not decide whether a struct entry for the light\n"
+    "        in the shader is generated. For that use the dedicated hasProjectionMatrix, hasInvProjectionMatrix,\n"
+    "        hasProjectionLightSpaceFromWorldSpaceMatrix, hasInvProjectionLightSpaceFromWorldSpaceMatrix,\n"
+    "        hasProjectionLightSpaceFromEyeSpaceMatrix, hasInvProjectionLightSpaceFromEyeSpaceMatrix\n"
+    "        flags. Usage of these, however, implicitely set this hasProjection flag.\n"
+    "        Additionally, the projection matrix is not automatically calculated. That is the duty of the user of the\n"
+    "        chunk. Typically, the multi light shadow stage does take responsibiltiy for the proper calculation and\n"
+    "        setting the projection matrix.\n"
+    "\n"
+    "    EYE_SPACE\n"
+    "        The lights position and direction are transformed to eye space before loading into the shader. \n"
+    "        On default they are provided in world space.\n"
+    "\n"
+    "    The following code features are supported:\n"
+    "        CODE_DISTANCE_ATTENUATION_CLASSIC\n"
+    "            The classic OpenGL attenuation function is added to the light code snippet.\n"
+    "\n"
+    "        CODE_DISTANCE_ATTENUATION_PHYSICAL\n"
+    "            A physically based attenuation function is added to the light code snippet.\n"
+    "\n"
+    "        CODE_DISTANCE_ATTENUATION_DECAY\n"
+    "            A physically based attenuation function is added to the light code snippet.\n"
+    "            An additional decay parameter is used by the function.\n"
+    "\n"
+    "        CODE_DISTANCE_ATTENUATION_MIX_PHYSICAL\n"
+    "            A physically based attenuation function is added to the light code snippet that\n"
+    "            also respect the classic OpenGL attenuation parameters.\n"
+    "\n"
+    "        CODE_DISTANCE_ATTENUATION_MIX_DECAY\n"
+    "            A physically based attenuation function is added to the light code snippet that\n"
+    "            also respect the classic OpenGL attenuation parameters.\n"
+    "            An additional decay parameter is used by the function.\n"
+    "\n"
+    "        CODE_DISTANCE_ATTENUATION_SMOOTH_HERMITE\n"
+    "            An attenuation function based on Hermitian smoothing is added to the light code snippet.\n"
+    "\n"
+    "        CODE_SPOT_ATTENUATION_CLASSIC\n"
+    "            The classic OpenGL spot attenuation function is added to the light code snippet.\n"
+    "            This model uses the cosine cutoff angle and the spot exponent parameter.\n"
+    "\n"
+    "        CODE_SPOT_ATTENUATION_SMOOTH_HERMITE\n"
+    "            A spot attenuation function based on Hermitian smoothing is added to the light code snippet.\n"
+    "            This model uses the cosine cutoff angle.\n"
+    "\n"
+    "        CODE_SPOT_ATTENUATION_SMOOTH_HERMITE_2\n"
+    "            A spot attenuation function based on Hermitian smoothing is added to the light code snippet.\n"
+    "            This model uses the cosine cutoff angle and the cosine penumbra angle.\n"
+    "\n"
+    "        CODE_SPOT_ATTENUATION_FROSTBITE\n"
+    "            A spot attenuation function based in accodrance to the Frostbite engine model.\n"
+    "            This optimized model uses a scale factor and an offset value.\n"
+    "                scale  := 1.0f / max (0.001f, (penumbraCos  - coneCos));\n"
+    "                offset := -coneCos * scale;\n"
+    "\n"
+    "    Following is the light structure shown that is valid if all layout features are activated. Usually,\n"
+    "    one is working only with a part of these members. Some members are expected to be set by the application\n"
+    "    programmer and some are set by internal machinery of OpenSG.\n"
+    "\n"
+    "    struct GlobalLight\n"
+    "    {\n"
+    "        vec3  ambientIntensity;\n"
+    "    }\n"
     "\n"
     "    struct Light\n"
     "    {\n"
-    "        mat4  worldToLightSpaceMatrix;\n"
-    "        mat4  lightToWorldSpaceMatrix;\n"
-    "        mat4  eyeToLightSpaceMatrix;\n"
-    "        mat4  lightToEyeSpaceMatrix;\n"
-    "        mat4  lightPerspectiveMatrix;\n"
-    "        mat4  invLightPerspectiveMatrix;\n"
+    "        mat4  matLSFromWS;\n"
+    "        mat4  matWSFromLS;\n"
+    "        mat4  matLSFromES;\n"
+    "        mat4  matESFromLS;\n"
+    "        mat4  matProjection;\n"
+    "        mat4  matInvProjection;\n"
+    "        mat4  matProjLSFromWS;\n"
+    "        mat4  matInvProjLSFromWS;\n"
+    "        mat4  matProjLSFromES;\n"
+    "        mat4  matInvProjLSFromES;\n"
     "        vec3  position;\n"
     "        vec3  direction;\n"
-    "        vec3  color;\n"
     "        vec3  ambientIntensity;\n"
     "        vec3  diffuseIntensity;\n"
     "        vec3  specularIntensity;\n"
-    "        float intensity;\n"
+    "        vec3  intensity;\n"
     "        float constantAttenuation;\n"
     "        float linearAttenuation;\n"
     "        float quadraticAttenuation;\n"
+    "        float decayAttenuation;\n"
+    "        float lengthFactor;\n"
     "        float rangeCutOn;\n"
     "        float rangeCutOff;\n"
     "        float rangeNearZone;\n"
     "        float rangeFarZone;\n"
     "        float cosSpotlightAngle;\n"
+    "        float tanSpotlightAngle;\n"
     "        float spotlightAngle;\n"
-    "        float spotExponent;\n"
+    "        float spotlightExponent;\n"
+    "        float spotlightScale;\n"
+    "        float spotlightOffset;\n"
+    "        float cosSpotlightPenumbraAngle;\n"
     "        float innerSuperEllipsesWidth;\n"
     "        float innerSuperEllipsesHeight;\n"
     "        float outerSuperEllipsesWidth;\n"
@@ -1197,11 +1426,15 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "        float superEllipsesTwist;\n"
     "        int   type;\n"
     "        bool  enabled;\n"
+    "        bool  shadow;\n"
+    "        int   shadowDataIndex;\n"
+    "        int   shadowParameterIndex;\n"
     "    };\n"
     "\n"
     "    layout (std430) buffer Lights\n"
     "    {\n"
-    "        Light light[];\n"
+    "        GlobalLight global;\n"
+    "        Light       light[];\n"
     "    } lights;\n"
     "\n"
     "The chunk provides a convenient function that allows to adjust the struct layout\n"
@@ -1218,7 +1451,7 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "        float linearAttenuation;\n"
     "        float quadraticAttenuation;\n"
     "        float cosSpotlightAngle;\n"
-    "        float spotExponent;\n"
+    "        float spotlightExponent;\n"
     "        int   type;\n"
     "        bool  enabled;\n"
     "    };\n"
@@ -1229,8 +1462,7 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "    {\n"
     "        vec3  position;\n"
     "        vec3  direction;\n"
-    "        vec3  color;\n"
-    "        float intensity;\n"
+    "        vec3  intensity;\n"
     "        float rangeCutOff;\n"
     "        float cosSpotlightAngle;\n"
     "        int   type;\n"
@@ -1238,250 +1470,42 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "    };\n"
     "\n"
     "    <Field\n"
-    "        name=\"hasWorldToLightSpaceMatrix\"\n"
-    "        type=\"bool\"\n"
+    "        name=\"feature\"\n"
+    "        type=\"UInt32\"\n"
     "        cardinality=\"single\"\n"
     "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
+    "        access=\"protected\"\n"
+    "        defaultValue=\"0\"\n"
     "    >\n"
-    "        This flag determines if the worldToLightSpaceMatrix attribute is part of \n"
-    "        the shader storage block, i.e. if the \"mat4  worldToLightSpaceMatrix;\" \n"
-    "        entry is contained in the shader struct for the Light.\n"
+    "        This value determines the set of attributes that the light struct encompasses.\n"
+    "        Some technique classes, e.g. the 'MultiLightShadowTechniqueSimple', automatically\n"
+    "        set some additional features that they need for their proper operation.\n"
+    "        The application programmer is expected to use the special 'getFragmentProgramSnippet()'\n"
+    "        function in order to get a compatible light structure layout for his shader.\n"
+    "        See the shadow examples for illustration.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "        name=\"hasLightToWorldSpaceMatrix\"\n"
-    "        type=\"bool\"\n"
+    "        name=\"codeFeature\"\n"
+    "        type=\"UInt32\"\n"
     "        cardinality=\"single\"\n"
     "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
+    "        access=\"protected\"\n"
+    "        defaultValue=\"0\"\n"
     "    >\n"
-    "        This flag determines if the lightToWorldSpaceMatrix attribute is part of \n"
-    "        the shader storage block, i.e. if the \"mat4  lightToWorldSpaceMatrix;\" \n"
-    "        entry is contained in the shader struct for the Light.\n"
+    "        This value determines the set of attributes that governs the code generation\n"
+    "        process for the multi light.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "        name=\"hasEyeToLightSpaceMatrix\"\n"
-    "        type=\"bool\"\n"
+    "        name=\"globalAmbientIntensity\"\n"
+    "        type=\"Vec3f\"\n"
     "        cardinality=\"single\"\n"
     "        visibility=\"external\"\n"
     "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
+    "        defaultValue=\"Vec3f(0,0,0)\"\n"
     "    >\n"
-    "        This flag determines if the eyeToLightSpaceMatrix attribute is part of \n"
-    "        the shader storage block, i.e. if the \"mat4  eyeToLightSpaceMatrix;\" \n"
-    "        entry is contained in the shader struct for the Light.\n"
-    "        Attention: If this flag is set the light shader storage block has to\n"
-    "        be updated with every redraw operation.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasLightToEyeSpaceMatrix\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the lightToEyeSpaceMatrix attribute is part of \n"
-    "        the shader storage block, i.e. if the \"mat4  lightToEyeSpaceMatrix;\" \n"
-    "        entry is contained in the shader struct for the Light.\n"
-    "        Attention: If this flag is set the light shader storage block has to\n"
-    "        be updated with every redraw operation.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasLightPerspectiveMatrix\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the lightPerspectiveMatrix attribute is part of \n"
-    "        the shader storage block, i.e. if the \"mat4  lightPerspectiveMatrix;\" \n"
-    "        entry is contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasInvLightPerspectiveMatrix\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the lightToEyeSpaceMatrix attribute is part of \n"
-    "        the shader storage block, i.e. if the \"mat4  invLightToEyeSpaceMatrix;\" \n"
-    "        entry is contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasColor\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the color attribute is part of the shader storage block, i.e.\n"
-    "        if the \"vec3  color;\" entry is contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasIntensity\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the intensity attribute is part of the shader storage block, i.e.\n"
-    "        if the \"float intensity;\" entry is contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasSeparateIntensities\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"true\"\n"
-    "    >\n"
-    "        This flag determines if the color intensity attributes are part of the shader storage block, i.e.\n"
-    "        if the \"vec3  Ia;\", \"vec3  Id;\" and \"vec3 Is;\" entries are contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasAttenuation\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"true\"\n"
-    "    >\n"
-    "        This flag determines if the attenuation attributes are part of the shader storage block, i.e.\n"
-    "        if the \"float constantAttenuation;\", \"float linearAttenuation;\" and \"float quadraticAttenuation;\"\n"
-    "        entries are contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"autoCalcRanges\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"true\"\n"
-    "    >\n"
-    "        If this flag is active and the lights have attenuations, then the cut on and cut off ranges\n"
-    "        are automatically calculated. They are, however, not provided automatically to the shader.\n"
-    "        For that, you have to set the hasRangeCutOn and hasRangeCutOff flags, respectively.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasRangeCutOn\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the rangeCutOn attribute is part of the shader storage block, i.e.\n"
-    "        if the \"float rangeCutOn;\" entry is contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasRangeCutOff\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the hasRangeCutOff attribute is part of the shader storage block, i.e.\n"
-    "        if the \"float hasRangeCutOff;\" entry is contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasRangeNearZone\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the hasRangeNearZone attribute is part of the shader storage block, i.e.\n"
-    "        if the \"float hasRangeNearZone;\" entry is contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasRangeFarZone\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the hasRangeFarZone attribute is part of the shader storage block, i.e.\n"
-    "        if the \"float hasRangeFarZone;\" entry is contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasCosSpotlightAngle\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"true\"\n"
-    "    >\n"
-    "        This flag determines if the cosine of the spot light angle attribute is part of the shader storage block, i.e.\n"
-    "        if the \"float  cosSpotlightAngle;\" entry is contained in the shader struct for the Light. If neither this flag\n"
-    "        nor the hasSpotlightAngle flag is true, then this flag is treated as if it has value true.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasSpotlightAngle\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the spot light angle attribute is part of the shader storage block, i.e.\n"
-    "        if the \"float  spotlightAngle;\" entry is contained in the shader struct for the Light. If neither this flag\n"
-    "        nor the hasCosSpotlightAngle flag is true, then the hasCosSpotlightAngle flag is treated as if it has value true.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasSpotExponent\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"true\"\n"
-    "    >\n"
-    "        This flag determines if the spot expenent attribute is part of the shader storage block, i.e.\n"
-    "        if the \"float  spotExponent;\" entry is contained in the shader struct for the Light.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
-    "        name=\"hasCinemaLight\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "        This flag determines if the cinema light attributes are part of the shader storage block, i.e.\n"
-    "        if the \"float innerSuperEllipsesWidth;\", ... entries are contained in the shader struct for the Light.\n"
-    "        If true this flag overrides the hasRangeCutOn, hasRangeCutOff, hasRangeNearZone and hasRangeFarZone\n"
-    "        flags, because cinema lights are described the corresponding attributes.\n"
-    "        See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html\n"
-    "             http://www.yaldex.com/open-gl/ch12lev1sec4.html\n"
-    "             https://en.wikipedia.org/wiki/Superellipse\n"
+    "    The global ambient light intensity, that is to be added to the single light ambient intensities.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
@@ -1505,18 +1529,8 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "        name=\"color\"\n"
-    "        type=\"Color3f\"\n"
-    "        cardinality=\"multi\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"protected\"\n"
-    "    >\n"
-    "    The light's color.\n"
-    "    </Field>\n"
-    "\n"
-    "    <Field\n"
     "        name=\"intensity\"\n"
-    "        type=\"Real32\"\n"
+    "        type=\"Vec3f\"\n"
     "        cardinality=\"multi\"\n"
     "        visibility=\"external\"\n"
     "        access=\"protected\"\n"
@@ -1565,6 +1579,27 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "    </Field>\n"
     "\n"
     "    <Field\n"
+    "        name=\"decayAttenuation\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"multi\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"protected\"\n"
+    "    >\n"
+    "    The light's attenuation consiting of the decay parameter.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"lengthFactor\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"multi\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"protected\"\n"
+    "    >\n"
+    "    All distance attenuation calculation are performed by multiplying the distance with the lengthFactor\n"
+    "    in order to allow adaptation between differing length unit systems.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
     "        name=\"spotlightAngle\"\n"
     "        type=\"Real32\"\n"
     "        cardinality=\"multi\"\n"
@@ -1581,7 +1616,13 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "        visibility=\"external\"\n"
     "        access=\"protected\"\n"
     "    >\n"
-    "    The spot angle in degree.\n"
+    "    The spotlight parameter. The meaning of this parameter dependes on the following flags:\n"
+    "    HAS_SPOTLIGHT_EXPONENT, HAS_SPOTLIGHT_PENUMBRA_ANGLE or HAS_SPOTLIGHT_PENUMBRA_FACTOR.\n"
+    "    In case of flag HAS_SPOTLIGHT_PENUMBRA_ANGLE the parameter is expected to be\n"
+    "    the spot penumbra angle in dedree. In case of flag HAS_SPOTLIGHT_PENUMBRA_FACTOR\n"
+    "    the parameter is expected to be in the range [0,1] and is used to calculate the\n"
+    "    spot penumbra angle from the spotlightAngle.\n"
+    "   \n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
@@ -1670,12 +1711,9 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "        visibility=\"external\"\n"
     "        access=\"protected\"\n"
     "    >\n"
-    "    The cinema light is described among others by a rangeCutOn parameter.\n"
-    "    In the interval rangeCutOn to rangeCutOff the lighted fragments are\n"
-    "    fully lit.\n"
-    "    See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html\n"
-    "         http://www.yaldex.com/open-gl/ch12lev1sec4.html\n"
-    "         https://en.wikipedia.org/wiki/Superellipse\n"
+    "    In the interval rangeCutOn to rangeCutOff the light is active and the\n"
+    "    fragements are lit. Outside is no light. This parameter can be manually\n"
+    "    set or automatically calculated.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
@@ -1685,12 +1723,9 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "        visibility=\"external\"\n"
     "        access=\"protected\"\n"
     "    >\n"
-    "    The cinema light is described among others by a rangeCutOff parameter.\n"
-    "    In the interval rangeCutOn to rangeCutOff the lighted fragments are\n"
-    "    fully lit.\n"
-    "    See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html\n"
-    "         http://www.yaldex.com/open-gl/ch12lev1sec4.html\n"
-    "         https://en.wikipedia.org/wiki/Superellipse\n"
+    "    In the interval rangeCutOn to rangeCutOff the light is active and the\n"
+    "    fragements are lit. Outside is no light. This parameter can be manually\n"
+    "    set or automatically calculated.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
@@ -1720,6 +1755,17 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "    </Field>\n"
     "\n"
     "    <Field\n"
+    "        name=\"projectionMatrix\"\n"
+    "        type=\"Matrix\"\n"
+    "        cardinality=\"multi\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"protected\"\n"
+    "    >\n"
+    "    The light projection matrix. This is typically calculated newly for each render pass and\n"
+    "    this field allows storage of this calculated matrix. Usally, internally set by OpenSG.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
     "        name=\"type\"\n"
     "        type=\"UInt8\"\n"
     "        cardinality=\"multi\"\n"
@@ -1740,6 +1786,41 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "    </Field>\n"
     "\n"
     "    <Field\n"
+    "        name=\"shadow\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"multi\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"protected\"\n"
+    "    >\n"
+    "    The on/off shadow state of the light.\n"
+    "    </Field>\n"
+    "    <Field\n"
+    "        name=\"shadowDataIndex\"\n"
+    "        type=\"Int32\"\n"
+    "        cardinality=\"multi\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"protected\"\n"
+    "    >\n"
+    "    The index of the light into the shadow data array. The MultiLightShadowStage does provide an additional\n"
+    "    shader storage buffer object for each shadowing light. This index points into this array, allowing\n"
+    "    the shader to access particular runtime information for the shadowing technique at hand.\n"
+    "    This field is internally set by OpenSG. No user setting necessary.\n"
+    "    </Field>\n"
+    "    <Field\n"
+    "        name=\"shadowParameterIndex\"\n"
+    "        type=\"Int32\"\n"
+    "        cardinality=\"multi\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"protected\"\n"
+    "    >\n"
+    "    The index of the light into the shadow parameter array. The MultiLightShadowStage does provide an additional\n"
+    "    shader storage buffer object for the shadowing parameters that each shadowing lights should use. This index \n"
+    "    points into this array, allowing the shader to access particular runtime information for the shadowing \n"
+    "    technique at hand. The user adds MultiLightShadowParameter instances to the MultiLightShadowStage stage\n"
+    "    and uses the index of a particular instance for this field.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
     "        name=\"beacon\"\n"
     "        type=\"Node\"\n"
     "        category=\"weakpointer\"\n"
@@ -1751,26 +1832,26 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "    </Field>\n"
     "\n"
     "    <Field\n"
+    "        name=\"normalizeDirection\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue=\"true\"\n"
+    "    >\n"
+    "    The camera last near value.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
     "        name=\"beaconMatrix\"\n"
     "        type=\"Matrix\"\n"
     "        cardinality=\"multi\"\n"
     "        visibility=\"internal\"\n"
     "        access=\"protected\"\n"
     "    >\n"
-    "        The beacon matrices used for the last render pass.\n"
+    "    The beacon matrices used for the last render pass. Internally set by OpenSG.\n"
     "    </Field>\n"
     "\n"
-    "    <Field\n"
-    "        name=\"eyeSpace\"\n"
-    "        type=\"bool\"\n"
-    "        cardinality=\"single\"\n"
-    "        visibility=\"external\"\n"
-    "        access=\"public\"\n"
-    "        defaultValue=\"false\"\n"
-    "    >\n"
-    "    The lights position and direction are transformed to eye space before loading into the shader. \n"
-    "    On default they are provided in world space.\n"
-    "    </Field>\n"
     "\n"
     "    <Field\n"
     "        name=\"lastCamNear\"\n"
@@ -1780,7 +1861,7 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "        access=\"protected\"\n"
     "        defaultValue=\"0.f\"\n"
     "    >\n"
-    "        The camera last near value.\n"
+    "    The camera last near value. Internally set by OpenSG.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
@@ -1791,7 +1872,7 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "        access=\"protected\"\n"
     "        defaultValue=\"0.f\"\n"
     "    >\n"
-    "        The camera last far value.\n"
+    "    The camera last far value. Internally set by OpenSG.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
@@ -1801,29 +1882,29 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "        visibility=\"internal\"\n"
     "        access=\"protected\"\n"
     "    >\n"
-    "        The camera last to world matrix.\n"
+    "    The camera last to world matrix. Internally set by OpenSG.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "     name=\"LightBlockName\"\n"
-    "     type=\"std::string\"\n"
-    "     cardinality=\"single\"\n"
-    "     visibility=\"external\"\n"
-    "     access=\"public\"\n"
-    "     defaultValue='\"Lights\"'\n"
-    "     >\n"
-    "        The shader storage buffer block name for the light buffer.\n"
+    "        name=\"LightBlockName\"\n"
+    "        type=\"std::string\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue='\"Lights\"'\n"
+    "    >\n"
+    "    The shader storage buffer block name for the light buffer.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "     name=\"LightVariableName\"\n"
-    "     type=\"std::string\"\n"
-    "     cardinality=\"single\"\n"
-    "     visibility=\"external\"\n"
-    "     access=\"public\"\n"
-    "     defaultValue='\"lights\"'\n"
-    "     >\n"
-    "        The shader variable name for the light buffer.\n"
+    "        name=\"LightVariableName\"\n"
+    "        type=\"std::string\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue='\"lights\"'\n"
+    "    >\n"
+    "    The shader variable name for the light buffer.\n"
     "    </Field>\n"
     "\n"
     "</FieldContainer>\n",
@@ -1833,34 +1914,260 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "in form of a buffer in OpenGL std430 layout format.\n"
     "A shader, binding a shader storage block to the very same binding point, \n"
     "is expected to respect the corresponding block layout. The layout is regulated\n"
-    "by the hasXXX fields of the chunk. If one is set to false the corresponding\n"
-    "struct entry is omitted.\n"
+    "by the feature field of the chunk. If a feature is not set the corresponding struct\n"
+    "entries are omitted. The feature attribute is protected, but getter and setters for \n"
+    "each feature are publicly provided.\n"
+    "\n"
+    "The following features are supported:\n"
+    "\n"
+    "HAS_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX\n"
+    "This flag determines if the matLSFromWS attribute is part of \n"
+    "the shader storage block, i.e. if the \"mat4  matLSFromWS;\" \n"
+    "entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_WORLD_SPACE_FROM_LIGHT_SPACE_MATRIX\n"
+    "This flag determines if the matWSFromLS attribute is part of \n"
+    "the shader storage block, i.e. if the \"mat4  matWSFromLS;\" \n"
+    "entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX\n"
+    "This flag determines if the matLSFromES attribute is part of \n"
+    "the shader storage block, i.e. if the \"mat4  matLSFromES;\" \n"
+    "entry is contained in the shader struct for the Light.\n"
+    "Attention: If this flag is set the light shader storage block has to\n"
+    "be updated with every redraw operation.\n"
+    "\n"
+    "HAS_EYE_SPACE_FROM_LIGHT_SPACE_MATRIX\n"
+    "This flag determines if the matESFromLS attribute is part of \n"
+    "the shader storage block, i.e. if the \"mat4  matESFromLS;\" \n"
+    "entry is contained in the shader struct for the Light.\n"
+    "Attention: If this flag is set the light shader storage block has to\n"
+    "be updated with every redraw operation.\n"
+    "\n"
+    "HAS_PROJECTION_MATRIX\n"
+    "This flag determines if the matProjection attribute is part of \n"
+    "the shader storage block, i.e. if the \"mat4  matProjection;\" \n"
+    "entry is contained in the shader struct for the Light.\n"
+    "Implicitely set the hasProjection flag.\n"
+    "\n"
+    "HAS_INV_PROJECTION_MATRIX\n"
+    "This flag determines if the matInvProjection attribute is part of \n"
+    "the shader storage block, i.e. if the \"mat4  matInvProjection;\" \n"
+    "entry is contained in the shader struct for the Light.\n"
+    "Implicitely set the hasProjection flag.\n"
+    "\n"
+    "HAS_PROJECTION_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX\n"
+    "This flag determines if the matProjLSFromWS attribute is part of \n"
+    "the shader storage block, i.e. if the \"mat4  matProjLSFromWS;\" \n"
+    "entry is contained in the shader struct for the Light.\n"
+    "Implicitely set the hasProjection flag.\n"
+    "\n"
+    "HAS_INV_PROJECTION_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX\n"
+    "This flag determines if the matInvProjLSFromWS attribute is part of \n"
+    "the shader storage block, i.e. if the \"mat4  matInvProjLSFromWS;\" \n"
+    "entry is contained in the shader struct for the Light.\n"
+    "Implicitely set the hasProjection flag.\n"
+    "\n"
+    "HAS_PROJECTION_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX\n"
+    "This flag determines if the matProjLSFromES attribute is part of \n"
+    "the shader storage block, i.e. if the \"mat4  matProjLSFromES;\" \n"
+    "entry is contained in the shader struct for the Light.\n"
+    "Implicitely set the hasProjection flag.\n"
+    "\n"
+    "HAS_INV_PROJECTION_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX\n"
+    "This flag determines if the matInvProjLSFromES attribute is part of \n"
+    "the shader storage block, i.e. if the \"mat4  matInvProjLSFromES;\" \n"
+    "entry is contained in the shader struct for the Light.\n"
+    "Implicitely set the hasProjection flag.\n"
+    "\n"
+    "HAS_INTENSITY\n"
+    "This flag determines if the color intensity attribute is part of the shader storage block, i.e.\n"
+    "if the \"vec3 intensity;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_SEPARATE_INTENSITIES\n"
+    "This flag determines if the color intensity attributes are part of the shader storage block, i.e.\n"
+    "if the \"vec3  Ia;\", \"vec3  Id;\" and \"vec3 Is;\" entries are contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_ATTENUATION\n"
+    "This flag determines if the attenuation attributes are part of the shader storage block, i.e.\n"
+    "if the \"float constantAttenuation;\", \"float linearAttenuation;\" and \"float quadraticAttenuation;\"\n"
+    "entries are contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_DECAY_ATTENUATION\n"
+    "This flag determines if the attenuation decay attribute  is also part of the shader storage block, i.e.\n"
+    "if the \"float decayAttenuation\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "AUTO_CALC_RANGES\n"
+    "If this flag is active and the lights have attenuations, then the cut on and cut off ranges\n"
+    "are automatically calculated. They are, however, not provided automatically to the shader.\n"
+    "For that, you have to set the hasRangeCutOn and hasRangeCutOff flags, respectively.\n"
+    "\n"
+    "HAS_RANGE_CUT_ON\n"
+    "This flag determines if the rangeCutOn attribute is part of the shader storage block, i.e.\n"
+    "if the \"float rangeCutOn;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_RANGE_CUT_OFF\n"
+    "This flag determines if the hasRangeCutOff attribute is part of the shader storage block, i.e.\n"
+    "if the \"float hasRangeCutOff;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_RANGE_NEAR_ZONE\n"
+    "This flag determines if the hasRangeNearZone attribute is part of the shader storage block, i.e.\n"
+    "if the \"float hasRangeNearZone;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_RANGE_FAR_ZONE\n"
+    "This flag determines if the hasRangeFarZone attribute is part of the shader storage block, i.e.\n"
+    "if the \"float hasRangeFarZone;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_SPOTLIGHT_ANGLE\n"
+    "This flag determines if the spot light angle attribute is part of the shader storage block, i.e.\n"
+    "if the \"float spotlightAngle;\" entry is contained in the shader struct for the Light.\n"
+    "If neither this flag nor the hasCosSpotlightAngle flag is true, then the hasCosSpotlightAngle \n"
+    "flag is treated as if it has value true.\n"
+    "\n"
+    "HAS_COS_SPOTLIGHT_ANGLE\n"
+    "This flag determines if the cosine spot light angle attribute is part of the shader storage block, i.e.\n"
+    "if the \"float cosSpotlightAngle;\" entry is contained in the shader struct for the Light.\n"
+    "If neither this flag nor the hasSpotlightAngle flag is true, then this flag is treated as if it \n"
+    "has value true.\n"
+    "\n"
+    "HAS_SPOTLIGHT_EXPONENT\n"
+    "This flag determines if the spot expenent attribute is part of the shader storage block, i.e.\n"
+    "if the \"float spotlightExponent;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_SPOTLIGHT_PENUMBRA_ANGLE\n"
+    "This flag determines if the spot penumbra angle attribute is part of the shader storage block, i.e.\n"
+    "if the \"float cosPenumbraCone;\" entry is contained in the shader struct for the Light.\n"
+    "\n"
+    "HAS_SPOTLIGHT_PENUMBRA_FACTOR\n"
+    "This flag determines if the spot penumbra angle attribute is part of the shader storage block, i.e.\n"
+    "if the \"float cosPenumbraCone;\" entry is contained in the shader struct for the Light. This flag\n"
+    "additionally, determines that the penumbra angle is calculated from the spot light cone angle.\n"
+    "\n"
+    "HAS_SPOTLIGHT_PENUMBRA_FROSTBITE\n"
+    "This flag determines if the spot light attributes are given in the Frostbite optimized model in the \n"
+    "shader storage block, i.e. if the \"float spotScale;\"  and \"float spotOffset;\" entries are contained\n"
+    "in the shader struct for the Light.\n"
+    "\n"
+    "HAS_CINEMA_LIGHT\n"
+    "This flag determines if the cinema light attributes are part of the shader storage block, i.e.\n"
+    "if the \"float innerSuperEllipsesWidth;\", ... entries are contained in the shader struct for the Light.\n"
+    "If true this flag overrides the hasRangeCutOn, hasRangeCutOff, hasRangeNearZone and hasRangeFarZone\n"
+    "flags, because cinema lights are described the corresponding attributes.\n"
+    "See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html\n"
+    "http://www.yaldex.com/open-gl/ch12lev1sec4.html\n"
+    "https://en.wikipedia.org/wiki/Superellipse\n"
+    "\n"
+    "HAS_SHADOW\n"
+    "This flag determines if the multi light supports shadowing. Is set to true the boolean\n"
+    "shadow flag, the shadowIntensity and the shadow index are added to the light struct.\n"
+    "\n"
+    "HAS_GLOBAL_AMBIENT_INTENSITY\n"
+    "This flag determines if the multi light supports a global ambient light state, i.e. if a vec3 global color\n"
+    "entry 'ambientLight' exists in the light buffer which is to be added to the single light ambient intensities.\n"
+    "\n"
+    "HAS_LENGTH_FACTOR\n"
+    "This flag determines if the multi light supports a global length factor light state, i.e. if a float 'lengthFactor'\n"
+    "exists in the light buffer which is used for distance attenuation calculations.\n"
+    "\n"
+    "HAS_PROJECTION\n"
+    "This flag determines if the multi light contains a projection matrix for each light, that is whether\n"
+    "storage is provided for the projection matrix. It does not decide whether a struct entry for the light\n"
+    "in the shader is generated. For that use the dedicated hasProjectionMatrix, hasInvProjectionMatrix,\n"
+    "hasProjectionLightSpaceFromWorldSpaceMatrix, hasInvProjectionLightSpaceFromWorldSpaceMatrix,\n"
+    "hasProjectionLightSpaceFromEyeSpaceMatrix, hasInvProjectionLightSpaceFromEyeSpaceMatrix\n"
+    "flags. Usage of these, however, implicitely set this hasProjection flag.\n"
+    "Additionally, the projection matrix is not automatically calculated. That is the duty of the user of the\n"
+    "chunk. Typically, the multi light shadow stage does take responsibiltiy for the proper calculation and\n"
+    "setting the projection matrix.\n"
+    "\n"
+    "EYE_SPACE\n"
+    "The lights position and direction are transformed to eye space before loading into the shader. \n"
+    "On default they are provided in world space.\n"
+    "\n"
+    "The following code features are supported:\n"
+    "CODE_DISTANCE_ATTENUATION_CLASSIC\n"
+    "The classic OpenGL attenuation function is added to the light code snippet.\n"
+    "\n"
+    "CODE_DISTANCE_ATTENUATION_PHYSICAL\n"
+    "A physically based attenuation function is added to the light code snippet.\n"
+    "\n"
+    "CODE_DISTANCE_ATTENUATION_DECAY\n"
+    "A physically based attenuation function is added to the light code snippet.\n"
+    "An additional decay parameter is used by the function.\n"
+    "\n"
+    "CODE_DISTANCE_ATTENUATION_MIX_PHYSICAL\n"
+    "A physically based attenuation function is added to the light code snippet that\n"
+    "also respect the classic OpenGL attenuation parameters.\n"
+    "\n"
+    "CODE_DISTANCE_ATTENUATION_MIX_DECAY\n"
+    "A physically based attenuation function is added to the light code snippet that\n"
+    "also respect the classic OpenGL attenuation parameters.\n"
+    "An additional decay parameter is used by the function.\n"
+    "\n"
+    "CODE_DISTANCE_ATTENUATION_SMOOTH_HERMITE\n"
+    "An attenuation function based on Hermitian smoothing is added to the light code snippet.\n"
+    "\n"
+    "CODE_SPOT_ATTENUATION_CLASSIC\n"
+    "The classic OpenGL spot attenuation function is added to the light code snippet.\n"
+    "This model uses the cosine cutoff angle and the spot exponent parameter.\n"
+    "\n"
+    "CODE_SPOT_ATTENUATION_SMOOTH_HERMITE\n"
+    "A spot attenuation function based on Hermitian smoothing is added to the light code snippet.\n"
+    "This model uses the cosine cutoff angle.\n"
+    "\n"
+    "CODE_SPOT_ATTENUATION_SMOOTH_HERMITE_2\n"
+    "A spot attenuation function based on Hermitian smoothing is added to the light code snippet.\n"
+    "This model uses the cosine cutoff angle and the cosine penumbra angle.\n"
+    "\n"
+    "CODE_SPOT_ATTENUATION_FROSTBITE\n"
+    "A spot attenuation function based in accodrance to the Frostbite engine model.\n"
+    "This optimized model uses a scale factor and an offset value.\n"
+    "scale  := 1.0f / max (0.001f, (penumbraCos  - coneCos));\n"
+    "offset := -coneCos * scale;\n"
+    "\n"
+    "Following is the light structure shown that is valid if all layout features are activated. Usually,\n"
+    "one is working only with a part of these members. Some members are expected to be set by the application\n"
+    "programmer and some are set by internal machinery of OpenSG.\n"
+    "\n"
+    "struct GlobalLight\n"
+    "{\n"
+    "vec3  ambientIntensity;\n"
+    "}\n"
     "\n"
     "struct Light\n"
     "{\n"
-    "mat4  worldToLightSpaceMatrix;\n"
-    "mat4  lightToWorldSpaceMatrix;\n"
-    "mat4  eyeToLightSpaceMatrix;\n"
-    "mat4  lightToEyeSpaceMatrix;\n"
-    "mat4  lightPerspectiveMatrix;\n"
-    "mat4  invLightPerspectiveMatrix;\n"
+    "mat4  matLSFromWS;\n"
+    "mat4  matWSFromLS;\n"
+    "mat4  matLSFromES;\n"
+    "mat4  matESFromLS;\n"
+    "mat4  matProjection;\n"
+    "mat4  matInvProjection;\n"
+    "mat4  matProjLSFromWS;\n"
+    "mat4  matInvProjLSFromWS;\n"
+    "mat4  matProjLSFromES;\n"
+    "mat4  matInvProjLSFromES;\n"
     "vec3  position;\n"
     "vec3  direction;\n"
-    "vec3  color;\n"
     "vec3  ambientIntensity;\n"
     "vec3  diffuseIntensity;\n"
     "vec3  specularIntensity;\n"
-    "float intensity;\n"
+    "vec3  intensity;\n"
     "float constantAttenuation;\n"
     "float linearAttenuation;\n"
     "float quadraticAttenuation;\n"
+    "float decayAttenuation;\n"
+    "float lengthFactor;\n"
     "float rangeCutOn;\n"
     "float rangeCutOff;\n"
     "float rangeNearZone;\n"
     "float rangeFarZone;\n"
     "float cosSpotlightAngle;\n"
+    "float tanSpotlightAngle;\n"
     "float spotlightAngle;\n"
-    "float spotExponent;\n"
+    "float spotlightExponent;\n"
+    "float spotlightScale;\n"
+    "float spotlightOffset;\n"
+    "float cosSpotlightPenumbraAngle;\n"
     "float innerSuperEllipsesWidth;\n"
     "float innerSuperEllipsesHeight;\n"
     "float outerSuperEllipsesWidth;\n"
@@ -1869,11 +2176,15 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "float superEllipsesTwist;\n"
     "int   type;\n"
     "bool  enabled;\n"
+    "bool  shadow;\n"
+    "int   shadowDataIndex;\n"
+    "int   shadowParameterIndex;\n"
     "};\n"
     "\n"
     "layout (std430) buffer Lights\n"
     "{\n"
-    "Light light[];\n"
+    "GlobalLight global;\n"
+    "Light       light[];\n"
     "} lights;\n"
     "\n"
     "The chunk provides a convenient function that allows to adjust the struct layout\n"
@@ -1890,7 +2201,7 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "float linearAttenuation;\n"
     "float quadraticAttenuation;\n"
     "float cosSpotlightAngle;\n"
-    "float spotExponent;\n"
+    "float spotlightExponent;\n"
     "int   type;\n"
     "bool  enabled;\n"
     "};\n"
@@ -1901,8 +2212,7 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "{\n"
     "vec3  position;\n"
     "vec3  direction;\n"
-    "vec3  color;\n"
-    "float intensity;\n"
+    "vec3  intensity;\n"
     "float rangeCutOff;\n"
     "float cosSpotlightAngle;\n"
     "int   type;\n"
@@ -1930,250 +2240,42 @@ UInt32 MultiLightChunkBase::getContainerSize(void) const
 /*------------------------- decorator get ------------------------------*/
 
 
-SFBool *MultiLightChunkBase::editSFHasWorldToLightSpaceMatrix(void)
+SFUInt32 *MultiLightChunkBase::editSFFeature(void)
 {
-    editSField(HasWorldToLightSpaceMatrixFieldMask);
+    editSField(FeatureFieldMask);
 
-    return &_sfHasWorldToLightSpaceMatrix;
+    return &_sfFeature;
 }
 
-const SFBool *MultiLightChunkBase::getSFHasWorldToLightSpaceMatrix(void) const
+const SFUInt32 *MultiLightChunkBase::getSFFeature(void) const
 {
-    return &_sfHasWorldToLightSpaceMatrix;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasLightToWorldSpaceMatrix(void)
-{
-    editSField(HasLightToWorldSpaceMatrixFieldMask);
-
-    return &_sfHasLightToWorldSpaceMatrix;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasLightToWorldSpaceMatrix(void) const
-{
-    return &_sfHasLightToWorldSpaceMatrix;
+    return &_sfFeature;
 }
 
 
-SFBool *MultiLightChunkBase::editSFHasEyeToLightSpaceMatrix(void)
+SFUInt32 *MultiLightChunkBase::editSFCodeFeature(void)
 {
-    editSField(HasEyeToLightSpaceMatrixFieldMask);
+    editSField(CodeFeatureFieldMask);
 
-    return &_sfHasEyeToLightSpaceMatrix;
+    return &_sfCodeFeature;
 }
 
-const SFBool *MultiLightChunkBase::getSFHasEyeToLightSpaceMatrix(void) const
+const SFUInt32 *MultiLightChunkBase::getSFCodeFeature(void) const
 {
-    return &_sfHasEyeToLightSpaceMatrix;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasLightToEyeSpaceMatrix(void)
-{
-    editSField(HasLightToEyeSpaceMatrixFieldMask);
-
-    return &_sfHasLightToEyeSpaceMatrix;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasLightToEyeSpaceMatrix(void) const
-{
-    return &_sfHasLightToEyeSpaceMatrix;
+    return &_sfCodeFeature;
 }
 
 
-SFBool *MultiLightChunkBase::editSFHasLightPerspectiveMatrix(void)
+SFVec3f *MultiLightChunkBase::editSFGlobalAmbientIntensity(void)
 {
-    editSField(HasLightPerspectiveMatrixFieldMask);
+    editSField(GlobalAmbientIntensityFieldMask);
 
-    return &_sfHasLightPerspectiveMatrix;
+    return &_sfGlobalAmbientIntensity;
 }
 
-const SFBool *MultiLightChunkBase::getSFHasLightPerspectiveMatrix(void) const
+const SFVec3f *MultiLightChunkBase::getSFGlobalAmbientIntensity(void) const
 {
-    return &_sfHasLightPerspectiveMatrix;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasInvLightPerspectiveMatrix(void)
-{
-    editSField(HasInvLightPerspectiveMatrixFieldMask);
-
-    return &_sfHasInvLightPerspectiveMatrix;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasInvLightPerspectiveMatrix(void) const
-{
-    return &_sfHasInvLightPerspectiveMatrix;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasColor(void)
-{
-    editSField(HasColorFieldMask);
-
-    return &_sfHasColor;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasColor(void) const
-{
-    return &_sfHasColor;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasIntensity(void)
-{
-    editSField(HasIntensityFieldMask);
-
-    return &_sfHasIntensity;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasIntensity(void) const
-{
-    return &_sfHasIntensity;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasSeparateIntensities(void)
-{
-    editSField(HasSeparateIntensitiesFieldMask);
-
-    return &_sfHasSeparateIntensities;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasSeparateIntensities(void) const
-{
-    return &_sfHasSeparateIntensities;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasAttenuation(void)
-{
-    editSField(HasAttenuationFieldMask);
-
-    return &_sfHasAttenuation;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasAttenuation(void) const
-{
-    return &_sfHasAttenuation;
-}
-
-
-SFBool *MultiLightChunkBase::editSFAutoCalcRanges(void)
-{
-    editSField(AutoCalcRangesFieldMask);
-
-    return &_sfAutoCalcRanges;
-}
-
-const SFBool *MultiLightChunkBase::getSFAutoCalcRanges(void) const
-{
-    return &_sfAutoCalcRanges;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasRangeCutOn(void)
-{
-    editSField(HasRangeCutOnFieldMask);
-
-    return &_sfHasRangeCutOn;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasRangeCutOn(void) const
-{
-    return &_sfHasRangeCutOn;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasRangeCutOff(void)
-{
-    editSField(HasRangeCutOffFieldMask);
-
-    return &_sfHasRangeCutOff;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasRangeCutOff(void) const
-{
-    return &_sfHasRangeCutOff;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasRangeNearZone(void)
-{
-    editSField(HasRangeNearZoneFieldMask);
-
-    return &_sfHasRangeNearZone;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasRangeNearZone(void) const
-{
-    return &_sfHasRangeNearZone;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasRangeFarZone(void)
-{
-    editSField(HasRangeFarZoneFieldMask);
-
-    return &_sfHasRangeFarZone;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasRangeFarZone(void) const
-{
-    return &_sfHasRangeFarZone;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasCosSpotlightAngle(void)
-{
-    editSField(HasCosSpotlightAngleFieldMask);
-
-    return &_sfHasCosSpotlightAngle;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasCosSpotlightAngle(void) const
-{
-    return &_sfHasCosSpotlightAngle;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasSpotlightAngle(void)
-{
-    editSField(HasSpotlightAngleFieldMask);
-
-    return &_sfHasSpotlightAngle;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasSpotlightAngle(void) const
-{
-    return &_sfHasSpotlightAngle;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasSpotExponent(void)
-{
-    editSField(HasSpotExponentFieldMask);
-
-    return &_sfHasSpotExponent;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasSpotExponent(void) const
-{
-    return &_sfHasSpotExponent;
-}
-
-
-SFBool *MultiLightChunkBase::editSFHasCinemaLight(void)
-{
-    editSField(HasCinemaLightFieldMask);
-
-    return &_sfHasCinemaLight;
-}
-
-const SFBool *MultiLightChunkBase::getSFHasCinemaLight(void) const
-{
-    return &_sfHasCinemaLight;
+    return &_sfGlobalAmbientIntensity;
 }
 
 
@@ -2203,27 +2305,14 @@ const MFVec3f *MultiLightChunkBase::getMFDirection(void) const
 }
 
 
-MFColor3f *MultiLightChunkBase::editMFColor(void)
-{
-    editMField(ColorFieldMask, _mfColor);
-
-    return &_mfColor;
-}
-
-const MFColor3f *MultiLightChunkBase::getMFColor(void) const
-{
-    return &_mfColor;
-}
-
-
-MFReal32 *MultiLightChunkBase::editMFIntensity(void)
+MFVec3f *MultiLightChunkBase::editMFIntensity(void)
 {
     editMField(IntensityFieldMask, _mfIntensity);
 
     return &_mfIntensity;
 }
 
-const MFReal32 *MultiLightChunkBase::getMFIntensity(void) const
+const MFVec3f *MultiLightChunkBase::getMFIntensity(void) const
 {
     return &_mfIntensity;
 }
@@ -2278,6 +2367,32 @@ MFVec3f *MultiLightChunkBase::editMFAttenuation(void)
 const MFVec3f *MultiLightChunkBase::getMFAttenuation(void) const
 {
     return &_mfAttenuation;
+}
+
+
+MFReal32 *MultiLightChunkBase::editMFDecayAttenuation(void)
+{
+    editMField(DecayAttenuationFieldMask, _mfDecayAttenuation);
+
+    return &_mfDecayAttenuation;
+}
+
+const MFReal32 *MultiLightChunkBase::getMFDecayAttenuation(void) const
+{
+    return &_mfDecayAttenuation;
+}
+
+
+MFReal32 *MultiLightChunkBase::editMFLengthFactor(void)
+{
+    editMField(LengthFactorFieldMask, _mfLengthFactor);
+
+    return &_mfLengthFactor;
+}
+
+const MFReal32 *MultiLightChunkBase::getMFLengthFactor(void) const
+{
+    return &_mfLengthFactor;
 }
 
 
@@ -2437,6 +2552,19 @@ const MFReal32 *MultiLightChunkBase::getMFRangeFarZone(void) const
 }
 
 
+MFMatrix *MultiLightChunkBase::editMFProjectionMatrix(void)
+{
+    editMField(ProjectionMatrixFieldMask, _mfProjectionMatrix);
+
+    return &_mfProjectionMatrix;
+}
+
+const MFMatrix *MultiLightChunkBase::getMFProjectionMatrix(void) const
+{
+    return &_mfProjectionMatrix;
+}
+
+
 MFUInt8 *MultiLightChunkBase::editMFType(void)
 {
     editMField(TypeFieldMask, _mfType);
@@ -2463,6 +2591,45 @@ const MFBool *MultiLightChunkBase::getMFEnabled(void) const
 }
 
 
+MFBool *MultiLightChunkBase::editMFShadow(void)
+{
+    editMField(ShadowFieldMask, _mfShadow);
+
+    return &_mfShadow;
+}
+
+const MFBool *MultiLightChunkBase::getMFShadow(void) const
+{
+    return &_mfShadow;
+}
+
+
+MFInt32 *MultiLightChunkBase::editMFShadowDataIndex(void)
+{
+    editMField(ShadowDataIndexFieldMask, _mfShadowDataIndex);
+
+    return &_mfShadowDataIndex;
+}
+
+const MFInt32 *MultiLightChunkBase::getMFShadowDataIndex(void) const
+{
+    return &_mfShadowDataIndex;
+}
+
+
+MFInt32 *MultiLightChunkBase::editMFShadowParameterIndex(void)
+{
+    editMField(ShadowParameterIndexFieldMask, _mfShadowParameterIndex);
+
+    return &_mfShadowParameterIndex;
+}
+
+const MFInt32 *MultiLightChunkBase::getMFShadowParameterIndex(void) const
+{
+    return &_mfShadowParameterIndex;
+}
+
+
 //! Get the MultiLightChunk::_mfBeacon field.
 const MFWeakNodePtr *MultiLightChunkBase::getMFBeacon(void) const
 {
@@ -2480,6 +2647,19 @@ Node * MultiLightChunkBase::getBeacon(const UInt32 index) const
     return _mfBeacon[index];
 }
 
+SFBool *MultiLightChunkBase::editSFNormalizeDirection(void)
+{
+    editSField(NormalizeDirectionFieldMask);
+
+    return &_sfNormalizeDirection;
+}
+
+const SFBool *MultiLightChunkBase::getSFNormalizeDirection(void) const
+{
+    return &_sfNormalizeDirection;
+}
+
+
 MFMatrix *MultiLightChunkBase::editMFBeaconMatrix(void)
 {
     editMField(BeaconMatrixFieldMask, _mfBeaconMatrix);
@@ -2490,19 +2670,6 @@ MFMatrix *MultiLightChunkBase::editMFBeaconMatrix(void)
 const MFMatrix *MultiLightChunkBase::getMFBeaconMatrix(void) const
 {
     return &_mfBeaconMatrix;
-}
-
-
-SFBool *MultiLightChunkBase::editSFEyeSpace(void)
-{
-    editSField(EyeSpaceFieldMask);
-
-    return &_sfEyeSpace;
-}
-
-const SFBool *MultiLightChunkBase::getSFEyeSpace(void) const
-{
-    return &_sfEyeSpace;
 }
 
 
@@ -2634,81 +2801,17 @@ SizeT MultiLightChunkBase::getBinSize(ConstFieldMaskArg whichField)
 {
     SizeT returnValue = Inherited::getBinSize(whichField);
 
-    if(FieldBits::NoField != (HasWorldToLightSpaceMatrixFieldMask & whichField))
+    if(FieldBits::NoField != (FeatureFieldMask & whichField))
     {
-        returnValue += _sfHasWorldToLightSpaceMatrix.getBinSize();
+        returnValue += _sfFeature.getBinSize();
     }
-    if(FieldBits::NoField != (HasLightToWorldSpaceMatrixFieldMask & whichField))
+    if(FieldBits::NoField != (CodeFeatureFieldMask & whichField))
     {
-        returnValue += _sfHasLightToWorldSpaceMatrix.getBinSize();
+        returnValue += _sfCodeFeature.getBinSize();
     }
-    if(FieldBits::NoField != (HasEyeToLightSpaceMatrixFieldMask & whichField))
+    if(FieldBits::NoField != (GlobalAmbientIntensityFieldMask & whichField))
     {
-        returnValue += _sfHasEyeToLightSpaceMatrix.getBinSize();
-    }
-    if(FieldBits::NoField != (HasLightToEyeSpaceMatrixFieldMask & whichField))
-    {
-        returnValue += _sfHasLightToEyeSpaceMatrix.getBinSize();
-    }
-    if(FieldBits::NoField != (HasLightPerspectiveMatrixFieldMask & whichField))
-    {
-        returnValue += _sfHasLightPerspectiveMatrix.getBinSize();
-    }
-    if(FieldBits::NoField != (HasInvLightPerspectiveMatrixFieldMask & whichField))
-    {
-        returnValue += _sfHasInvLightPerspectiveMatrix.getBinSize();
-    }
-    if(FieldBits::NoField != (HasColorFieldMask & whichField))
-    {
-        returnValue += _sfHasColor.getBinSize();
-    }
-    if(FieldBits::NoField != (HasIntensityFieldMask & whichField))
-    {
-        returnValue += _sfHasIntensity.getBinSize();
-    }
-    if(FieldBits::NoField != (HasSeparateIntensitiesFieldMask & whichField))
-    {
-        returnValue += _sfHasSeparateIntensities.getBinSize();
-    }
-    if(FieldBits::NoField != (HasAttenuationFieldMask & whichField))
-    {
-        returnValue += _sfHasAttenuation.getBinSize();
-    }
-    if(FieldBits::NoField != (AutoCalcRangesFieldMask & whichField))
-    {
-        returnValue += _sfAutoCalcRanges.getBinSize();
-    }
-    if(FieldBits::NoField != (HasRangeCutOnFieldMask & whichField))
-    {
-        returnValue += _sfHasRangeCutOn.getBinSize();
-    }
-    if(FieldBits::NoField != (HasRangeCutOffFieldMask & whichField))
-    {
-        returnValue += _sfHasRangeCutOff.getBinSize();
-    }
-    if(FieldBits::NoField != (HasRangeNearZoneFieldMask & whichField))
-    {
-        returnValue += _sfHasRangeNearZone.getBinSize();
-    }
-    if(FieldBits::NoField != (HasRangeFarZoneFieldMask & whichField))
-    {
-        returnValue += _sfHasRangeFarZone.getBinSize();
-    }
-    if(FieldBits::NoField != (HasCosSpotlightAngleFieldMask & whichField))
-    {
-        returnValue += _sfHasCosSpotlightAngle.getBinSize();
-    }
-    if(FieldBits::NoField != (HasSpotlightAngleFieldMask & whichField))
-    {
-        returnValue += _sfHasSpotlightAngle.getBinSize();
-    }
-    if(FieldBits::NoField != (HasSpotExponentFieldMask & whichField))
-    {
-        returnValue += _sfHasSpotExponent.getBinSize();
-    }
-    if(FieldBits::NoField != (HasCinemaLightFieldMask & whichField))
-    {
-        returnValue += _sfHasCinemaLight.getBinSize();
+        returnValue += _sfGlobalAmbientIntensity.getBinSize();
     }
     if(FieldBits::NoField != (PositionFieldMask & whichField))
     {
@@ -2717,10 +2820,6 @@ SizeT MultiLightChunkBase::getBinSize(ConstFieldMaskArg whichField)
     if(FieldBits::NoField != (DirectionFieldMask & whichField))
     {
         returnValue += _mfDirection.getBinSize();
-    }
-    if(FieldBits::NoField != (ColorFieldMask & whichField))
-    {
-        returnValue += _mfColor.getBinSize();
     }
     if(FieldBits::NoField != (IntensityFieldMask & whichField))
     {
@@ -2741,6 +2840,14 @@ SizeT MultiLightChunkBase::getBinSize(ConstFieldMaskArg whichField)
     if(FieldBits::NoField != (AttenuationFieldMask & whichField))
     {
         returnValue += _mfAttenuation.getBinSize();
+    }
+    if(FieldBits::NoField != (DecayAttenuationFieldMask & whichField))
+    {
+        returnValue += _mfDecayAttenuation.getBinSize();
+    }
+    if(FieldBits::NoField != (LengthFactorFieldMask & whichField))
+    {
+        returnValue += _mfLengthFactor.getBinSize();
     }
     if(FieldBits::NoField != (SpotlightAngleFieldMask & whichField))
     {
@@ -2790,6 +2897,10 @@ SizeT MultiLightChunkBase::getBinSize(ConstFieldMaskArg whichField)
     {
         returnValue += _mfRangeFarZone.getBinSize();
     }
+    if(FieldBits::NoField != (ProjectionMatrixFieldMask & whichField))
+    {
+        returnValue += _mfProjectionMatrix.getBinSize();
+    }
     if(FieldBits::NoField != (TypeFieldMask & whichField))
     {
         returnValue += _mfType.getBinSize();
@@ -2798,17 +2909,29 @@ SizeT MultiLightChunkBase::getBinSize(ConstFieldMaskArg whichField)
     {
         returnValue += _mfEnabled.getBinSize();
     }
+    if(FieldBits::NoField != (ShadowFieldMask & whichField))
+    {
+        returnValue += _mfShadow.getBinSize();
+    }
+    if(FieldBits::NoField != (ShadowDataIndexFieldMask & whichField))
+    {
+        returnValue += _mfShadowDataIndex.getBinSize();
+    }
+    if(FieldBits::NoField != (ShadowParameterIndexFieldMask & whichField))
+    {
+        returnValue += _mfShadowParameterIndex.getBinSize();
+    }
     if(FieldBits::NoField != (BeaconFieldMask & whichField))
     {
         returnValue += _mfBeacon.getBinSize();
     }
+    if(FieldBits::NoField != (NormalizeDirectionFieldMask & whichField))
+    {
+        returnValue += _sfNormalizeDirection.getBinSize();
+    }
     if(FieldBits::NoField != (BeaconMatrixFieldMask & whichField))
     {
         returnValue += _mfBeaconMatrix.getBinSize();
-    }
-    if(FieldBits::NoField != (EyeSpaceFieldMask & whichField))
-    {
-        returnValue += _sfEyeSpace.getBinSize();
     }
     if(FieldBits::NoField != (LastCamNearFieldMask & whichField))
     {
@@ -2839,81 +2962,17 @@ void MultiLightChunkBase::copyToBin(BinaryDataHandler &pMem,
 {
     Inherited::copyToBin(pMem, whichField);
 
-    if(FieldBits::NoField != (HasWorldToLightSpaceMatrixFieldMask & whichField))
+    if(FieldBits::NoField != (FeatureFieldMask & whichField))
     {
-        _sfHasWorldToLightSpaceMatrix.copyToBin(pMem);
+        _sfFeature.copyToBin(pMem);
     }
-    if(FieldBits::NoField != (HasLightToWorldSpaceMatrixFieldMask & whichField))
+    if(FieldBits::NoField != (CodeFeatureFieldMask & whichField))
     {
-        _sfHasLightToWorldSpaceMatrix.copyToBin(pMem);
+        _sfCodeFeature.copyToBin(pMem);
     }
-    if(FieldBits::NoField != (HasEyeToLightSpaceMatrixFieldMask & whichField))
+    if(FieldBits::NoField != (GlobalAmbientIntensityFieldMask & whichField))
     {
-        _sfHasEyeToLightSpaceMatrix.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasLightToEyeSpaceMatrixFieldMask & whichField))
-    {
-        _sfHasLightToEyeSpaceMatrix.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasLightPerspectiveMatrixFieldMask & whichField))
-    {
-        _sfHasLightPerspectiveMatrix.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasInvLightPerspectiveMatrixFieldMask & whichField))
-    {
-        _sfHasInvLightPerspectiveMatrix.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasColorFieldMask & whichField))
-    {
-        _sfHasColor.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasIntensityFieldMask & whichField))
-    {
-        _sfHasIntensity.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasSeparateIntensitiesFieldMask & whichField))
-    {
-        _sfHasSeparateIntensities.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasAttenuationFieldMask & whichField))
-    {
-        _sfHasAttenuation.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (AutoCalcRangesFieldMask & whichField))
-    {
-        _sfAutoCalcRanges.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasRangeCutOnFieldMask & whichField))
-    {
-        _sfHasRangeCutOn.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasRangeCutOffFieldMask & whichField))
-    {
-        _sfHasRangeCutOff.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasRangeNearZoneFieldMask & whichField))
-    {
-        _sfHasRangeNearZone.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasRangeFarZoneFieldMask & whichField))
-    {
-        _sfHasRangeFarZone.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasCosSpotlightAngleFieldMask & whichField))
-    {
-        _sfHasCosSpotlightAngle.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasSpotlightAngleFieldMask & whichField))
-    {
-        _sfHasSpotlightAngle.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasSpotExponentFieldMask & whichField))
-    {
-        _sfHasSpotExponent.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (HasCinemaLightFieldMask & whichField))
-    {
-        _sfHasCinemaLight.copyToBin(pMem);
+        _sfGlobalAmbientIntensity.copyToBin(pMem);
     }
     if(FieldBits::NoField != (PositionFieldMask & whichField))
     {
@@ -2922,10 +2981,6 @@ void MultiLightChunkBase::copyToBin(BinaryDataHandler &pMem,
     if(FieldBits::NoField != (DirectionFieldMask & whichField))
     {
         _mfDirection.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (ColorFieldMask & whichField))
-    {
-        _mfColor.copyToBin(pMem);
     }
     if(FieldBits::NoField != (IntensityFieldMask & whichField))
     {
@@ -2946,6 +3001,14 @@ void MultiLightChunkBase::copyToBin(BinaryDataHandler &pMem,
     if(FieldBits::NoField != (AttenuationFieldMask & whichField))
     {
         _mfAttenuation.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (DecayAttenuationFieldMask & whichField))
+    {
+        _mfDecayAttenuation.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (LengthFactorFieldMask & whichField))
+    {
+        _mfLengthFactor.copyToBin(pMem);
     }
     if(FieldBits::NoField != (SpotlightAngleFieldMask & whichField))
     {
@@ -2995,6 +3058,10 @@ void MultiLightChunkBase::copyToBin(BinaryDataHandler &pMem,
     {
         _mfRangeFarZone.copyToBin(pMem);
     }
+    if(FieldBits::NoField != (ProjectionMatrixFieldMask & whichField))
+    {
+        _mfProjectionMatrix.copyToBin(pMem);
+    }
     if(FieldBits::NoField != (TypeFieldMask & whichField))
     {
         _mfType.copyToBin(pMem);
@@ -3003,17 +3070,29 @@ void MultiLightChunkBase::copyToBin(BinaryDataHandler &pMem,
     {
         _mfEnabled.copyToBin(pMem);
     }
+    if(FieldBits::NoField != (ShadowFieldMask & whichField))
+    {
+        _mfShadow.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (ShadowDataIndexFieldMask & whichField))
+    {
+        _mfShadowDataIndex.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (ShadowParameterIndexFieldMask & whichField))
+    {
+        _mfShadowParameterIndex.copyToBin(pMem);
+    }
     if(FieldBits::NoField != (BeaconFieldMask & whichField))
     {
         _mfBeacon.copyToBin(pMem);
     }
+    if(FieldBits::NoField != (NormalizeDirectionFieldMask & whichField))
+    {
+        _sfNormalizeDirection.copyToBin(pMem);
+    }
     if(FieldBits::NoField != (BeaconMatrixFieldMask & whichField))
     {
         _mfBeaconMatrix.copyToBin(pMem);
-    }
-    if(FieldBits::NoField != (EyeSpaceFieldMask & whichField))
-    {
-        _sfEyeSpace.copyToBin(pMem);
     }
     if(FieldBits::NoField != (LastCamNearFieldMask & whichField))
     {
@@ -3042,100 +3121,20 @@ void MultiLightChunkBase::copyFromBin(BinaryDataHandler &pMem,
 {
     Inherited::copyFromBin(pMem, whichField);
 
-    if(FieldBits::NoField != (HasWorldToLightSpaceMatrixFieldMask & whichField))
+    if(FieldBits::NoField != (FeatureFieldMask & whichField))
     {
-        editSField(HasWorldToLightSpaceMatrixFieldMask);
-        _sfHasWorldToLightSpaceMatrix.copyFromBin(pMem);
+        editSField(FeatureFieldMask);
+        _sfFeature.copyFromBin(pMem);
     }
-    if(FieldBits::NoField != (HasLightToWorldSpaceMatrixFieldMask & whichField))
+    if(FieldBits::NoField != (CodeFeatureFieldMask & whichField))
     {
-        editSField(HasLightToWorldSpaceMatrixFieldMask);
-        _sfHasLightToWorldSpaceMatrix.copyFromBin(pMem);
+        editSField(CodeFeatureFieldMask);
+        _sfCodeFeature.copyFromBin(pMem);
     }
-    if(FieldBits::NoField != (HasEyeToLightSpaceMatrixFieldMask & whichField))
+    if(FieldBits::NoField != (GlobalAmbientIntensityFieldMask & whichField))
     {
-        editSField(HasEyeToLightSpaceMatrixFieldMask);
-        _sfHasEyeToLightSpaceMatrix.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasLightToEyeSpaceMatrixFieldMask & whichField))
-    {
-        editSField(HasLightToEyeSpaceMatrixFieldMask);
-        _sfHasLightToEyeSpaceMatrix.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasLightPerspectiveMatrixFieldMask & whichField))
-    {
-        editSField(HasLightPerspectiveMatrixFieldMask);
-        _sfHasLightPerspectiveMatrix.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasInvLightPerspectiveMatrixFieldMask & whichField))
-    {
-        editSField(HasInvLightPerspectiveMatrixFieldMask);
-        _sfHasInvLightPerspectiveMatrix.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasColorFieldMask & whichField))
-    {
-        editSField(HasColorFieldMask);
-        _sfHasColor.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasIntensityFieldMask & whichField))
-    {
-        editSField(HasIntensityFieldMask);
-        _sfHasIntensity.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasSeparateIntensitiesFieldMask & whichField))
-    {
-        editSField(HasSeparateIntensitiesFieldMask);
-        _sfHasSeparateIntensities.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasAttenuationFieldMask & whichField))
-    {
-        editSField(HasAttenuationFieldMask);
-        _sfHasAttenuation.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (AutoCalcRangesFieldMask & whichField))
-    {
-        editSField(AutoCalcRangesFieldMask);
-        _sfAutoCalcRanges.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasRangeCutOnFieldMask & whichField))
-    {
-        editSField(HasRangeCutOnFieldMask);
-        _sfHasRangeCutOn.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasRangeCutOffFieldMask & whichField))
-    {
-        editSField(HasRangeCutOffFieldMask);
-        _sfHasRangeCutOff.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasRangeNearZoneFieldMask & whichField))
-    {
-        editSField(HasRangeNearZoneFieldMask);
-        _sfHasRangeNearZone.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasRangeFarZoneFieldMask & whichField))
-    {
-        editSField(HasRangeFarZoneFieldMask);
-        _sfHasRangeFarZone.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasCosSpotlightAngleFieldMask & whichField))
-    {
-        editSField(HasCosSpotlightAngleFieldMask);
-        _sfHasCosSpotlightAngle.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasSpotlightAngleFieldMask & whichField))
-    {
-        editSField(HasSpotlightAngleFieldMask);
-        _sfHasSpotlightAngle.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasSpotExponentFieldMask & whichField))
-    {
-        editSField(HasSpotExponentFieldMask);
-        _sfHasSpotExponent.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (HasCinemaLightFieldMask & whichField))
-    {
-        editSField(HasCinemaLightFieldMask);
-        _sfHasCinemaLight.copyFromBin(pMem);
+        editSField(GlobalAmbientIntensityFieldMask);
+        _sfGlobalAmbientIntensity.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (PositionFieldMask & whichField))
     {
@@ -3146,11 +3145,6 @@ void MultiLightChunkBase::copyFromBin(BinaryDataHandler &pMem,
     {
         editMField(DirectionFieldMask, _mfDirection);
         _mfDirection.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (ColorFieldMask & whichField))
-    {
-        editMField(ColorFieldMask, _mfColor);
-        _mfColor.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (IntensityFieldMask & whichField))
     {
@@ -3176,6 +3170,16 @@ void MultiLightChunkBase::copyFromBin(BinaryDataHandler &pMem,
     {
         editMField(AttenuationFieldMask, _mfAttenuation);
         _mfAttenuation.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (DecayAttenuationFieldMask & whichField))
+    {
+        editMField(DecayAttenuationFieldMask, _mfDecayAttenuation);
+        _mfDecayAttenuation.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (LengthFactorFieldMask & whichField))
+    {
+        editMField(LengthFactorFieldMask, _mfLengthFactor);
+        _mfLengthFactor.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (SpotlightAngleFieldMask & whichField))
     {
@@ -3237,6 +3241,11 @@ void MultiLightChunkBase::copyFromBin(BinaryDataHandler &pMem,
         editMField(RangeFarZoneFieldMask, _mfRangeFarZone);
         _mfRangeFarZone.copyFromBin(pMem);
     }
+    if(FieldBits::NoField != (ProjectionMatrixFieldMask & whichField))
+    {
+        editMField(ProjectionMatrixFieldMask, _mfProjectionMatrix);
+        _mfProjectionMatrix.copyFromBin(pMem);
+    }
     if(FieldBits::NoField != (TypeFieldMask & whichField))
     {
         editMField(TypeFieldMask, _mfType);
@@ -3247,20 +3256,35 @@ void MultiLightChunkBase::copyFromBin(BinaryDataHandler &pMem,
         editMField(EnabledFieldMask, _mfEnabled);
         _mfEnabled.copyFromBin(pMem);
     }
+    if(FieldBits::NoField != (ShadowFieldMask & whichField))
+    {
+        editMField(ShadowFieldMask, _mfShadow);
+        _mfShadow.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (ShadowDataIndexFieldMask & whichField))
+    {
+        editMField(ShadowDataIndexFieldMask, _mfShadowDataIndex);
+        _mfShadowDataIndex.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (ShadowParameterIndexFieldMask & whichField))
+    {
+        editMField(ShadowParameterIndexFieldMask, _mfShadowParameterIndex);
+        _mfShadowParameterIndex.copyFromBin(pMem);
+    }
     if(FieldBits::NoField != (BeaconFieldMask & whichField))
     {
         editMField(BeaconFieldMask, _mfBeacon);
         _mfBeacon.copyFromBin(pMem);
     }
+    if(FieldBits::NoField != (NormalizeDirectionFieldMask & whichField))
+    {
+        editSField(NormalizeDirectionFieldMask);
+        _sfNormalizeDirection.copyFromBin(pMem);
+    }
     if(FieldBits::NoField != (BeaconMatrixFieldMask & whichField))
     {
         editMField(BeaconMatrixFieldMask, _mfBeaconMatrix);
         _mfBeaconMatrix.copyFromBin(pMem);
-    }
-    if(FieldBits::NoField != (EyeSpaceFieldMask & whichField))
-    {
-        editSField(EyeSpaceFieldMask);
-        _sfEyeSpace.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (LastCamNearFieldMask & whichField))
     {
@@ -3412,33 +3436,18 @@ FieldContainerTransitPtr MultiLightChunkBase::shallowCopy(void) const
 
 MultiLightChunkBase::MultiLightChunkBase(void) :
     Inherited(),
-    _sfHasWorldToLightSpaceMatrix(bool(false)),
-    _sfHasLightToWorldSpaceMatrix(bool(false)),
-    _sfHasEyeToLightSpaceMatrix(bool(false)),
-    _sfHasLightToEyeSpaceMatrix(bool(false)),
-    _sfHasLightPerspectiveMatrix(bool(false)),
-    _sfHasInvLightPerspectiveMatrix(bool(false)),
-    _sfHasColor               (bool(false)),
-    _sfHasIntensity           (bool(false)),
-    _sfHasSeparateIntensities (bool(true)),
-    _sfHasAttenuation         (bool(true)),
-    _sfAutoCalcRanges         (bool(true)),
-    _sfHasRangeCutOn          (bool(false)),
-    _sfHasRangeCutOff         (bool(false)),
-    _sfHasRangeNearZone       (bool(false)),
-    _sfHasRangeFarZone        (bool(false)),
-    _sfHasCosSpotlightAngle   (bool(true)),
-    _sfHasSpotlightAngle      (bool(false)),
-    _sfHasSpotExponent        (bool(true)),
-    _sfHasCinemaLight         (bool(false)),
+    _sfFeature                (UInt32(0)),
+    _sfCodeFeature            (UInt32(0)),
+    _sfGlobalAmbientIntensity (Vec3f(Vec3f(0,0,0))),
     _mfPosition               (),
     _mfDirection              (),
-    _mfColor                  (),
     _mfIntensity              (),
     _mfAmbientIntensity       (),
     _mfDiffuseIntensity       (),
     _mfSpecularIntensity      (),
     _mfAttenuation            (),
+    _mfDecayAttenuation       (),
+    _mfLengthFactor           (),
     _mfSpotlightAngle         (),
     _mfSpotExponent           (),
     _mfInnerSuperEllipsesWidth(),
@@ -3451,11 +3460,15 @@ MultiLightChunkBase::MultiLightChunkBase(void) :
     _mfRangeCutOff            (),
     _mfRangeNearZone          (),
     _mfRangeFarZone           (),
+    _mfProjectionMatrix       (),
     _mfType                   (),
     _mfEnabled                (),
+    _mfShadow                 (),
+    _mfShadowDataIndex        (),
+    _mfShadowParameterIndex   (),
     _mfBeacon                 (),
+    _sfNormalizeDirection     (bool(true)),
     _mfBeaconMatrix           (),
-    _sfEyeSpace               (bool(false)),
     _sfLastCamNear            (Real32(0.f)),
     _sfLastCamFar             (Real32(0.f)),
     _sfLastCamToWorld         (),
@@ -3466,33 +3479,18 @@ MultiLightChunkBase::MultiLightChunkBase(void) :
 
 MultiLightChunkBase::MultiLightChunkBase(const MultiLightChunkBase &source) :
     Inherited(source),
-    _sfHasWorldToLightSpaceMatrix(source._sfHasWorldToLightSpaceMatrix),
-    _sfHasLightToWorldSpaceMatrix(source._sfHasLightToWorldSpaceMatrix),
-    _sfHasEyeToLightSpaceMatrix(source._sfHasEyeToLightSpaceMatrix),
-    _sfHasLightToEyeSpaceMatrix(source._sfHasLightToEyeSpaceMatrix),
-    _sfHasLightPerspectiveMatrix(source._sfHasLightPerspectiveMatrix),
-    _sfHasInvLightPerspectiveMatrix(source._sfHasInvLightPerspectiveMatrix),
-    _sfHasColor               (source._sfHasColor               ),
-    _sfHasIntensity           (source._sfHasIntensity           ),
-    _sfHasSeparateIntensities (source._sfHasSeparateIntensities ),
-    _sfHasAttenuation         (source._sfHasAttenuation         ),
-    _sfAutoCalcRanges         (source._sfAutoCalcRanges         ),
-    _sfHasRangeCutOn          (source._sfHasRangeCutOn          ),
-    _sfHasRangeCutOff         (source._sfHasRangeCutOff         ),
-    _sfHasRangeNearZone       (source._sfHasRangeNearZone       ),
-    _sfHasRangeFarZone        (source._sfHasRangeFarZone        ),
-    _sfHasCosSpotlightAngle   (source._sfHasCosSpotlightAngle   ),
-    _sfHasSpotlightAngle      (source._sfHasSpotlightAngle      ),
-    _sfHasSpotExponent        (source._sfHasSpotExponent        ),
-    _sfHasCinemaLight         (source._sfHasCinemaLight         ),
+    _sfFeature                (source._sfFeature                ),
+    _sfCodeFeature            (source._sfCodeFeature            ),
+    _sfGlobalAmbientIntensity (source._sfGlobalAmbientIntensity ),
     _mfPosition               (source._mfPosition               ),
     _mfDirection              (source._mfDirection              ),
-    _mfColor                  (source._mfColor                  ),
     _mfIntensity              (source._mfIntensity              ),
     _mfAmbientIntensity       (source._mfAmbientIntensity       ),
     _mfDiffuseIntensity       (source._mfDiffuseIntensity       ),
     _mfSpecularIntensity      (source._mfSpecularIntensity      ),
     _mfAttenuation            (source._mfAttenuation            ),
+    _mfDecayAttenuation       (source._mfDecayAttenuation       ),
+    _mfLengthFactor           (source._mfLengthFactor           ),
     _mfSpotlightAngle         (source._mfSpotlightAngle         ),
     _mfSpotExponent           (source._mfSpotExponent           ),
     _mfInnerSuperEllipsesWidth(source._mfInnerSuperEllipsesWidth),
@@ -3505,11 +3503,15 @@ MultiLightChunkBase::MultiLightChunkBase(const MultiLightChunkBase &source) :
     _mfRangeCutOff            (source._mfRangeCutOff            ),
     _mfRangeNearZone          (source._mfRangeNearZone          ),
     _mfRangeFarZone           (source._mfRangeFarZone           ),
+    _mfProjectionMatrix       (source._mfProjectionMatrix       ),
     _mfType                   (source._mfType                   ),
     _mfEnabled                (source._mfEnabled                ),
+    _mfShadow                 (source._mfShadow                 ),
+    _mfShadowDataIndex        (source._mfShadowDataIndex        ),
+    _mfShadowParameterIndex   (source._mfShadowParameterIndex   ),
     _mfBeacon                 (),
+    _sfNormalizeDirection     (source._sfNormalizeDirection     ),
     _mfBeaconMatrix           (source._mfBeaconMatrix           ),
-    _sfEyeSpace               (source._sfEyeSpace               ),
     _sfLastCamNear            (source._sfLastCamNear            ),
     _sfLastCamFar             (source._sfLastCamFar             ),
     _sfLastCamToWorld         (source._sfLastCamToWorld         ),
@@ -3547,477 +3549,77 @@ void MultiLightChunkBase::onCreate(const MultiLightChunk *source)
     }
 }
 
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasWorldToLightSpaceMatrix (void) const
+GetFieldHandlePtr MultiLightChunkBase::getHandleFeature         (void) const
 {
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasWorldToLightSpaceMatrix,
-             this->getType().getFieldDesc(HasWorldToLightSpaceMatrixFieldId),
+    SFUInt32::GetHandlePtr returnValue(
+        new  SFUInt32::GetHandle(
+             &_sfFeature,
+             this->getType().getFieldDesc(FeatureFieldId),
              const_cast<MultiLightChunkBase *>(this)));
 
     return returnValue;
 }
 
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasWorldToLightSpaceMatrix(void)
+EditFieldHandlePtr MultiLightChunkBase::editHandleFeature        (void)
 {
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasWorldToLightSpaceMatrix,
-             this->getType().getFieldDesc(HasWorldToLightSpaceMatrixFieldId),
+    SFUInt32::EditHandlePtr returnValue(
+        new  SFUInt32::EditHandle(
+             &_sfFeature,
+             this->getType().getFieldDesc(FeatureFieldId),
              this));
 
 
-    editSField(HasWorldToLightSpaceMatrixFieldMask);
+    editSField(FeatureFieldMask);
 
     return returnValue;
 }
 
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasLightToWorldSpaceMatrix (void) const
+GetFieldHandlePtr MultiLightChunkBase::getHandleCodeFeature     (void) const
 {
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasLightToWorldSpaceMatrix,
-             this->getType().getFieldDesc(HasLightToWorldSpaceMatrixFieldId),
+    SFUInt32::GetHandlePtr returnValue(
+        new  SFUInt32::GetHandle(
+             &_sfCodeFeature,
+             this->getType().getFieldDesc(CodeFeatureFieldId),
              const_cast<MultiLightChunkBase *>(this)));
 
     return returnValue;
 }
 
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasLightToWorldSpaceMatrix(void)
+EditFieldHandlePtr MultiLightChunkBase::editHandleCodeFeature    (void)
 {
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasLightToWorldSpaceMatrix,
-             this->getType().getFieldDesc(HasLightToWorldSpaceMatrixFieldId),
+    SFUInt32::EditHandlePtr returnValue(
+        new  SFUInt32::EditHandle(
+             &_sfCodeFeature,
+             this->getType().getFieldDesc(CodeFeatureFieldId),
              this));
 
 
-    editSField(HasLightToWorldSpaceMatrixFieldMask);
+    editSField(CodeFeatureFieldMask);
 
     return returnValue;
 }
 
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasEyeToLightSpaceMatrix (void) const
+GetFieldHandlePtr MultiLightChunkBase::getHandleGlobalAmbientIntensity (void) const
 {
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasEyeToLightSpaceMatrix,
-             this->getType().getFieldDesc(HasEyeToLightSpaceMatrixFieldId),
+    SFVec3f::GetHandlePtr returnValue(
+        new  SFVec3f::GetHandle(
+             &_sfGlobalAmbientIntensity,
+             this->getType().getFieldDesc(GlobalAmbientIntensityFieldId),
              const_cast<MultiLightChunkBase *>(this)));
 
     return returnValue;
 }
 
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasEyeToLightSpaceMatrix(void)
+EditFieldHandlePtr MultiLightChunkBase::editHandleGlobalAmbientIntensity(void)
 {
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasEyeToLightSpaceMatrix,
-             this->getType().getFieldDesc(HasEyeToLightSpaceMatrixFieldId),
+    SFVec3f::EditHandlePtr returnValue(
+        new  SFVec3f::EditHandle(
+             &_sfGlobalAmbientIntensity,
+             this->getType().getFieldDesc(GlobalAmbientIntensityFieldId),
              this));
 
 
-    editSField(HasEyeToLightSpaceMatrixFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasLightToEyeSpaceMatrix (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasLightToEyeSpaceMatrix,
-             this->getType().getFieldDesc(HasLightToEyeSpaceMatrixFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasLightToEyeSpaceMatrix(void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasLightToEyeSpaceMatrix,
-             this->getType().getFieldDesc(HasLightToEyeSpaceMatrixFieldId),
-             this));
-
-
-    editSField(HasLightToEyeSpaceMatrixFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasLightPerspectiveMatrix (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasLightPerspectiveMatrix,
-             this->getType().getFieldDesc(HasLightPerspectiveMatrixFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasLightPerspectiveMatrix(void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasLightPerspectiveMatrix,
-             this->getType().getFieldDesc(HasLightPerspectiveMatrixFieldId),
-             this));
-
-
-    editSField(HasLightPerspectiveMatrixFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasInvLightPerspectiveMatrix (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasInvLightPerspectiveMatrix,
-             this->getType().getFieldDesc(HasInvLightPerspectiveMatrixFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasInvLightPerspectiveMatrix(void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasInvLightPerspectiveMatrix,
-             this->getType().getFieldDesc(HasInvLightPerspectiveMatrixFieldId),
-             this));
-
-
-    editSField(HasInvLightPerspectiveMatrixFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasColor        (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasColor,
-             this->getType().getFieldDesc(HasColorFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasColor       (void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasColor,
-             this->getType().getFieldDesc(HasColorFieldId),
-             this));
-
-
-    editSField(HasColorFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasIntensity    (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasIntensity,
-             this->getType().getFieldDesc(HasIntensityFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasIntensity   (void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasIntensity,
-             this->getType().getFieldDesc(HasIntensityFieldId),
-             this));
-
-
-    editSField(HasIntensityFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasSeparateIntensities (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasSeparateIntensities,
-             this->getType().getFieldDesc(HasSeparateIntensitiesFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasSeparateIntensities(void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasSeparateIntensities,
-             this->getType().getFieldDesc(HasSeparateIntensitiesFieldId),
-             this));
-
-
-    editSField(HasSeparateIntensitiesFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasAttenuation  (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasAttenuation,
-             this->getType().getFieldDesc(HasAttenuationFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasAttenuation (void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasAttenuation,
-             this->getType().getFieldDesc(HasAttenuationFieldId),
-             this));
-
-
-    editSField(HasAttenuationFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleAutoCalcRanges  (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfAutoCalcRanges,
-             this->getType().getFieldDesc(AutoCalcRangesFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleAutoCalcRanges (void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfAutoCalcRanges,
-             this->getType().getFieldDesc(AutoCalcRangesFieldId),
-             this));
-
-
-    editSField(AutoCalcRangesFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasRangeCutOn   (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasRangeCutOn,
-             this->getType().getFieldDesc(HasRangeCutOnFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasRangeCutOn  (void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasRangeCutOn,
-             this->getType().getFieldDesc(HasRangeCutOnFieldId),
-             this));
-
-
-    editSField(HasRangeCutOnFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasRangeCutOff  (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasRangeCutOff,
-             this->getType().getFieldDesc(HasRangeCutOffFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasRangeCutOff (void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasRangeCutOff,
-             this->getType().getFieldDesc(HasRangeCutOffFieldId),
-             this));
-
-
-    editSField(HasRangeCutOffFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasRangeNearZone (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasRangeNearZone,
-             this->getType().getFieldDesc(HasRangeNearZoneFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasRangeNearZone(void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasRangeNearZone,
-             this->getType().getFieldDesc(HasRangeNearZoneFieldId),
-             this));
-
-
-    editSField(HasRangeNearZoneFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasRangeFarZone (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasRangeFarZone,
-             this->getType().getFieldDesc(HasRangeFarZoneFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasRangeFarZone(void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasRangeFarZone,
-             this->getType().getFieldDesc(HasRangeFarZoneFieldId),
-             this));
-
-
-    editSField(HasRangeFarZoneFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasCosSpotlightAngle (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasCosSpotlightAngle,
-             this->getType().getFieldDesc(HasCosSpotlightAngleFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasCosSpotlightAngle(void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasCosSpotlightAngle,
-             this->getType().getFieldDesc(HasCosSpotlightAngleFieldId),
-             this));
-
-
-    editSField(HasCosSpotlightAngleFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasSpotlightAngle (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasSpotlightAngle,
-             this->getType().getFieldDesc(HasSpotlightAngleFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasSpotlightAngle(void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasSpotlightAngle,
-             this->getType().getFieldDesc(HasSpotlightAngleFieldId),
-             this));
-
-
-    editSField(HasSpotlightAngleFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasSpotExponent (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasSpotExponent,
-             this->getType().getFieldDesc(HasSpotExponentFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasSpotExponent(void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasSpotExponent,
-             this->getType().getFieldDesc(HasSpotExponentFieldId),
-             this));
-
-
-    editSField(HasSpotExponentFieldMask);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleHasCinemaLight  (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfHasCinemaLight,
-             this->getType().getFieldDesc(HasCinemaLightFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleHasCinemaLight (void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfHasCinemaLight,
-             this->getType().getFieldDesc(HasCinemaLightFieldId),
-             this));
-
-
-    editSField(HasCinemaLightFieldMask);
+    editSField(GlobalAmbientIntensityFieldMask);
 
     return returnValue;
 }
@@ -4072,35 +3674,10 @@ EditFieldHandlePtr MultiLightChunkBase::editHandleDirection      (void)
     return returnValue;
 }
 
-GetFieldHandlePtr MultiLightChunkBase::getHandleColor           (void) const
-{
-    MFColor3f::GetHandlePtr returnValue(
-        new  MFColor3f::GetHandle(
-             &_mfColor,
-             this->getType().getFieldDesc(ColorFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleColor          (void)
-{
-    MFColor3f::EditHandlePtr returnValue(
-        new  MFColor3f::EditHandle(
-             &_mfColor,
-             this->getType().getFieldDesc(ColorFieldId),
-             this));
-
-
-    editMField(ColorFieldMask, _mfColor);
-
-    return returnValue;
-}
-
 GetFieldHandlePtr MultiLightChunkBase::getHandleIntensity       (void) const
 {
-    MFReal32::GetHandlePtr returnValue(
-        new  MFReal32::GetHandle(
+    MFVec3f::GetHandlePtr returnValue(
+        new  MFVec3f::GetHandle(
              &_mfIntensity,
              this->getType().getFieldDesc(IntensityFieldId),
              const_cast<MultiLightChunkBase *>(this)));
@@ -4110,8 +3687,8 @@ GetFieldHandlePtr MultiLightChunkBase::getHandleIntensity       (void) const
 
 EditFieldHandlePtr MultiLightChunkBase::editHandleIntensity      (void)
 {
-    MFReal32::EditHandlePtr returnValue(
-        new  MFReal32::EditHandle(
+    MFVec3f::EditHandlePtr returnValue(
+        new  MFVec3f::EditHandle(
              &_mfIntensity,
              this->getType().getFieldDesc(IntensityFieldId),
              this));
@@ -4218,6 +3795,56 @@ EditFieldHandlePtr MultiLightChunkBase::editHandleAttenuation    (void)
 
 
     editMField(AttenuationFieldMask, _mfAttenuation);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr MultiLightChunkBase::getHandleDecayAttenuation (void) const
+{
+    MFReal32::GetHandlePtr returnValue(
+        new  MFReal32::GetHandle(
+             &_mfDecayAttenuation,
+             this->getType().getFieldDesc(DecayAttenuationFieldId),
+             const_cast<MultiLightChunkBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr MultiLightChunkBase::editHandleDecayAttenuation(void)
+{
+    MFReal32::EditHandlePtr returnValue(
+        new  MFReal32::EditHandle(
+             &_mfDecayAttenuation,
+             this->getType().getFieldDesc(DecayAttenuationFieldId),
+             this));
+
+
+    editMField(DecayAttenuationFieldMask, _mfDecayAttenuation);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr MultiLightChunkBase::getHandleLengthFactor    (void) const
+{
+    MFReal32::GetHandlePtr returnValue(
+        new  MFReal32::GetHandle(
+             &_mfLengthFactor,
+             this->getType().getFieldDesc(LengthFactorFieldId),
+             const_cast<MultiLightChunkBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr MultiLightChunkBase::editHandleLengthFactor   (void)
+{
+    MFReal32::EditHandlePtr returnValue(
+        new  MFReal32::EditHandle(
+             &_mfLengthFactor,
+             this->getType().getFieldDesc(LengthFactorFieldId),
+             this));
+
+
+    editMField(LengthFactorFieldMask, _mfLengthFactor);
 
     return returnValue;
 }
@@ -4522,6 +4149,31 @@ EditFieldHandlePtr MultiLightChunkBase::editHandleRangeFarZone   (void)
     return returnValue;
 }
 
+GetFieldHandlePtr MultiLightChunkBase::getHandleProjectionMatrix (void) const
+{
+    MFMatrix::GetHandlePtr returnValue(
+        new  MFMatrix::GetHandle(
+             &_mfProjectionMatrix,
+             this->getType().getFieldDesc(ProjectionMatrixFieldId),
+             const_cast<MultiLightChunkBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr MultiLightChunkBase::editHandleProjectionMatrix(void)
+{
+    MFMatrix::EditHandlePtr returnValue(
+        new  MFMatrix::EditHandle(
+             &_mfProjectionMatrix,
+             this->getType().getFieldDesc(ProjectionMatrixFieldId),
+             this));
+
+
+    editMField(ProjectionMatrixFieldMask, _mfProjectionMatrix);
+
+    return returnValue;
+}
+
 GetFieldHandlePtr MultiLightChunkBase::getHandleType            (void) const
 {
     MFUInt8::GetHandlePtr returnValue(
@@ -4572,6 +4224,81 @@ EditFieldHandlePtr MultiLightChunkBase::editHandleEnabled        (void)
     return returnValue;
 }
 
+GetFieldHandlePtr MultiLightChunkBase::getHandleShadow          (void) const
+{
+    MFBool::GetHandlePtr returnValue(
+        new  MFBool::GetHandle(
+             &_mfShadow,
+             this->getType().getFieldDesc(ShadowFieldId),
+             const_cast<MultiLightChunkBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr MultiLightChunkBase::editHandleShadow         (void)
+{
+    MFBool::EditHandlePtr returnValue(
+        new  MFBool::EditHandle(
+             &_mfShadow,
+             this->getType().getFieldDesc(ShadowFieldId),
+             this));
+
+
+    editMField(ShadowFieldMask, _mfShadow);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr MultiLightChunkBase::getHandleShadowDataIndex (void) const
+{
+    MFInt32::GetHandlePtr returnValue(
+        new  MFInt32::GetHandle(
+             &_mfShadowDataIndex,
+             this->getType().getFieldDesc(ShadowDataIndexFieldId),
+             const_cast<MultiLightChunkBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr MultiLightChunkBase::editHandleShadowDataIndex(void)
+{
+    MFInt32::EditHandlePtr returnValue(
+        new  MFInt32::EditHandle(
+             &_mfShadowDataIndex,
+             this->getType().getFieldDesc(ShadowDataIndexFieldId),
+             this));
+
+
+    editMField(ShadowDataIndexFieldMask, _mfShadowDataIndex);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr MultiLightChunkBase::getHandleShadowParameterIndex (void) const
+{
+    MFInt32::GetHandlePtr returnValue(
+        new  MFInt32::GetHandle(
+             &_mfShadowParameterIndex,
+             this->getType().getFieldDesc(ShadowParameterIndexFieldId),
+             const_cast<MultiLightChunkBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr MultiLightChunkBase::editHandleShadowParameterIndex(void)
+{
+    MFInt32::EditHandlePtr returnValue(
+        new  MFInt32::EditHandle(
+             &_mfShadowParameterIndex,
+             this->getType().getFieldDesc(ShadowParameterIndexFieldId),
+             this));
+
+
+    editMField(ShadowParameterIndexFieldMask, _mfShadowParameterIndex);
+
+    return returnValue;
+}
+
 GetFieldHandlePtr MultiLightChunkBase::getHandleBeacon          (void) const
 {
     MFWeakNodePtr::GetHandlePtr returnValue(
@@ -4609,6 +4336,31 @@ EditFieldHandlePtr MultiLightChunkBase::editHandleBeacon         (void)
     return returnValue;
 }
 
+GetFieldHandlePtr MultiLightChunkBase::getHandleNormalizeDirection (void) const
+{
+    SFBool::GetHandlePtr returnValue(
+        new  SFBool::GetHandle(
+             &_sfNormalizeDirection,
+             this->getType().getFieldDesc(NormalizeDirectionFieldId),
+             const_cast<MultiLightChunkBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr MultiLightChunkBase::editHandleNormalizeDirection(void)
+{
+    SFBool::EditHandlePtr returnValue(
+        new  SFBool::EditHandle(
+             &_sfNormalizeDirection,
+             this->getType().getFieldDesc(NormalizeDirectionFieldId),
+             this));
+
+
+    editSField(NormalizeDirectionFieldMask);
+
+    return returnValue;
+}
+
 GetFieldHandlePtr MultiLightChunkBase::getHandleBeaconMatrix    (void) const
 {
     MFMatrix::GetHandlePtr returnValue(
@@ -4630,31 +4382,6 @@ EditFieldHandlePtr MultiLightChunkBase::editHandleBeaconMatrix   (void)
 
 
     editMField(BeaconMatrixFieldMask, _mfBeaconMatrix);
-
-    return returnValue;
-}
-
-GetFieldHandlePtr MultiLightChunkBase::getHandleEyeSpace        (void) const
-{
-    SFBool::GetHandlePtr returnValue(
-        new  SFBool::GetHandle(
-             &_sfEyeSpace,
-             this->getType().getFieldDesc(EyeSpaceFieldId),
-             const_cast<MultiLightChunkBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr MultiLightChunkBase::editHandleEyeSpace       (void)
-{
-    SFBool::EditHandlePtr returnValue(
-        new  SFBool::EditHandle(
-             &_sfEyeSpace,
-             this->getType().getFieldDesc(EyeSpaceFieldId),
-             this));
-
-
-    editSField(EyeSpaceFieldMask);
 
     return returnValue;
 }
@@ -4838,10 +4565,6 @@ void MultiLightChunkBase::resolveLinks(void)
                                       oOffsets);
 #endif
 #ifdef OSG_MT_CPTR_ASPECT
-    _mfColor.terminateShare(Thread::getCurrentAspect(),
-                                      oOffsets);
-#endif
-#ifdef OSG_MT_CPTR_ASPECT
     _mfIntensity.terminateShare(Thread::getCurrentAspect(),
                                       oOffsets);
 #endif
@@ -4859,6 +4582,14 @@ void MultiLightChunkBase::resolveLinks(void)
 #endif
 #ifdef OSG_MT_CPTR_ASPECT
     _mfAttenuation.terminateShare(Thread::getCurrentAspect(),
+                                      oOffsets);
+#endif
+#ifdef OSG_MT_CPTR_ASPECT
+    _mfDecayAttenuation.terminateShare(Thread::getCurrentAspect(),
+                                      oOffsets);
+#endif
+#ifdef OSG_MT_CPTR_ASPECT
+    _mfLengthFactor.terminateShare(Thread::getCurrentAspect(),
                                       oOffsets);
 #endif
 #ifdef OSG_MT_CPTR_ASPECT
@@ -4910,11 +4641,27 @@ void MultiLightChunkBase::resolveLinks(void)
                                       oOffsets);
 #endif
 #ifdef OSG_MT_CPTR_ASPECT
+    _mfProjectionMatrix.terminateShare(Thread::getCurrentAspect(),
+                                      oOffsets);
+#endif
+#ifdef OSG_MT_CPTR_ASPECT
     _mfType.terminateShare(Thread::getCurrentAspect(),
                                       oOffsets);
 #endif
 #ifdef OSG_MT_CPTR_ASPECT
     _mfEnabled.terminateShare(Thread::getCurrentAspect(),
+                                      oOffsets);
+#endif
+#ifdef OSG_MT_CPTR_ASPECT
+    _mfShadow.terminateShare(Thread::getCurrentAspect(),
+                                      oOffsets);
+#endif
+#ifdef OSG_MT_CPTR_ASPECT
+    _mfShadowDataIndex.terminateShare(Thread::getCurrentAspect(),
+                                      oOffsets);
+#endif
+#ifdef OSG_MT_CPTR_ASPECT
+    _mfShadowParameterIndex.terminateShare(Thread::getCurrentAspect(),
                                       oOffsets);
 #endif
 #ifdef OSG_MT_CPTR_ASPECT

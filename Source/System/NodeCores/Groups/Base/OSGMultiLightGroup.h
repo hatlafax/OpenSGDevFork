@@ -36,22 +36,22 @@
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 
-#ifndef _OSGMULTILIGHTCHUNK_H_
-#define _OSGMULTILIGHTCHUNK_H_
+#ifndef _OSGMULTILIGHTGROUP_H_
+#define _OSGMULTILIGHTGROUP_H_
 #ifdef __sgi
 #pragma once
 #endif
 
-#include "OSGMultiLight.h"
-#include "OSGMultiLightChunkBase.h"
+#include "OSGMultiLightGroupBase.h"
+#include "OSGMultiLightChunk.h"
 
 OSG_BEGIN_NAMESPACE
 
-/*! \brief MultiLightChunk class. See \ref
-           PageSystemMultiLightChunk for a description.
+/*! \brief MultiLightGroup class. See \ref
+           PageSystemMultiLightGroup for a description.
 */
 
-class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
+class OSG_SYSTEM_DLLMAPPING MultiLightGroup : public MultiLightGroupBase
 {
   protected:
 
@@ -59,13 +59,12 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
 
   public:
 
-    typedef MultiLightChunkBase Inherited;
-    typedef MultiLightChunk     Self;
+    typedef MultiLightGroupBase Inherited;
+    typedef MultiLightGroup     Self;
 
     /*---------------------------------------------------------------------*/
-    /*! \name                 Main Interface                               */
+    /*! \name                      Interface                               */
     /*! \{                                                                 */
-
           void                 setLayoutType                    (UInt32 layout);
 
           UInt32               getNumLights                     () const;
@@ -77,9 +76,6 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
           void                 clearLights                      ();
           bool                 empty                            () const;
           void                 enableLights                     (bool flag);
-
-          void                 setGlobalAmbientIntensity        (const Color3f& color);
-          void                 setGlobalAmbientIntensity        (Real32 red, Real32 green, Real32 blue);
 
     const Pnt3f&               getPosition                      (const UInt32 idx) const;
     const Vec3f&               getDirection                     (const UInt32 idx) const;
@@ -106,7 +102,6 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
           Real32               getRangeCutOff                   (const UInt32 idx) const;
           Real32               getRangeNearZone                 (const UInt32 idx) const;
           Real32               getRangeFarZone                  (const UInt32 idx) const;
-    const Matrix&              getProjectionMatrix              (const UInt32 idx) const;
           MultiLight::Type     getType                          (const UInt32 idx) const;
           bool                 getEnabled                       (const UInt32 idx) const;
           bool                 getShadow                        (const UInt32 idx) const;
@@ -147,7 +142,6 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
           void                 setRangeCutOff                   (const UInt32 idx, Real32 cutOff);
           void                 setRangeNearZone                 (const UInt32 idx, Real32 nearZone);
           void                 setRangeFarZone                  (const UInt32 idx, Real32 farZone);
-          void                 setProjectionMatrix              (const UInt32 idx, const Matrix& projectionMatrix);
           void                 setType                          (const UInt32 idx, MultiLight::Type eType);
           void                 setEnabled                       (const UInt32 idx, bool flag);
           void                 setShadow                        (const UInt32 idx, bool flag);
@@ -252,236 +246,27 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
           bool                 checkCodeFeatures                                (UInt32 features) const;
           void                 setCodeFeatures                                  (UInt32 features, bool value);
 
+          const Vec3f&         getGlobalAmbientIntensity        () const;
+
+          const std::string&   getLightBlockName                () const;
+          const std::string&   getLightVariableName             () const;
+          bool                 getNormalizeDirection            () const;
+          GLenum               getUsage                         () const;
+
+          void                 setGlobalAmbientIntensity        (const Vec3f &value);
+          void                 setGlobalAmbientIntensity        (const Color3f &color);
+          void                 setGlobalAmbientIntensity        (Real32 red, Real32 green, Real32 blue);
+
+          void                 setLightBlockName                (const std::string &value);
+          void                 setLightVariableName             (const std::string &value);
+          void                 setNormalizeDirection            (bool value);
+          void                 setUsage                         (const GLenum &value);
+
           std::string          getFragmentProgramSnippet        (bool add_attenuation_code, bool add_ubo_code) const;
           std::string          getLightUBOProgSnippet           () const;
           std::string          getAttenuationProgSnippet        () const;
 
     /*! \}                                                                 */
-
-    /*---------------------------------------------------------------------*/
-    /*! \name                   Draw Interface                             */
-    /*! \{                                                                 */
-
-    //
-    // The following convenience functions (calc...) do not modify the 
-    // multi light state.
-    //
-
-    void    calcSpotAngle                               (
-                UInt32           idx,
-                Real32&          spotlightAngle,
-                Real32&          cosSpotlightAngle) const;
- 
-    void    calcRange                                   (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                bool             attenuationAware,
-                Real32&          cutOnRange,
-                Real32&          cutOffRange)const;
-
-    void    calcCutOnRange                              (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                bool             attenuationAware,
-                Real32&          cutOnRange) const;
-
-    void    calcCutOffRange                             (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                bool             attenuationAware,
-                Real32&          cutOffRange) const;
-
-    void    calcFrustumZ(
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                Real32&          zNear,
-                Real32&          zFar)const;
-
-    void    calcPosition                                (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                Pnt3f&           position, 
-                bool             eyeSpace = false) const;
-
-    void    calcDirection                               (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                Vec3f&           direction,
-                bool             eyeSpace = false) const;
-
-    void    calcPositionAndDirection                    (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                Pnt3f&           position, 
-                Vec3f&           direction,
-                bool             eyeSpace = false) const;
-
-    void    calcLightSpaceMatrixLSFromWS                (
-                UInt32           idx,
-                Matrix&          matLSFromWS) const;
-
-    void    calcLightSpaceMatrixLSFromES                (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                Matrix&          matLSFromES) const;
-
-    void    calcLightSpaceMatricesLSFrom                (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                Matrix&          matLSFromWS, 
-                Matrix&          matLSFromES) const;
-
-    void    calcInvLightSpaceMatrixWSFromLS             (
-                UInt32           idx,
-                Matrix&          matWSFromLS) const;
-
-    void    calcInvLightSpaceMatricesWSFrom             (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                Matrix&          matWSFromLS, 
-                Matrix&          matESFromLS) const;
-
-    void    calcProjectionMatrix                        (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matProjection) const;
-
-    void    calcInvProjectionMatrix                     (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matInvProjection) const;
-
-    void    calcLightSpaceProjectionMatrixLSFromWS      (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matLightSpaceProjectionLSFromWS) const;
-
-    void    calcLightSpaceProjectionMatrixLSFromES      (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matLightSpaceProjectionLSFromES) const;
-
-    void    calcInvLightSpaceProjectionMatrixLSFromWS   (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matInvLightSpaceProjectionLSFromWS) const;
-
-    void    calcInvLightSpaceProjectionMatrixLSFromES   (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matInvLightSpaceProjectionLSFromES) const;
-    
-    void    calcProjectionMatrix                        (
-                UInt32           idx,
-                Real32           zNear,
-                Real32           zFar,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matProjection) const;
-
-    void    calcInvProjectionMatrix                     (
-                UInt32           idx,
-                Real32           zNear,
-                Real32           zFar,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matInvProjection) const;
-
-    void    calcLightSpaceProjectionMatrixLSFromWS      (
-                UInt32           idx,
-                Real32           zNear,
-                Real32           zFar,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matLightSpaceProjectionLSFromWS) const;
-
-    void    calcLightSpaceProjectionMatrixLSFromES      (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                Real32           zNear,
-                Real32           zFar,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matLightSpaceProjectionLSFromES) const;
-
-    void    calcInvLightSpaceProjectionMatrixLSFromWS   (
-                UInt32           idx,
-                Real32           zNear,
-                Real32           zFar,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matInvLightSpaceProjectionLSFromWS) const;
-
-    void    calcInvLightSpaceProjectionMatrixLSFromES   (
-                DrawEnv*         pEnv,
-                UInt32           idx,
-                Real32           zNear,
-                Real32           zFar,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matInvLightSpaceProjectionLSFromES) const;
-
-    void    calcProjectionMatrix                        (
-                MultiLight::Type type,
-                Real32           cosSpotlightAngle,
-                Real32           zNear,
-                Real32           zFar,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matProjection) const;
-
-    void    calcInvProjectionMatrix                     (
-                MultiLight::Type type,
-                Real32           cosSpotlightAngle,
-                Real32           zNear,
-                Real32           zFar,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matInvProjection) const;
-
-    //
-    // The following convenience function do take credit of the currently stored
-    // projection matrix.
-    //
-
-    Matrix  getInvProjectionMatrix                      (
-                UInt32           idx) const;
-
-    Matrix  getLightSpaceProjectionMatrixLSFromWS       (
-                UInt32           idx) const;
-
-    Matrix  getLightSpaceProjectionMatrixLSFromES       (
-                DrawEnv*         pEnv,
-                UInt32           idx) const;
-
-    Matrix  getLightSpaceProjectionMatrixLSFrom         (
-                UInt32           idx,
-                const Matrix&    matLSFrom) const;
-
-    Matrix  getInvLightSpaceProjectionMatrixLSFromWS    (
-                UInt32           idx) const;
-
-    Matrix  getInvLightSpaceProjectionMatrixLSFromES    (
-                DrawEnv*         pEnv,
-                UInt32           idx) const;
-
-    Matrix  getInvLightSpaceProjectionMatrixLSFrom      (
-                UInt32           idx,
-                const Matrix&    matLSFrom) const;
-    /*! \}                                                                 */
-    
     /*---------------------------------------------------------------------*/
     /*! \name                      Sync                                    */
     /*! \{                                                                 */
@@ -499,52 +284,25 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
                       const BitVector  bvFlags  = 0) const;
 
     /*! \}                                                                 */
-    /*---------------------------------------------------------------------*/
-    /*! \name                       State                                  */
-    /*! \{                                                                 */
-
-    virtual void activate   (DrawEnv    *pEnv,
-                             UInt32      index = 0);
-
-    virtual void changeFrom (DrawEnv    *pEnv,
-                             StateChunk *pOld,
-                             UInt32      index = 0);
-
-    virtual void deactivate (DrawEnv    *pEnv,
-                             UInt32      index = 0);
-
-    /*! \}                                                                 */
-    /*---------------------------------------------------------------------*/
-    /*! \name             OpenGL handling                                  */
-    /*! \{                                                                 */
-    /*! \}                                                                 */
     /*=========================  PROTECTED  ===============================*/
 
   protected:
-    bool   _bUpdateBuffer;
 
-    ChangedFunctor  _cameraCB;
-
-    // Variables should all be in MultiLightChunkBase.
-
-    void onCreate      (const MultiLightChunk *source      = NULL);
-    void onCreateAspect(const MultiLightChunk *createAspect,
-                        const MultiLightChunk *source      = NULL);
-    void onDestroy     (      UInt32           uiContainerId     );
+    // Variables should all be in MultiLightGroupBase.
 
     /*---------------------------------------------------------------------*/
     /*! \name                  Constructors                                */
     /*! \{                                                                 */
 
-    MultiLightChunk(void);
-    MultiLightChunk(const MultiLightChunk &source);
+    MultiLightGroup(void);
+    MultiLightGroup(const MultiLightGroup &source);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                   Destructors                                */
     /*! \{                                                                 */
 
-    virtual ~MultiLightChunk(void);
+    virtual ~MultiLightGroup(void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -554,131 +312,33 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
     static void initMethod(InitPhase ePhase);
 
     /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                      Render                                  */
+    /*! \{                                                                 */
+
+    Action::ResultE renderEnter(Action *action);
+    Action::ResultE renderLeave(Action *action);
+
+    /*! \}                                                                 */
     /*==========================  PRIVATE  ================================*/
 
   private:
 
+    MultiLightChunk*            getChunk();
+    const MultiLightChunk*      getChunk() const;
+
     friend class FieldContainer;
-    friend class MultiLightChunkBase;
-
-    /*---------------------------------------------------------------------*/
-    /*! \name                         buffer                               */
-    /*! \{                                                                 */
-    void    transformToWorldSpace               (DrawEnv* pEnv,
-                                                 Node* beacon, 
-                                                 const Pnt3f& position_bs, 
-                                                 const Vec3f& direction_bs, 
-                                                 Pnt3f& position_ws, 
-                                                 Vec3f& direction_ws) const;
-
-    void    transformToEyeSpace                  (DrawEnv* pEnv,
-                                                  Node* beacon, 
-                                                  const Pnt3f& position_bs, 
-                                                  const Vec3f& direction_bs, 
-                                                  Pnt3f& position_es, 
-                                                  Vec3f& direction_es) const;
-
-    void    calcDirectionalLightMatrixLSFromWS  (Node* beacon, 
-                                                 const Vec3f& direction_bs, 
-                                                 Matrix& matLSFromWS) const;
-
-    void    calcDirectionalLightMatrixLSFromES  (DrawEnv* pEnv,
-                                                 Node* beacon, 
-                                                 const Vec3f& direction_bs, 
-                                                 Matrix& matLSFromES) const;
-
-    void    calcDirectionalLightMatricesLSFrom  (DrawEnv* pEnv,
-                                                 Node* beacon, 
-                                                 const Vec3f& direction_bs, 
-                                                 Matrix& matLSFromWS,
-                                                 Matrix& matLSFromES) const;
-
-    void    calcPointLightMatrixLSFromWS        (Node* beacon, 
-                                                 const Pnt3f& position_bs, 
-                                                 Matrix& matLSFromWS) const;
-
-    void    calcPointLightMatrixLSFromES        (DrawEnv* pEnv,
-                                                 Node* beacon, 
-                                                 const Pnt3f& position_bs, 
-                                                 Matrix& matLSFromES) const;
-
-    void    calcPointLightMatricesLSFrom        (DrawEnv* pEnv,
-                                                 Node* beacon, 
-                                                 const Pnt3f& position_bs, 
-                                                 Matrix& matLSFromWS,
-                                                 Matrix& matLSFromES) const;
-
-    void    calcSpotLightMatrixLSFromWS         (Node* beacon, 
-                                                 const Pnt3f& position_bs, 
-                                                 const Vec3f& direction_bs, 
-                                                 Matrix& matLSFromWS) const;
-
-    void    calcSpotLightMatrixLSFromES         (DrawEnv* pEnv,
-                                                 Node* beacon, 
-                                                 const Pnt3f& position_bs, 
-                                                 const Vec3f& direction_bs, 
-                                                 Matrix& matLSFromES) const;
-
-    void    calcSpotLightMatricesLSFrom         (DrawEnv* pEnv,
-                                                 Node* beacon, 
-                                                 const Pnt3f& position_bs, 
-                                                 const Vec3f& direction_bs, 
-                                                 Matrix& matLSFromWS,
-                                                 Matrix& matLSFromES) const;
-
-    void    calcPointLightRange                 (DrawEnv* pEnv,
-                                                 const Vec3f attenuation,
-                                                 Real32 threshold,
-                                                 Real32& cutOnRange,
-                                                 Real32& cutOffRange) const;
-
-    void    calcPointLightRange                 (DrawEnv* pEnv,
-                                                 Real32 decayAttenuation,
-                                                 Real32 threshold,
-                                                 Real32& cutOnRange,
-                                                 Real32& cutOffRange) const;
-
-    std::size_t         calcLightBufferSize     () const;
-    std::vector<UInt8>  createLightBuffer       (DrawEnv* pEnv) const;
-    void                createLightState        (DrawEnv* pEnv);
-    void                updateLightState        (DrawEnv* pEnv);
-
-    /*! \}                                                                 */
-
-    bool        check_invariant() const;
-    void        force_invariant();
-
-    void        setFeatureImpl          (UInt32 features);
-    void        setCodeFeatureImpl      (UInt32 features);
-
-    /*---------------------------------------------------------------------*/
-    /*! \name                  code generation                             */
-    /*! \{                                                                 */
-
-    std::string getDistanceAttenuationClassicProgSnippet        () const;
-    std::string getDistanceAttenuationPhysicallyProgSnippet     () const;
-    std::string getDistanceAttenuationDecayProgSnippet          () const;
-    std::string getDistanceAttenuationMixPhysicallyProgSnippet  () const;
-    std::string getDistanceAttenuationMixDecayProgSnippet       () const;
-    std::string getDistanceAttenuationSmoothHermiteProgSnippet  () const;
-    std::string getSpotAttenuationClassicProgSnippet            () const;
-    std::string getSpotAttenuationSmoothHermiteProgSnippet      () const;
-    std::string getSpotAttenuationSmoothHermite2ProgSnippet     () const;
-    std::string getSpotAttenuationFrostbiteProgSnippet          () const;
-    std::string getCinemaAttenuationProgSnippet                 () const;
-
-    /*! \}                                                                 */
-
+    friend class MultiLightGroupBase;
 
     // prohibit default functions (move to 'public' if you need one)
-    void operator =(const MultiLightChunk &source);
+    void operator =(const MultiLightGroup &source);
 };
 
-typedef MultiLightChunk *MultiLightChunkP;
+typedef MultiLightGroup *MultiLightGroupP;
 
 OSG_END_NAMESPACE
 
-#include "OSGMultiLightChunkBase.inl"
-#include "OSGMultiLightChunk.inl"
+#include "OSGMultiLightGroupBase.inl"
+#include "OSGMultiLightGroup.inl"
 
-#endif /* _OSGMULTILIGHTCHUNK_H_ */
+#endif /* _OSGMULTILIGHTGROUP_H_ */

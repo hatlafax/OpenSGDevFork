@@ -87,6 +87,11 @@ OSG_BEGIN_NAMESPACE
  *                        Field Documentation                              *
 \***************************************************************************/
 
+/*! \var bool            ClusterShadingStageBase::_sfActivate
+    If the stage is deactivated it does not perform any action on its own but act as a simple Group core. This
+    flag is not to be confused with the 'disabled' flag that does allow to disable any operation of the stage.
+*/
+
 /*! \var UInt32          ClusterShadingStageBase::_sfBlockSize
     The number of compute shader work group threads per xy-direction
 */
@@ -176,7 +181,10 @@ OSG_BEGIN_NAMESPACE
 */
 
 /*! \var bool            ClusterShadingStageBase::_sfDisabled
-    Disable the stage completely. The geometry fragment shaders must act accordingly.
+    Toogle usage of cluster shading on/off. The 'lightIndexList' is not generated and the fragment shader has to
+    use the 'affectedLightIndexList' directly, not gaining any performance optimization due to clustering.
+    This flag is not to be confused with the 'activate' flag that allows to basically run this stage as a simple
+    Group core. 
 */
 
 /*! \var UInt32          ClusterShadingStageBase::_sfMaxLightIndexListSize
@@ -237,6 +245,14 @@ PointerType FieldTraits<ClusterShadingStage *, nsOSG>::_type(
 
 OSG_FIELDTRAITS_GETTYPE_NS(ClusterShadingStage *, nsOSG)
 
+OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
+                           ClusterShadingStage *,
+                           nsOSG)
+
+OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
+                           ClusterShadingStage *,
+                           nsOSG)
+
 /***************************************************************************\
  *                         Field Description                               *
 \***************************************************************************/
@@ -245,6 +261,19 @@ void ClusterShadingStageBase::classDescInserter(TypeObject &oType)
 {
     FieldDescriptionBase *pDesc = NULL;
 
+
+    pDesc = new SFBool::Description(
+        SFBool::getClassType(),
+        "activate",
+        "If the stage is deactivated it does not perform any action on its own but act as a simple Group core. This\n"
+        "flag is not to be confused with the 'disabled' flag that does allow to disable any operation of the stage.\n",
+        ActivateFieldId, ActivateFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&ClusterShadingStage::editHandleActivate),
+        static_cast<FieldGetMethodSig >(&ClusterShadingStage::getHandleActivate));
+
+    oType.addInitialDesc(pDesc);
 
     pDesc = new SFUInt32::Description(
         SFUInt32::getClassType(),
@@ -505,7 +534,10 @@ void ClusterShadingStageBase::classDescInserter(TypeObject &oType)
     pDesc = new SFBool::Description(
         SFBool::getClassType(),
         "disabled",
-        "Disable the stage completely. The geometry fragment shaders must act accordingly.\n",
+        "Toogle usage of cluster shading on/off. The 'lightIndexList' is not generated and the fragment shader has to\n"
+        "use the 'affectedLightIndexList' directly, not gaining any performance optimization due to clustering.\n"
+        "This flag is not to be confused with the 'activate' flag that allows to basically run this stage as a simple\n"
+        "Group core. \n",
         DisabledFieldId, DisabledFieldMask,
         false,
         (Field::SFDefaultFlags | Field::FStdAccess),
@@ -654,375 +686,390 @@ ClusterShadingStageBase::TypeObject ClusterShadingStageBase::_type(
     "<?xml version=\"1.0\"?>\n"
     "\n"
     "<FieldContainer\n"
-    "   name=\"ClusterShadingStage\"\n"
-    "   parent=\"Stage\"\n"
-    "   library=\"ContribTechniques\"\n"
-    "   pointerfieldtypes=\"none\"\n"
-    "   structure=\"concrete\"\n"
-    "   systemcomponent=\"true\"\n"
-    "   parentsystemcomponent=\"true\"\n"
-    "   decoratable=\"false\"\n"
-    "   useLocalIncludes=\"false\"\n"
-    "   isNodeCore=\"true\"\n"
-    "   isBundle=\"false\"\n"
-    "   >\n"
-    "\n"
-    "     <Field\n"
-    "    name=\"blockSize\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"16\"\n"
-    "    access=\"public\"\n"
+    "    name=\"ClusterShadingStage\"\n"
+    "    parent=\"Stage\"\n"
+    "    library=\"ContribTechniques\"\n"
+    "    pointerfieldtypes=\"both\"\n"
+    "    structure=\"concrete\"\n"
+    "    systemcomponent=\"true\"\n"
+    "    parentsystemcomponent=\"true\"\n"
+    "    decoratable=\"false\"\n"
+    "    useLocalIncludes=\"false\"\n"
+    "    isNodeCore=\"true\"\n"
+    "    isBundle=\"false\"\n"
     "    >\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"activate\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"true\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        If the stage is deactivated it does not perform any action on its own but act as a simple Group core. This\n"
+    "        flag is not to be confused with the 'disabled' flag that does allow to disable any operation of the stage.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"blockSize\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"16\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The number of compute shader work group threads per xy-direction\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"tileSize\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"64\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"tileSize\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"64\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The number of pixel per cluster tile per xy-direction. The overall number if\n"
     "        clusters is then tileSize^2  * numClusterZ.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"numClusterZ\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"32\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"numClusterZ\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"32\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The number of clusters in the z direction. The overall number if\n"
     "        clusters is then tileSize^2  * numClusterZ.\n"
     "    </Field>\n"
     "\n"
-    "     <Field\n"
-    "    name=\"nearPlaneOffset\"\n"
-    "    type=\"Real32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"5.f\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "    <Field\n"
+    "        name=\"nearPlaneOffset\"\n"
+    "        type=\"Real32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"5.f\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        z-coords below of zNear + near_plane_offset are mapped to cluster key 0, i.e.\n"
     "        the logarithmic clustering starts at zNear + near_plane_offset with key 1. Key 0\n"
     "        is therefor artificially. With this parameter you can enhance the cluster utilization.\n"
     "    </Field>\n"
     "\n"
-    "     <Field\n"
-    "    name=\"dispatchDataBindingPnt\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"1\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
-    "        The fragment shader binding point for the clustering data UBO.\n"
-    "    </Field>\n"
-    "\n"
-    "     <Field\n"
-    "    name=\"clusterDataBindingPnt\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"2\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "    <Field\n"
+    "        name=\"dispatchDataBindingPnt\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"1\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The fragment shader binding point for the clustering data UBO.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"lightBindingPnt\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"1\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"clusterDataBindingPnt\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"2\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        The fragment shader binding point for the clustering data UBO.\n"
+    "    </Field>\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"lightBindingPnt\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"1\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The fragment shader SSBO binding point for the multi light chunk.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"affectedLightIndexListBindingPnt\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"2\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"affectedLightIndexListBindingPnt\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"2\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The fragment shader binding point for the index list SSBO of the view frustum affecting lights.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"frustumBindingPnt\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"3\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"frustumBindingPnt\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"3\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The frustum and cull light computation shader binding point for the SSBO frustum buffer.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"lightIndexListBindingPnt\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"4\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"lightIndexListBindingPnt\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"4\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The fragment shader binding point for the index list SSBO of the cluster shading lights.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"lightIndexCounterBindingPnt\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"5\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"lightIndexCounterBindingPnt\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"5\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The fragment shader binding point for the index list global counter SSBO.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"lightGridBindingPnt\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"0\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"lightGridBindingPnt\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"0\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The fragment shader binding point for the texture image of the light grid.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "     name=\"affectedLightIndexListBlockName\"\n"
-    "     type=\"std::string\"\n"
-    "     cardinality=\"single\"\n"
-    "     visibility=\"external\"\n"
-    "     access=\"public\"\n"
-    "     defaultValue='\"AffectedLightIndexList\"'\n"
-    "     >\n"
+    "        name=\"affectedLightIndexListBlockName\"\n"
+    "        type=\"std::string\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue='\"AffectedLightIndexList\"'\n"
+    "        >\n"
     "        The shader storage buffer block name for the affected light index buffer.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "     name=\"affectedLightIndexListVariableName\"\n"
-    "     type=\"std::string\"\n"
-    "     cardinality=\"single\"\n"
-    "     visibility=\"external\"\n"
-    "     access=\"public\"\n"
-    "     defaultValue='\"affectedLightIndexList\"'\n"
-    "     >\n"
+    "        name=\"affectedLightIndexListVariableName\"\n"
+    "        type=\"std::string\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue='\"affectedLightIndexList\"'\n"
+    "        >\n"
     "        The variable name for the affected light index buffer.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "     name=\"lightIndexListBlockName\"\n"
-    "     type=\"std::string\"\n"
-    "     cardinality=\"single\"\n"
-    "     visibility=\"external\"\n"
-    "     access=\"public\"\n"
-    "     defaultValue='\"LightIndexList\"'\n"
-    "     >\n"
+    "        name=\"lightIndexListBlockName\"\n"
+    "        type=\"std::string\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue='\"LightIndexList\"'\n"
+    "        >\n"
     "        The shader storage buffer block name for the global light index buffer.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "     name=\"lightIndexListVariableName\"\n"
-    "     type=\"std::string\"\n"
-    "     cardinality=\"single\"\n"
-    "     visibility=\"external\"\n"
-    "     access=\"public\"\n"
-    "     defaultValue='\"lightIndexList\"'\n"
-    "     >\n"
+    "        name=\"lightIndexListVariableName\"\n"
+    "        type=\"std::string\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue='\"lightIndexList\"'\n"
+    "        >\n"
     "        The variable name for the global light index buffer.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "     name=\"clusteringDataBlockName\"\n"
-    "     type=\"std::string\"\n"
-    "     cardinality=\"single\"\n"
-    "     visibility=\"external\"\n"
-    "     access=\"public\"\n"
-    "     defaultValue='\"ClusteringData\"'\n"
-    "     >\n"
+    "        name=\"clusteringDataBlockName\"\n"
+    "        type=\"std::string\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue='\"ClusteringData\"'\n"
+    "        >\n"
     "        The uniform buffer block name for the clustering data buffer.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "     name=\"clusteringDataVariableName\"\n"
-    "     type=\"std::string\"\n"
-    "     cardinality=\"single\"\n"
-    "     visibility=\"external\"\n"
-    "     access=\"public\"\n"
-    "     defaultValue='\"clusteringData\"'\n"
-    "     >\n"
+    "        name=\"clusteringDataVariableName\"\n"
+    "        type=\"std::string\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue='\"clusteringData\"'\n"
+    "        >\n"
     "        The variable name for the clustering data buffer.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "     name=\"lightGridVariableName\"\n"
-    "     type=\"std::string\"\n"
-    "     cardinality=\"single\"\n"
-    "     visibility=\"external\"\n"
-    "     access=\"public\"\n"
-    "     defaultValue='\"light_grid\"'\n"
-    "     >\n"
+    "        name=\"lightGridVariableName\"\n"
+    "        type=\"std::string\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue='\"light_grid\"'\n"
+    "        >\n"
     "        The variable name for the uniform light grid image array .\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"calcFrustumsOnCPU\"\n"
-    "    type=\"bool\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"false\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"calcFrustumsOnCPU\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"false\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Calculate the view frustums on the CPU.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"cullLighsOnCPU\"\n"
-    "    type=\"bool\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"false\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"cullLighsOnCPU\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"false\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        Cull the lights on the CPU.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"disabled\"\n"
-    "    type=\"bool\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"false\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
-    "        Disable the stage completely. The geometry fragment shaders must act accordingly.\n"
+    "        name=\"disabled\"\n"
+    "        type=\"bool\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"false\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
+    "        Toogle usage of cluster shading on/off. The 'lightIndexList' is not generated and the fragment shader has to\n"
+    "        use the 'affectedLightIndexList' directly, not gaining any performance optimization due to clustering.\n"
+    "        This flag is not to be confused with the 'activate' flag that allows to basically run this stage as a simple\n"
+    "        Group core. \n"
     "    </Field>\n"
     "\n"
-    "     <Field\n"
-    "    name=\"maxLightIndexListSize\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"2097152\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "    <Field\n"
+    "        name=\"maxLightIndexListSize\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"2097152\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The maximal number of light indices, i.e. the accumulated sum of all cluster lights. If the light index\n"
     "        list is completely filled all additional lights are silently dropped.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"maxClusterLightCount\"\n"
-    "    type=\"UInt32\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"1024\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"maxClusterLightCount\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"1024\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The maximal number of lights that can be attributed to one specific cluster. Realize, that\n"
     "        the accumulated sum of all  cluster attributed lights must not exceed the maxLightIndexListSize.\n"
     "        If the number of lights for one cluster exceeds this limit the excessive lights are silently dropped.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"frustNode\"\n"
-    "    type=\"NodePtr\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"internal\"\n"
-    "    defaultValue=\"NULL\"\n"
-    "    access=\"protected\"\n"
-    "    >\n"
+    "        name=\"frustNode\"\n"
+    "        type=\"NodePtr\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"internal\"\n"
+    "        defaultValue=\"NULL\"\n"
+    "        access=\"protected\"\n"
+    "        >\n"
     "        The frustum computation node.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"frustAlgoElement\"\n"
-    "    type=\"AlgorithmComputeElementPtr\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"internal\"\n"
-    "    defaultValue=\"NULL\"\n"
-    "    access=\"protected\"\n"
-    "    >\n"
+    "        name=\"frustAlgoElement\"\n"
+    "        type=\"AlgorithmComputeElementPtr\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"internal\"\n"
+    "        defaultValue=\"NULL\"\n"
+    "        access=\"protected\"\n"
+    "        >\n"
     "        The frustum algorithm computation element.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"frustCompShaderAlgo\"\n"
-    "    type=\"ComputeShaderAlgorithmPtr\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"internal\"\n"
-    "    defaultValue=\"NULL\"\n"
-    "    access=\"protected\"\n"
-    "    >\n"
+    "        name=\"frustCompShaderAlgo\"\n"
+    "        type=\"ComputeShaderAlgorithmPtr\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"internal\"\n"
+    "        defaultValue=\"NULL\"\n"
+    "        access=\"protected\"\n"
+    "        >\n"
     "        The frustum computation shader algorithm.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"cullNode\"\n"
-    "    type=\"NodePtr\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"internal\"\n"
-    "    defaultValue=\"NULL\"\n"
-    "    access=\"protected\"\n"
-    "    >\n"
+    "        name=\"cullNode\"\n"
+    "        type=\"NodePtr\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"internal\"\n"
+    "        defaultValue=\"NULL\"\n"
+    "        access=\"protected\"\n"
+    "        >\n"
     "        The frustum computation node.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"cullAlgoElement\"\n"
-    "    type=\"AlgorithmComputeElementPtr\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"internal\"\n"
-    "    defaultValue=\"NULL\"\n"
-    "    access=\"protected\"\n"
-    "    >\n"
+    "        name=\"cullAlgoElement\"\n"
+    "        type=\"AlgorithmComputeElementPtr\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"internal\"\n"
+    "        defaultValue=\"NULL\"\n"
+    "        access=\"protected\"\n"
+    "        >\n"
     "        The frustum algorithm computation element.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"cullCompShaderAlgo\"\n"
-    "    type=\"ComputeShaderAlgorithmPtr\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"internal\"\n"
-    "    defaultValue=\"NULL\"\n"
-    "    access=\"protected\"\n"
-    "    >\n"
+    "        name=\"cullCompShaderAlgo\"\n"
+    "        type=\"ComputeShaderAlgorithmPtr\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"internal\"\n"
+    "        defaultValue=\"NULL\"\n"
+    "        access=\"protected\"\n"
+    "        >\n"
     "        The frustum computation shader algorithm.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"multiLightChunk\"\n"
-    "    type=\"MultiLightChunkPtr\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"external\"\n"
-    "    defaultValue=\"NULL\"\n"
-    "    access=\"public\"\n"
-    "    >\n"
+    "        name=\"multiLightChunk\"\n"
+    "        type=\"MultiLightChunkPtr\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        defaultValue=\"NULL\"\n"
+    "        access=\"public\"\n"
+    "        >\n"
     "        The multi light chunk.\n"
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "    name=\"shaderProgChunk\"\n"
-    "    type=\"ShaderProgramChunkPtr\"\n"
-    "    cardinality=\"single\"\n"
-    "    visibility=\"internal\"\n"
-    "    defaultValue=\"NULL\"\n"
-    "    access=\"protected\"\n"
-    "    >\n"
+    "        name=\"shaderProgChunk\"\n"
+    "        type=\"ShaderProgramChunkPtr\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"internal\"\n"
+    "        defaultValue=\"NULL\"\n"
+    "        access=\"protected\"\n"
+    "        >\n"
     "        The shader program chunk.\n"
     "    </Field>\n"
     "\n"
@@ -1048,6 +1095,19 @@ UInt32 ClusterShadingStageBase::getContainerSize(void) const
 }
 
 /*------------------------- decorator get ------------------------------*/
+
+
+SFBool *ClusterShadingStageBase::editSFActivate(void)
+{
+    editSField(ActivateFieldMask);
+
+    return &_sfActivate;
+}
+
+const SFBool *ClusterShadingStageBase::getSFActivate(void) const
+{
+    return &_sfActivate;
+}
 
 
 SFUInt32 *ClusterShadingStageBase::editSFBlockSize(void)
@@ -1596,6 +1656,10 @@ SizeT ClusterShadingStageBase::getBinSize(ConstFieldMaskArg whichField)
 {
     SizeT returnValue = Inherited::getBinSize(whichField);
 
+    if(FieldBits::NoField != (ActivateFieldMask & whichField))
+    {
+        returnValue += _sfActivate.getBinSize();
+    }
     if(FieldBits::NoField != (BlockSizeFieldMask & whichField))
     {
         returnValue += _sfBlockSize.getBinSize();
@@ -1733,6 +1797,10 @@ void ClusterShadingStageBase::copyToBin(BinaryDataHandler &pMem,
 {
     Inherited::copyToBin(pMem, whichField);
 
+    if(FieldBits::NoField != (ActivateFieldMask & whichField))
+    {
+        _sfActivate.copyToBin(pMem);
+    }
     if(FieldBits::NoField != (BlockSizeFieldMask & whichField))
     {
         _sfBlockSize.copyToBin(pMem);
@@ -1868,6 +1936,11 @@ void ClusterShadingStageBase::copyFromBin(BinaryDataHandler &pMem,
 {
     Inherited::copyFromBin(pMem, whichField);
 
+    if(FieldBits::NoField != (ActivateFieldMask & whichField))
+    {
+        editSField(ActivateFieldMask);
+        _sfActivate.copyFromBin(pMem);
+    }
     if(FieldBits::NoField != (BlockSizeFieldMask & whichField))
     {
         editSField(BlockSizeFieldMask);
@@ -2153,6 +2226,7 @@ FieldContainerTransitPtr ClusterShadingStageBase::shallowCopy(void) const
 
 ClusterShadingStageBase::ClusterShadingStageBase(void) :
     Inherited(),
+    _sfActivate               (bool(true)),
     _sfBlockSize              (UInt32(16)),
     _sfTileSize               (UInt32(64)),
     _sfNumClusterZ            (UInt32(32)),
@@ -2190,6 +2264,7 @@ ClusterShadingStageBase::ClusterShadingStageBase(void) :
 
 ClusterShadingStageBase::ClusterShadingStageBase(const ClusterShadingStageBase &source) :
     Inherited(source),
+    _sfActivate               (source._sfActivate               ),
     _sfBlockSize              (source._sfBlockSize              ),
     _sfTileSize               (source._sfTileSize               ),
     _sfNumClusterZ            (source._sfNumClusterZ            ),
@@ -2256,6 +2331,31 @@ void ClusterShadingStageBase::onCreate(const ClusterShadingStage *source)
 
         pThis->setShaderProgChunk(source->getShaderProgChunk());
     }
+}
+
+GetFieldHandlePtr ClusterShadingStageBase::getHandleActivate        (void) const
+{
+    SFBool::GetHandlePtr returnValue(
+        new  SFBool::GetHandle(
+             &_sfActivate,
+             this->getType().getFieldDesc(ActivateFieldId),
+             const_cast<ClusterShadingStageBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr ClusterShadingStageBase::editHandleActivate       (void)
+{
+    SFBool::EditHandlePtr returnValue(
+        new  SFBool::EditHandle(
+             &_sfActivate,
+             this->getType().getFieldDesc(ActivateFieldId),
+             this));
+
+
+    editSField(ActivateFieldMask);
+
+    return returnValue;
 }
 
 GetFieldHandlePtr ClusterShadingStageBase::getHandleBlockSize       (void) const

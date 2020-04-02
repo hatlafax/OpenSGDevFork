@@ -74,505 +74,105 @@ OSG::UInt16 MultiLightChunkBase::getClassGroupId(void)
 
 /*------------------------------ get -----------------------------------*/
 
-//! Get the value of the MultiLightChunk::_sfHasWorldToLightSpaceMatrix field.
+//! Get the value of the MultiLightChunk::_sfFeature field.
 
 inline
-bool &MultiLightChunkBase::editHasWorldToLightSpaceMatrix(void)
+UInt32 &MultiLightChunkBase::editFeature(void)
 {
-    editSField(HasWorldToLightSpaceMatrixFieldMask);
+    editSField(FeatureFieldMask);
 
-    return _sfHasWorldToLightSpaceMatrix.getValue();
+    return _sfFeature.getValue();
 }
 
-//! Get the value of the MultiLightChunk::_sfHasWorldToLightSpaceMatrix field.
+//! Get the value of the MultiLightChunk::_sfFeature field.
 inline
-      bool  MultiLightChunkBase::getHasWorldToLightSpaceMatrix(void) const
+      UInt32  MultiLightChunkBase::getFeature(void) const
 {
-    return _sfHasWorldToLightSpaceMatrix.getValue();
+    return _sfFeature.getValue();
 }
 
-//! Set the value of the MultiLightChunk::_sfHasWorldToLightSpaceMatrix field.
+//! Set the value of the MultiLightChunk::_sfFeature field.
 inline
-void MultiLightChunkBase::setHasWorldToLightSpaceMatrix(const bool value)
+void MultiLightChunkBase::setFeature(const UInt32 value)
 {
-    editSField(HasWorldToLightSpaceMatrixFieldMask);
+    editSField(FeatureFieldMask);
 
-    _sfHasWorldToLightSpaceMatrix.setValue(value);
+    _sfFeature.setValue(value);
 }
-//! Get the value of the MultiLightChunk::_sfHasLightToWorldSpaceMatrix field.
+//! Get the value of the MultiLightChunk::_sfCodeFeature field.
 
 inline
-bool &MultiLightChunkBase::editHasLightToWorldSpaceMatrix(void)
+UInt32 &MultiLightChunkBase::editCodeFeature(void)
 {
-    editSField(HasLightToWorldSpaceMatrixFieldMask);
+    editSField(CodeFeatureFieldMask);
 
-    return _sfHasLightToWorldSpaceMatrix.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasLightToWorldSpaceMatrix field.
-inline
-      bool  MultiLightChunkBase::getHasLightToWorldSpaceMatrix(void) const
-{
-    return _sfHasLightToWorldSpaceMatrix.getValue();
+    return _sfCodeFeature.getValue();
 }
 
-//! Set the value of the MultiLightChunk::_sfHasLightToWorldSpaceMatrix field.
+//! Get the value of the MultiLightChunk::_sfCodeFeature field.
 inline
-void MultiLightChunkBase::setHasLightToWorldSpaceMatrix(const bool value)
+      UInt32  MultiLightChunkBase::getCodeFeature(void) const
 {
-    editSField(HasLightToWorldSpaceMatrixFieldMask);
-
-    _sfHasLightToWorldSpaceMatrix.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasEyeToLightSpaceMatrix field.
-
-inline
-bool &MultiLightChunkBase::editHasEyeToLightSpaceMatrix(void)
-{
-    editSField(HasEyeToLightSpaceMatrixFieldMask);
-
-    return _sfHasEyeToLightSpaceMatrix.getValue();
+    return _sfCodeFeature.getValue();
 }
 
-//! Get the value of the MultiLightChunk::_sfHasEyeToLightSpaceMatrix field.
+//! Set the value of the MultiLightChunk::_sfCodeFeature field.
 inline
-      bool  MultiLightChunkBase::getHasEyeToLightSpaceMatrix(void) const
+void MultiLightChunkBase::setCodeFeature(const UInt32 value)
 {
-    return _sfHasEyeToLightSpaceMatrix.getValue();
+    editSField(CodeFeatureFieldMask);
+
+    _sfCodeFeature.setValue(value);
+}
+//! Get the value of the MultiLightChunk::_sfGlobalAmbientIntensity field.
+
+inline
+Vec3f &MultiLightChunkBase::editGlobalAmbientIntensity(void)
+{
+    editSField(GlobalAmbientIntensityFieldMask);
+
+    return _sfGlobalAmbientIntensity.getValue();
 }
 
-//! Set the value of the MultiLightChunk::_sfHasEyeToLightSpaceMatrix field.
+//! Get the value of the MultiLightChunk::_sfGlobalAmbientIntensity field.
 inline
-void MultiLightChunkBase::setHasEyeToLightSpaceMatrix(const bool value)
+const Vec3f &MultiLightChunkBase::getGlobalAmbientIntensity(void) const
 {
-    editSField(HasEyeToLightSpaceMatrixFieldMask);
-
-    _sfHasEyeToLightSpaceMatrix.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasLightToEyeSpaceMatrix field.
-
-inline
-bool &MultiLightChunkBase::editHasLightToEyeSpaceMatrix(void)
-{
-    editSField(HasLightToEyeSpaceMatrixFieldMask);
-
-    return _sfHasLightToEyeSpaceMatrix.getValue();
+    return _sfGlobalAmbientIntensity.getValue();
 }
 
-//! Get the value of the MultiLightChunk::_sfHasLightToEyeSpaceMatrix field.
+//! Set the value of the MultiLightChunk::_sfGlobalAmbientIntensity field.
 inline
-      bool  MultiLightChunkBase::getHasLightToEyeSpaceMatrix(void) const
+void MultiLightChunkBase::setGlobalAmbientIntensity(const Vec3f &value)
 {
-    return _sfHasLightToEyeSpaceMatrix.getValue();
+    editSField(GlobalAmbientIntensityFieldMask);
+
+    _sfGlobalAmbientIntensity.setValue(value);
+}
+//! Get the value of the MultiLightChunk::_sfNormalizeDirection field.
+
+inline
+bool &MultiLightChunkBase::editNormalizeDirection(void)
+{
+    editSField(NormalizeDirectionFieldMask);
+
+    return _sfNormalizeDirection.getValue();
 }
 
-//! Set the value of the MultiLightChunk::_sfHasLightToEyeSpaceMatrix field.
+//! Get the value of the MultiLightChunk::_sfNormalizeDirection field.
 inline
-void MultiLightChunkBase::setHasLightToEyeSpaceMatrix(const bool value)
+      bool  MultiLightChunkBase::getNormalizeDirection(void) const
 {
-    editSField(HasLightToEyeSpaceMatrixFieldMask);
-
-    _sfHasLightToEyeSpaceMatrix.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasLightPerspectiveMatrix field.
-
-inline
-bool &MultiLightChunkBase::editHasLightPerspectiveMatrix(void)
-{
-    editSField(HasLightPerspectiveMatrixFieldMask);
-
-    return _sfHasLightPerspectiveMatrix.getValue();
+    return _sfNormalizeDirection.getValue();
 }
 
-//! Get the value of the MultiLightChunk::_sfHasLightPerspectiveMatrix field.
+//! Set the value of the MultiLightChunk::_sfNormalizeDirection field.
 inline
-      bool  MultiLightChunkBase::getHasLightPerspectiveMatrix(void) const
+void MultiLightChunkBase::setNormalizeDirection(const bool value)
 {
-    return _sfHasLightPerspectiveMatrix.getValue();
-}
+    editSField(NormalizeDirectionFieldMask);
 
-//! Set the value of the MultiLightChunk::_sfHasLightPerspectiveMatrix field.
-inline
-void MultiLightChunkBase::setHasLightPerspectiveMatrix(const bool value)
-{
-    editSField(HasLightPerspectiveMatrixFieldMask);
-
-    _sfHasLightPerspectiveMatrix.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasInvLightPerspectiveMatrix field.
-
-inline
-bool &MultiLightChunkBase::editHasInvLightPerspectiveMatrix(void)
-{
-    editSField(HasInvLightPerspectiveMatrixFieldMask);
-
-    return _sfHasInvLightPerspectiveMatrix.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasInvLightPerspectiveMatrix field.
-inline
-      bool  MultiLightChunkBase::getHasInvLightPerspectiveMatrix(void) const
-{
-    return _sfHasInvLightPerspectiveMatrix.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasInvLightPerspectiveMatrix field.
-inline
-void MultiLightChunkBase::setHasInvLightPerspectiveMatrix(const bool value)
-{
-    editSField(HasInvLightPerspectiveMatrixFieldMask);
-
-    _sfHasInvLightPerspectiveMatrix.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasColor field.
-
-inline
-bool &MultiLightChunkBase::editHasColor(void)
-{
-    editSField(HasColorFieldMask);
-
-    return _sfHasColor.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasColor field.
-inline
-      bool  MultiLightChunkBase::getHasColor(void) const
-{
-    return _sfHasColor.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasColor field.
-inline
-void MultiLightChunkBase::setHasColor(const bool value)
-{
-    editSField(HasColorFieldMask);
-
-    _sfHasColor.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasIntensity field.
-
-inline
-bool &MultiLightChunkBase::editHasIntensity(void)
-{
-    editSField(HasIntensityFieldMask);
-
-    return _sfHasIntensity.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasIntensity field.
-inline
-      bool  MultiLightChunkBase::getHasIntensity(void) const
-{
-    return _sfHasIntensity.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasIntensity field.
-inline
-void MultiLightChunkBase::setHasIntensity(const bool value)
-{
-    editSField(HasIntensityFieldMask);
-
-    _sfHasIntensity.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasSeparateIntensities field.
-
-inline
-bool &MultiLightChunkBase::editHasSeparateIntensities(void)
-{
-    editSField(HasSeparateIntensitiesFieldMask);
-
-    return _sfHasSeparateIntensities.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasSeparateIntensities field.
-inline
-      bool  MultiLightChunkBase::getHasSeparateIntensities(void) const
-{
-    return _sfHasSeparateIntensities.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasSeparateIntensities field.
-inline
-void MultiLightChunkBase::setHasSeparateIntensities(const bool value)
-{
-    editSField(HasSeparateIntensitiesFieldMask);
-
-    _sfHasSeparateIntensities.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasAttenuation field.
-
-inline
-bool &MultiLightChunkBase::editHasAttenuation(void)
-{
-    editSField(HasAttenuationFieldMask);
-
-    return _sfHasAttenuation.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasAttenuation field.
-inline
-      bool  MultiLightChunkBase::getHasAttenuation(void) const
-{
-    return _sfHasAttenuation.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasAttenuation field.
-inline
-void MultiLightChunkBase::setHasAttenuation(const bool value)
-{
-    editSField(HasAttenuationFieldMask);
-
-    _sfHasAttenuation.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfAutoCalcRanges field.
-
-inline
-bool &MultiLightChunkBase::editAutoCalcRanges(void)
-{
-    editSField(AutoCalcRangesFieldMask);
-
-    return _sfAutoCalcRanges.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfAutoCalcRanges field.
-inline
-      bool  MultiLightChunkBase::getAutoCalcRanges(void) const
-{
-    return _sfAutoCalcRanges.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfAutoCalcRanges field.
-inline
-void MultiLightChunkBase::setAutoCalcRanges(const bool value)
-{
-    editSField(AutoCalcRangesFieldMask);
-
-    _sfAutoCalcRanges.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasRangeCutOn field.
-
-inline
-bool &MultiLightChunkBase::editHasRangeCutOn(void)
-{
-    editSField(HasRangeCutOnFieldMask);
-
-    return _sfHasRangeCutOn.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasRangeCutOn field.
-inline
-      bool  MultiLightChunkBase::getHasRangeCutOn(void) const
-{
-    return _sfHasRangeCutOn.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasRangeCutOn field.
-inline
-void MultiLightChunkBase::setHasRangeCutOn(const bool value)
-{
-    editSField(HasRangeCutOnFieldMask);
-
-    _sfHasRangeCutOn.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasRangeCutOff field.
-
-inline
-bool &MultiLightChunkBase::editHasRangeCutOff(void)
-{
-    editSField(HasRangeCutOffFieldMask);
-
-    return _sfHasRangeCutOff.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasRangeCutOff field.
-inline
-      bool  MultiLightChunkBase::getHasRangeCutOff(void) const
-{
-    return _sfHasRangeCutOff.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasRangeCutOff field.
-inline
-void MultiLightChunkBase::setHasRangeCutOff(const bool value)
-{
-    editSField(HasRangeCutOffFieldMask);
-
-    _sfHasRangeCutOff.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasRangeNearZone field.
-
-inline
-bool &MultiLightChunkBase::editHasRangeNearZone(void)
-{
-    editSField(HasRangeNearZoneFieldMask);
-
-    return _sfHasRangeNearZone.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasRangeNearZone field.
-inline
-      bool  MultiLightChunkBase::getHasRangeNearZone(void) const
-{
-    return _sfHasRangeNearZone.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasRangeNearZone field.
-inline
-void MultiLightChunkBase::setHasRangeNearZone(const bool value)
-{
-    editSField(HasRangeNearZoneFieldMask);
-
-    _sfHasRangeNearZone.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasRangeFarZone field.
-
-inline
-bool &MultiLightChunkBase::editHasRangeFarZone(void)
-{
-    editSField(HasRangeFarZoneFieldMask);
-
-    return _sfHasRangeFarZone.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasRangeFarZone field.
-inline
-      bool  MultiLightChunkBase::getHasRangeFarZone(void) const
-{
-    return _sfHasRangeFarZone.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasRangeFarZone field.
-inline
-void MultiLightChunkBase::setHasRangeFarZone(const bool value)
-{
-    editSField(HasRangeFarZoneFieldMask);
-
-    _sfHasRangeFarZone.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasCosSpotlightAngle field.
-
-inline
-bool &MultiLightChunkBase::editHasCosSpotlightAngle(void)
-{
-    editSField(HasCosSpotlightAngleFieldMask);
-
-    return _sfHasCosSpotlightAngle.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasCosSpotlightAngle field.
-inline
-      bool  MultiLightChunkBase::getHasCosSpotlightAngle(void) const
-{
-    return _sfHasCosSpotlightAngle.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasCosSpotlightAngle field.
-inline
-void MultiLightChunkBase::setHasCosSpotlightAngle(const bool value)
-{
-    editSField(HasCosSpotlightAngleFieldMask);
-
-    _sfHasCosSpotlightAngle.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasSpotlightAngle field.
-
-inline
-bool &MultiLightChunkBase::editHasSpotlightAngle(void)
-{
-    editSField(HasSpotlightAngleFieldMask);
-
-    return _sfHasSpotlightAngle.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasSpotlightAngle field.
-inline
-      bool  MultiLightChunkBase::getHasSpotlightAngle(void) const
-{
-    return _sfHasSpotlightAngle.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasSpotlightAngle field.
-inline
-void MultiLightChunkBase::setHasSpotlightAngle(const bool value)
-{
-    editSField(HasSpotlightAngleFieldMask);
-
-    _sfHasSpotlightAngle.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasSpotExponent field.
-
-inline
-bool &MultiLightChunkBase::editHasSpotExponent(void)
-{
-    editSField(HasSpotExponentFieldMask);
-
-    return _sfHasSpotExponent.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasSpotExponent field.
-inline
-      bool  MultiLightChunkBase::getHasSpotExponent(void) const
-{
-    return _sfHasSpotExponent.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasSpotExponent field.
-inline
-void MultiLightChunkBase::setHasSpotExponent(const bool value)
-{
-    editSField(HasSpotExponentFieldMask);
-
-    _sfHasSpotExponent.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfHasCinemaLight field.
-
-inline
-bool &MultiLightChunkBase::editHasCinemaLight(void)
-{
-    editSField(HasCinemaLightFieldMask);
-
-    return _sfHasCinemaLight.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfHasCinemaLight field.
-inline
-      bool  MultiLightChunkBase::getHasCinemaLight(void) const
-{
-    return _sfHasCinemaLight.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfHasCinemaLight field.
-inline
-void MultiLightChunkBase::setHasCinemaLight(const bool value)
-{
-    editSField(HasCinemaLightFieldMask);
-
-    _sfHasCinemaLight.setValue(value);
-}
-//! Get the value of the MultiLightChunk::_sfEyeSpace field.
-
-inline
-bool &MultiLightChunkBase::editEyeSpace(void)
-{
-    editSField(EyeSpaceFieldMask);
-
-    return _sfEyeSpace.getValue();
-}
-
-//! Get the value of the MultiLightChunk::_sfEyeSpace field.
-inline
-      bool  MultiLightChunkBase::getEyeSpace(void) const
-{
-    return _sfEyeSpace.getValue();
-}
-
-//! Set the value of the MultiLightChunk::_sfEyeSpace field.
-inline
-void MultiLightChunkBase::setEyeSpace(const bool value)
-{
-    editSField(EyeSpaceFieldMask);
-
-    _sfEyeSpace.setValue(value);
+    _sfNormalizeDirection.setValue(value);
 }
 //! Get the value of the MultiLightChunk::_sfLastCamNear field.
 
@@ -730,30 +330,15 @@ MFVec3f            ::reference MultiLightChunkBase::editDirection(const UInt32 i
     return _mfDirection[index];
 }
 
-//! Get the value of the \a index element the MultiLightChunk::_mfColor field.
-inline
-const Color3f &MultiLightChunkBase::getColor(const UInt32 index) const
-{
-    return _mfColor[index];
-}
-
-inline
-MFColor3f          ::reference MultiLightChunkBase::editColor(const UInt32 index)
-{
-    editMField(ColorFieldMask, _mfColor);
-
-    return _mfColor[index];
-}
-
 //! Get the value of the \a index element the MultiLightChunk::_mfIntensity field.
 inline
-      Real32  MultiLightChunkBase::getIntensity(const UInt32 index) const
+const Vec3f &MultiLightChunkBase::getIntensity(const UInt32 index) const
 {
     return _mfIntensity[index];
 }
 
 inline
-MFReal32           ::reference MultiLightChunkBase::editIntensity(const UInt32 index)
+MFVec3f            ::reference MultiLightChunkBase::editIntensity(const UInt32 index)
 {
     editMField(IntensityFieldMask, _mfIntensity);
 
@@ -818,6 +403,36 @@ MFVec3f            ::reference MultiLightChunkBase::editAttenuation(const UInt32
     editMField(AttenuationFieldMask, _mfAttenuation);
 
     return _mfAttenuation[index];
+}
+
+//! Get the value of the \a index element the MultiLightChunk::_mfDecayAttenuation field.
+inline
+      Real32  MultiLightChunkBase::getDecayAttenuation(const UInt32 index) const
+{
+    return _mfDecayAttenuation[index];
+}
+
+inline
+MFReal32           ::reference MultiLightChunkBase::editDecayAttenuation(const UInt32 index)
+{
+    editMField(DecayAttenuationFieldMask, _mfDecayAttenuation);
+
+    return _mfDecayAttenuation[index];
+}
+
+//! Get the value of the \a index element the MultiLightChunk::_mfLengthFactor field.
+inline
+      Real32  MultiLightChunkBase::getLengthFactor(const UInt32 index) const
+{
+    return _mfLengthFactor[index];
+}
+
+inline
+MFReal32           ::reference MultiLightChunkBase::editLengthFactor(const UInt32 index)
+{
+    editMField(LengthFactorFieldMask, _mfLengthFactor);
+
+    return _mfLengthFactor[index];
 }
 
 //! Get the value of the \a index element the MultiLightChunk::_mfSpotlightAngle field.
@@ -1000,6 +615,21 @@ MFReal32           ::reference MultiLightChunkBase::editRangeFarZone(const UInt3
     return _mfRangeFarZone[index];
 }
 
+//! Get the value of the \a index element the MultiLightChunk::_mfProjectionMatrix field.
+inline
+const Matrix &MultiLightChunkBase::getProjectionMatrix(const UInt32 index) const
+{
+    return _mfProjectionMatrix[index];
+}
+
+inline
+MFMatrix           ::reference MultiLightChunkBase::editProjectionMatrix(const UInt32 index)
+{
+    editMField(ProjectionMatrixFieldMask, _mfProjectionMatrix);
+
+    return _mfProjectionMatrix[index];
+}
+
 //! Get the value of the \a index element the MultiLightChunk::_mfType field.
 inline
       UInt8  MultiLightChunkBase::getType(const UInt32 index) const
@@ -1030,6 +660,51 @@ MFBool             ::reference MultiLightChunkBase::editEnabled(const UInt32 ind
     return _mfEnabled[index];
 }
 
+//! Get the value of the \a index element the MultiLightChunk::_mfShadow field.
+inline
+      bool  MultiLightChunkBase::getShadow(const UInt32 index) const
+{
+    return _mfShadow[index];
+}
+
+inline
+MFBool             ::reference MultiLightChunkBase::editShadow(const UInt32 index)
+{
+    editMField(ShadowFieldMask, _mfShadow);
+
+    return _mfShadow[index];
+}
+
+//! Get the value of the \a index element the MultiLightChunk::_mfShadowDataIndex field.
+inline
+      Int32  MultiLightChunkBase::getShadowDataIndex(const UInt32 index) const
+{
+    return _mfShadowDataIndex[index];
+}
+
+inline
+MFInt32            ::reference MultiLightChunkBase::editShadowDataIndex(const UInt32 index)
+{
+    editMField(ShadowDataIndexFieldMask, _mfShadowDataIndex);
+
+    return _mfShadowDataIndex[index];
+}
+
+//! Get the value of the \a index element the MultiLightChunk::_mfShadowParameterIndex field.
+inline
+      Int32  MultiLightChunkBase::getShadowParameterIndex(const UInt32 index) const
+{
+    return _mfShadowParameterIndex[index];
+}
+
+inline
+MFInt32            ::reference MultiLightChunkBase::editShadowParameterIndex(const UInt32 index)
+{
+    editMField(ShadowParameterIndexFieldMask, _mfShadowParameterIndex);
+
+    return _mfShadowParameterIndex[index];
+}
+
 
 //! Get the value of the \a index element the MultiLightChunk::_mfBeaconMatrix field.
 inline
@@ -1057,62 +732,14 @@ void MultiLightChunkBase::execSync (      MultiLightChunkBase *pFrom,
 {
     Inherited::execSync(pFrom, whichField, oOffsets, syncMode, uiSyncInfo);
 
-    if(FieldBits::NoField != (HasWorldToLightSpaceMatrixFieldMask & whichField))
-        _sfHasWorldToLightSpaceMatrix.syncWith(pFrom->_sfHasWorldToLightSpaceMatrix);
+    if(FieldBits::NoField != (FeatureFieldMask & whichField))
+        _sfFeature.syncWith(pFrom->_sfFeature);
 
-    if(FieldBits::NoField != (HasLightToWorldSpaceMatrixFieldMask & whichField))
-        _sfHasLightToWorldSpaceMatrix.syncWith(pFrom->_sfHasLightToWorldSpaceMatrix);
+    if(FieldBits::NoField != (CodeFeatureFieldMask & whichField))
+        _sfCodeFeature.syncWith(pFrom->_sfCodeFeature);
 
-    if(FieldBits::NoField != (HasEyeToLightSpaceMatrixFieldMask & whichField))
-        _sfHasEyeToLightSpaceMatrix.syncWith(pFrom->_sfHasEyeToLightSpaceMatrix);
-
-    if(FieldBits::NoField != (HasLightToEyeSpaceMatrixFieldMask & whichField))
-        _sfHasLightToEyeSpaceMatrix.syncWith(pFrom->_sfHasLightToEyeSpaceMatrix);
-
-    if(FieldBits::NoField != (HasLightPerspectiveMatrixFieldMask & whichField))
-        _sfHasLightPerspectiveMatrix.syncWith(pFrom->_sfHasLightPerspectiveMatrix);
-
-    if(FieldBits::NoField != (HasInvLightPerspectiveMatrixFieldMask & whichField))
-        _sfHasInvLightPerspectiveMatrix.syncWith(pFrom->_sfHasInvLightPerspectiveMatrix);
-
-    if(FieldBits::NoField != (HasColorFieldMask & whichField))
-        _sfHasColor.syncWith(pFrom->_sfHasColor);
-
-    if(FieldBits::NoField != (HasIntensityFieldMask & whichField))
-        _sfHasIntensity.syncWith(pFrom->_sfHasIntensity);
-
-    if(FieldBits::NoField != (HasSeparateIntensitiesFieldMask & whichField))
-        _sfHasSeparateIntensities.syncWith(pFrom->_sfHasSeparateIntensities);
-
-    if(FieldBits::NoField != (HasAttenuationFieldMask & whichField))
-        _sfHasAttenuation.syncWith(pFrom->_sfHasAttenuation);
-
-    if(FieldBits::NoField != (AutoCalcRangesFieldMask & whichField))
-        _sfAutoCalcRanges.syncWith(pFrom->_sfAutoCalcRanges);
-
-    if(FieldBits::NoField != (HasRangeCutOnFieldMask & whichField))
-        _sfHasRangeCutOn.syncWith(pFrom->_sfHasRangeCutOn);
-
-    if(FieldBits::NoField != (HasRangeCutOffFieldMask & whichField))
-        _sfHasRangeCutOff.syncWith(pFrom->_sfHasRangeCutOff);
-
-    if(FieldBits::NoField != (HasRangeNearZoneFieldMask & whichField))
-        _sfHasRangeNearZone.syncWith(pFrom->_sfHasRangeNearZone);
-
-    if(FieldBits::NoField != (HasRangeFarZoneFieldMask & whichField))
-        _sfHasRangeFarZone.syncWith(pFrom->_sfHasRangeFarZone);
-
-    if(FieldBits::NoField != (HasCosSpotlightAngleFieldMask & whichField))
-        _sfHasCosSpotlightAngle.syncWith(pFrom->_sfHasCosSpotlightAngle);
-
-    if(FieldBits::NoField != (HasSpotlightAngleFieldMask & whichField))
-        _sfHasSpotlightAngle.syncWith(pFrom->_sfHasSpotlightAngle);
-
-    if(FieldBits::NoField != (HasSpotExponentFieldMask & whichField))
-        _sfHasSpotExponent.syncWith(pFrom->_sfHasSpotExponent);
-
-    if(FieldBits::NoField != (HasCinemaLightFieldMask & whichField))
-        _sfHasCinemaLight.syncWith(pFrom->_sfHasCinemaLight);
+    if(FieldBits::NoField != (GlobalAmbientIntensityFieldMask & whichField))
+        _sfGlobalAmbientIntensity.syncWith(pFrom->_sfGlobalAmbientIntensity);
 
     if(FieldBits::NoField != (PositionFieldMask & whichField))
         _mfPosition.syncWith(pFrom->_mfPosition,
@@ -1122,12 +749,6 @@ void MultiLightChunkBase::execSync (      MultiLightChunkBase *pFrom,
 
     if(FieldBits::NoField != (DirectionFieldMask & whichField))
         _mfDirection.syncWith(pFrom->_mfDirection,
-                                syncMode,
-                                uiSyncInfo,
-                                oOffsets);
-
-    if(FieldBits::NoField != (ColorFieldMask & whichField))
-        _mfColor.syncWith(pFrom->_mfColor,
                                 syncMode,
                                 uiSyncInfo,
                                 oOffsets);
@@ -1158,6 +779,18 @@ void MultiLightChunkBase::execSync (      MultiLightChunkBase *pFrom,
 
     if(FieldBits::NoField != (AttenuationFieldMask & whichField))
         _mfAttenuation.syncWith(pFrom->_mfAttenuation,
+                                syncMode,
+                                uiSyncInfo,
+                                oOffsets);
+
+    if(FieldBits::NoField != (DecayAttenuationFieldMask & whichField))
+        _mfDecayAttenuation.syncWith(pFrom->_mfDecayAttenuation,
+                                syncMode,
+                                uiSyncInfo,
+                                oOffsets);
+
+    if(FieldBits::NoField != (LengthFactorFieldMask & whichField))
+        _mfLengthFactor.syncWith(pFrom->_mfLengthFactor,
                                 syncMode,
                                 uiSyncInfo,
                                 oOffsets);
@@ -1234,6 +867,12 @@ void MultiLightChunkBase::execSync (      MultiLightChunkBase *pFrom,
                                 uiSyncInfo,
                                 oOffsets);
 
+    if(FieldBits::NoField != (ProjectionMatrixFieldMask & whichField))
+        _mfProjectionMatrix.syncWith(pFrom->_mfProjectionMatrix,
+                                syncMode,
+                                uiSyncInfo,
+                                oOffsets);
+
     if(FieldBits::NoField != (TypeFieldMask & whichField))
         _mfType.syncWith(pFrom->_mfType,
                                 syncMode,
@@ -1246,20 +885,38 @@ void MultiLightChunkBase::execSync (      MultiLightChunkBase *pFrom,
                                 uiSyncInfo,
                                 oOffsets);
 
+    if(FieldBits::NoField != (ShadowFieldMask & whichField))
+        _mfShadow.syncWith(pFrom->_mfShadow,
+                                syncMode,
+                                uiSyncInfo,
+                                oOffsets);
+
+    if(FieldBits::NoField != (ShadowDataIndexFieldMask & whichField))
+        _mfShadowDataIndex.syncWith(pFrom->_mfShadowDataIndex,
+                                syncMode,
+                                uiSyncInfo,
+                                oOffsets);
+
+    if(FieldBits::NoField != (ShadowParameterIndexFieldMask & whichField))
+        _mfShadowParameterIndex.syncWith(pFrom->_mfShadowParameterIndex,
+                                syncMode,
+                                uiSyncInfo,
+                                oOffsets);
+
     if(FieldBits::NoField != (BeaconFieldMask & whichField))
         _mfBeacon.syncWith(pFrom->_mfBeacon,
                                 syncMode,
                                 uiSyncInfo,
                                 oOffsets);
 
+    if(FieldBits::NoField != (NormalizeDirectionFieldMask & whichField))
+        _sfNormalizeDirection.syncWith(pFrom->_sfNormalizeDirection);
+
     if(FieldBits::NoField != (BeaconMatrixFieldMask & whichField))
         _mfBeaconMatrix.syncWith(pFrom->_mfBeaconMatrix,
                                 syncMode,
                                 uiSyncInfo,
                                 oOffsets);
-
-    if(FieldBits::NoField != (EyeSpaceFieldMask & whichField))
-        _sfEyeSpace.syncWith(pFrom->_sfEyeSpace);
 
     if(FieldBits::NoField != (LastCamNearFieldMask & whichField))
         _sfLastCamNear.syncWith(pFrom->_sfLastCamNear);

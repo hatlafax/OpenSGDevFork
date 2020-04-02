@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="MultiLightGroup"
+    parent="Group"
+    library="System"
+    pointerfieldtypes="both"
+    structure="concrete"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    isNodeCore="true"
+    isBundle="false"   
+    >
+    MultiLightGroup wraps a MultiLightChunk which overrides in the RenderAction.
+    It shared the interface with the MultiLightChunk that makes it easy to use.
+
+    <Field
+        name="activate"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="true"
+        access="public"
+        >
+        If the MultiLight group is deactivated it does not perform any action on its own but act as a simple Group core.
+    </Field>
+
+    <Field
+        name="multiLightChunk"
+        type="MultiLightChunkPtr"
+        cardinality="single"
+        visibility="external"
+        defaultValue="NULL"
+        access="public"
+        >
+        The multi light chunk.
+    </Field>
+
+    <Field
+        name="lightBindingPnt"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="1"
+        access="public"
+        >
+        The fragment shader SSBO binding point for the multi light chunk.
+    </Field>
+
+</FieldContainer>
