@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="MaterialFactory"
+    parent="FieldContainer"
+    library="ContribTechniques"
+    structure="abstract"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    >
+    The material factory is supposed to provide a ChunkMaterial instance for
+    a given MaterialDesc object.
+
+    <Field
+        name="shaderManager"
+        type="ShaderManager"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        category="pointer"
+        defaultValue="NULL"
+        >
+        The shader manager is responsible for mananging the ShaderProgramChunk
+        objects for the ChunkMaterial.
+    </Field>
+
+</FieldContainer>

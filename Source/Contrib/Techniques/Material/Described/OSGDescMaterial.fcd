@@ -1,0 +1,93 @@
+<?xml version="1.0" ?>
+
+<FieldContainer
+    name="DescMaterial"
+    parent="ChunkMaterial"
+    library="ContribTechniques"
+    structure="concrete"
+    pointerfieldtypes="none"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    >
+    The described material is a ChunkMaterial that wraps a MaterialDesc instance which
+    is used for setting up various chunks for material and texture properties and that
+    is able to optionally provide matching shader code.
+
+    <Field
+        name="environmentDesc"
+        type="EnvironmentDescPtr"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="NULL"
+        >
+        The capabilities that are used for code generation.
+    </Field>
+
+    <Field
+        name="materialDesc"
+        type="MaterialDescPtr"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        >
+        The plain material parameters.
+    </Field>
+
+    <Field
+        name="capabilitiesDesc"
+        type="CapabilitiesDescPtr"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="NULL"
+        >
+        The capabilities that are used for code generation.
+    </Field>
+
+    <Field
+        name="vertMaterialBindingPnt"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="-1"
+        >
+        The vertex shader material binding point for the uniform buffer object.
+    </Field>
+
+    <Field
+        name="fragMaterialBindingPnt"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="-1"
+        >
+        The fragment shader material binding point for the uniform buffer object.
+    </Field>
+
+    <Field
+        name="fragEnvironmentBindingPnt"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="-1"
+        >
+        The fragment shader environment binding point for the uniform buffer object.
+    </Field>
+
+    <Field
+        name="texUnitOffset"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="8"
+        >
+        Each texture of the material does reserve one texture binding point. 
+        The texUnitOffset parameter determines the first one to use.
+    </Field>
+
+</FieldContainer>
+

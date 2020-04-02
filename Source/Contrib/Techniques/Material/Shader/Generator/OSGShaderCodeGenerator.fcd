@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="ShaderCodeGenerator"
+    parent="FieldContainer"
+    library="ContribTechniques"
+    structure="abstract"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    >
+    A concrete shader generator is responsible for generating
+    the shader program text from the given ShaderDesc description
+    instance. It might uses the provided stages and chunks for
+    detailing the program text.
+
+    <Field
+        name="CapabilitiesDesc"
+        type="CapabilitiesDescPtr"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="NULL"
+        >
+        The capabilities that are used for code generation.
+    </Field>
+     <Field
+        name="HDR2Stage"
+        type="HDR2StagePtr"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="NULL"
+        >
+    </Field>
+    <Field
+        name="clusterShadingStage"
+        type="ClusterShadingStagePtr"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="NULL"
+        >
+    </Field>
+    <Field
+        name="multiLightShadowStage"
+        type="MultiLightShadowStagePtr"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="NULL"
+        >
+    </Field>
+    <Field
+        name="SSAOStage"
+        type="SSAOStagePtr"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="NULL"
+        >
+    </Field>
+    <Field
+        name="multiLightGroup"
+        type="MultiLightGroupPtr"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="NULL"
+        >
+    </Field>
+    <Field
+        name="lightBindingPnt"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="1"
+        access="public"
+        >
+        The fragment shader SSBO binding point for the multi light chunk.
+    </Field>
+    <Field
+        name="hasClipPlanes"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="false"
+        >
+    </Field>
+</FieldContainer>

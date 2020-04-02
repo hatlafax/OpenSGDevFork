@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="DescMaterialFactory"
+    parent="MaterialFactory"
+    library="ContribTechniques"
+    structure="concrete"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    >
+    This material factory provides PbrMaterial instances.
+
+    <Field
+        name="environmentDesc"
+        type="EnvironmentDesc"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        category="pointer"
+        defaultValue="NULL"
+        >
+        The environment description contains additional global information
+        for the setup of a material.
+    </Field>
+
+    <Field
+        name="vertMaterialBindingPnt"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="9"
+        >
+        The vertex shader material binding point for the uniform buffer object.
+    </Field>
+
+    <Field
+        name="fragMaterialBindingPnt"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="10"
+        >
+        The fragment shader material binding point for the uniform buffer object.
+    </Field>
+
+    <Field
+        name="fragEnvironmentBindingPnt"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="11"
+        >
+        The fragment shader environment binding point for the uniform buffer object.
+    </Field>
+
+    <Field
+        name="texUnitOffset"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="8"
+        >
+        Each texture of the material does reserve one texture binding point. 
+        The texUnitOffset parameter determines the first one to use.
+    </Field>
+
+</FieldContainer>

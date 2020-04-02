@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="DescMaterialManager"
+    parent="MaterialManager"
+    library="ContribTechniques"
+    structure="concrete"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    >
+    This is a concrete implementation of the abstract material manager.
+
+    <Field
+        name="materialFactory"
+        type="MaterialFactory"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        category="pointer"
+        defaultValue="NULL"
+        >
+        The material factory is responsible for providing a concrete
+        ChunkMaterial from a given MaterialDesc object. The ChunkMaterial
+        might be shared with other parts of the scene.
+    </Field>
+
+    <Field
+        name="materialMap"
+        type="HashKeyToFieldContainerMap"
+        cardinality="single"
+        visibility="external"
+        access="protected"
+        category="pointer"
+        defaultValue="NULL"
+        >
+    </Field>
+
+    <Field
+        name="imageMap"
+        type="HashKeyToFieldContainerMap"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        category="pointer"
+        defaultValue="NULL"
+        >
+    </Field>
+
+    <Field
+        name="evalEnvironmentHash"
+        type="bool"
+        cardinality="single"
+        visibility="internal"
+        access="public"
+        defaultValue="false"
+        >
+        If true, a hash value describing the environment is stored into the MaterialDesc
+        instance on adding a material.
+    </Field>
+
+    <Field
+        name="excludeHashingMask"
+        type="BitVector"
+        cardinality="single"
+        visibility="internal"
+        access="public"
+        defaultValue="0"
+        >
+        All field mask that are contained in this value do not participate in the
+        hash calculation procedure.
+    </Field>
+
+</FieldContainer>
