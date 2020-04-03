@@ -116,7 +116,7 @@ class OSG_BASE_DLLMAPPING LiSPSMTechnique
     void    setLightProjMat (const Matrix& matrix, Projection::Type type);
 
     void    setCamView      (const Matrix& matrix, const View& view);
-    void    setCamProjMat   (const Matrix& matrix, Projection::Type type);
+    void    setCamProjMat   (const Matrix& matrix);
 
     void    setGamma        (Real32 gamma);
     void    setFieldOfView  (Real32 fov);
@@ -245,7 +245,6 @@ class OSG_BASE_DLLMAPPING LiSPSMTechnique
 
   private:
     View                _cView;
-    Projection::Type    _cType;
 
     View                _lView;
     Projection::Type    _lType;

@@ -83,7 +83,8 @@ SceneFileType::SceneFileType(const Char8  *suffixArray[],
      Inherited       (flags           ),
     _suffixList      (                ),
     _override        (override        ),
-    _overridePriority(overridePriority)
+    _overridePriority(overridePriority),
+    _nonStreamIO     (false           )
 {
     FINFO(( "Init %s Scene File Type %p\n", 
             suffixArray[0], static_cast<void *>(this)));
@@ -99,7 +100,7 @@ SceneFileType::SceneFileType(const Char8  *suffixArray[],
         sI->assign(suffixArray[i++]);
     }
 
-	SceneFileHandler::the()->addSceneFileType(*this);
+    SceneFileHandler::the()->addSceneFileType(*this);
 }
 
 //---------------------------------------------------------
@@ -111,7 +112,8 @@ SceneFileType::SceneFileType(const SceneFileType &obj) :
     Inherited        (obj                  ),
     _suffixList      (obj._suffixList      ),
     _override        (obj._override        ),
-    _overridePriority(obj._overridePriority)
+    _overridePriority(obj._overridePriority),
+    _nonStreamIO     (obj._nonStreamIO     )
 {
     SWARNING << "In SceneFileType copy constructor" << std::endl;
 }

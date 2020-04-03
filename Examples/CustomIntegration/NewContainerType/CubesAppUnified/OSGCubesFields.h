@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -64,24 +64,24 @@
 
 OSG_BEGIN_NAMESPACE
 
+
 class Cubes;
 
 OSG_GEN_CONTAINERPTR(Cubes);
-
 /*! \ingroup GrpCubesLibFieldTraits
     \ingroup GrpLibOSGCubesLib
  */
 template <>
-struct FieldTraits<Cubes *> :
-    public FieldTraitsFCPtrBase<Cubes *>
+struct FieldTraits<Cubes *, nsOSG> :
+    public FieldTraitsFCPtrBase<Cubes *, nsOSG>
 {
   private:
 
-    static DataType             _type;
+    static PointerType             _type;
 
   public:
 
-    typedef FieldTraits<Cubes *>  Self;
+    typedef FieldTraits<Cubes *, nsOSG>  Self;
 
     enum                        { Convertible = NotConvertible };
 
@@ -90,57 +90,55 @@ struct FieldTraits<Cubes *> :
     template<typename RefCountPolicy> inline
     static const Char8    *getSName     (void);
 
-//    static const char *getSName(void) { return "SFCubesPtr"; }
     template<typename RefCountPolicy> inline
     static const Char8    *getMName     (void);
 
-//    static const char *getMName(void) { return "MFCubesPtr"; }
 };
 
 template<> inline
-const Char8 *FieldTraits<Cubes *, 0>::getSName<RecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<Cubes *, nsOSG>::getSName<RecordedRefCountPolicy>(void)
 {
     return "SFRecCubesPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<Cubes *, 0>::getSName<UnrecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<Cubes *, nsOSG>::getSName<UnrecordedRefCountPolicy>(void)
 {
     return "SFUnrecCubesPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<Cubes *, 0>::getSName<WeakRefCountPolicy>(void)
+const Char8 *FieldTraits<Cubes *, nsOSG>::getSName<WeakRefCountPolicy>(void)
 {
     return "SFWeakCubesPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<Cubes *, 0>::getSName<NoRefCountPolicy>(void)
+const Char8 *FieldTraits<Cubes *, nsOSG>::getSName<NoRefCountPolicy>(void)
 {
     return "SFUnrefdCubesPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<Cubes *, 0>::getMName<RecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<Cubes *, nsOSG>::getMName<RecordedRefCountPolicy>(void)
 {
     return "MFRecCubesPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<Cubes *, 0>::getMName<UnrecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<Cubes *, nsOSG>::getMName<UnrecordedRefCountPolicy>(void)
 {
     return "MFUnrecCubesPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<Cubes *, 0>::getMName<WeakRefCountPolicy>(void)
+const Char8 *FieldTraits<Cubes *, nsOSG>::getMName<WeakRefCountPolicy>(void)
 {
     return "MFWeakCubesPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<Cubes *, 0>::getMName<NoRefCountPolicy>(void)
+const Char8 *FieldTraits<Cubes *, nsOSG>::getMName<NoRefCountPolicy>(void)
 {
     return "MFUnrefdCubesPtr"; 
 }
@@ -149,30 +147,30 @@ const Char8 *FieldTraits<Cubes *, 0>::getMName<NoRefCountPolicy>(void)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /*! \ingroup GrpCubesLibFieldSFields */
 typedef PointerSField<Cubes *,
-                      RecordedRefCountPolicy  > SFRecCubesPtr;
+                      RecordedRefCountPolicy, nsOSG  > SFRecCubesPtr;
 /*! \ingroup GrpCubesLibFieldSFields */
 typedef PointerSField<Cubes *,
-                      UnrecordedRefCountPolicy> SFUnrecCubesPtr;
+                      UnrecordedRefCountPolicy, nsOSG> SFUnrecCubesPtr;
 /*! \ingroup GrpCubesLibFieldSFields */
 typedef PointerSField<Cubes *,
-                      WeakRefCountPolicy      > SFWeakCubesPtr;
+                      WeakRefCountPolicy, nsOSG      > SFWeakCubesPtr;
 /*! \ingroup GrpCubesLibFieldSFields */
 typedef PointerSField<Cubes *,
-                      NoRefCountPolicy        > SFUncountedCubesPtr;
+                      NoRefCountPolicy, nsOSG        > SFUncountedCubesPtr;
 
 
 /*! \ingroup GrpCubesLibFieldMFields */
 typedef PointerMField<Cubes *,
-                      RecordedRefCountPolicy  > MFRecCubesPtr;
+                      RecordedRefCountPolicy, nsOSG  > MFRecCubesPtr;
 /*! \ingroup GrpCubesLibFieldMFields */
 typedef PointerMField<Cubes *,
-                      UnrecordedRefCountPolicy> MFUnrecCubesPtr;
+                      UnrecordedRefCountPolicy, nsOSG> MFUnrecCubesPtr;
 /*! \ingroup GrpCubesLibFieldMFields */
 typedef PointerMField<Cubes *,
-                      WeakRefCountPolicy      > MFWeakCubesPtr;
+                      WeakRefCountPolicy, nsOSG      > MFWeakCubesPtr;
 /*! \ingroup GrpCubesLibFieldMFields */
 typedef PointerMField<Cubes *,
-                      NoRefCountPolicy        > MFUncountedCubesPtr;
+                      NoRefCountPolicy, nsOSG        > MFUncountedCubesPtr;
 
 
 

@@ -2,9 +2,9 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -51,6 +51,7 @@
 OSG_BEGIN_NAMESPACE
 
 
+
 //! access the type of the class
 inline
 OSG::FieldContainerType &CubesBase::getClassType(void)
@@ -82,13 +83,12 @@ const Pnt3f &CubesBase::getPosition(const UInt32 index) const
 }
 
 inline
-Pnt3f &CubesBase::editPosition(const UInt32 index)
+MFPnt3f            ::reference CubesBase::editPosition(const UInt32 index)
 {
     editMField(PositionFieldMask, _mfPosition);
 
     return _mfPosition[index];
 }
-
 
 //! Get the value of the \a index element the Cubes::_mfLength field.
 inline
@@ -98,13 +98,12 @@ inline
 }
 
 inline
-Real32 &CubesBase::editLength(const UInt32 index)
+MFReal32           ::reference CubesBase::editLength(const UInt32 index)
 {
     editMField(LengthFieldMask, _mfLength);
 
     return _mfLength[index];
 }
-
 
 //! Get the value of the \a index element the Cubes::_mfColor field.
 inline
@@ -114,13 +113,12 @@ const Color3f &CubesBase::getColor(const UInt32 index) const
 }
 
 inline
-Color3f &CubesBase::editColor(const UInt32 index)
+MFColor3f          ::reference CubesBase::editColor(const UInt32 index)
 {
     editMField(ColorFieldMask, _mfColor);
 
     return _mfColor[index];
 }
-
 
 
 #ifdef OSG_MT_CPTR_ASPECT

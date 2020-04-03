@@ -203,7 +203,9 @@ bool FieldConnectorFactoryBase::initialize(void)
 
 bool FieldConnectorFactoryBase::terminate(void)
 {
+#ifdef _DEBUG
     fprintf(stderr, "FieldConnectorFactoryBase::terminate\n");
+#endif
 
     EntryMapIt      eIt  = _mConnectorMap.begin();
     EntryMapConstIt eEnd = _mConnectorMap.end  ();

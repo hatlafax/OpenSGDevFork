@@ -783,7 +783,7 @@ inline
 }
 
 inline
-Real32 &TextureChunkBase::editShaderOffsetMatrix(const UInt32 index)
+MFReal32           ::reference TextureChunkBase::editShaderOffsetMatrix(const UInt32 index)
 {
     editMField(ShaderOffsetMatrixFieldMask, _mfShaderOffsetMatrix);
 

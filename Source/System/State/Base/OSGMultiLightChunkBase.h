@@ -65,11 +65,11 @@
 
 #include "OSGShaderStorageBufferObjStdLayoutChunk.h" // Parent
 
-#include "OSGSysFields.h"               // HasWorldToLightSpaceMatrix type
-#include "OSGVecFields.h"               // Position type
-#include "OSGBaseFields.h"              // Color type
+#include "OSGSysFields.h"               // Feature type
+#include "OSGVecFields.h"               // GlobalAmbientIntensity type
+#include "OSGMathFields.h"              // ProjectionMatrix type
 #include "OSGNodeFields.h"              // Beacon type
-#include "OSGMathFields.h"              // BeaconMatrix type
+#include "OSGBaseFields.h"              // LightBlockName type
 
 #include "OSGMultiLightChunkFields.h"
 
@@ -98,34 +98,19 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
 
     enum
     {
-        HasWorldToLightSpaceMatrixFieldId = Inherited::NextFieldId,
-        HasLightToWorldSpaceMatrixFieldId = HasWorldToLightSpaceMatrixFieldId + 1,
-        HasEyeToLightSpaceMatrixFieldId = HasLightToWorldSpaceMatrixFieldId + 1,
-        HasLightToEyeSpaceMatrixFieldId = HasEyeToLightSpaceMatrixFieldId + 1,
-        HasLightPerspectiveMatrixFieldId = HasLightToEyeSpaceMatrixFieldId + 1,
-        HasInvLightPerspectiveMatrixFieldId = HasLightPerspectiveMatrixFieldId + 1,
-        HasColorFieldId = HasInvLightPerspectiveMatrixFieldId + 1,
-        HasIntensityFieldId = HasColorFieldId + 1,
-        HasSeparateIntensitiesFieldId = HasIntensityFieldId + 1,
-        HasAttenuationFieldId = HasSeparateIntensitiesFieldId + 1,
-        AutoCalcRangesFieldId = HasAttenuationFieldId + 1,
-        HasRangeCutOnFieldId = AutoCalcRangesFieldId + 1,
-        HasRangeCutOffFieldId = HasRangeCutOnFieldId + 1,
-        HasRangeNearZoneFieldId = HasRangeCutOffFieldId + 1,
-        HasRangeFarZoneFieldId = HasRangeNearZoneFieldId + 1,
-        HasCosSpotlightAngleFieldId = HasRangeFarZoneFieldId + 1,
-        HasSpotlightAngleFieldId = HasCosSpotlightAngleFieldId + 1,
-        HasSpotExponentFieldId = HasSpotlightAngleFieldId + 1,
-        HasCinemaLightFieldId = HasSpotExponentFieldId + 1,
-        PositionFieldId = HasCinemaLightFieldId + 1,
+        FeatureFieldId = Inherited::NextFieldId,
+        CodeFeatureFieldId = FeatureFieldId + 1,
+        GlobalAmbientIntensityFieldId = CodeFeatureFieldId + 1,
+        PositionFieldId = GlobalAmbientIntensityFieldId + 1,
         DirectionFieldId = PositionFieldId + 1,
-        ColorFieldId = DirectionFieldId + 1,
-        IntensityFieldId = ColorFieldId + 1,
+        IntensityFieldId = DirectionFieldId + 1,
         AmbientIntensityFieldId = IntensityFieldId + 1,
         DiffuseIntensityFieldId = AmbientIntensityFieldId + 1,
         SpecularIntensityFieldId = DiffuseIntensityFieldId + 1,
         AttenuationFieldId = SpecularIntensityFieldId + 1,
-        SpotlightAngleFieldId = AttenuationFieldId + 1,
+        DecayAttenuationFieldId = AttenuationFieldId + 1,
+        LengthFactorFieldId = DecayAttenuationFieldId + 1,
+        SpotlightAngleFieldId = LengthFactorFieldId + 1,
         SpotExponentFieldId = SpotlightAngleFieldId + 1,
         InnerSuperEllipsesWidthFieldId = SpotExponentFieldId + 1,
         InnerSuperEllipsesHeightFieldId = InnerSuperEllipsesWidthFieldId + 1,
@@ -137,12 +122,16 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
         RangeCutOffFieldId = RangeCutOnFieldId + 1,
         RangeNearZoneFieldId = RangeCutOffFieldId + 1,
         RangeFarZoneFieldId = RangeNearZoneFieldId + 1,
-        TypeFieldId = RangeFarZoneFieldId + 1,
+        ProjectionMatrixFieldId = RangeFarZoneFieldId + 1,
+        TypeFieldId = ProjectionMatrixFieldId + 1,
         EnabledFieldId = TypeFieldId + 1,
-        BeaconFieldId = EnabledFieldId + 1,
-        BeaconMatrixFieldId = BeaconFieldId + 1,
-        EyeSpaceFieldId = BeaconMatrixFieldId + 1,
-        LastCamNearFieldId = EyeSpaceFieldId + 1,
+        ShadowFieldId = EnabledFieldId + 1,
+        ShadowDataIndexFieldId = ShadowFieldId + 1,
+        ShadowParameterIndexFieldId = ShadowDataIndexFieldId + 1,
+        BeaconFieldId = ShadowParameterIndexFieldId + 1,
+        NormalizeDirectionFieldId = BeaconFieldId + 1,
+        BeaconMatrixFieldId = NormalizeDirectionFieldId + 1,
+        LastCamNearFieldId = BeaconMatrixFieldId + 1,
         LastCamFarFieldId = LastCamNearFieldId + 1,
         LastCamToWorldFieldId = LastCamFarFieldId + 1,
         LightBlockNameFieldId = LastCamToWorldFieldId + 1,
@@ -150,50 +139,16 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
         NextFieldId = LightVariableNameFieldId + 1
     };
 
-    static const OSG::BitVector HasWorldToLightSpaceMatrixFieldMask =
-        (TypeTraits<BitVector>::One << HasWorldToLightSpaceMatrixFieldId);
-    static const OSG::BitVector HasLightToWorldSpaceMatrixFieldMask =
-        (TypeTraits<BitVector>::One << HasLightToWorldSpaceMatrixFieldId);
-    static const OSG::BitVector HasEyeToLightSpaceMatrixFieldMask =
-        (TypeTraits<BitVector>::One << HasEyeToLightSpaceMatrixFieldId);
-    static const OSG::BitVector HasLightToEyeSpaceMatrixFieldMask =
-        (TypeTraits<BitVector>::One << HasLightToEyeSpaceMatrixFieldId);
-    static const OSG::BitVector HasLightPerspectiveMatrixFieldMask =
-        (TypeTraits<BitVector>::One << HasLightPerspectiveMatrixFieldId);
-    static const OSG::BitVector HasInvLightPerspectiveMatrixFieldMask =
-        (TypeTraits<BitVector>::One << HasInvLightPerspectiveMatrixFieldId);
-    static const OSG::BitVector HasColorFieldMask =
-        (TypeTraits<BitVector>::One << HasColorFieldId);
-    static const OSG::BitVector HasIntensityFieldMask =
-        (TypeTraits<BitVector>::One << HasIntensityFieldId);
-    static const OSG::BitVector HasSeparateIntensitiesFieldMask =
-        (TypeTraits<BitVector>::One << HasSeparateIntensitiesFieldId);
-    static const OSG::BitVector HasAttenuationFieldMask =
-        (TypeTraits<BitVector>::One << HasAttenuationFieldId);
-    static const OSG::BitVector AutoCalcRangesFieldMask =
-        (TypeTraits<BitVector>::One << AutoCalcRangesFieldId);
-    static const OSG::BitVector HasRangeCutOnFieldMask =
-        (TypeTraits<BitVector>::One << HasRangeCutOnFieldId);
-    static const OSG::BitVector HasRangeCutOffFieldMask =
-        (TypeTraits<BitVector>::One << HasRangeCutOffFieldId);
-    static const OSG::BitVector HasRangeNearZoneFieldMask =
-        (TypeTraits<BitVector>::One << HasRangeNearZoneFieldId);
-    static const OSG::BitVector HasRangeFarZoneFieldMask =
-        (TypeTraits<BitVector>::One << HasRangeFarZoneFieldId);
-    static const OSG::BitVector HasCosSpotlightAngleFieldMask =
-        (TypeTraits<BitVector>::One << HasCosSpotlightAngleFieldId);
-    static const OSG::BitVector HasSpotlightAngleFieldMask =
-        (TypeTraits<BitVector>::One << HasSpotlightAngleFieldId);
-    static const OSG::BitVector HasSpotExponentFieldMask =
-        (TypeTraits<BitVector>::One << HasSpotExponentFieldId);
-    static const OSG::BitVector HasCinemaLightFieldMask =
-        (TypeTraits<BitVector>::One << HasCinemaLightFieldId);
+    static const OSG::BitVector FeatureFieldMask =
+        (TypeTraits<BitVector>::One << FeatureFieldId);
+    static const OSG::BitVector CodeFeatureFieldMask =
+        (TypeTraits<BitVector>::One << CodeFeatureFieldId);
+    static const OSG::BitVector GlobalAmbientIntensityFieldMask =
+        (TypeTraits<BitVector>::One << GlobalAmbientIntensityFieldId);
     static const OSG::BitVector PositionFieldMask =
         (TypeTraits<BitVector>::One << PositionFieldId);
     static const OSG::BitVector DirectionFieldMask =
         (TypeTraits<BitVector>::One << DirectionFieldId);
-    static const OSG::BitVector ColorFieldMask =
-        (TypeTraits<BitVector>::One << ColorFieldId);
     static const OSG::BitVector IntensityFieldMask =
         (TypeTraits<BitVector>::One << IntensityFieldId);
     static const OSG::BitVector AmbientIntensityFieldMask =
@@ -204,6 +159,10 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
         (TypeTraits<BitVector>::One << SpecularIntensityFieldId);
     static const OSG::BitVector AttenuationFieldMask =
         (TypeTraits<BitVector>::One << AttenuationFieldId);
+    static const OSG::BitVector DecayAttenuationFieldMask =
+        (TypeTraits<BitVector>::One << DecayAttenuationFieldId);
+    static const OSG::BitVector LengthFactorFieldMask =
+        (TypeTraits<BitVector>::One << LengthFactorFieldId);
     static const OSG::BitVector SpotlightAngleFieldMask =
         (TypeTraits<BitVector>::One << SpotlightAngleFieldId);
     static const OSG::BitVector SpotExponentFieldMask =
@@ -228,16 +187,24 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
         (TypeTraits<BitVector>::One << RangeNearZoneFieldId);
     static const OSG::BitVector RangeFarZoneFieldMask =
         (TypeTraits<BitVector>::One << RangeFarZoneFieldId);
+    static const OSG::BitVector ProjectionMatrixFieldMask =
+        (TypeTraits<BitVector>::One << ProjectionMatrixFieldId);
     static const OSG::BitVector TypeFieldMask =
         (TypeTraits<BitVector>::One << TypeFieldId);
     static const OSG::BitVector EnabledFieldMask =
         (TypeTraits<BitVector>::One << EnabledFieldId);
+    static const OSG::BitVector ShadowFieldMask =
+        (TypeTraits<BitVector>::One << ShadowFieldId);
+    static const OSG::BitVector ShadowDataIndexFieldMask =
+        (TypeTraits<BitVector>::One << ShadowDataIndexFieldId);
+    static const OSG::BitVector ShadowParameterIndexFieldMask =
+        (TypeTraits<BitVector>::One << ShadowParameterIndexFieldId);
     static const OSG::BitVector BeaconFieldMask =
         (TypeTraits<BitVector>::One << BeaconFieldId);
+    static const OSG::BitVector NormalizeDirectionFieldMask =
+        (TypeTraits<BitVector>::One << NormalizeDirectionFieldId);
     static const OSG::BitVector BeaconMatrixFieldMask =
         (TypeTraits<BitVector>::One << BeaconMatrixFieldId);
-    static const OSG::BitVector EyeSpaceFieldMask =
-        (TypeTraits<BitVector>::One << EyeSpaceFieldId);
     static const OSG::BitVector LastCamNearFieldMask =
         (TypeTraits<BitVector>::One << LastCamNearFieldId);
     static const OSG::BitVector LastCamFarFieldMask =
@@ -251,33 +218,18 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     static const OSG::BitVector NextFieldMask =
         (TypeTraits<BitVector>::One << NextFieldId);
         
-    typedef SFBool            SFHasWorldToLightSpaceMatrixType;
-    typedef SFBool            SFHasLightToWorldSpaceMatrixType;
-    typedef SFBool            SFHasEyeToLightSpaceMatrixType;
-    typedef SFBool            SFHasLightToEyeSpaceMatrixType;
-    typedef SFBool            SFHasLightPerspectiveMatrixType;
-    typedef SFBool            SFHasInvLightPerspectiveMatrixType;
-    typedef SFBool            SFHasColorType;
-    typedef SFBool            SFHasIntensityType;
-    typedef SFBool            SFHasSeparateIntensitiesType;
-    typedef SFBool            SFHasAttenuationType;
-    typedef SFBool            SFAutoCalcRangesType;
-    typedef SFBool            SFHasRangeCutOnType;
-    typedef SFBool            SFHasRangeCutOffType;
-    typedef SFBool            SFHasRangeNearZoneType;
-    typedef SFBool            SFHasRangeFarZoneType;
-    typedef SFBool            SFHasCosSpotlightAngleType;
-    typedef SFBool            SFHasSpotlightAngleType;
-    typedef SFBool            SFHasSpotExponentType;
-    typedef SFBool            SFHasCinemaLightType;
+    typedef SFUInt32          SFFeatureType;
+    typedef SFUInt32          SFCodeFeatureType;
+    typedef SFVec3f           SFGlobalAmbientIntensityType;
     typedef MFPnt3f           MFPositionType;
     typedef MFVec3f           MFDirectionType;
-    typedef MFColor3f         MFColorType;
-    typedef MFReal32          MFIntensityType;
+    typedef MFVec3f           MFIntensityType;
     typedef MFVec3f           MFAmbientIntensityType;
     typedef MFVec3f           MFDiffuseIntensityType;
     typedef MFVec3f           MFSpecularIntensityType;
     typedef MFVec3f           MFAttenuationType;
+    typedef MFReal32          MFDecayAttenuationType;
+    typedef MFReal32          MFLengthFactorType;
     typedef MFReal32          MFSpotlightAngleType;
     typedef MFReal32          MFSpotExponentType;
     typedef MFReal32          MFInnerSuperEllipsesWidthType;
@@ -290,11 +242,15 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     typedef MFReal32          MFRangeCutOffType;
     typedef MFReal32          MFRangeNearZoneType;
     typedef MFReal32          MFRangeFarZoneType;
+    typedef MFMatrix          MFProjectionMatrixType;
     typedef MFUInt8           MFTypeType;
     typedef MFBool            MFEnabledType;
+    typedef MFBool            MFShadowType;
+    typedef MFInt32           MFShadowDataIndexType;
+    typedef MFInt32           MFShadowParameterIndexType;
     typedef MFWeakNodePtr     MFBeaconType;
+    typedef SFBool            SFNormalizeDirectionType;
     typedef MFMatrix          MFBeaconMatrixType;
-    typedef SFBool            SFEyeSpaceType;
     typedef SFReal32          SFLastCamNearType;
     typedef SFReal32          SFLastCamFarType;
     typedef SFMatrix          SFLastCamToWorldType;
@@ -325,65 +281,11 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     /*! \{                                                                 */
 
 
-                  SFBool              *editSFHasWorldToLightSpaceMatrix(void);
-            const SFBool              *getSFHasWorldToLightSpaceMatrix (void) const;
+                  SFVec3f             *editSFGlobalAmbientIntensity(void);
+            const SFVec3f             *getSFGlobalAmbientIntensity (void) const;
 
-                  SFBool              *editSFHasLightToWorldSpaceMatrix(void);
-            const SFBool              *getSFHasLightToWorldSpaceMatrix (void) const;
-
-                  SFBool              *editSFHasEyeToLightSpaceMatrix(void);
-            const SFBool              *getSFHasEyeToLightSpaceMatrix (void) const;
-
-                  SFBool              *editSFHasLightToEyeSpaceMatrix(void);
-            const SFBool              *getSFHasLightToEyeSpaceMatrix (void) const;
-
-                  SFBool              *editSFHasLightPerspectiveMatrix(void);
-            const SFBool              *getSFHasLightPerspectiveMatrix (void) const;
-
-                  SFBool              *editSFHasInvLightPerspectiveMatrix(void);
-            const SFBool              *getSFHasInvLightPerspectiveMatrix (void) const;
-
-                  SFBool              *editSFHasColor       (void);
-            const SFBool              *getSFHasColor        (void) const;
-
-                  SFBool              *editSFHasIntensity   (void);
-            const SFBool              *getSFHasIntensity    (void) const;
-
-                  SFBool              *editSFHasSeparateIntensities(void);
-            const SFBool              *getSFHasSeparateIntensities (void) const;
-
-                  SFBool              *editSFHasAttenuation (void);
-            const SFBool              *getSFHasAttenuation  (void) const;
-
-                  SFBool              *editSFAutoCalcRanges (void);
-            const SFBool              *getSFAutoCalcRanges  (void) const;
-
-                  SFBool              *editSFHasRangeCutOn  (void);
-            const SFBool              *getSFHasRangeCutOn   (void) const;
-
-                  SFBool              *editSFHasRangeCutOff (void);
-            const SFBool              *getSFHasRangeCutOff  (void) const;
-
-                  SFBool              *editSFHasRangeNearZone(void);
-            const SFBool              *getSFHasRangeNearZone (void) const;
-
-                  SFBool              *editSFHasRangeFarZone(void);
-            const SFBool              *getSFHasRangeFarZone (void) const;
-
-                  SFBool              *editSFHasCosSpotlightAngle(void);
-            const SFBool              *getSFHasCosSpotlightAngle (void) const;
-
-                  SFBool              *editSFHasSpotlightAngle(void);
-            const SFBool              *getSFHasSpotlightAngle (void) const;
-
-                  SFBool              *editSFHasSpotExponent(void);
-            const SFBool              *getSFHasSpotExponent (void) const;
-
-                  SFBool              *editSFHasCinemaLight (void);
-            const SFBool              *getSFHasCinemaLight  (void) const;
-
-                  SFBool              *editSFEyeSpace       (void);
-            const SFBool              *getSFEyeSpace        (void) const;
+                  SFBool              *editSFNormalizeDirection(void);
+            const SFBool              *getSFNormalizeDirection (void) const;
 
                   SFString            *editSFLightBlockName (void);
             const SFString            *getSFLightBlockName  (void) const;
@@ -392,65 +294,11 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
             const SFString            *getSFLightVariableName (void) const;
 
 
-                  bool                &editHasWorldToLightSpaceMatrix(void);
-                  bool                 getHasWorldToLightSpaceMatrix (void) const;
+                  Vec3f               &editGlobalAmbientIntensity(void);
+            const Vec3f               &getGlobalAmbientIntensity (void) const;
 
-                  bool                &editHasLightToWorldSpaceMatrix(void);
-                  bool                 getHasLightToWorldSpaceMatrix (void) const;
-
-                  bool                &editHasEyeToLightSpaceMatrix(void);
-                  bool                 getHasEyeToLightSpaceMatrix (void) const;
-
-                  bool                &editHasLightToEyeSpaceMatrix(void);
-                  bool                 getHasLightToEyeSpaceMatrix (void) const;
-
-                  bool                &editHasLightPerspectiveMatrix(void);
-                  bool                 getHasLightPerspectiveMatrix (void) const;
-
-                  bool                &editHasInvLightPerspectiveMatrix(void);
-                  bool                 getHasInvLightPerspectiveMatrix (void) const;
-
-                  bool                &editHasColor       (void);
-                  bool                 getHasColor        (void) const;
-
-                  bool                &editHasIntensity   (void);
-                  bool                 getHasIntensity    (void) const;
-
-                  bool                &editHasSeparateIntensities(void);
-                  bool                 getHasSeparateIntensities (void) const;
-
-                  bool                &editHasAttenuation (void);
-                  bool                 getHasAttenuation  (void) const;
-
-                  bool                &editAutoCalcRanges (void);
-                  bool                 getAutoCalcRanges  (void) const;
-
-                  bool                &editHasRangeCutOn  (void);
-                  bool                 getHasRangeCutOn   (void) const;
-
-                  bool                &editHasRangeCutOff (void);
-                  bool                 getHasRangeCutOff  (void) const;
-
-                  bool                &editHasRangeNearZone(void);
-                  bool                 getHasRangeNearZone (void) const;
-
-                  bool                &editHasRangeFarZone(void);
-                  bool                 getHasRangeFarZone (void) const;
-
-                  bool                &editHasCosSpotlightAngle(void);
-                  bool                 getHasCosSpotlightAngle (void) const;
-
-                  bool                &editHasSpotlightAngle(void);
-                  bool                 getHasSpotlightAngle (void) const;
-
-                  bool                &editHasSpotExponent(void);
-                  bool                 getHasSpotExponent (void) const;
-
-                  bool                &editHasCinemaLight (void);
-                  bool                 getHasCinemaLight  (void) const;
-
-                  bool                &editEyeSpace       (void);
-                  bool                 getEyeSpace        (void) const;
+                  bool                &editNormalizeDirection(void);
+                  bool                 getNormalizeDirection (void) const;
 
                   std::string         &editLightBlockName (void);
             const std::string         &getLightBlockName  (void) const;
@@ -463,26 +311,8 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     /*! \name                    Field Set                                 */
     /*! \{                                                                 */
 
-            void setHasWorldToLightSpaceMatrix(const bool value);
-            void setHasLightToWorldSpaceMatrix(const bool value);
-            void setHasEyeToLightSpaceMatrix(const bool value);
-            void setHasLightToEyeSpaceMatrix(const bool value);
-            void setHasLightPerspectiveMatrix(const bool value);
-            void setHasInvLightPerspectiveMatrix(const bool value);
-            void setHasColor       (const bool value);
-            void setHasIntensity   (const bool value);
-            void setHasSeparateIntensities(const bool value);
-            void setHasAttenuation (const bool value);
-            void setAutoCalcRanges (const bool value);
-            void setHasRangeCutOn  (const bool value);
-            void setHasRangeCutOff (const bool value);
-            void setHasRangeNearZone(const bool value);
-            void setHasRangeFarZone(const bool value);
-            void setHasCosSpotlightAngle(const bool value);
-            void setHasSpotlightAngle(const bool value);
-            void setHasSpotExponent(const bool value);
-            void setHasCinemaLight (const bool value);
-            void setEyeSpace       (const bool value);
+            void setGlobalAmbientIntensity(const Vec3f &value);
+            void setNormalizeDirection(const bool value);
             void setLightBlockName (const std::string &value);
             void setLightVariableName(const std::string &value);
 
@@ -549,33 +379,18 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     /*! \name                      Fields                                  */
     /*! \{                                                                 */
 
-    SFBool            _sfHasWorldToLightSpaceMatrix;
-    SFBool            _sfHasLightToWorldSpaceMatrix;
-    SFBool            _sfHasEyeToLightSpaceMatrix;
-    SFBool            _sfHasLightToEyeSpaceMatrix;
-    SFBool            _sfHasLightPerspectiveMatrix;
-    SFBool            _sfHasInvLightPerspectiveMatrix;
-    SFBool            _sfHasColor;
-    SFBool            _sfHasIntensity;
-    SFBool            _sfHasSeparateIntensities;
-    SFBool            _sfHasAttenuation;
-    SFBool            _sfAutoCalcRanges;
-    SFBool            _sfHasRangeCutOn;
-    SFBool            _sfHasRangeCutOff;
-    SFBool            _sfHasRangeNearZone;
-    SFBool            _sfHasRangeFarZone;
-    SFBool            _sfHasCosSpotlightAngle;
-    SFBool            _sfHasSpotlightAngle;
-    SFBool            _sfHasSpotExponent;
-    SFBool            _sfHasCinemaLight;
+    SFUInt32          _sfFeature;
+    SFUInt32          _sfCodeFeature;
+    SFVec3f           _sfGlobalAmbientIntensity;
     MFPnt3f           _mfPosition;
     MFVec3f           _mfDirection;
-    MFColor3f         _mfColor;
-    MFReal32          _mfIntensity;
+    MFVec3f           _mfIntensity;
     MFVec3f           _mfAmbientIntensity;
     MFVec3f           _mfDiffuseIntensity;
     MFVec3f           _mfSpecularIntensity;
     MFVec3f           _mfAttenuation;
+    MFReal32          _mfDecayAttenuation;
+    MFReal32          _mfLengthFactor;
     MFReal32          _mfSpotlightAngle;
     MFReal32          _mfSpotExponent;
     MFReal32          _mfInnerSuperEllipsesWidth;
@@ -588,11 +403,15 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     MFReal32          _mfRangeCutOff;
     MFReal32          _mfRangeNearZone;
     MFReal32          _mfRangeFarZone;
+    MFMatrix          _mfProjectionMatrix;
     MFUInt8           _mfType;
     MFBool            _mfEnabled;
+    MFBool            _mfShadow;
+    MFInt32           _mfShadowDataIndex;
+    MFInt32           _mfShadowParameterIndex;
     MFWeakNodePtr     _mfBeacon;
+    SFBool            _sfNormalizeDirection;
     MFMatrix          _mfBeaconMatrix;
-    SFBool            _sfEyeSpace;
     SFReal32          _sfLastCamNear;
     SFReal32          _sfLastCamFar;
     SFMatrix          _sfLastCamToWorld;
@@ -626,50 +445,16 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-     GetFieldHandlePtr  getHandleHasWorldToLightSpaceMatrix (void) const;
-     EditFieldHandlePtr editHandleHasWorldToLightSpaceMatrix(void);
-     GetFieldHandlePtr  getHandleHasLightToWorldSpaceMatrix (void) const;
-     EditFieldHandlePtr editHandleHasLightToWorldSpaceMatrix(void);
-     GetFieldHandlePtr  getHandleHasEyeToLightSpaceMatrix (void) const;
-     EditFieldHandlePtr editHandleHasEyeToLightSpaceMatrix(void);
-     GetFieldHandlePtr  getHandleHasLightToEyeSpaceMatrix (void) const;
-     EditFieldHandlePtr editHandleHasLightToEyeSpaceMatrix(void);
-     GetFieldHandlePtr  getHandleHasLightPerspectiveMatrix (void) const;
-     EditFieldHandlePtr editHandleHasLightPerspectiveMatrix(void);
-     GetFieldHandlePtr  getHandleHasInvLightPerspectiveMatrix (void) const;
-     EditFieldHandlePtr editHandleHasInvLightPerspectiveMatrix(void);
-     GetFieldHandlePtr  getHandleHasColor        (void) const;
-     EditFieldHandlePtr editHandleHasColor       (void);
-     GetFieldHandlePtr  getHandleHasIntensity    (void) const;
-     EditFieldHandlePtr editHandleHasIntensity   (void);
-     GetFieldHandlePtr  getHandleHasSeparateIntensities (void) const;
-     EditFieldHandlePtr editHandleHasSeparateIntensities(void);
-     GetFieldHandlePtr  getHandleHasAttenuation  (void) const;
-     EditFieldHandlePtr editHandleHasAttenuation (void);
-     GetFieldHandlePtr  getHandleAutoCalcRanges  (void) const;
-     EditFieldHandlePtr editHandleAutoCalcRanges (void);
-     GetFieldHandlePtr  getHandleHasRangeCutOn   (void) const;
-     EditFieldHandlePtr editHandleHasRangeCutOn  (void);
-     GetFieldHandlePtr  getHandleHasRangeCutOff  (void) const;
-     EditFieldHandlePtr editHandleHasRangeCutOff (void);
-     GetFieldHandlePtr  getHandleHasRangeNearZone (void) const;
-     EditFieldHandlePtr editHandleHasRangeNearZone(void);
-     GetFieldHandlePtr  getHandleHasRangeFarZone (void) const;
-     EditFieldHandlePtr editHandleHasRangeFarZone(void);
-     GetFieldHandlePtr  getHandleHasCosSpotlightAngle (void) const;
-     EditFieldHandlePtr editHandleHasCosSpotlightAngle(void);
-     GetFieldHandlePtr  getHandleHasSpotlightAngle (void) const;
-     EditFieldHandlePtr editHandleHasSpotlightAngle(void);
-     GetFieldHandlePtr  getHandleHasSpotExponent (void) const;
-     EditFieldHandlePtr editHandleHasSpotExponent(void);
-     GetFieldHandlePtr  getHandleHasCinemaLight  (void) const;
-     EditFieldHandlePtr editHandleHasCinemaLight (void);
+     GetFieldHandlePtr  getHandleFeature         (void) const;
+     EditFieldHandlePtr editHandleFeature        (void);
+     GetFieldHandlePtr  getHandleCodeFeature     (void) const;
+     EditFieldHandlePtr editHandleCodeFeature    (void);
+     GetFieldHandlePtr  getHandleGlobalAmbientIntensity (void) const;
+     EditFieldHandlePtr editHandleGlobalAmbientIntensity(void);
      GetFieldHandlePtr  getHandlePosition        (void) const;
      EditFieldHandlePtr editHandlePosition       (void);
      GetFieldHandlePtr  getHandleDirection       (void) const;
      EditFieldHandlePtr editHandleDirection      (void);
-     GetFieldHandlePtr  getHandleColor           (void) const;
-     EditFieldHandlePtr editHandleColor          (void);
      GetFieldHandlePtr  getHandleIntensity       (void) const;
      EditFieldHandlePtr editHandleIntensity      (void);
      GetFieldHandlePtr  getHandleAmbientIntensity (void) const;
@@ -680,6 +465,10 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
      EditFieldHandlePtr editHandleSpecularIntensity(void);
      GetFieldHandlePtr  getHandleAttenuation     (void) const;
      EditFieldHandlePtr editHandleAttenuation    (void);
+     GetFieldHandlePtr  getHandleDecayAttenuation (void) const;
+     EditFieldHandlePtr editHandleDecayAttenuation(void);
+     GetFieldHandlePtr  getHandleLengthFactor    (void) const;
+     EditFieldHandlePtr editHandleLengthFactor   (void);
      GetFieldHandlePtr  getHandleSpotlightAngle  (void) const;
      EditFieldHandlePtr editHandleSpotlightAngle (void);
      GetFieldHandlePtr  getHandleSpotExponent    (void) const;
@@ -704,16 +493,24 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
      EditFieldHandlePtr editHandleRangeNearZone  (void);
      GetFieldHandlePtr  getHandleRangeFarZone    (void) const;
      EditFieldHandlePtr editHandleRangeFarZone   (void);
+     GetFieldHandlePtr  getHandleProjectionMatrix (void) const;
+     EditFieldHandlePtr editHandleProjectionMatrix(void);
      GetFieldHandlePtr  getHandleType            (void) const;
      EditFieldHandlePtr editHandleType           (void);
      GetFieldHandlePtr  getHandleEnabled         (void) const;
      EditFieldHandlePtr editHandleEnabled        (void);
+     GetFieldHandlePtr  getHandleShadow          (void) const;
+     EditFieldHandlePtr editHandleShadow         (void);
+     GetFieldHandlePtr  getHandleShadowDataIndex (void) const;
+     EditFieldHandlePtr editHandleShadowDataIndex(void);
+     GetFieldHandlePtr  getHandleShadowParameterIndex (void) const;
+     EditFieldHandlePtr editHandleShadowParameterIndex(void);
      GetFieldHandlePtr  getHandleBeacon          (void) const;
      EditFieldHandlePtr editHandleBeacon         (void);
+     GetFieldHandlePtr  getHandleNormalizeDirection (void) const;
+     EditFieldHandlePtr editHandleNormalizeDirection(void);
      GetFieldHandlePtr  getHandleBeaconMatrix    (void) const;
      EditFieldHandlePtr editHandleBeaconMatrix   (void);
-     GetFieldHandlePtr  getHandleEyeSpace        (void) const;
-     EditFieldHandlePtr editHandleEyeSpace       (void);
      GetFieldHandlePtr  getHandleLastCamNear     (void) const;
      EditFieldHandlePtr editHandleLastCamNear    (void);
      GetFieldHandlePtr  getHandleLastCamFar      (void) const;
@@ -731,17 +528,20 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     /*! \{                                                                 */
 
 
+                  SFUInt32            *editSFFeature        (void);
+            const SFUInt32            *getSFFeature         (void) const;
+
+                  SFUInt32            *editSFCodeFeature    (void);
+            const SFUInt32            *getSFCodeFeature     (void) const;
+
                   MFPnt3f             *editMFPosition       (void);
             const MFPnt3f             *getMFPosition        (void) const;
 
                   MFVec3f             *editMFDirection      (void);
             const MFVec3f             *getMFDirection       (void) const;
 
-                  MFColor3f           *editMFColor          (void);
-            const MFColor3f           *getMFColor           (void) const;
-
-                  MFReal32            *editMFIntensity      (void);
-            const MFReal32            *getMFIntensity       (void) const;
+                  MFVec3f             *editMFIntensity      (void);
+            const MFVec3f             *getMFIntensity       (void) const;
 
                   MFVec3f             *editMFAmbientIntensity(void);
             const MFVec3f             *getMFAmbientIntensity (void) const;
@@ -754,6 +554,12 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
 
                   MFVec3f             *editMFAttenuation    (void);
             const MFVec3f             *getMFAttenuation     (void) const;
+
+                  MFReal32            *editMFDecayAttenuation(void);
+            const MFReal32            *getMFDecayAttenuation (void) const;
+
+                  MFReal32            *editMFLengthFactor   (void);
+            const MFReal32            *getMFLengthFactor    (void) const;
 
                   MFReal32            *editMFSpotlightAngle (void);
             const MFReal32            *getMFSpotlightAngle  (void) const;
@@ -791,11 +597,23 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
                   MFReal32            *editMFRangeFarZone   (void);
             const MFReal32            *getMFRangeFarZone    (void) const;
 
+                  MFMatrix            *editMFProjectionMatrix(void);
+            const MFMatrix            *getMFProjectionMatrix (void) const;
+
                   MFUInt8             *editMFType           (void);
             const MFUInt8             *getMFType            (void) const;
 
                   MFBool              *editMFEnabled        (void);
             const MFBool              *getMFEnabled         (void) const;
+
+                  MFBool              *editMFShadow         (void);
+            const MFBool              *getMFShadow          (void) const;
+
+                  MFInt32             *editMFShadowDataIndex(void);
+            const MFInt32             *getMFShadowDataIndex (void) const;
+
+                  MFInt32             *editMFShadowParameterIndex(void);
+            const MFInt32             *getMFShadowParameterIndex (void) const;
             const MFWeakNodePtr       *getMFBeacon          (void) const;
                   MFWeakNodePtr       *editMFBeacon         (void);
 
@@ -812,17 +630,20 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
             const SFMatrix            *getSFLastCamToWorld  (void) const;
 
 
+                  UInt32              &editFeature        (void);
+                  UInt32               getFeature         (void) const;
+
+                  UInt32              &editCodeFeature    (void);
+                  UInt32               getCodeFeature     (void) const;
+
                   MFPnt3f            ::reference editPosition       (const UInt32 index);
             const Pnt3f               &getPosition        (const UInt32 index) const;
 
                   MFVec3f            ::reference editDirection      (const UInt32 index);
             const Vec3f               &getDirection       (const UInt32 index) const;
 
-                  MFColor3f          ::reference editColor          (const UInt32 index);
-            const Color3f             &getColor           (const UInt32 index) const;
-
-                  MFReal32           ::reference editIntensity      (const UInt32 index);
-                  Real32               getIntensity       (const UInt32 index) const;
+                  MFVec3f            ::reference editIntensity      (const UInt32 index);
+            const Vec3f               &getIntensity       (const UInt32 index) const;
 
                   MFVec3f            ::reference editAmbientIntensity(const UInt32 index);
             const Vec3f               &getAmbientIntensity (const UInt32 index) const;
@@ -835,6 +656,12 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
 
                   MFVec3f            ::reference editAttenuation    (const UInt32 index);
             const Vec3f               &getAttenuation     (const UInt32 index) const;
+
+                  MFReal32           ::reference editDecayAttenuation(const UInt32 index);
+                  Real32               getDecayAttenuation (const UInt32 index) const;
+
+                  MFReal32           ::reference editLengthFactor   (const UInt32 index);
+                  Real32               getLengthFactor    (const UInt32 index) const;
 
                   MFReal32           ::reference editSpotlightAngle (const UInt32 index);
                   Real32               getSpotlightAngle  (const UInt32 index) const;
@@ -872,11 +699,23 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
                   MFReal32           ::reference editRangeFarZone   (const UInt32 index);
                   Real32               getRangeFarZone    (const UInt32 index) const;
 
+                  MFMatrix           ::reference editProjectionMatrix(const UInt32 index);
+            const Matrix              &getProjectionMatrix (const UInt32 index) const;
+
                   MFUInt8            ::reference editType           (const UInt32 index);
                   UInt8                getType            (const UInt32 index) const;
 
                   MFBool             ::reference editEnabled        (const UInt32 index);
                   bool                 getEnabled         (const UInt32 index) const;
+
+                  MFBool             ::reference editShadow         (const UInt32 index);
+                  bool                 getShadow          (const UInt32 index) const;
+
+                  MFInt32            ::reference editShadowDataIndex(const UInt32 index);
+                  Int32                getShadowDataIndex (const UInt32 index) const;
+
+                  MFInt32            ::reference editShadowParameterIndex(const UInt32 index);
+                  Int32                getShadowParameterIndex (const UInt32 index) const;
 
                   Node * getBeacon         (const UInt32 index) const;
 
@@ -897,6 +736,8 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     /*! \name                    Field Set                                 */
     /*! \{                                                                 */
 
+            void setFeature        (const UInt32 value);
+            void setCodeFeature    (const UInt32 value);
             void setLastCamNear    (const Real32 value);
             void setLastCamFar     (const Real32 value);
             void setLastCamToWorld (const Matrix &value);

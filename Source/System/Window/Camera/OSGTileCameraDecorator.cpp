@@ -169,7 +169,7 @@ void TileCameraDecorator::getProjection(Matrix &result,
 */
 
 void TileCameraDecorator::getDecoration(Matrix &result, 
-										UInt32  width, 
+                                        UInt32  width, 
                                         UInt32  height)
 {
     if(width == 0 || height == 0)

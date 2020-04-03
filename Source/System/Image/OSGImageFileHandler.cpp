@@ -781,17 +781,18 @@ bool ImageFileHandlerBase::addImageFileType(ImageFileType &fileType)
 
         smI = _suffixTypeMap.find(suffix);
 
+        // Allow overriding, but warn!
         if(smI != _suffixTypeMap.end())
         {
-            SWARNING << "Can't add an image file type with suffix "
-                     << suffix << " a second time" << std::endl;
+            SWARNING << "Added an image file type with suffix "
+                     << suffix << " a second time, basically overriding the original one." << std::endl;
         }
-        else
-        {
+        //else
+        //{
             _suffixTypeMap[suffix] = &fileType;
 
             retCode = true;
-        }
+        //}
     }
 
     std::string mimetype = fileType.getMimeType();
@@ -800,15 +801,16 @@ bool ImageFileHandlerBase::addImageFileType(ImageFileType &fileType)
 
     TypeMap::iterator tIt = _mimeTypeMap.find(mimetype);
 
+    // Allow overriding, but warn!
     if(tIt != _mimeTypeMap.end())
     {
-        SWARNING << "Can't add an image file type with mimetype "
-                 << mimetype << " a second time" << std::endl;
+        SWARNING << "Added an image file type with mimetype "
+                 << mimetype << " a second time, basically overriding the original one." << std::endl;
     }
-    else
-    {
+    //else
+    //{
         _mimeTypeMap[mimetype] = &fileType;
-    }
+    //}
 
     return retCode;
 }

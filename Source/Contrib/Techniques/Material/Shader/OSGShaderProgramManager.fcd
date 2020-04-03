@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="ShaderProgramManager"
+    parent="FieldContainer"
+    library="ContribTechniques"
+    structure="concrete"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    >
+    The ShaderProgramManager is responsible for providing the
+    actual ShaderProgram instance for each ShaderDesc entry from
+    the ShaderDescStore object provided from a ShaderCodeGenerator.
+    It maps the SHA1 hash of the program text to the ShaderProgram
+    in order to allow sharing of them.
+    <Field
+        name="programMap"
+        type="HashKeyToFieldContainerMap"
+        cardinality="single"
+        visibility="external"
+        access="protected"
+        category="pointer"
+        defaultValue="NULL"
+        >
+        The map of  key hash values to the ShaderProgram objects.
+        The hash values are calculated from the shader program text.
+    </Field>
+
+    <Field
+        name="initCallback"
+        type="ShaderProgramFunctorCallback"
+        cardinality="single"
+        visibility="external"
+        access="none"
+        >
+        A callback that is called after creation of a new ShaderProgram
+        instance. This callback responsibility is to perform additional
+        initializations of the ShaderProgram. Typically, some uniforms
+        are added to the ShaderProgram here.
+    </Field>
+
+    <Field
+        name="updateCallback"
+        type="ShaderProgramFunctorCallback"
+        cardinality="single"
+        visibility="external"
+        access="none"
+        >
+        An update callback that is called e.g. at the beginning of a render
+        task. Typically, the uniforms are updated here.
+    </Field>
+
+</FieldContainer>

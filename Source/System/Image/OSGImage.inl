@@ -166,6 +166,83 @@ UInt8 *Image::editDataFast(UInt32 mipmapNum,
     return data;
 }
 
+inline
+UInt32 Image::calcMipmapLevelSize(const FormatInfo& info,
+                                  UInt32 mipmapNum,
+                                  UInt32 w, UInt32 h, UInt32 d) const
+{
+    Int32 sum = 0;
+    if (info.format == 0)
+    {
+        sum = (w?w:1) * (h?h:1) * (d?d:1) * getBpp();
+    }
+    else
+    {
+        sum = ((w?w:1) + info.blockExtent.x()-1) / info.blockExtent.x() * 
+              ((h?h:1) + info.blockExtent.y()-1) / info.blockExtent.y() *
+              ((d?d:1) + info.blockExtent.z()-1) / info.blockExtent.z() * 
+              info.blockSize;
+    }
+
+#ifdef OSG_DEBUG
+    switch (getPixelFormat())
+    {
+        case OSG_RGB_DXT1:
+        case OSG_RGBA_DXT1:
+        case OSG_SRGB_DXT1:
+        case OSG_SRGB_ALPHA_DXT1:
+            sum = (((w?w:1)+3)/4) * (((h?h:1)+3)/4) * 8;
+            break;
+        case OSG_RGBA_DXT3:
+        case OSG_RGBA_DXT5:
+        case OSG_SRGB_ALPHA_DXT3:
+        case OSG_SRGB_ALPHA_DXT5:
+            sum = (((w?w:1)+3)/4) * (((h?h:1)+3)/4) * 16;
+            break;
+
+        default:
+            sum = (w?w:1) * (h?h:1) * getBpp();
+            break;
+    }
+
+    sum *= (d?d:1);
+#endif
+
+    return sum;
+}
+
+inline
+UInt32 Image::calcMipmapLevelSize(const FormatInfo& info,
+                                  UInt32 mipmapNum) const
+{
+    UInt32 w, h, d;
+    calcMipmapGeometry(mipmapNum, w, h, d);
+    return calcMipmapLevelSize(info, mipmapNum, w, h, d);
+}
+
+inline
+UInt32 Image::calcMipmapSumSize(const FormatInfo& info,
+                                UInt32 mipmapNum,
+                                UInt32 w,
+                                UInt32 h,
+                                UInt32 d) const
+{
+    Int32 sum = 0;
+
+    if (w && h && d)
+    {
+        while (mipmapNum--)
+        {
+            sum += calcMipmapLevelSize(info, mipmapNum,w,h,d);
+
+            w >>= 1;
+            h >>= 1;
+            d >>= 1;
+        }
+    }
+
+    return sum;
+}
 
 #ifdef CHECK_GV
 // Specialization for Image we need this to support VRML PixelTextures.

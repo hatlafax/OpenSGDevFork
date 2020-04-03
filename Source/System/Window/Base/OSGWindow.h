@@ -172,7 +172,10 @@ class OSG_SYSTEM_DLLMAPPING Window : public WindowBase
 
     static void                 setGLLibraryName  (const Char8  *s     );
 
-           UInt32               getGLVersion      (      void          );
+           UInt32               getGLVersion      (      void          );   // major << 8 + minor
+           UInt32               getGLSLVersion    (      void          );   // major << 8 + minor
+           const std::string&   getGLVendor       (      void          );
+           const std::string&   getGLRenderer     (      void          );
 
     static Int32                getExtensionIdX   (const Char8  *s     );
            bool                 hasExtension      (      UInt32  extId );
@@ -186,9 +189,28 @@ class OSG_SYSTEM_DLLMAPPING Window : public WindowBase
     const  Vec2f               &getConstantValuev (      GLenum  val   );
 
 
-           bool                 hasExtOrVersion (UInt32 extId, 
-                                                 UInt32 uiGLVersion = 0xFFFF, 
-                                                 UInt32 uiGLESVersion = 0xFFFF);
+           bool                 hasExtOrVersion   (UInt32 extId, 
+                                                   UInt32 uiGLVersion   = 0xFFFF,   // major << 8 + minor
+                                                   UInt32 uiGLESVersion = 0xFFFF);  // major << 8 + minor
+
+           bool                 hasGLVersion      (UInt32 uiGLVersion   = 0xFFFF,   // major << 8 + minor
+                                                   UInt32 uiGLESVersion = 0xFFFF);  // major << 8 + minor
+
+           bool                 hasGLSLVersion    (UInt32 uiGLSLVersion         );  // major << 8 + minor
+
+           bool                 hasExtOrVersionNum(UInt32 extId, 
+                                                   UInt32 uiGLMajor     = 0xFFFF, 
+                                                   UInt32 uiGLMinor     = 0xFFFF, 
+                                                   UInt32 uiGLESMajor   = 0xFFFF,
+                                                   UInt32 uiGLESMinor   = 0xFFFF);
+
+           bool                 hasGLVersionNum   (UInt32 uiGLMajor     = 0xFFFF, 
+                                                   UInt32 uiGLMinor     = 0xFFFF, 
+                                                   UInt32 uiGLESMajor   = 0xFFFF,
+                                                   UInt32 uiGLESMinor   = 0xFFFF);
+
+           bool                 hasGLSLVersionNum (UInt32 uiGLSLMajor, 
+                                                   UInt32 uiGLSLMinor           );
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -555,6 +577,9 @@ class OSG_SYSTEM_DLLMAPPING Window : public WindowBase
     std::vector<GLObjectId         >  _idInfo;
 
     UInt32                            _glVersion;
+    UInt32                            _glslVersion;
+    std::string                       _glVendor;
+    std::string                       _glRenderer;
     std::vector<std::string        >  _extensions;
     /**
      * List of whether extension can be used in current context. Indexed by

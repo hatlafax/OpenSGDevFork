@@ -70,6 +70,7 @@ class OSG_BASE_DLLMAPPING PolygonBody
     /*! \{                                                                 */
 
     PolygonBody();
+    PolygonBody(const PolygonBody& rhs);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -82,6 +83,11 @@ class OSG_BASE_DLLMAPPING PolygonBody
     /*---------------------------------------------------------------------*/
     /*! \name                    Operators                                 */
     /*! \{                                                                 */
+
+    PolygonBody&    operator=       (const PolygonBody& rhs);
+    bool            operator==      (const PolygonBody& rhs) const;
+    bool            equals          (const PolygonBody& rhs, Real32 tol) const;
+
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                    Set                                       */
@@ -136,9 +142,6 @@ class OSG_BASE_DLLMAPPING PolygonBody
 
     /*==========================  PRIVATE  ================================*/
   private:
-                    PolygonBody             (const PolygonBody& rhs);
-    PolygonBody&    operator=               (const PolygonBody& rhs);
-
     void            addUniqueEdge           (VecLineSegmentsT& outEdgeList, const LineSegment& line) const;
     void            addUniqueVertex         (const Pnt3f& vertex, Real32 tolerance);
     void            removeVisiblePolygons   (const Pnt3f& point);
@@ -151,7 +154,26 @@ class OSG_BASE_DLLMAPPING PolygonBody
     bool            clip                    (Real32 p, Real32 q, Real32& u1, Real32& u2) const;
     void            extrudePolygons         (const Vec3f& direction, const BoxVolume& boundingBox);
     void            createConvexHull        (const VecVerticesT& vertices);
+  
+    void            intersectToUnique       (
+                                                const LineSegment& line, 
+                                                const Pnt3f& minbox, 
+                                                const Pnt3f& maxbox, 
+                                                Real32 tolerance = TypeTraits<OSG::Real32>::getDefaultEps()
+                                            );
+    bool            clipToUnique            (
+                                                Real32 point, 
+                                                Real32 dir, 
+                                                Real32 minbox, 
+                                                Real32 maxbox, 
+                                                Real32& tmin, 
+                                                Real32& tmax, 
+                                                Real32 tolerance = TypeTraits<OSG::Real32>::getDefaultEps()
+                                            ) const;
 
+    void            clearPolygons           ();
+    void            copyPolygons            (const VecPolygonsT& rhs);
+    void            addPolygons             (const VecPolygonsT& rhs);
 
   private:
     VecVerticesT    _vertices;

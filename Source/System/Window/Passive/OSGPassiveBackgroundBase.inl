@@ -99,6 +99,56 @@ void PassiveBackgroundBase::setClearFrameBufferObject(const bool value)
 
     _sfClearFrameBufferObject.setValue(value);
 }
+//! Get the value of the PassiveBackground::_sfUseMediator field.
+
+inline
+bool &PassiveBackgroundBase::editUseMediator(void)
+{
+    editSField(UseMediatorFieldMask);
+
+    return _sfUseMediator.getValue();
+}
+
+//! Get the value of the PassiveBackground::_sfUseMediator field.
+inline
+      bool  PassiveBackgroundBase::getUseMediator(void) const
+{
+    return _sfUseMediator.getValue();
+}
+
+//! Set the value of the PassiveBackground::_sfUseMediator field.
+inline
+void PassiveBackgroundBase::setUseMediator(const bool value)
+{
+    editSField(UseMediatorFieldMask);
+
+    _sfUseMediator.setValue(value);
+}
+//! Get the value of the PassiveBackground::_sfAutoResize field.
+
+inline
+bool &PassiveBackgroundBase::editAutoResize(void)
+{
+    editSField(AutoResizeFieldMask);
+
+    return _sfAutoResize.getValue();
+}
+
+//! Get the value of the PassiveBackground::_sfAutoResize field.
+inline
+      bool  PassiveBackgroundBase::getAutoResize(void) const
+{
+    return _sfAutoResize.getValue();
+}
+
+//! Set the value of the PassiveBackground::_sfAutoResize field.
+inline
+void PassiveBackgroundBase::setAutoResize(const bool value)
+{
+    editSField(AutoResizeFieldMask);
+
+    _sfAutoResize.setValue(value);
+}
 
 
 #ifdef OSG_MT_CPTR_ASPECT
@@ -116,6 +166,15 @@ void PassiveBackgroundBase::execSync (      PassiveBackgroundBase *pFrom,
 
     if(FieldBits::NoField != (ClearCallbackFieldMask & whichField))
         _sfClearCallback.syncWith(pFrom->_sfClearCallback);
+
+    if(FieldBits::NoField != (UseMediatorFieldMask & whichField))
+        _sfUseMediator.syncWith(pFrom->_sfUseMediator);
+
+    if(FieldBits::NoField != (AutoResizeFieldMask & whichField))
+        _sfAutoResize.syncWith(pFrom->_sfAutoResize);
+
+    if(FieldBits::NoField != (MediatorFieldMask & whichField))
+        _sfMediator.syncWith(pFrom->_sfMediator);
 }
 #endif
 

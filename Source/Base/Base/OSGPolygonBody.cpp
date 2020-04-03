@@ -74,9 +74,78 @@ PolygonBody::PolygonBody()
 {
 }
 
+PolygonBody::PolygonBody(const PolygonBody& rhs)
+: _vertices(rhs._vertices)
+, _polygons()
+{
+    addPolygons(rhs._polygons);
+}
+
 PolygonBody::~PolygonBody()
 {
     clear();
+}
+
+PolygonBody& PolygonBody::operator=(const PolygonBody& rhs)
+{
+    if (&rhs == this)
+        return *this;
+
+    _vertices = rhs._vertices;
+    copyPolygons(rhs._polygons);
+
+    return *this;
+}
+
+bool PolygonBody::operator==(const PolygonBody& rhs) const
+{
+    if (&rhs == this)
+        return true;
+
+    std::size_t sz1 = _vertices.size();
+    std::size_t sz2 = _polygons.size();
+    bool result = ( sz1 == rhs._vertices.size() 
+                 && sz2 == rhs._polygons.size() );
+
+    if (result)
+    {
+        for (std::size_t i = 0; i < sz2; ++i)
+        {
+            result &= *_polygons[i] == *rhs._polygons[i];
+            if (!result) break;
+        }
+    }
+
+    return result
+        && _vertices == rhs._vertices;
+}
+
+bool PolygonBody::equals(const PolygonBody& rhs, Real32 tol) const
+{
+    if (&rhs == this)
+        return true;
+
+    std::size_t sz1 = _vertices.size();
+    std::size_t sz2 = _polygons.size();
+    bool result = ( sz1 == rhs._vertices.size() 
+                 && sz2 == rhs._polygons.size() );
+    if (result)
+    {
+        for (std::size_t i = 0; i < sz1; ++i)
+        {
+            result &= _vertices[i].equals(rhs._vertices[i], tol);
+            if (!result) break;
+        }
+    }
+    if (result)
+    {
+        for (std::size_t i = 0; i < sz2; ++i)
+        {
+            result &= _polygons[i]->equals(*rhs._polygons[i], tol);
+            if (!result) break;
+        }
+    }
+    return result;
 }
 
 void PolygonBody::add(const VecVerticesT& vertices, const Vec3f& normal)
@@ -170,10 +239,8 @@ void PolygonBody::extrude(const Vec3f& direction, const BoxVolume& boundingBox)
     std::size_t size = getNumVertices();
 
     for (std::size_t i = 0; i < size; ++i)
-        intersect(LineSegment(_vertices[i], direction), minimum, maximum, _vertices);
-
-    // only for debugging
-    extrudePolygons(direction, boundingBox);
+        //intersect      (LineSegment(_vertices[i], direction), minimum, maximum, _vertices);
+        intersectToUnique(LineSegment(_vertices[i], direction), minimum, maximum);
 }
 
 void PolygonBody::extrudePolygons(const Vec3f& direction, const BoxVolume& boundingBox)
@@ -267,10 +334,7 @@ void PolygonBody::createUniqueVertices(Real32 tolerance)
 
 void PolygonBody::clear()
 {
-    for (std::size_t i = 0; i < _polygons.size(); ++i)
-        delete _polygons[i];
-
-    _polygons.clear();
+    clearPolygons();
     _vertices.clear();
 }
 
@@ -420,9 +484,9 @@ void PolygonBody::createConvexHull(const VecVerticesT& vertices)
 
     clear();
 
-    // QJn: joggle each input coordniate by a random number in the range [-n,n]
+    // QJn: joggle each input coordniate by a random number in the range [-n,n] : QJ0.0001
     // Qt: triangulate result
-    orgQhull::Qhull convexHull(rPoints, "QJ0.0001Qt");
+    orgQhull::Qhull convexHull(rPoints, "Qt");
 
     std::vector<orgQhull::QhullFacet> triangles = convexHull.facetList().toStdVector();
 
@@ -464,5 +528,53 @@ void PolygonBody::createConvexHull(const VecVerticesT& vertices)
 #endif // OSG_WITH_QHULL
 }
 
+void PolygonBody::intersectToUnique(
+    const LineSegment& line, 
+    const Pnt3f& minbox, 
+    const Pnt3f& maxbox, 
+    Real32 tolerance)
+{
+    const Vec3f& dir = line.getDirection();
+    const Pnt3f& pnt = line.getStartPoint();
+
+    Real32 tmin = TypeTraits<OSG::Real32>::getMin();
+    Real32 tmax = TypeTraits<OSG::Real32>::getMax();
+
+    if (!clipToUnique(pnt.x(), dir.x(), minbox.x(), maxbox.x(), tmin, tmax, tolerance))
+        return;
+    if (!clipToUnique(pnt.y(), dir.y(), minbox.y(), maxbox.y(), tmin, tmax, tolerance))
+        return;
+    if (!clipToUnique(pnt.z(), dir.z(), minbox.z(), maxbox.z(), tmin, tmax, tolerance))
+        return;
+
+    if (tmax > -tolerance)
+    {
+        addUniqueVertex(line.getPoint(tmax), tolerance);
+    }
+}
+
+bool PolygonBody::clipToUnique(
+    Real32  point,  Real32  dir, 
+    Real32  minbox, Real32  maxbox, 
+    Real32& tmin,   Real32& tmax, 
+    Real32 tolerance) const
+{
+    if (abs(dir) < tolerance)
+    {
+        if ( (point < (minbox - tolerance)) || (point > (maxbox + tolerance)) )
+            return false;
+    }
+    else
+    {
+        Real32 intermin = (minbox - point) / dir;
+        Real32 intermax = (maxbox - point) / dir;
+        Real32 tminx    = (intermin > intermax) ? intermax : intermin;
+        Real32 tmaxx    = (intermin > intermax) ? intermin : intermax;
+
+        tmin = (tmin < tminx) ? tminx : tmin;
+        tmax = (tmax < tmaxx) ? tmax  : tmaxx;
+    }
+    return true;
+}
 
 OSG_END_NAMESPACE

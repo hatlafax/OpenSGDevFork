@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -266,14 +266,14 @@ class OSG_WINDOWWIN32_DLLMAPPING WIN32WindowBase : public Window
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-    GetFieldHandlePtr  getHandleHwnd            (void) const;
-    EditFieldHandlePtr editHandleHwnd           (void);
-    GetFieldHandlePtr  getHandleHdc             (void) const;
-    EditFieldHandlePtr editHandleHdc            (void);
-    GetFieldHandlePtr  getHandleHglrc           (void) const;
-    EditFieldHandlePtr editHandleHglrc          (void);
-    GetFieldHandlePtr  getHandleDummy0          (void) const;
-    EditFieldHandlePtr editHandleDummy0         (void);
+     GetFieldHandlePtr  getHandleHwnd            (void) const;
+     EditFieldHandlePtr editHandleHwnd           (void);
+     GetFieldHandlePtr  getHandleHdc             (void) const;
+     EditFieldHandlePtr editHandleHdc            (void);
+     GetFieldHandlePtr  getHandleHglrc           (void) const;
+     EditFieldHandlePtr editHandleHglrc          (void);
+     GetFieldHandlePtr  getHandleDummy0          (void) const;
+     EditFieldHandlePtr editHandleDummy0         (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

@@ -677,6 +677,102 @@ void MemoryConsumption::print(std::ostream &os, bool ignoreProto) const
                     % totalCount;
 }
 
+void MemoryConsumption::print_sorted(std::ostream &os, bool ignoreProto, bool sort_by_name) const
+{
+    std::size_t maxNameLength = 0;
+
+    typedef std::vector<TypeMemMapConstIt> IteratorStorage;
+
+    IteratorStorage iterStore;
+    
+    typedef std::map<std::string,      TypeMemMapConstIt> NameToIteratorMapT;
+    typedef std::multimap<std::size_t, TypeMemMapConstIt> SizeToIteratorMapT;
+
+    NameToIteratorMapT sorterByName;
+    SizeToIteratorMapT sorterBySize;
+
+    TypeMemMapConstIt tmIt  = _memMap.begin();
+    TypeMemMapConstIt tmEnd = _memMap.end  ();
+
+    for(; tmIt != tmEnd; ++tmIt)
+    {
+        FieldContainerType *fcType =
+            FieldContainerFactory::the()->findType(tmIt->first);
+
+        if(fcType == NULL)
+            continue;
+
+        if(ignoreProto && tmIt->second.second == 1)
+            continue;
+
+        maxNameLength = std::max(fcType->getName().size(), maxNameLength);
+
+        if (sort_by_name)
+        {
+            sorterByName.insert(NameToIteratorMapT::value_type(fcType->getName(), tmIt));
+        }
+        else
+        {
+            sorterBySize.insert(SizeToIteratorMapT::value_type(tmIt->second.first, tmIt));
+        }
+    }
+
+    if (sort_by_name)
+    {
+        NameToIteratorMapT::const_iterator mapIt  = sorterByName.begin();
+        NameToIteratorMapT::const_iterator mapEnd = sorterByName.end  ();
+
+        for (; mapIt != mapEnd; ++mapIt)
+            iterStore.push_back(mapIt->second);
+    }
+    else
+    {
+        SizeToIteratorMapT::const_iterator mapIt  = sorterBySize.begin();
+        SizeToIteratorMapT::const_iterator mapEnd = sorterBySize.end  ();
+
+        for (; mapIt != mapEnd; ++mapIt)
+            iterStore.push_back(mapIt->second);
+    }
+
+    std::stringstream format;
+    format << "%|1$-" << maxNameLength << "| [%|2$10|] Byte [%|3$8.0f|] kByte [%|4$5|]\n";
+
+    IteratorStorage::const_iterator iter = iterStore.begin();
+    IteratorStorage::const_iterator end  = iterStore.end  ();
+
+    SizeT         totalMem   = 0;
+    UInt32        totalCount = 0;
+    boost::format formatter(format.str());
+
+    for(; iter != end; ++iter)
+    {
+        TypeMemMapConstIt tmIt = *iter;
+
+        FieldContainerType *fcType =
+            FieldContainerFactory::the()->findType(tmIt->first);
+
+        if(fcType == NULL)
+            continue;
+
+        if(ignoreProto && tmIt->second.second == 1)
+            continue;
+
+        os << formatter % fcType->getCName()
+                        % tmIt->second.first
+                        % (tmIt->second.first / 1024.f)
+                        % tmIt->second.second;
+
+        totalMem   += tmIt->second.first;
+        totalCount += tmIt->second.second;
+    }
+
+    os << "--------------------------------------------\n";
+    os << formatter % "Total"
+                    % totalMem
+                    % (totalMem / 1024.f)
+                    % totalCount;
+}
+
 MemoryConsumption::TypeMemMapConstIt MemoryConsumption::beginMap(void) const
 {
     return _memMap.begin();

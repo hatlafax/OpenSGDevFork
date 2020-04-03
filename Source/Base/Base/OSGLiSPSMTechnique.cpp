@@ -44,18 +44,20 @@
 #include "OSGConfig.h"
 #include "OSGLiSPSMTechnique.h"
 
-#include <OSGBaseFunctions.h>
+#include "OSGBaseFunctions.h"
 
 #include "OSGBoxVolume.h"
 #include "OSGFrustumVolume.h"
 #include "OSGPolygonBody.h"
 
-#include <OSGMatrixUtility.h>
+#include "OSGMatrixUtility.h"
 #include "OSGPlane.h"
 
 OSG_BEGIN_NAMESPACE
 
 /*! \class OSG::LiSPSMTechnique
+    https://www.cg.tuwien.ac.at/research/publications/2004/Wimmer-2004-LSPM/Wimmer-2004-LSPM-Paper.pdf
+    https://www.cg.tuwien.ac.at/research/publications/2011/Stingl_2011_RHS/Stingl_2011_RHS-thesis.pdf
 */
 
 const Matrix LiSPSMTechnique::_exchangeAxisTrafo = Matrix (
@@ -72,7 +74,6 @@ LiSPSMTechnique::LiSPSMTechnique(UInt32 nbrOfSplits)
 : _cView        (Pnt3f(0.f, 0.f, 0.f),
                  Pnt3f(0.f, 0.f, 1.f),
                  Vec3f(0.f, 1.f, 0.f))          // camera view (eye, center, up)
-, _cType        (Projection::PERSPECTIVE)       // camera projection type
 , _lView        (Pnt3f(0.f, 1.f, 0.f),
                  Pnt3f(0.f, 0.f, 0.f),
                  Vec3f(0.f, 0.f,-1.f))          // light  view (eye, center, up)
@@ -103,7 +104,6 @@ LiSPSMTechnique::LiSPSMTechnique(UInt32 nbrOfSplits)
 
 LiSPSMTechnique::LiSPSMTechnique(const LiSPSMTechnique& rhs)
 : _cView        (rhs._cView)
-, _cType        (rhs._cType)
 , _lView        (rhs._lView)
 , _lType        (rhs._lType)
 , _mode         (rhs._mode)
@@ -133,26 +133,25 @@ LiSPSMTechnique& LiSPSMTechnique::operator=(const LiSPSMTechnique& rhs)
 {
     if (&rhs == this) return *this;
 
-    _cView        = _cView;
-    _cType        = _cType;
-    _lView        = _lView;
-    _lType        = _lType;
-    _mode         = _mode;
-    _arbScaled    = _arbScaled;
-    _gamma        = _gamma;
-    _fov          = _fov;
-    _eta          = _eta;
-    _lambda       = _lambda;
-    _pseudoNear   = _pseudoNear;
-    _pseudoFar    = _pseudoFar;
-    _lViewMat     = _lViewMat;
-    _lProjMat     = _lProjMat;
-    _cViewMat     = _cViewMat;
-    _cProjMat     = _cProjMat;
-    _liSPMat      = _liSPMat;
-    _distances    = _distances;
-    _nParams      = _nParams;
-    _paramN       = _paramN;
+    _cView        = rhs._cView;
+    _lView        = rhs._lView;
+    _lType        = rhs._lType;
+    _mode         = rhs._mode;
+    _arbScaled    = rhs._arbScaled;
+    _gamma        = rhs._gamma;
+    _fov          = rhs._fov;
+    _eta          = rhs._eta;
+    _lambda       = rhs._lambda;
+    _pseudoNear   = rhs._pseudoNear;
+    _pseudoFar    = rhs._pseudoFar;
+    _lViewMat     = rhs._lViewMat;
+    _lProjMat     = rhs._lProjMat;
+    _cViewMat     = rhs._cViewMat;
+    _cProjMat     = rhs._cProjMat;
+    _liSPMat      = rhs._liSPMat;
+    _distances    = rhs._distances;
+    _nParams      = rhs._nParams;
+    _paramN       = rhs._paramN;
 
     return *this;
 }

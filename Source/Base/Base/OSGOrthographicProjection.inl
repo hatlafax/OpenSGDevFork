@@ -39,6 +39,35 @@
 OSG_BEGIN_NAMESPACE
 
 inline
+bool OrthographicProjection::operator==(
+    const OrthographicProjection& rhs) const
+{
+    if (&rhs == this)
+        return true;
+
+    return Projection::operator==(rhs) 
+        && _left   == rhs._left
+        && _right  == rhs._right
+        && _bottom == rhs._bottom
+        && _top    == rhs._top;
+}
+
+inline
+bool OrthographicProjection::equals(
+    const OrthographicProjection& rhs, 
+    Real32 tol) const
+{
+    if (&rhs == this)
+        return true;
+
+    return Projection::equals(rhs, tol) 
+        && (_left   - rhs._left   <= tol) && (rhs._left   - _left   <= tol)
+        && (_right  - rhs._right  <= tol) && (rhs._right  - _right  <= tol)
+        && (_bottom - rhs._bottom <= tol) && (rhs._bottom - _bottom <= tol)
+        && (_top    - rhs._top    <= tol) && (rhs._top    - _top    <= tol);
+}
+
+inline
 Real32 OrthographicProjection::getLeft() const
 {
     return _left;
@@ -84,6 +113,24 @@ inline
 void OrthographicProjection::setTop(Real32 top)
 {
     _top = top;
+}
+
+inline
+void OrthographicProjection::setValue(
+    Real32 left,
+    Real32 right,
+    Real32 bottom,
+    Real32 top,
+    Real32 zNear,
+    Real32 zFar)
+{
+    _left   = left;
+    _right  = right;
+    _bottom = bottom;
+    _top    = top;
+    
+    setZNear(zNear);
+    setZFar (zFar);
 }
 
 OSG_END_NAMESPACE

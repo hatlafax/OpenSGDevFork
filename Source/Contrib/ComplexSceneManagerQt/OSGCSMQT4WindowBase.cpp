@@ -156,7 +156,8 @@ CSMQT4WindowBase::TypeObject CSMQT4WindowBase::_type(
     reinterpret_cast<PrototypeCreateF>(&CSMQT4WindowBase::createEmptyLocal),
     reinterpret_cast<InitContainerF>(&CSMQT4Window::initMethod),
     reinterpret_cast<ExitContainerF>(&CSMQT4Window::exitMethod),
-    reinterpret_cast<InitalInsertDescFunc>(&CSMQT4Window::classDescInserter),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&CSMQT4Window::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\"?>\n"

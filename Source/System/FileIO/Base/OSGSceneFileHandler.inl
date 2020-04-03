@@ -98,4 +98,18 @@ inline bool
     return retVal;
 }
 
+inline bool SceneFileHandlerBase::compressible(const SceneFileType* fileType)
+{
+    OSG_ASSERT(fileType);
+
+    return (fileType->getFlags() & SceneFileType::OSG_NOT_ZIP_COMPRESSIBLE ) == 0
+        && (fileType->getFlags() & SceneFileType::OSG_STREAMING_UNSUPPORTED) == 0;
+}
+
+inline bool SceneFileHandlerBase::allowStreaming(const SceneFileType* fileType)
+{
+    OSG_ASSERT(fileType);
+    return (fileType->getFlags() & SceneFileType::OSG_STREAMING_UNSUPPORTED) == 0;
+}
+
 OSG_END_NAMESPACE

@@ -1,0 +1,317 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="EnvironmentDesc"
+    parent="FieldContainer"
+    library="ContribTechniques"
+    structure="concrete"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    >
+    This class provides additional information about the
+    render environment. Tonmapping, additional light info
+    etc. are described here.
+
+    <Field
+        name="Feature"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0"
+        >
+        Each environment category does have a unique feature
+        value. Only if a feature is set it is evaluated by
+        the machinery.
+        The following feature categories are supported: 
+        FEATURE_TONEMAPPING, FEATURE_CLASSIC_LIGHT_EXTENSIONS, 
+        FEATURE_FOG
+    </Field>
+
+    <Field
+        name="clipPlanes"
+        type="Vec4f"
+        cardinality="multi"
+        visibility="external"
+        access="public"
+        >
+        Set of active clip planes.
+    </Field>
+
+    <Field
+        name="applyGamma"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="true"
+        access="public"
+        >
+        If set gamma correction is performed just before writing to the final
+        draw buffer at the end of the pipeline.
+    </Field>
+
+    <Field
+        name="accurateGamma"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="true"
+        access="public"
+        >
+        If set correct gamma calculation is performed, i.e. respect linear near black.
+        This parameter is only in use if parameter applyGamma is set to true.
+        See http://www.poynton.com/notes/colour_and_gamma/GammaFAQ.html 
+        https://en.wikipedia.org/wiki/Gamma_correction
+        http://renderwonk.com/blog/index.php/archive/adventures-with-gamma-correct-rendering/
+        for reference.
+    </Field>
+    
+    <Field
+        name="toneMappingMode"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="4"
+        access="public"
+        >
+        Tonemapping technique to use. Valid values are 
+        NO_TONE_MAPPING, LOGARITHMIC_TONE_MAPPING, EXPONENTIAL_TONE_MAPPING, DRAGO_LOGARITHMIC_TONE_MAPPING, 
+        REINHARD_TONE_MAPPING, REINHARD_MODIFIED_TONE_MAPPING, FILMIC_HABLE_TONE_MAPPING, FILMIC_UNCHARTED2_TONE_MAPPING,
+        FILMIC_ACES_TONE_MAPPING, FILMIC_HEJ2015_TONE_MAPPING
+
+        For details about the different tone mapping techniques lookup the following references:
+        Adaptive Logarithmic Mapping for Displaying High Contrast Scenes
+        F. Drago, K. Myszkowski, T. Annen, and N. Chiba
+        In Eurographics 2003 
+        http://resources.mpi-inf.mpg.de/tmo/logmap/logmap.pdf
+
+        Photographic Tone Reproduction for Digital Images
+        Erik Reinhard, Michael Stark, Peter Shirley, James Ferwerda
+        http://www.cmap.polytechnique.fr/~peyre/cours/x2005signal/hdr_photographic.pdf
+
+        http://filmicgames.com/archives/75
+        http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff
+
+        High Dynamic Range Imaging
+        Aquisition, Display, and Image-Based Lighing
+        Erik Reinhard et al.
+        Second Edition 2010
+        ISBN 978-0-12-374914-7
+    </Field>
+
+    <Field
+        name="autoExposureMode"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="2"
+        access="public"
+        >
+        Three exposure working modes are allowed: MANUAL, KEY_VALUE, AUTOMATIC, SATURATION_BASED and
+        STANDARD_OUTPUT_BASED
+
+        If set to manual mode the Exposure parameter is used directly. If key value mode is set the KeyValue is
+        used for calculation of the used exposure value. If mode is set to automatic, then the KeyValue is also
+        automatically calculated from the average luminance of the scene. The key value is a scalar that controls 
+        how brightly or darkly the algorithm will expose your scene. The remaining modes are based on
+        the article 
+        https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/
+        and calculate the exposure value from ApertureFNumber, ShutterSpeedValue and ISO film value.
+    </Field>
+
+    <Field
+        name="use_ITU_R_BT_709"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="true"
+        access="public"
+        >
+        Calculate linear Y luminance from ITU-BT-709 to CIE XYZ if set to true. Otherwise calculate  linearY luminance
+        according to the American NTSC coding system.
+        See  http://www.poynton.com/ColorFAQ.html and http://www.poynton.com/PDFs/coloureq.pdf for reference.
+    </Field>
+
+    <Field
+        name="useLinChromCorrection"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="true"
+        access="public"
+        >
+        Use a linear chromatic correction function. This works with parameter 'saturation'.
+        See https://www.cs.ubc.ca/~heidrich/Papers/EG.09_1.pdf for reference.
+    </Field>
+
+    <Field
+        name="exposure"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="0.f"
+        access="public"
+        >
+        Exposure mimics the camera shutter time. You're controlling how much light hits the film by modifying 
+        how long the shutter stays open. This parameter is only valid if the auto exposure mode is set to MANUAL.
+        Otherwise it is calculated either by the keyValue parameter or directly by the luminance of the scene.
+        Reasonable values are in the interval [-10.f, 10.f]. 
+    </Field>
+
+    <Field
+        name="keyValue"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="0.18f"
+        access="public"
+        >
+        This parameter is mimics the mood of the scene. It is meant to be chosen based on whether the 
+        scene is high-key (bright, low contrast) or low-key (dark, high contrast). This value is used
+        for calculating a proper exposure value given that the auto exposure mode is set to KEY_VALUE.
+        Reasonable values are in the interval [0.f, 1.f]. 
+        See http://www.cis.rit.edu/jaf/publications/sig02_paper.pdf for reference.
+    </Field>
+
+    <Field
+        name="apertureFNumber"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="16.0f"
+        access="public"
+        >
+        The f-number of an optical system such as a camera lens is the ratio of the system's focal length to 
+        the diameter of the entrance pupil. N = f/D, with focal length of the lens f and diameter of the pupil
+        (effective aperture) D. This value is used only for the autoExposureMode modes SATURATION_BASED and
+        STANDARD_OUTPUT_BASED.
+
+        See also: https://en.wikipedia.org/wiki/F-number
+                  https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/
+    </Field>
+    <Field
+        name="shutterSpeed"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="0.01f"
+        access="public"
+        >
+        A measure of the film exposure time given in reciprocal seconds.
+        This value is used only for the autoExposureMode modes SATURATION_BASED and
+        STANDARD_OUTPUT_BASED.
+
+        See also: https://en.wikipedia.org/wiki/F-number
+                  https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/
+    </Field>
+    <Field
+        name="ISO"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="100.f"
+        access="public"
+        >
+        Film speed is the measure of a photographic film's sensitivity to light.
+        This value is used only for the autoExposureMode modes SATURATION_BASED and
+        STANDARD_OUTPUT_BASED.
+
+        See also: https://en.wikipedia.org/wiki/Film_speed
+                  https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/
+    </Field>
+
+    <Field
+        name="whiteLevel"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="5.f"
+        access="public"
+        >
+        This parameter is the smallest luminance that will be mapped to pure white. It is used in the
+        following tone mapping techiques: logarithmic, exponential, drago_logarithmic and reinhard_modified.
+        Reasonable values are in the interval [0.f, 25.f]. 
+        See http://www.cis.rit.edu/jaf/publications/sig02_paper.pdf for reference.
+    </Field>
+
+    <Field
+        name="dragoBias"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="0.85f"
+        access="public"
+        >
+        The bias function is a power function defined over the unit interval, 
+        an intuitive parameter dragoBias remaps an input value to a higher or lower value.
+        This parameter is only used by the drago_logarithmic tone mapping technique.
+        Reasonable values are in the interval [0.f, 1.f]. 
+        See http://resources.mpi-inf.mpg.de/tmo/logmap/logmap.pdf for reference.
+    </Field>
+
+    <Field
+        name="saturation"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="1.f"
+        access="public"
+        >
+        This parameter allows to control the satuarion of the tone mapped scene. It allows color
+        correction applied after tone mapping.
+        Reasonable values are in the interval [0.f, 4.f]. 
+        See https://www.cs.ubc.ca/~heidrich/Papers/EG.09_1.pdf for reference.
+    </Field>
+
+    <Field
+        name="contrast"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="1.f"
+        access="public"
+        >
+        The standard contrast operation simply pushes colors away from grey. The operation is
+        performed before tone mapping in sRGB space.
+        See http://filmicworlds.com/blog/minimal-color-grading-tools/
+    </Field>
+
+    <Field
+        name="gamma"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="2.2f"
+        access="public"
+        >
+        The gamma value used for the GAMMA correction calculation.
+    </Field>
+
+    <Field
+        name="filterColor"
+        type="Color3f"
+        cardinality="single"
+        visibility="external"
+        defaultValue="Color3f(1.f,1.f,1.f)"
+        access="public"
+        >
+        The filter color is multiplied to the scene after exposure correction but before to the
+        tone mapping operation.
+        See http://filmicworlds.com/blog/minimal-color-grading-tools/
+    </Field>
+
+    <Field
+        name="globalAmbientIntensity"
+        type="Vec3f"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="Vec3f(0,0,0)"
+    >
+    The global ambient light intensity, that is to be added to the single light ambient intensities.
+    </Field>
+
+</FieldContainer>

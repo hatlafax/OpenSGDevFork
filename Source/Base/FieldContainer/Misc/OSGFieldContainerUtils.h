@@ -78,8 +78,9 @@ class OSG_BASE_DLLMAPPING MemoryConsumption
     typedef TypeMemMap::iterator                  TypeMemMapIt;
     typedef TypeMemMap::const_iterator            TypeMemMapConstIt;
     
-    void scan (void                                     );
-    void print(std::ostream &os, bool ignoreProto = true) const;
+    void scan        (void                                     );
+    void print       (std::ostream &os, bool ignoreProto = true) const;
+    void print_sorted(std::ostream &os, bool ignoreProto = true, bool sort_by_name = true) const;
     
     TypeMemMapConstIt beginMap     (void) const;
     TypeMemMapConstIt endMap       (void) const;

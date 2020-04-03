@@ -319,6 +319,9 @@ class OSG_UTIL_DLLMAPPING DotFileGeneratorGraphOp : public GraphOp
     // Do not use rank statement
     bool                                _no_ranks;
 
+    // Do not show object addresses
+    bool                                _no_addresses;
+
     // Maximal number of children of a node included in the graph
     Int32                               _max_node_children;
 

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="ShaderDescStore"
+    parent="FieldContainer"
+    library="ContribTechniques"
+    structure="concrete"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    >
+   <Field
+	 name="store"
+	 type="ShaderDescPtr"
+	 cardinality="multi"
+	 visibility="internal"
+	 access="public"
+	 >
+  </Field>
+
+</FieldContainer>

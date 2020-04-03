@@ -65,6 +65,7 @@
 
 #include "OSGGeoVectorBufferProperty.h" // Parent
 
+#include "OSGSysFields.h"               // OsgGLId type
 
 #include "OSGGeoVectorBufferRefPropertyFields.h"
 
@@ -91,6 +92,18 @@ class OSG_DRAWABLE_DLLMAPPING GeoVectorBufferRefPropertyBase : public GeoVectorB
 
   public:
 
+    enum
+    {
+        OsgGLIdFieldId = Inherited::NextFieldId,
+        NextFieldId = OsgGLIdFieldId + 1
+    };
+
+    static const OSG::BitVector OsgGLIdFieldMask =
+        (TypeTraits<BitVector>::One << OsgGLIdFieldId);
+    static const OSG::BitVector NextFieldMask =
+        (TypeTraits<BitVector>::One << NextFieldId);
+        
+    typedef SFUInt32          SFOsgGLIdType;
 
     /*---------------------------------------------------------------------*/
     /*! \name                    Class Get                                 */
@@ -109,6 +122,31 @@ class OSG_DRAWABLE_DLLMAPPING GeoVectorBufferRefPropertyBase : public GeoVectorB
     virtual const FieldContainerType &getType         (void) const;
 
     virtual       UInt32              getContainerSize(void) const;
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                    Field Get                                 */
+    /*! \{                                                                 */
+
+
+                  SFUInt32            *editSFOsgGLId        (void);
+            const SFUInt32            *getSFOsgGLId         (void) const;
+
+
+                  UInt32              &editOsgGLId        (void);
+                  UInt32               getOsgGLId         (void) const;
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                    Field Set                                 */
+    /*! \{                                                                 */
+
+            void setOsgGLId        (const UInt32 value);
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                Ptr MField Set                                */
+    /*! \{                                                                 */
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -160,6 +198,13 @@ class OSG_DRAWABLE_DLLMAPPING GeoVectorBufferRefPropertyBase : public GeoVectorB
     static const Char8 *getClassname     (void             );
 
     /*---------------------------------------------------------------------*/
+    /*! \name                      Fields                                  */
+    /*! \{                                                                 */
+
+    SFUInt32          _sfOsgGLId;
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
     /*! \name                   Constructors                               */
     /*! \{                                                                 */
 
@@ -184,6 +229,8 @@ class OSG_DRAWABLE_DLLMAPPING GeoVectorBufferRefPropertyBase : public GeoVectorB
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
+     GetFieldHandlePtr  getHandleOsgGLId         (void) const;
+     EditFieldHandlePtr editHandleOsgGLId        (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

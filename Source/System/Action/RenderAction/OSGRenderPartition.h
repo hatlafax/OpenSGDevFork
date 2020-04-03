@@ -310,6 +310,9 @@ class OSG_SYSTEM_DLLMAPPING RenderPartition : public RenderPartitionBase
           void           subOverride        (UInt32      uiSlot, 
                                              StateChunk *pChunk);
 
+          void          activateOverride    ();
+          void          deactivateOverride  ();
+
     const StateOverride *getCurrentOverrides(void              ) const;
 
     /*-------------------------- comparison ---------------------------------*/
@@ -435,6 +438,8 @@ class OSG_SYSTEM_DLLMAPPING RenderPartition : public RenderPartitionBase
     StateOverridePool        *_pStatePool;
     
     OverrideStack             _sStateOverrides;
+
+    bool                      _bPermitOverride;
 
     TreeBuilderPool          *_pTreeBuilderPool;
 

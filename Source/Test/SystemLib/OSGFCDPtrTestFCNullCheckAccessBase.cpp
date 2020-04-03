@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -53,6 +53,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
 #include "OSGConfig.h"
 
 
@@ -64,10 +69,6 @@
 #include "OSGFCDPtrTestFCNullCheckAccess.h"
 
 #include <boost/bind.hpp>
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -196,11 +197,11 @@ OSG_FIELDTRAITS_GETTYPE_NS(FCDPtrTestFCNullCheckAccess *, nsOSG)
 
 OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
                            FCDPtrTestFCNullCheckAccess *,
-                           nsOSG);
+                           nsOSG)
 
 OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
                            FCDPtrTestFCNullCheckAccess *,
-                           nsOSG);
+                           nsOSG)
 
 /***************************************************************************\
  *                         Field Description                               *
@@ -507,9 +508,10 @@ FCDPtrTestFCNullCheckAccessBase::TypeObject FCDPtrTestFCNullCheckAccessBase::_ty
     "NULL",
     nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&FCDPtrTestFCNullCheckAccessBase::createEmptyLocal),
-    FCDPtrTestFCNullCheckAccess::initMethod,
-    FCDPtrTestFCNullCheckAccess::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&FCDPtrTestFCNullCheckAccess::classDescInserter),
+    reinterpret_cast<InitContainerF>(&FCDPtrTestFCNullCheckAccess::initMethod),
+    reinterpret_cast<ExitContainerF>(&FCDPtrTestFCNullCheckAccess::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&FCDPtrTestFCNullCheckAccess::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\" ?>\n"
@@ -903,6 +905,21 @@ SFUnrecFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::editSFFieldSFPub_ptr (void
     return &_sfFieldSFPub_ptr;
 }
 
+//! Get the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPub_ptr field.
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldSFPub_ptr(void) const
+{
+    return _sfFieldSFPub_ptr.getValue();
+}
+
+//! Set the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPub_ptr field.
+void FCDPtrTestFCNullCheckAccessBase::setFieldSFPub_ptr(FCDTestFC * const value)
+{
+    editSField(FieldSFPub_ptrFieldMask);
+
+    _sfFieldSFPub_ptr.setValue(value);
+}
+
+
 //! Get the FCDPtrTestFCNullCheckAccess::_sfFieldSFPub_weakptr field.
 const SFWeakFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getSFFieldSFPub_weakptr(void) const
 {
@@ -915,6 +932,21 @@ SFWeakFCDTestFCPtr  *FCDPtrTestFCNullCheckAccessBase::editSFFieldSFPub_weakptr(v
 
     return &_sfFieldSFPub_weakptr;
 }
+
+//! Get the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPub_weakptr field.
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldSFPub_weakptr(void) const
+{
+    return _sfFieldSFPub_weakptr.getValue();
+}
+
+//! Set the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPub_weakptr field.
+void FCDPtrTestFCNullCheckAccessBase::setFieldSFPub_weakptr(FCDTestFC * const value)
+{
+    editSField(FieldSFPub_weakptrFieldMask);
+
+    _sfFieldSFPub_weakptr.setValue(value);
+}
+
 
 //! Get the FCDPtrTestFCNullCheckAccess::_sfFieldSFPub_mpchildptr field.
 const SFUnrecChildFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getSFFieldSFPub_mpchildptr(void) const
@@ -929,6 +961,21 @@ SFUnrecChildFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::editSFFieldSFPub_mpch
     return &_sfFieldSFPub_mpchildptr;
 }
 
+//! Get the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPub_mpchildptr field.
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldSFPub_mpchildptr(void) const
+{
+    return _sfFieldSFPub_mpchildptr.getValue();
+}
+
+//! Set the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPub_mpchildptr field.
+void FCDPtrTestFCNullCheckAccessBase::setFieldSFPub_mpchildptr(FCDTestFC * const value)
+{
+    editSField(FieldSFPub_mpchildptrFieldMask);
+
+    _sfFieldSFPub_mpchildptr.setValue(value);
+}
+
+
 //! Get the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_ptr field.
 const SFUnrecFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getSFFieldSFPro_ptr(void) const
 {
@@ -941,6 +988,21 @@ SFUnrecFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::editSFFieldSFPro_ptr (void
 
     return &_sfFieldSFPro_ptr;
 }
+
+//! Get the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_ptr field.
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldSFPro_ptr(void) const
+{
+    return _sfFieldSFPro_ptr.getValue();
+}
+
+//! Set the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_ptr field.
+void FCDPtrTestFCNullCheckAccessBase::setFieldSFPro_ptr(FCDTestFC * const value)
+{
+    editSField(FieldSFPro_ptrFieldMask);
+
+    _sfFieldSFPro_ptr.setValue(value);
+}
+
 
 //! Get the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_weakptr field.
 const SFWeakFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getSFFieldSFPro_weakptr(void) const
@@ -955,6 +1017,21 @@ SFWeakFCDTestFCPtr  *FCDPtrTestFCNullCheckAccessBase::editSFFieldSFPro_weakptr(v
     return &_sfFieldSFPro_weakptr;
 }
 
+//! Get the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_weakptr field.
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldSFPro_weakptr(void) const
+{
+    return _sfFieldSFPro_weakptr.getValue();
+}
+
+//! Set the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_weakptr field.
+void FCDPtrTestFCNullCheckAccessBase::setFieldSFPro_weakptr(FCDTestFC * const value)
+{
+    editSField(FieldSFPro_weakptrFieldMask);
+
+    _sfFieldSFPro_weakptr.setValue(value);
+}
+
+
 //! Get the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_mpchildptr field.
 const SFUnrecChildFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getSFFieldSFPro_mpchildptr(void) const
 {
@@ -968,6 +1045,21 @@ SFUnrecChildFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::editSFFieldSFPro_mpch
     return &_sfFieldSFPro_mpchildptr;
 }
 
+//! Get the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_mpchildptr field.
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldSFPro_mpchildptr(void) const
+{
+    return _sfFieldSFPro_mpchildptr.getValue();
+}
+
+//! Set the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_mpchildptr field.
+void FCDPtrTestFCNullCheckAccessBase::setFieldSFPro_mpchildptr(FCDTestFC * const value)
+{
+    editSField(FieldSFPro_mpchildptrFieldMask);
+
+    _sfFieldSFPro_mpchildptr.setValue(value);
+}
+
+
 
 
 
@@ -976,11 +1068,19 @@ const MFUnrecFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getMFFieldMFPub_ptr(
 {
     return &_mfFieldMFPub_ptr;
 }
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldMFPub_ptr(const UInt32 index) const
+{
+    return _mfFieldMFPub_ptr[index];
+}
 
 //! Get the FCDPtrTestFCNullCheckAccess::_mfFieldMFPub_weakptr field.
 const MFWeakFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getMFFieldMFPub_weakptr(void) const
 {
     return &_mfFieldMFPub_weakptr;
+}
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldMFPub_weakptr(const UInt32 index) const
+{
+    return _mfFieldMFPub_weakptr[index];
 }
 
 //! Get the FCDPtrTestFCNullCheckAccess::_mfFieldMFPub_mpchildptr field.
@@ -988,11 +1088,19 @@ const MFUnrecChildFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getMFFieldMFPub
 {
     return &_mfFieldMFPub_mpchildptr;
 }
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldMFPub_mpchildptr(const UInt32 index) const
+{
+    return _mfFieldMFPub_mpchildptr[index];
+}
 
 //! Get the FCDPtrTestFCNullCheckAccess::_mfFieldMFPro_ptr field.
 const MFUnrecFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getMFFieldMFPro_ptr(void) const
 {
     return &_mfFieldMFPro_ptr;
+}
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldMFPro_ptr(const UInt32 index) const
+{
+    return _mfFieldMFPro_ptr[index];
 }
 
 //! Get the FCDPtrTestFCNullCheckAccess::_mfFieldMFPro_weakptr field.
@@ -1000,11 +1108,19 @@ const MFWeakFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getMFFieldMFPro_weakp
 {
     return &_mfFieldMFPro_weakptr;
 }
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldMFPro_weakptr(const UInt32 index) const
+{
+    return _mfFieldMFPro_weakptr[index];
+}
 
 //! Get the FCDPtrTestFCNullCheckAccess::_mfFieldMFPro_mpchildptr field.
 const MFUnrecChildFCDTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getMFFieldMFPro_mpchildptr(void) const
 {
     return &_mfFieldMFPro_mpchildptr;
+}
+FCDTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldMFPro_mpchildptr(const UInt32 index) const
+{
+    return _mfFieldMFPro_mpchildptr[index];
 }
 
 
@@ -1023,6 +1139,21 @@ SFUnrecChildFCDSParTestFCPtr *FCDPtrTestFCNullCheckAccessBase::editSFFieldSFPub_
     return &_sfFieldSFPub_spchildptr;
 }
 
+//! Get the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPub_spchildptr field.
+FCDSParTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldSFPub_spchildptr(void) const
+{
+    return _sfFieldSFPub_spchildptr.getValue();
+}
+
+//! Set the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPub_spchildptr field.
+void FCDPtrTestFCNullCheckAccessBase::setFieldSFPub_spchildptr(FCDSParTestFC * const value)
+{
+    editSField(FieldSFPub_spchildptrFieldMask);
+
+    _sfFieldSFPub_spchildptr.setValue(value);
+}
+
+
 //! Get the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_spchildptr field.
 const SFUnrecChildFCDSParTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getSFFieldSFPro_spchildptr(void) const
 {
@@ -1036,17 +1167,40 @@ SFUnrecChildFCDSParTestFCPtr *FCDPtrTestFCNullCheckAccessBase::editSFFieldSFPro_
     return &_sfFieldSFPro_spchildptr;
 }
 
+//! Get the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_spchildptr field.
+FCDSParTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldSFPro_spchildptr(void) const
+{
+    return _sfFieldSFPro_spchildptr.getValue();
+}
+
+//! Set the value of the FCDPtrTestFCNullCheckAccess::_sfFieldSFPro_spchildptr field.
+void FCDPtrTestFCNullCheckAccessBase::setFieldSFPro_spchildptr(FCDSParTestFC * const value)
+{
+    editSField(FieldSFPro_spchildptrFieldMask);
+
+    _sfFieldSFPro_spchildptr.setValue(value);
+}
+
+
 
 //! Get the FCDPtrTestFCNullCheckAccess::_mfFieldMFPub_spchildptr field.
 const MFUnrecChildFCDSParTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getMFFieldMFPub_spchildptr(void) const
 {
     return &_mfFieldMFPub_spchildptr;
 }
+FCDSParTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldMFPub_spchildptr(const UInt32 index) const
+{
+    return _mfFieldMFPub_spchildptr[index];
+}
 
 //! Get the FCDPtrTestFCNullCheckAccess::_mfFieldMFPro_spchildptr field.
 const MFUnrecChildFCDSParTestFCPtr *FCDPtrTestFCNullCheckAccessBase::getMFFieldMFPro_spchildptr(void) const
 {
     return &_mfFieldMFPro_spchildptr;
+}
+FCDSParTestFC * FCDPtrTestFCNullCheckAccessBase::getFieldMFPro_spchildptr(const UInt32 index) const
+{
+    return _mfFieldMFPro_spchildptr[index];
 }
 
 

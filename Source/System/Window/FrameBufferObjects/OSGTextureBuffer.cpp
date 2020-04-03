@@ -52,6 +52,7 @@
 #include "OSGWindow.h"
 #include "OSGDrawEnv.h"
 #include "OSGTextureObjChunk.h"
+#include "OSGCubeTextureObjChunk.h"
 #include "OSGImage.h"
 
 OSG_BEGIN_NAMESPACE
@@ -193,16 +194,89 @@ void TextureBuffer::resizeBuffers(UInt32 uiWidth, UInt32 uiHeight)
         return;
 
     pImg->set(pImg->getPixelFormat(), //Image::OSG_RGB_PF, 
-              uiWidth, 
-              uiHeight,
-              pImg->getDepth      (),
-              pImg->getMipMapCount(),
-              pImg->getFrameCount (),
-              pImg->getFrameDelay (),
-              NULL,
-              pImg->getDataType   (), //Image::OSG_UINT8_IMAGEDATA,
-              false,
-              pImg->getSideCount  ());
+                uiWidth, 
+                uiHeight,
+                pImg->getDepth      (),
+                pImg->getMipMapCount(),
+                pImg->getFrameCount (),
+                pImg->getFrameDelay (),
+                NULL,
+                pImg->getDataType   (), //Image::OSG_UINT8_IMAGEDATA,
+                false,
+                pImg->getSideCount  ());
+
+    CubeTextureObjChunk *pCubeTex = dynamic_cast<CubeTextureObjChunk*>(pTex);
+    if (pCubeTex)
+    {
+        Image *pPosZImg = pCubeTex->getPosZImage();
+        Image *pPosYImg = pCubeTex->getPosYImage();
+        Image *pPosXImg = pCubeTex->getPosXImage();
+        Image *pNegYImg = pCubeTex->getNegYImage();
+        Image *pNegXImg = pCubeTex->getNegXImage();
+
+        if(pPosZImg == NULL || pPosYImg == NULL || pPosXImg == NULL || pNegYImg == NULL || pNegXImg == NULL)
+            return;
+
+        pPosZImg->set(pPosZImg->getPixelFormat(), //Image::OSG_RGB_PF, 
+                      uiWidth, 
+                      uiHeight,
+                      pPosZImg->getDepth      (),
+                      pPosZImg->getMipMapCount(),
+                      pPosZImg->getFrameCount (),
+                      pPosZImg->getFrameDelay (),
+                      NULL,
+                      pPosZImg->getDataType   (), //Image::OSG_UINT8_IMAGEDATA,
+                      false,
+                      pPosZImg->getSideCount  ());
+
+        pPosYImg->set(pPosYImg->getPixelFormat(), //Image::OSG_RGB_PF, 
+                      uiWidth, 
+                      uiHeight,
+                      pPosYImg->getDepth      (),
+                      pPosYImg->getMipMapCount(),
+                      pPosYImg->getFrameCount (),
+                      pPosYImg->getFrameDelay (),
+                      NULL,
+                      pPosYImg->getDataType   (), //Image::OSG_UINT8_IMAGEDATA,
+                      false,
+                      pPosYImg->getSideCount  ());
+
+        pPosXImg->set(pPosXImg->getPixelFormat(), //Image::OSG_RGB_PF, 
+                      uiWidth, 
+                      uiHeight,
+                      pPosXImg->getDepth      (),
+                      pPosXImg->getMipMapCount(),
+                      pPosXImg->getFrameCount (),
+                      pPosXImg->getFrameDelay (),
+                      NULL,
+                      pPosXImg->getDataType   (), //Image::OSG_UINT8_IMAGEDATA,
+                      false,
+                      pPosXImg->getSideCount  ());
+
+        pNegYImg->set(pNegYImg->getPixelFormat(), //Image::OSG_RGB_PF, 
+                      uiWidth, 
+                      uiHeight,
+                      pNegYImg->getDepth      (),
+                      pNegYImg->getMipMapCount(),
+                      pNegYImg->getFrameCount (),
+                      pNegYImg->getFrameDelay (),
+                      NULL,
+                      pNegYImg->getDataType   (), //Image::OSG_UINT8_IMAGEDATA,
+                      false,
+                      pNegYImg->getSideCount  ());
+
+        pNegXImg->set(pNegXImg->getPixelFormat(), //Image::OSG_RGB_PF, 
+                      uiWidth, 
+                      uiHeight,
+                      pNegXImg->getDepth      (),
+                      pNegXImg->getMipMapCount(),
+                      pNegXImg->getFrameCount (),
+                      pNegXImg->getFrameDelay (),
+                      NULL,
+                      pNegXImg->getDataType   (), //Image::OSG_UINT8_IMAGEDATA,
+                      false,
+                      pNegXImg->getSideCount  ());
+    }
 }
 
 GLenum TextureBuffer::getBufferFormat(void) const
@@ -232,30 +306,6 @@ void TextureBuffer::processPreDeactivate(DrawEnv *pEnv, UInt32 index)
         
         if(pTexObj == NULL)
             return;
-        
-        Image *pTexImg = pTexObj->getImage();
-
-        if(pTexImg == NULL)
-            return;
-
-        if(pTexImg->getData() == NULL)
-        {
-            SINFO << "TextureBuffer::render: (Re)Allocating image "
-                  << "for read-back."
-                  << endLog;
-            
-            pTexImg->set(pTexImg->getPixelFormat(),
-                         pTexImg->getWidth      (),
-                         pTexImg->getHeight     (),
-                         pTexImg->getDepth      (),
-                         pTexImg->getMipMapCount(),
-                         pTexImg->getFrameCount (),
-                         pTexImg->getFrameDelay (),
-                         NULL,
-                         pTexImg->getDataType   (),
-                         true,
-                         pTexImg->getSideCount  () );
-        }
 
         UInt32  mipMapLevel = _sfLevel.getValue();
         UInt32  frame       = 0;
@@ -272,41 +322,99 @@ void TextureBuffer::processPreDeactivate(DrawEnv *pEnv, UInt32 index)
             target = _sfTexture.getValue()->determineTextureTarget(pWindow);
         }
 
-        switch(target)
+        Image *pTexImg = NULL;
+
+        CubeTextureObjChunk *pCubeTex = dynamic_cast<CubeTextureObjChunk*>(pTexObj);
+
+        if (pCubeTex)
         {
-            case GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB:
-                side = 0;
-                break;
-            case GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB:
-                side = 1;
-                break;
-            case GL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB:
-                side = 2;
-                break;
-            case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB:
-                side = 3;
-                break;
-            case GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB:
-                side = 4;
-                break;
-            case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB:
-                side = 5;
-                break;
+            side = 0;
+
+            switch(target)
+            {
+                case GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB:
+                    pTexImg = pCubeTex->getPosXImage();
+                    break;
+                case GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB:
+                    pTexImg = pCubeTex->getNegXImage();
+                    break;
+                case GL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB:
+                    pTexImg = pCubeTex->getPosYImage();
+                    break;
+                case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB:
+                    pTexImg = pCubeTex->getNegYImage();
+                    break;
+                case GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB:
+                    pTexImg = pCubeTex->getPosZImage();
+                    break;
+                case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB:
+                    pTexImg = pTexObj->getImage();
+                    break;
+            }
+        }
+        else
+        {
+            pTexImg = pTexObj->getImage();
+
+            switch(target)
+            {
+                case GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB:
+                    side = 0;
+                    break;
+                case GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB:
+                    side = 1;
+                    break;
+                case GL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB:
+                    side = 2;
+                    break;
+                case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB:
+                    side = 3;
+                    break;
+                case GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB:
+                    side = 4;
+                    break;
+                case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB:
+                    side = 5;
+                    break;
+            }
+        }
+
+        if(pTexImg == NULL)
+            return;
+
+        if(pTexImg->getData() == NULL)
+        {
+            SINFO << "TextureBuffer::render: (Re)Allocating image "
+                    << "for read-back."
+                    << endLog;
+            
+            pTexImg->set(pTexImg->getPixelFormat(),
+                         pTexImg->getWidth      (),
+                         pTexImg->getHeight     (),
+                         pTexImg->getDepth      (),
+                         pTexImg->getMipMapCount(),
+                         pTexImg->getFrameCount (),
+                         pTexImg->getFrameDelay (),
+                         NULL,
+                         pTexImg->getDataType   (),
+                         true,
+                         pTexImg->getSideCount  () );
         }
 
         // select GL_COLORATTACHMENTn and read data into image
 #ifndef OSG_OGL_ES2
         glReadBuffer(index);
 #endif
-        glReadPixels(0, 0, 
-                     pTexImg->getWidth      (),
-                     pTexImg->getHeight     (),
-                     pTexImg->getPixelFormat(),
-                     pTexImg->getDataType   (),
-                     pTexImg->editData      (mipMapLevel, frame, side));
         
+        glReadPixels(0, 0, 
+                        pTexImg->getWidth      (),
+                        pTexImg->getHeight     (),
+                        pTexImg->getPixelFormat(),
+                        pTexImg->getDataType   (),
+                        pTexImg->editData      (mipMapLevel, frame, side));
+
 #ifndef OSG_OGL_ES2
-        glReadBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
 #endif
     }
 }

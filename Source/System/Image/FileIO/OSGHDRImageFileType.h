@@ -43,6 +43,8 @@
 #pragma  once
 #endif
 
+#include <boost/array.hpp>
+
 #include "OSGImageFileIODef.h"
 #include "OSGImageFileType.h"
 
@@ -125,12 +127,31 @@ class OSG_IMGFILEIO_DLLMAPPING HDRImageFileType : public ImageFileType
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
 
-
-    typedef unsigned char RGBE[4];
+    typedef boost::array<unsigned char, 4> RGBE;
+    typedef std::vector<RGBE>              ScanlineT;
+    typedef std::vector<unsigned char>     ScratchT;
 
     bool checkHDR   (std::istream &is, 
                           int     &width, 
                           int     &height);
+
+    bool handleNonRunLengthEncodedData(
+                    std::istream  &is, 
+                    Real16        *data, 
+                    int            width, 
+                    int            height,
+                    ScanlineT     &sline,
+                    unsigned char  rgbe[4]);
+
+    bool handleNonRunLengthEncodedData(
+                    std::istream  &is, 
+                    Real32         *data, 
+                    int            width, 
+                    int            height,
+                    ScanlineT     &sline,
+                    unsigned char  rgbe[4]);
+
+
     bool radiance2fp(std::istream &is, 
                           Real16  *data, 
                           int      width, 
@@ -142,33 +163,38 @@ class OSG_IMGFILEIO_DLLMAPPING HDRImageFileType : public ImageFileType
     bool freadcolrs (std::istream &is, 
                           RGBE    *scan, 
                           int      width);
-    void RGBE2Float (     RGBE     rgbe, 
-                          Real32  *fcol);
-    void RGBE2Half  (     RGBE     rgbe, 
-                          Real16  *fcol);
 
-    int  fwritecolrs(std:: ostream &os, 
-                     const Real32  *scan, 
-                           RGBE    *rgbe_scan, 
-                           int      width, 
-                           int      height);
+    void RGBE2Float (const RGBE    &rgbe, 
+                           Real32  *fcol);
+    void RGBE2Half  (const RGBE    &rgbe, 
+                           Real16  *fcol);
 
-    int  fwritecolrs(std:: ostream &os, 
-                     const Real16  *scan, 
-                           RGBE    *rgbe_scan, 
-                           int      width, 
-                           int      height);
 
-    int fwriteRGBE  (std::ostream &os, 
-                          RGBE    *rgbe_scan, 
-                          int      width, 
-                          int      height);
+    int  fwritecolrs(std:: ostream   &os, 
+                     const Real32    *scan, 
+                           ScanlineT &rgbe_scan, 
+                           ScratchT  &scratch,
+                           int        width, 
+                           int        height);
+
+    int  fwritecolrs(std:: ostream   &os, 
+                     const Real16    *scan, 
+                           ScanlineT &rgbe_scan, 
+                           ScratchT  &scratch,
+                           int        width, 
+                           int        height);
+
+    int fwriteRGBE  (std::ostream   &os, 
+                          ScanlineT &rgbe_scan, 
+                          ScratchT  &scratch,
+                          int        width, 
+                          int        height);
 
     void float2RGBE (const Real32  *fcol, 
-                           RGBE     rgbe);
+                           RGBE    &rgbe);
 
     void half2RGBE  (const Real16  *fcol, 
-                           RGBE     rgbe);
+                           RGBE    &rgbe);
 
 
     static  HDRImageFileType _the;

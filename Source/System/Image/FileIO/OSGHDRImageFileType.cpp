@@ -192,7 +192,8 @@ bool HDRImageFileType::write(const Image        *image,
     os << "EXPOSURE=" << 1.0f << std::endl << std::endl;
     os << "-Y " << height << " +X " << width << std::endl;
 
-    RGBE *rgbe_scan = new RGBE[width];
+    ScanlineT rgbe_scan(width);
+    ScratchT  scratch(4 * width);
 
     if( image->getDataType() == Image::OSG_FLOAT32_IMAGEDATA)
     {
@@ -204,10 +205,10 @@ bool HDRImageFileType::write(const Image        *image,
             if (fwritecolrs(os, 
                             &data[y * width * 3], 
                             rgbe_scan, 
+                            scratch,
                             width, 
                             height) < 0)
             {
-                delete [] rgbe_scan;
                 return false;
             }
         }
@@ -222,16 +223,15 @@ bool HDRImageFileType::write(const Image        *image,
             if(fwritecolrs(os, 
                            &data[y * width * 3], 
                            rgbe_scan, 
+                           scratch,
                            width, 
                            height) < 0)
             {
-                delete [] rgbe_scan;
                 return false;
             }
         }
     }
 
-    delete [] rgbe_scan;
     return true;
 }
 
@@ -325,54 +325,77 @@ bool HDRImageFileType::checkHDR(std::istream &is, int &width, int &height)
     
     return HDRok;
 }
-// convert radiance hdr to float image (streaming type)
-bool HDRImageFileType::radiance2fp(std::istream &is, 
-                                        Real16  *data, 
-                                        int      width, 
-                                        int      height)
+
+bool HDRImageFileType::handleNonRunLengthEncodedData(
+    std::istream  &is, 
+    Real16        *data, 
+    int            width, 
+    int            height,
+    ScanlineT     &sline,
+    unsigned char  rgbe[4])
 {
     int x,y,yx;
-    RGBE *sline = new RGBE[width];
 
-    if (!sline)
-        return false;
+    for(int i=0;i<4;i++)
+        sline[0][i] = rgbe[i];
 
-    for(y=height-1;y>=0;y--)
+    for(y = height-1; y >= 0; y--)
     {
         yx = y*width;
-        if (!freadcolrs(is, sline, width))
-            return false;
-        Real16 *fcol = &data[yx * 3];
+
+        for (int j=1; j < width; ++j)
+        {
+            rgbe[0] = static_cast<unsigned char>(is.get());
+            rgbe[1] = static_cast<unsigned char>(is.get());
+            rgbe[2] = static_cast<unsigned char>(is.get());
+            rgbe[3] = static_cast<unsigned char>(is.get());
+
+            for(int i=0;i<4;i++)
+                sline[j][i] = rgbe[i];
+        }
+
+        Real16* fcol = &data[yx * 3];
         for (x=0;x<width;x++)
         {
             RGBE2Half(sline[x], fcol);
             fcol += 3;
         }
     }
-    delete[] sline;
 
     return true;
 }
 
-
-// convert radiance hdr to float image (streaming type)
-bool HDRImageFileType::radiance2fp(std::istream &is, 
-                                        Real32  *data, 
-                                        int      width, 
-                                        int      height)
+bool HDRImageFileType::handleNonRunLengthEncodedData(
+    std::istream  &is, 
+    Real32        *data, 
+    int            width, 
+    int            height,
+    ScanlineT     &sline,
+    unsigned char  rgbe[4])
 {
     int x,y,yx;
-    RGBE *sline = new RGBE[width];
 
-    if (!sline)
-        return false;
+    for(int i=0;i<4;i++)
+        sline[0][i] = rgbe[i];
 
-    for(y=height-1;y>=0;y--)
+    int j=1;
+
+    for(y = height-1; y >= 0; y--, j=0)
     {
         yx = y*width;
-        if (!freadcolrs(is, sline, width))
-            return false;
-        Real32 *fcol = &data[yx * 3];
+
+        for (; j < width; ++j)
+        {
+            rgbe[0] = static_cast<unsigned char>(is.get());
+            rgbe[1] = static_cast<unsigned char>(is.get());
+            rgbe[2] = static_cast<unsigned char>(is.get());
+            rgbe[3] = static_cast<unsigned char>(is.get());
+
+            for(int i=0;i<4;i++)
+                sline[j][i] = rgbe[i];
+        }
+
+        Real32* fcol = &data[yx * 3];
         for (x=0;x<width;x++)
         {
             RGBE2Float(sline[x], fcol);
@@ -380,70 +403,182 @@ bool HDRImageFileType::radiance2fp(std::istream &is,
         }
     }
 
-    delete[] sline;
+    return true;
+}
+
+// convert radiance hdr to float image (streaming type)
+bool HDRImageFileType::radiance2fp(std::istream &is, 
+                                   Real16       *data, 
+                                   int           width, 
+                                   int           height)
+{
+    int x,y,yx;
+    ScanlineT sline(width);
+
+    int code,val;
+    unsigned char c1, c2, len;
+
+    if ((width < MINELEN) | (width > MAXELEN))
+    {
+        // Read flat data
+        unsigned char rgbe[4];
+
+        rgbe[0] = static_cast<unsigned char>(is.get()); if (is.eof()) return false;
+        rgbe[1] = static_cast<unsigned char>(is.get());
+        rgbe[2] = static_cast<unsigned char>(is.get());
+        rgbe[3] = static_cast<unsigned char>(is.get());
+
+        return handleNonRunLengthEncodedData(is, data, width, height, sline, rgbe);
+    }
+
+    for(y=height-1;y>=0;y--)
+    {
+        yx = y*width;
+
+                        c1  = static_cast<unsigned char>(is.get());     if (is.eof()) return false;
+        sline[0][GRN] = c2  = static_cast<unsigned char>(is.get());
+        sline[0][BLU] = len = static_cast<unsigned char>(is.get());
+
+        if ( c1 != 2 || c2 != 2 || (len & 0x80) )
+        {
+            // not run-length encoded, so we have to actually use THIS data as a decoded
+            // pixel (note this can't be a valid pixel--one of RGB must be >= 128)
+
+            unsigned char rgbe[4];
+            rgbe[0] = c1;
+            rgbe[1] = c2;
+            rgbe[2] = len;
+            rgbe[3] = static_cast<unsigned char>(is.get());
+
+            return handleNonRunLengthEncodedData(is, data, width, height, sline, rgbe);
+        }
+
+        len <<= 8;
+        len |= is.get();
+
+        for(int i=0;i<4;i++)
+        {
+            for (int j=0;j<width;)
+            {
+                if (is.eof())
+                    return false;
+
+                code = is.get();
+                    
+                if (code > 128)
+                {
+                    code &= 127;
+                    val = is.get();
+                    
+                    while (code--)
+                        sline[j++][i] = static_cast<unsigned char>(val);
+                }
+                else
+                {
+                    while (code--) 
+                      sline[j++][i] = is.get();
+                }
+            }
+        }
+
+        Real16* fcol = &data[yx * 3];
+        for (x=0;x<width;x++)
+        {
+            RGBE2Half(sline[x], fcol);
+            fcol += 3;
+        }
+    }
     
     return true;
 }
 
-// read and decode a rgbe scanline (streaming type)
-bool HDRImageFileType::freadcolrs(std::istream &is, RGBE *scan, int width)
+bool HDRImageFileType::radiance2fp(std::istream &is, 
+                                   Real32       *data, 
+                                   int           width, 
+                                   int           height)
 {
-    int i,j,code,val,size;
-    unsigned char byte;
+    int x,y,yx;
+    ScanlineT sline(width);
+
+    int code,val;
+    unsigned char c1, c2, len;
 
     if ((width < MINELEN) | (width > MAXELEN))
     {
-        FWARNING(("Sorry, format probably too old\n"));
-        return false;
+        // Read flat data
+        unsigned char rgbe[4];
+
+        rgbe[0] = static_cast<unsigned char>(is.get()); if (is.eof()) return false;
+        rgbe[1] = static_cast<unsigned char>(is.get());
+        rgbe[2] = static_cast<unsigned char>(is.get());
+        rgbe[3] = static_cast<unsigned char>(is.get());
+
+        return handleNonRunLengthEncodedData(is, data, width, height, sline, rgbe);
     }
 
-    byte = static_cast<unsigned char>(is.get());
-    if (is.eof())
-        return false;
-
-    byte = static_cast<unsigned char>(is.get());
-    scan[0][GRN] = byte;
-
-    byte = static_cast<unsigned char>(is.get());
-    scan[0][BLU] = byte;
-
-    size = (int(scan[0][BLU])) << 8;
-    i = is.get();
-
-    if ( (size | i) != width )
-        return false;
-
-    for(i=0;i<4;i++)
+    for(y=height-1;y>=0;y--)
     {
-        for (j=0;j<width;)
+        yx = y*width;
+
+                        c1  = static_cast<unsigned char>(is.get());     if (is.eof()) return false;
+        sline[0][GRN] = c2  = static_cast<unsigned char>(is.get());
+        sline[0][BLU] = len = static_cast<unsigned char>(is.get());
+
+        if ( c1 != 2 || c2 != 2 || (len & 0x80) )
         {
-            if (is.eof())
-                return false;
-            
-            code = is.get();
-                
-            if (code > 128)
+            // not run-length encoded, so we have to actually use THIS data as a decoded
+            // pixel (note this can't be a valid pixel--one of RGB must be >= 128)
+
+            unsigned char rgbe[4];
+            rgbe[0] = c1;
+            rgbe[1] = c2;
+            rgbe[2] = len;
+            rgbe[3] = static_cast<unsigned char>(is.get());
+
+            return handleNonRunLengthEncodedData(is, data, width, height, sline, rgbe);
+        }
+
+        len <<= 8;
+        len |= is.get();
+
+        for(int i=0;i<4;i++)
+        {
+            for (int j=0;j<width;)
             {
-                code &= 127;
-                val = is.get();
-                
-                while (code--)
-                    scan[j++][i] = static_cast<unsigned char>(val);
+                if (is.eof())
+                    return false;
+
+                code = is.get();
+                    
+                if (code > 128)
+                {
+                    code &= 127;
+                    val = is.get();
+                    
+                    while (code--)
+                        sline[j++][i] = static_cast<unsigned char>(val);
+                }
+                else
+                {
+                    while (code--) 
+                      sline[j++][i] = is.get();
+                }
             }
-            else
-            {
-                while (code--) 
-                  scan[j++][i] = is.get();
-            }
+        }
+
+        Real32* fcol = &data[yx * 3];
+        for (x=0;x<width;x++)
+        {
+            RGBE2Float(sline[x], fcol);
+            fcol += 3;
         }
     }
     
-    return is.eof() ? false : true;
+    return true;
 }
 
-
 //rgbe -> float color
-void HDRImageFileType::RGBE2Float(RGBE rgbe, Real32 *fcol)
+void HDRImageFileType::RGBE2Float(const RGBE& rgbe, Real32 *fcol)
 {
     if (rgbe[EXP] == 0)
     {
@@ -458,7 +593,7 @@ void HDRImageFileType::RGBE2Float(RGBE rgbe, Real32 *fcol)
     }
 }
 
-void HDRImageFileType::RGBE2Half(RGBE rgbe, Real16 *fcol)
+void HDRImageFileType::RGBE2Half(const RGBE& rgbe, Real16 *fcol)
 {
     if(rgbe[EXP] == 0)
     {
@@ -474,11 +609,12 @@ void HDRImageFileType::RGBE2Half(RGBE rgbe, Real16 *fcol)
     }
 }
 
-int HDRImageFileType::fwritecolrs(std:: ostream &os, 
-                                  const Real32  *scan, 
-                                        RGBE    *rgbe_scan,
-                                        int      width, 
-                                        int      height   )
+int HDRImageFileType::fwritecolrs(std:: ostream   &os, 
+                                  const Real32    *scan, 
+                                        ScanlineT &rgbe_scan, 
+                                        ScratchT  &scratch,
+                                        int        width, 
+                                        int        height   )
 {
     // convert scanline
     for (int i=0;i<width;i++)
@@ -487,14 +623,15 @@ int HDRImageFileType::fwritecolrs(std:: ostream &os,
         scan += 3;
     }
 
-    return fwriteRGBE(os, rgbe_scan, width, height);
+    return fwriteRGBE(os, rgbe_scan, scratch, width, height);
 }
 
-int HDRImageFileType::fwritecolrs(std:: ostream &os, 
-                                  const Real16  *scan, 
-                                        RGBE    *rgbe_scan,
-                                        int      width, 
-                                        int      height)
+int HDRImageFileType::fwritecolrs(std:: ostream   &os, 
+                                  const Real16    *scan, 
+                                        ScanlineT &rgbe_scan, 
+                                        ScratchT  &scratch,
+                                        int        width, 
+                                        int        height)
 {
     // convert scanline
     for(int i=0;i<width;i++)
@@ -503,89 +640,102 @@ int HDRImageFileType::fwritecolrs(std:: ostream &os,
         scan += 3;
     }
 
-    return fwriteRGBE(os, rgbe_scan, width, height);
+    return fwriteRGBE(os, rgbe_scan, scratch, width, height);
 }
 
-int HDRImageFileType::fwriteRGBE(std::ostream &os,  
-                                      RGBE    *rgbe_scan, 
-                                      int      width, 
-                                      int      height)
+int HDRImageFileType::fwriteRGBE(std::ostream   &os,  
+                                      ScanlineT &rgbe_scan, 
+                                      ScratchT  &scratch,
+                                      int        width, 
+                                      int        height)
 {
-    int i, j, beg, c2, cnt=0;
-
     if ((width < MINELEN) | (width > MAXELEN))
     {
         // OOBs, write out flat
-        os.write(reinterpret_cast<char *>(rgbe_scan), width);
+        os.write(reinterpret_cast<char *>(&rgbe_scan[0]), width);
         return 0;
+    }
+
+    for(int j=0;j<width;j++)
+    {
+        scratch[j + width*0] = rgbe_scan[j][0];
+        scratch[j + width*1] = rgbe_scan[j][1];
+        scratch[j + width*2] = rgbe_scan[j][2];
+        scratch[j + width*3] = rgbe_scan[j][3];
     }
 
     // put magic header
     os << static_cast<unsigned char>(2);
     os << static_cast<unsigned char>(2);
-    os << static_cast<unsigned char>(width>>8);
-    os << static_cast<unsigned char>(width&255);
+    os << static_cast<unsigned char>((width&0xff00) >>8);
+    os << static_cast<unsigned char>( width&0x00ff     );
 
-    // put components seperately
-    for (i=0;i<4;i++)
+    /* RLE each component separately */
+    int x;
+    int c,r;
+
+    for (c=0; c < 4; c++)
     {
-        for (j=0;j<width;j+=cnt)
-        {
-            // find next run
-            for (beg=j;beg<width;beg+=cnt)
-            {
-                for(cnt=1; 
-                    (cnt<127)&&
-                        ((beg+cnt)<width)&&
-                        (rgbe_scan[beg+cnt][i]==rgbe_scan[beg][i]); 
-                    cnt++) ;
+        unsigned char *comp = &scratch[width*c];
 
-                if (cnt>=MINRUN)
+        x = 0;
+        while (x < width)
+        {
+            // find first run
+            r = x;
+            while (r+2 < width)
+            {
+                if (comp[r] == comp[r+1] && comp[r] == comp[r+2])
                     break;
-                    // long enough
+                ++r;
             }
-            if (((beg-j)>1) && ((beg-j) < MINRUN))
+    
+            if (r+2 >= width)
+                r = width;
+    
+            // dump up to first run
+            while (x < r)
             {
-                c2 = j+1;
-                while (rgbe_scan[c2++][i] == rgbe_scan[j][i])
-                {
-                    if (c2 == beg)
-                    {
-                        // short run
-                        os << static_cast<unsigned char>(128+beg-j);
-                        os << static_cast<unsigned char>(rgbe_scan[j][i]);
-                        j = beg;
-                        break;
-                    }
-                }
-            }
-            while (j < beg)
-            {
-                // write out non-run
-                if ((c2 = beg-j) > 128)
-                    c2 = 128;
-                os << static_cast<unsigned char>(c2);
+                int len = r-x;
+                if (len > 128)
+                    len = 128;
+    
+                os << static_cast<unsigned char>(len);
+                os.write(reinterpret_cast<const char*>(&comp[x]), len);
                 
-                while (c2--)
-                    os << rgbe_scan[j++][i];
+                x += len;
             }
-            if (cnt >= MINRUN)
+    
+            // if there's a run, output it
+            if (r+2 < width)    // same test as what we break out of in search loop, so only true if we break'd
             {
-                // write out run
-                os << static_cast<unsigned char>(128+cnt);
-                os << rgbe_scan[beg][i];
-            }
-            else
-            {
-                cnt = 0;
+                // find next byte after run
+                while (r < width && comp[r] == comp[x])
+                    ++r;
+    
+                // output run up to r
+                while (x < r)
+                {
+                    int len = r-x;
+                    if (len > 127)
+                        len = 127;
+    
+                    unsigned char lengthbyte = static_cast<unsigned char>(len+128);
+
+                    os << lengthbyte;
+                    os << comp[x];
+
+                    x += len;
+                }
             }
         }
     }
+
     return (os.fail() ? -1 : 0);
 }
 
 //float color -> rgbe
-void HDRImageFileType::float2RGBE(const Real32 *fcol, RGBE rgbe)
+void HDRImageFileType::float2RGBE(const Real32 *fcol, RGBE& rgbe)
 {
     Real32 d = (*(fcol + RED) > *(fcol + GRN)) ? *(fcol + RED) : *(fcol + GRN);
     
@@ -609,7 +759,7 @@ void HDRImageFileType::float2RGBE(const Real32 *fcol, RGBE rgbe)
 }
 
 //half color -> rgbe
-void HDRImageFileType::half2RGBE(const Real16 *fcol, RGBE rgbe)
+void HDRImageFileType::half2RGBE(const Real16 *fcol, RGBE& rgbe)
 {
     Real32 d = (*(fcol + RED) > *(fcol + GRN)) ? *(fcol + RED) : *(fcol + GRN);
     

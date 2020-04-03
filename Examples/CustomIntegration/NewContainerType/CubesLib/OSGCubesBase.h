@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -72,6 +72,7 @@
 #include "OSGCubesFields.h"
 
 OSG_BEGIN_NAMESPACE
+
 
 class Cubes;
 
@@ -148,13 +149,13 @@ class OSG_CUBESLIB_DLLMAPPING CubesBase : public MaterialDrawable
             const MFColor3f           *getMFColor           (void) const;
 
 
-                  Pnt3f               &editPosition       (const UInt32 index);
+            MFPnt3f            ::reference       editPosition       (const UInt32 index);
             const Pnt3f               &getPosition        (const UInt32 index) const;
 
-                  Real32              &editLength         (const UInt32 index);
+            MFReal32           ::reference       editLength         (const UInt32 index);
                   Real32               getLength          (const UInt32 index) const;
 
-                  Color3f             &editColor          (const UInt32 index);
+            MFColor3f          ::reference       editColor          (const UInt32 index);
             const Color3f             &getColor           (const UInt32 index) const;
 
     /*! \}                                                                 */
@@ -173,7 +174,7 @@ class OSG_CUBESLIB_DLLMAPPING CubesBase : public MaterialDrawable
     /*! \name                   Binary Access                              */
     /*! \{                                                                 */
 
-    virtual UInt32 getBinSize (ConstFieldMaskArg  whichField);
+    virtual SizeT  getBinSize (ConstFieldMaskArg  whichField);
     virtual void   copyToBin  (BinaryDataHandler &pMem,
                                ConstFieldMaskArg  whichField);
     virtual void   copyFromBin(BinaryDataHandler &pMem,
@@ -251,12 +252,12 @@ class OSG_CUBESLIB_DLLMAPPING CubesBase : public MaterialDrawable
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-    GetFieldHandlePtr  getHandlePosition        (void) const;
-    EditFieldHandlePtr editHandlePosition       (void);
-    GetFieldHandlePtr  getHandleLength          (void) const;
-    EditFieldHandlePtr editHandleLength         (void);
-    GetFieldHandlePtr  getHandleColor           (void) const;
-    EditFieldHandlePtr editHandleColor          (void);
+     GetFieldHandlePtr  getHandlePosition        (void) const;
+     EditFieldHandlePtr editHandlePosition       (void);
+     GetFieldHandlePtr  getHandleLength          (void) const;
+     EditFieldHandlePtr editHandleLength         (void);
+     GetFieldHandlePtr  getHandleColor           (void) const;
+     EditFieldHandlePtr editHandleColor          (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

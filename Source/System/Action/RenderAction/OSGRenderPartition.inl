@@ -382,13 +382,27 @@ void RenderPartition::popState(void)
 inline
 void RenderPartition::addOverride(UInt32 uiSlot, StateChunk *pChunk)
 {
-    _sStateOverrides.top()->addOverride(uiSlot, pChunk);
+    if (_bPermitOverride)
+        _sStateOverrides.top()->addOverride(uiSlot, pChunk);
 }
 
 inline
 void RenderPartition::subOverride(UInt32 uiSlot, StateChunk *pChunk)
 {
-    _sStateOverrides.top()->subOverride(uiSlot, pChunk);
+    if (_bPermitOverride)
+        _sStateOverrides.top()->subOverride(uiSlot, pChunk);
+}
+
+inline
+void RenderPartition::activateOverride()
+{
+    _bPermitOverride = true;
+}
+
+inline
+void RenderPartition::deactivateOverride()
+{
+    _bPermitOverride = false;
 }
 
 inline

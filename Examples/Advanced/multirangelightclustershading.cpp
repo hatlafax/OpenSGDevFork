@@ -25,6 +25,10 @@
 //      - only tested on decsent NVidia GPUs
 //      - this example is a proof of concept
 //      - this example is not performance optimized
+//      - there is an example multirangelightclustershadingstage.cpp that
+//        basically shows this example implemented with the specialized
+//        ClusterShadingStage that takes over of most of the work and 
+//        details of this example.
 //
 // Key bindings:
 //      Esc   : quit example
@@ -59,7 +63,7 @@
 #include <boost/foreach.hpp>
 #include <boost/random.hpp>
 #include <boost/tuple/tuple.hpp>
-#include "boost/tuple/tuple_comparison.hpp"
+#include <boost/tuple/tuple_comparison.hpp>
 #include <boost/multi_array.hpp>
 
 #ifdef OSG_BUILD_ACTIVE
@@ -155,7 +159,6 @@
 #include <OpenSG/OSGComputeShaderAlgorithm.h>
 #include <OpenSG/OSGComputeShaderChunk.h>
 #include <OpenSG/OSGGeoProperties.h>
-
 #endif
 
 // ============================================================================
@@ -2207,8 +2210,7 @@ struct Light
 
     OSG::Pnt3f   position;                  // light position in object space for point and spot lights
     OSG::Vec3f   direction;                 // direction of directional light or spot light in object space
-    OSG::Color3f color;                     // the color of the light
-    OSG::Real32  intensity;                 // the intensity of the light
+    OSG::Vec3f   intensity;                 // the intensity of the light
     OSG::Real32  range;                     // the range of the light, i.e. the light sphere radius of influence
     OSG::Real32  spotlightAngle;            // the cone angle in case of a spot light
     OSG::Real32  innerSuperEllipsesWidth;   // cinema light parameter
@@ -2259,8 +2261,7 @@ VecLightsT lights;                              // the lights of the scene
 Light::Light(Type e) 
 : position(0.f, 0.f, 0.f)
 , direction(0.f, 0.f, 1.f)
-, color(1.f,1.f,1.f)
-, intensity(1.f)
+, intensity(1.f,1.f,1.f)
 , range(1.f)
 , spotlightAngle(20.f)
 , innerSuperEllipsesWidth(1.f)
@@ -3006,9 +3007,9 @@ OSG::MultiLightChunkTransitPtr create_light_state(const VecLightsT& vLights)
     lightChunk->setUsage(GL_DYNAMIC_DRAW);
     lightChunk->setLayoutType(OSG::MultiLight::SIMPLE_LAYOUT | OSG::MultiLight::CINEMA_LAYOUT);
 
-    lightChunk->setHasEyeToLightSpaceMatrix(true);  // provide a struct entry for the transform from view space to light space
-    lightChunk->setHasCosSpotlightAngle    (true);  // provide a struct entry for the cosine of the spot light angle (defaults to true)
-    lightChunk->setHasSpotlightAngle       (true);  // provide a struct entry for the spot light angle itself (defaults to false)
+    lightChunk->setHasLightSpaceFromEyeSpaceMatrix(true);   // provide a struct entry for the transform from view space to light space
+    lightChunk->setHasCosSpotlightAngle           (true);   // provide a struct entry for the cosine of the spot light angle (defaults to true)
+    lightChunk->setHasSpotlightAngle              (true);   // provide a struct entry for the spot light angle itself (defaults to false)
 
     //lightChunk->setEyeSpace(true);
 
@@ -3018,7 +3019,6 @@ OSG::MultiLightChunkTransitPtr create_light_state(const VecLightsT& vLights)
 
         lightChunk->setPosition                 (idx, light.position);
         lightChunk->setDirection                (idx, light.direction);
-        lightChunk->setColor                    (idx, light.color);
         lightChunk->setIntensity                (idx, light.intensity);
         lightChunk->setRange                    (idx, light.range);
         lightChunk->setSpotlightAngle           (idx, light.spotlightAngle);
@@ -3040,7 +3040,7 @@ void update_light_state(OSG::MultiLightChunk* lightChunk, const VecLightsT& vLig
 {
     if (lightChunk)
     {
-        if (lightChunk->numLights() != vLights.size())
+        if (lightChunk->getNumLights() != vLights.size())
         {
             lightChunk->clearLights();
 
@@ -3050,7 +3050,6 @@ void update_light_state(OSG::MultiLightChunk* lightChunk, const VecLightsT& vLig
 
                 lightChunk->setPosition                 (idx, light.position);
                 lightChunk->setDirection                (idx, light.direction);
-                lightChunk->setColor                    (idx, light.color);
                 lightChunk->setIntensity                (idx, light.intensity);
                 lightChunk->setRange                    (idx, light.range);
                 lightChunk->setSpotlightAngle           (idx, light.spotlightAngle);
@@ -3073,7 +3072,6 @@ void update_light_state(OSG::MultiLightChunk* lightChunk, const VecLightsT& vLig
 
                 lightChunk->setPosition                 (idx, light.position);
                 lightChunk->setDirection                (idx, light.direction);
-                lightChunk->setColor                    (idx, light.color);
                 lightChunk->setIntensity                (idx, light.intensity);
                 lightChunk->setRange                    (idx, light.range);
                 lightChunk->setSpotlightAngle           (idx, light.spotlightAngle);
@@ -3794,8 +3792,10 @@ Light Light::create_light(
     Light::dir_test_case_7 = OSG::Vec3f(0,0,-1);
     Light::dir_test_case_8 = OSG::Vec3f(0,0,-1);
 
-    l.color.setRandom();
-    l.intensity = max_light_power * small_die();
+    OSG::Color3f rand_color;
+    rand_color.setRandom();
+
+    l.intensity = max_light_power * small_die() * rand_color;
     l.range     = L * light_range_die();
 
     switch (e)
@@ -3877,8 +3877,11 @@ void Light::create_light_geometry(OSG::UInt32 material_idx)
 
     beacon->clearChildren();
 
+    OSG::Vec3f tmp = intensity;
+    tmp.normalize();
+
     Material mat;
-    mat.emissive = color;
+    mat.emissive = tmp;
     mat.opacity  = 0.7f;
 
     materials[material_idx] = mat;
@@ -6384,11 +6387,10 @@ std::string get_light_culling_cp_program()
     << endl << "//"
     << endl << "struct Light"
     << endl << "{"
-    << endl << "    mat4  eyeToLightSpaceMatrix;"
+    << endl << "    mat4  matLSFromES;"
     << endl << "    vec3  position;                 // in world space"
     << endl << "    vec3  direction;                // in world space"
-    << endl << "    vec3  color;"
-    << endl << "    float intensity;"
+    << endl << "    vec3  intensity;"
     << endl << "    float range;"
     << endl << "    float cosSpotlightAngle;"
     << endl << "    float spotlightAngle;"
@@ -6826,9 +6828,10 @@ std::string get_light_culling_cp_program()
     //<< endl << "        if (!isEqual(sharedFrustumZ.y, testData.value14[gl_WorkGroupID.z]))"
     //<< endl << "            atomicAdd(sharedTestValue, 1);"
     // Debug Test End
-    << endl << "        if (lights.light[light_index].enabled)"
+    << endl << "        Light light = lights.light[light_index];"
+    << endl << ""
+    << endl << "        if (light.enabled)"
     << endl << "        {"
-    << endl << "            Light light = lights.light[light_index];"
     // Debug Test Begin
     //<< endl << "            uint test_idx = light_index      * dispatchData.numTiles.x * dispatchData.numTiles.y * clusteringData.c"
     //<< endl << "                          + gl_WorkGroupID.z * dispatchData.numTiles.x * dispatchData.numTiles.y"
@@ -7092,11 +7095,10 @@ std::string get_fp_program()
     << endl << ""
     << endl << "struct Light"
     << endl << "{"
-    << endl << "    mat4  eyeToLightSpaceMatrix;"
+    << endl << "    mat4  matLSFromES;"
     << endl << "    vec3  position;                 // in world space"
     << endl << "    vec3  direction;                // in world space"
-    << endl << "    vec3  color;"
-    << endl << "    float intensity;"
+    << endl << "    vec3  intensity;"
     << endl << "    float range;"
     << endl << "    float cosSpotlightAngle;"
     << endl << "    float spotlightAngle;"
@@ -7446,7 +7448,7 @@ std::string get_fp_program()
     << endl << "    else"
     << endl << "       pf = pow(n_dot_h, m);"
     << endl << ""
-    << endl << "    vec3 light_intensity = lights.light[i].intensity * lights.light[i].color;"
+    << endl << "    vec3 light_intensity = lights.light[i].intensity;"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
     << endl << "     + light_intensity * materials.material[j].ambient"
@@ -7499,7 +7501,7 @@ std::string get_fp_program()
     << endl << ""
     << endl << "    float attenuation = calcAttenuation(lights.light[i].range, d);"
     << endl << ""
-    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity * lights.light[i].color;"
+    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity;"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
     << endl << "     + light_intensity * materials.material[j].ambient"
@@ -7562,7 +7564,7 @@ std::string get_fp_program()
     << endl << ""
     << endl << "    attenuation *= spotAttenuation(lights.light[i].cosSpotlightAngle, l, s);"
     << endl << ""
-    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity * lights.light[i].color;"
+    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity;"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
     << endl << "     + light_intensity * materials.material[j].ambient"
@@ -7623,7 +7625,7 @@ std::string get_fp_program()
     << endl << ""
     << endl << "    float attenuation = calcAttenuation(lights.light[i].range, d);"
     << endl << ""
-    << endl << "    vec3 p_LS = (lights.light[i].eyeToLightSpaceMatrix * vec4(p, 1.0)).xyz;"
+    << endl << "    vec3 p_LS = (lights.light[i].matLSFromES * vec4(p, 1.0)).xyz;"
     << endl << ""
     << endl << "    attenuation *= clipSuperEllipses("
     << endl << "                            lights.light[i].innerSuperEllipsesWidth,"
@@ -7638,7 +7640,7 @@ std::string get_fp_program()
     << endl << ""
     << endl << "    attenuation = clamp(attenuation, 0.0, 1.0);"
     << endl << ""
-    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity * lights.light[i].color;"
+    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity;"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
     << endl << "     + light_intensity * materials.material[j].ambient"

@@ -1,0 +1,175 @@
+/*---------------------------------------------------------------------------*\
+ *                                OpenSG                                     *
+ *                                                                           *
+ *                                                                           *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
+ *                                                                           *
+ *                            www.opensg.org                                 *
+ *                                                                           *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
+ *                                                                           *
+\*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*\
+ *                                License                                    *
+ *                                                                           *
+ * This library is free software; you can redistribute it and/or modify it   *
+ * under the terms of the GNU Library General Public License as published    *
+ * by the Free Software Foundation, version 2.                               *
+ *                                                                           *
+ * This library is distributed in the hope that it will be useful, but       *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of                *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
+ * Library General Public License for more details.                          *
+ *                                                                           *
+ * You should have received a copy of the GNU Library General Public         *
+ * License along with this library; if not, write to the Free Software       *
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                 *
+ *                                                                           *
+\*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*\
+ *                                Changes                                    *
+ *                                                                           *
+ *                                                                           *
+ *                                                                           *
+ *                                                                           *
+ *                                                                           *
+ *                                                                           *
+\*---------------------------------------------------------------------------*/
+
+//---------------------------------------------------------------------------
+//  Includes
+//---------------------------------------------------------------------------
+
+#include <cstdlib>
+#include <cstdio>
+
+#include "OSGConfig.h"
+
+#include "OSGSSAOStageData.h"
+
+#include "OSGFrameBufferObject.h"
+#include "OSGTextureBuffer.h"
+#include "OSGTextureObjChunk.h"
+
+OSG_BEGIN_NAMESPACE
+
+// Documentation for this class is emitted in the
+// OSGSSAOStageDataBase.cpp file.
+// To modify it, please change the .fcd file (OSGSSAOStageData.fcd) and
+// regenerate the base file.
+
+/***************************************************************************\
+ *                           Class variables                               *
+\***************************************************************************/
+
+/***************************************************************************\
+ *                           Class methods                                 *
+\***************************************************************************/
+
+void SSAOStageData::initMethod(InitPhase ePhase)
+{
+    Inherited::initMethod(ePhase);
+
+    if(ePhase == TypeObject::SystemPost)
+    {
+    }
+}
+
+
+/***************************************************************************\
+ *                           Instance methods                              *
+\***************************************************************************/
+
+/*-------------------------------------------------------------------------*\
+ -  private                                                                 -
+\*-------------------------------------------------------------------------*/
+
+/*----------------------- constructors & destructors ----------------------*/
+
+SSAOStageData::SSAOStageData(void) :
+    Inherited()
+{
+}
+
+SSAOStageData::SSAOStageData(const SSAOStageData &source) :
+    Inherited(source)
+{
+}
+
+SSAOStageData::~SSAOStageData(void)
+{
+}
+
+/*----------------------------- class specific ----------------------------*/
+
+void SSAOStageData::changed(ConstFieldMaskArg whichField, 
+                            UInt32            origin,
+                            BitVector         details)
+{
+    Inherited::changed(whichField, origin, details);
+}
+
+void SSAOStageData::dump(      UInt32    ,
+                         const BitVector ) const
+{
+    SLOG << "Dump SSAOStageData NI" << std::endl;
+}
+
+/*----------------------------- Convenience -------------------------------*/
+
+TextureObjChunk* SSAOStageData::getNormalTexObjChunk() const
+{
+    FrameBufferObject* pFBO = getScenePassRenderTarget();
+
+    TextureBuffer* pTexBuffer = dynamic_cast<TextureBuffer*>(pFBO->getColorAttachments(0));
+    if (!pTexBuffer)
+        return NULL;
+
+    return pTexBuffer->getTexture();
+}
+
+TextureObjChunk* SSAOStageData::getPositionTexObjChunk() const
+{
+    FrameBufferObject* pFBO = getScenePassRenderTarget();
+
+    TextureBuffer* pTexBuffer = dynamic_cast<TextureBuffer*>(pFBO->getColorAttachments(1));
+    if (!pTexBuffer)
+        return NULL;
+
+    return pTexBuffer->getTexture();
+}
+
+TextureObjChunk* SSAOStageData::getDepthTexObjChunk() const
+{
+    FrameBufferObject* pFBO = getScenePassRenderTarget();
+
+    TextureBuffer* pTexBuffer = dynamic_cast<TextureBuffer*>(pFBO->getDepthAttachment());
+    if (!pTexBuffer)
+        return NULL;
+
+    return pTexBuffer->getTexture();
+}
+
+TextureObjChunk* SSAOStageData::getSSAOTexObjChunk() const
+{
+    FrameBufferObject* pFBO = getSSAOPassRenderTarget();
+
+    TextureBuffer* pTexBuffer = dynamic_cast<TextureBuffer*>(pFBO->getColorAttachments(0));
+    if (!pTexBuffer)
+        return NULL;
+
+    return pTexBuffer->getTexture();
+}
+
+TextureObjChunk* SSAOStageData::getBlurTexObjChunk() const
+{
+    FrameBufferObject* pFBO = getBlurPassRenderTarget();
+
+    TextureBuffer* pTexBuffer = dynamic_cast<TextureBuffer*>(pFBO->getColorAttachments(0));
+    if (!pTexBuffer)
+        return NULL;
+
+    return pTexBuffer->getTexture();
+}
+
+OSG_END_NAMESPACE

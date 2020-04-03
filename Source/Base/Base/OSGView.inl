@@ -39,6 +39,28 @@
 OSG_BEGIN_NAMESPACE
 
 inline
+bool View::operator==(const View& rhs) const
+{
+    if (&rhs == this)
+        return true;
+
+    return _eye    == rhs._eye
+        && _center == rhs._center
+        && _up     == rhs._up;
+}
+
+inline
+bool View::equals(const View& rhs, Real32 tol) const
+{
+    if (&rhs == this)
+        return true;
+
+    return _eye   .equals(rhs._eye,    tol)
+        && _center.equals(rhs._center, tol)
+        && _up    .equals(rhs._up,     tol);
+}
+
+inline
 const Pnt3f& View::getEye() const
 {
     return _eye;
@@ -73,6 +95,37 @@ void View::setUp(const Vec3f& up)
 {
     _up = up;
 }
+
+inline
+Vec3f View::getDirection() const
+{
+    Vec3f dir = _center - _eye;
+    dir.normalize();
+    return dir;
+}
+
+inline
+void View::setValue(
+    const Pnt3f& eye, 
+    const Pnt3f& center, 
+    const Vec3f& up)
+{
+    _eye    = eye;
+    _center = center;
+    _up     = up;
+}
+
+inline
+void View::setValue(
+    const Matrix& mat, 
+    bool isMatWSFromES)
+{
+    if (isMatWSFromES)
+        setByMatWSFromES(mat);
+    else
+        setByMatESFromWS(mat);
+}
+
 
 OSG_END_NAMESPACE
 

@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="SSAOStage"
+    parent="Stage"
+    library="ContribTechniques"
+    pointerfieldtypes="both"
+    structure="concrete"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    isNodeCore="true"
+    isBundle="false"
+    >
+    This stage generates an ambient occlusion texture object from its child tree.
+
+    <Field
+        name="activate"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="true"
+        access="public"
+        >
+        If the stage is deactivated it does not perform any action on its own but act as a simple Group core.
+    </Field>
+    
+    <Field
+        name="calcPosFromDepth"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="true"
+        access="public"
+        >
+        If true the view space position is calculated from the depth texture value in the SSAO shader.
+        Otherwise a separate position texture is used to get the position information into the SSAO shader.
+    </Field>
+
+    <Field
+        name="offsetKernelSize"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="64"
+        access="public"
+        >
+        The number of hemisphere samples used in the SSAO technique.
+    </Field>
+
+    <Field
+        name="rotateKernelSize"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="4"
+        access="public"
+        >
+        The square root of the rotation vector kernel size. A texture with
+        these vectors is tiled over the scene.
+    </Field>
+
+    <Field
+        name="radius"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="0.5"
+        access="public"
+        >
+        The radius of the sample hemisphere.
+    </Field>
+
+    <Field
+        name="bias"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="0.025"
+        access="public"
+        >
+        The bias value used for depth testing.
+    </Field>
+
+    <Field
+        name="blurKernelSize"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="4"
+        access="public"
+        >
+        Number of tap iterations (x,y) used in the Blur shader. Reasonable values are in the interval [2, 10].
+    </Field>
+
+    <Field
+        name="ambientOcclusionTexUnit"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="16"
+        >
+        Texture unit for the final ambientOcclusion texture map. This texture is activated
+        for the subsequent scene rendering pass. Shaders are expected to provide a sampler
+        for this texture.
+    </Field>
+
+    <Field
+        name="offsetKernelChunk"
+        type="UniformBufferObjStd140ChunkPtr"
+        cardinality="single"
+        visibility="internal"
+	access="protected"
+        defaultValue="NULL"
+        >
+    </Field>
+    
+    <Field
+        name="rotateKernelChunk"
+        type="TextureObjChunkPtr"
+        cardinality="single"
+        visibility="internal"
+	access="protected"
+        defaultValue="NULL"
+        >
+    </Field>
+
+</FieldContainer>

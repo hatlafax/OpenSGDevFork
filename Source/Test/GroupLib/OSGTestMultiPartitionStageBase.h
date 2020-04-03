@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -161,7 +161,7 @@ class OSG_GROUP_DLLMAPPING TestMultiPartitionStageBase : public Stage
                   Int32               &editNumPartitions  (void);
                   Int32                getNumPartitions   (void) const;
 
-                  Int32               &editOrder          (const UInt32 index);
+            MFInt32            ::reference       editOrder          (const UInt32 index);
                   Int32                getOrder           (const UInt32 index) const;
 
                   bool                &editUseGroup       (void);
@@ -265,14 +265,14 @@ class OSG_GROUP_DLLMAPPING TestMultiPartitionStageBase : public Stage
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-    GetFieldHandlePtr  getHandleMessage         (void) const;
-    EditFieldHandlePtr editHandleMessage        (void);
-    GetFieldHandlePtr  getHandleNumPartitions   (void) const;
-    EditFieldHandlePtr editHandleNumPartitions  (void);
-    GetFieldHandlePtr  getHandleOrder           (void) const;
-    EditFieldHandlePtr editHandleOrder          (void);
-    GetFieldHandlePtr  getHandleUseGroup        (void) const;
-    EditFieldHandlePtr editHandleUseGroup       (void);
+     GetFieldHandlePtr  getHandleMessage         (void) const;
+     EditFieldHandlePtr editHandleMessage        (void);
+     GetFieldHandlePtr  getHandleNumPartitions   (void) const;
+     EditFieldHandlePtr editHandleNumPartitions  (void);
+     GetFieldHandlePtr  getHandleOrder           (void) const;
+     EditFieldHandlePtr editHandleOrder          (void);
+     GetFieldHandlePtr  getHandleUseGroup        (void) const;
+     EditFieldHandlePtr editHandleUseGroup       (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

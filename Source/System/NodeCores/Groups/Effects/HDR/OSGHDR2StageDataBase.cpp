@@ -63,10 +63,10 @@
 
 
 #include "OSGSimpleSHLChunk.h"          // LuminanceMapShader Class
-#include "OSGTextureEnvChunk.h"         // SharedTextureEnvChunk Class
 #include "OSGMaterialChunk.h"           // SharedMaterialChunk Class
-#include "OSGChunkMaterial.h"           // SceneMaterial Class
-#include "OSGFrameBufferObject.h"       // SceneRenderTarget Class
+#include "OSGChunkMaterial.h"           // BackgroundMaterial Class
+#include "OSGDepthChunk.h"              // FinalScreenMaterialDepthChunk Class
+#include "OSGFrameBufferObject.h"       // BackgroundRenderTarget Class
 #include "OSGUniformBufferObjStd140Chunk.h" // HdrShaderData Class
 
 #include "OSGHDR2StageDataBase.h"
@@ -149,11 +149,11 @@ OSG_BEGIN_NAMESPACE
     Additionally, it carries the original depth information to the final depth buffer.
 */
 
-/*! \var TextureEnvChunk * HDR2StageDataBase::_sfSharedTextureEnvChunk
+/*! \var MaterialChunk * HDR2StageDataBase::_sfSharedMaterialChunk
     
 */
 
-/*! \var MaterialChunk * HDR2StageDataBase::_sfSharedMaterialChunk
+/*! \var ChunkMaterial * HDR2StageDataBase::_sfBackgroundMaterial
     
 */
 
@@ -197,11 +197,19 @@ OSG_BEGIN_NAMESPACE
     
 */
 
+/*! \var DepthChunk *    HDR2StageDataBase::_sfFinalScreenMaterialDepthChunk
+    
+*/
+
 /*! \var Int32           HDR2StageDataBase::_sfWidth
     
 */
 
 /*! \var Int32           HDR2StageDataBase::_sfHeight
+    
+*/
+
+/*! \var FrameBufferObject * HDR2StageDataBase::_sfBackgroundRenderTarget
     
 */
 
@@ -408,18 +416,6 @@ void HDR2StageDataBase::classDescInserter(TypeObject &oType)
 
     oType.addInitialDesc(pDesc);
 
-    pDesc = new SFUnrecTextureEnvChunkPtr::Description(
-        SFUnrecTextureEnvChunkPtr::getClassType(),
-        "sharedTextureEnvChunk",
-        "",
-        SharedTextureEnvChunkFieldId, SharedTextureEnvChunkFieldMask,
-        false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&HDR2StageData::editHandleSharedTextureEnvChunk),
-        static_cast<FieldGetMethodSig >(&HDR2StageData::getHandleSharedTextureEnvChunk));
-
-    oType.addInitialDesc(pDesc);
-
     pDesc = new SFUnrecMaterialChunkPtr::Description(
         SFUnrecMaterialChunkPtr::getClassType(),
         "sharedMaterialChunk",
@@ -429,6 +425,18 @@ void HDR2StageDataBase::classDescInserter(TypeObject &oType)
         (Field::SFDefaultFlags | Field::FStdAccess),
         static_cast<FieldEditMethodSig>(&HDR2StageData::editHandleSharedMaterialChunk),
         static_cast<FieldGetMethodSig >(&HDR2StageData::getHandleSharedMaterialChunk));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFUnrecChunkMaterialPtr::Description(
+        SFUnrecChunkMaterialPtr::getClassType(),
+        "backgroundMaterial",
+        "",
+        BackgroundMaterialFieldId, BackgroundMaterialFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&HDR2StageData::editHandleBackgroundMaterial),
+        static_cast<FieldGetMethodSig >(&HDR2StageData::getHandleBackgroundMaterial));
 
     oType.addInitialDesc(pDesc);
 
@@ -552,6 +560,18 @@ void HDR2StageDataBase::classDescInserter(TypeObject &oType)
 
     oType.addInitialDesc(pDesc);
 
+    pDesc = new SFUnrecDepthChunkPtr::Description(
+        SFUnrecDepthChunkPtr::getClassType(),
+        "finalScreenMaterialDepthChunk",
+        "",
+        FinalScreenMaterialDepthChunkFieldId, FinalScreenMaterialDepthChunkFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&HDR2StageData::editHandleFinalScreenMaterialDepthChunk),
+        static_cast<FieldGetMethodSig >(&HDR2StageData::getHandleFinalScreenMaterialDepthChunk));
+
+    oType.addInitialDesc(pDesc);
+
     pDesc = new SFInt32::Description(
         SFInt32::getClassType(),
         "width",
@@ -573,6 +593,18 @@ void HDR2StageDataBase::classDescInserter(TypeObject &oType)
         (Field::SFDefaultFlags | Field::FStdAccess),
         static_cast<FieldEditMethodSig>(&HDR2StageData::editHandleHeight),
         static_cast<FieldGetMethodSig >(&HDR2StageData::getHandleHeight));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFUnrecFrameBufferObjectPtr::Description(
+        SFUnrecFrameBufferObjectPtr::getClassType(),
+        "backgroundRenderTarget",
+        "",
+        BackgroundRenderTargetFieldId, BackgroundRenderTargetFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&HDR2StageData::editHandleBackgroundRenderTarget),
+        static_cast<FieldGetMethodSig >(&HDR2StageData::getHandleBackgroundRenderTarget));
 
     oType.addInitialDesc(pDesc);
 
@@ -875,15 +907,6 @@ HDR2StageDataBase::TypeObject HDR2StageDataBase::_type(
     "        Additionally, it carries the original depth information to the final depth buffer.\n"
     "  </Field>\n"
     "  <Field\n"
-    "\t name=\"sharedTextureEnvChunk\"\n"
-    "\t type=\"TextureEnvChunkPtr\"\n"
-    "\t cardinality=\"single\"\n"
-    "\t visibility=\"external\"\n"
-    "\t defaultValue=\"NULL\"\n"
-    "\t access=\"public\"\n"
-    "\t >\n"
-    "  </Field>\n"
-    "  <Field\n"
     "\t name=\"sharedMaterialChunk\"\n"
     "\t type=\"MaterialChunkPtr\"\n"
     "\t cardinality=\"single\"\n"
@@ -892,7 +915,16 @@ HDR2StageDataBase::TypeObject HDR2StageDataBase::_type(
     "\t access=\"public\"\n"
     "\t >\n"
     "  </Field>\n"
-    "<Field\n"
+    "  <Field\n"
+    "\t name=\"backgroundMaterial\"\n"
+    "\t type=\"ChunkMaterialPtr\"\n"
+    "\t cardinality=\"single\"\n"
+    "\t visibility=\"external\"\n"
+    "\t defaultValue=\"NULL\"\n"
+    "\t access=\"public\"\n"
+    "\t >\n"
+    "  </Field>\n"
+    "  <Field\n"
     "\t name=\"sceneMaterial\"\n"
     "\t type=\"ChunkMaterialPtr\"\n"
     "\t cardinality=\"single\"\n"
@@ -983,6 +1015,15 @@ HDR2StageDataBase::TypeObject HDR2StageDataBase::_type(
     "     >\n"
     "  </Field>\n"
     "  <Field\n"
+    "\t name=\"finalScreenMaterialDepthChunk\"\n"
+    "\t type=\"DepthChunkPtr\"\n"
+    "\t cardinality=\"single\"\n"
+    "\t visibility=\"external\"\n"
+    "\t defaultValue=\"NULL\"\n"
+    "\t access=\"public\"\n"
+    "\t >\n"
+    "  </Field>\n"
+    "  <Field\n"
     "\t name=\"width\"\n"
     "\t type=\"Int32\"\n"
     "\t cardinality=\"single\"\n"
@@ -1000,7 +1041,16 @@ HDR2StageDataBase::TypeObject HDR2StageDataBase::_type(
     "\t access=\"public\"\n"
     "     >\n"
     "  </Field>\n"
-    "<Field\n"
+    "  <Field\n"
+    "\t name=\"backgroundRenderTarget\"\n"
+    "\t type=\"FrameBufferObjectPtr\"\n"
+    "\t cardinality=\"single\"\n"
+    "\t visibility=\"external\"\n"
+    "\t defaultValue=\"NULL\"\n"
+    "\t access=\"public\"\n"
+    "\t >\n"
+    "  </Field>\n"
+    "  <Field\n"
     "\t name=\"sceneRenderTarget\"\n"
     "\t type=\"FrameBufferObjectPtr\"\n"
     "\t cardinality=\"single\"\n"
@@ -1009,7 +1059,7 @@ HDR2StageDataBase::TypeObject HDR2StageDataBase::_type(
     "\t access=\"public\"\n"
     "\t >\n"
     "  </Field>\n"
-    "<Field\n"
+    "  <Field\n"
     "\t name=\"luminanceRenderTarget\"\n"
     "\t type=\"FrameBufferObjectPtr\"\n"
     "\t cardinality=\"single\"\n"
@@ -1372,34 +1422,6 @@ void HDR2StageDataBase::setFinalScreenShader(SimpleSHLChunk * const value)
 }
 
 
-//! Get the HDR2StageData::_sfSharedTextureEnvChunk field.
-const SFUnrecTextureEnvChunkPtr *HDR2StageDataBase::getSFSharedTextureEnvChunk(void) const
-{
-    return &_sfSharedTextureEnvChunk;
-}
-
-SFUnrecTextureEnvChunkPtr *HDR2StageDataBase::editSFSharedTextureEnvChunk(void)
-{
-    editSField(SharedTextureEnvChunkFieldMask);
-
-    return &_sfSharedTextureEnvChunk;
-}
-
-//! Get the value of the HDR2StageData::_sfSharedTextureEnvChunk field.
-TextureEnvChunk * HDR2StageDataBase::getSharedTextureEnvChunk(void) const
-{
-    return _sfSharedTextureEnvChunk.getValue();
-}
-
-//! Set the value of the HDR2StageData::_sfSharedTextureEnvChunk field.
-void HDR2StageDataBase::setSharedTextureEnvChunk(TextureEnvChunk * const value)
-{
-    editSField(SharedTextureEnvChunkFieldMask);
-
-    _sfSharedTextureEnvChunk.setValue(value);
-}
-
-
 //! Get the HDR2StageData::_sfSharedMaterialChunk field.
 const SFUnrecMaterialChunkPtr *HDR2StageDataBase::getSFSharedMaterialChunk(void) const
 {
@@ -1425,6 +1447,34 @@ void HDR2StageDataBase::setSharedMaterialChunk(MaterialChunk * const value)
     editSField(SharedMaterialChunkFieldMask);
 
     _sfSharedMaterialChunk.setValue(value);
+}
+
+
+//! Get the HDR2StageData::_sfBackgroundMaterial field.
+const SFUnrecChunkMaterialPtr *HDR2StageDataBase::getSFBackgroundMaterial(void) const
+{
+    return &_sfBackgroundMaterial;
+}
+
+SFUnrecChunkMaterialPtr *HDR2StageDataBase::editSFBackgroundMaterial(void)
+{
+    editSField(BackgroundMaterialFieldMask);
+
+    return &_sfBackgroundMaterial;
+}
+
+//! Get the value of the HDR2StageData::_sfBackgroundMaterial field.
+ChunkMaterial * HDR2StageDataBase::getBackgroundMaterial(void) const
+{
+    return _sfBackgroundMaterial.getValue();
+}
+
+//! Set the value of the HDR2StageData::_sfBackgroundMaterial field.
+void HDR2StageDataBase::setBackgroundMaterial(ChunkMaterial * const value)
+{
+    editSField(BackgroundMaterialFieldMask);
+
+    _sfBackgroundMaterial.setValue(value);
 }
 
 
@@ -1682,6 +1732,34 @@ const SFUInt32 *HDR2StageDataBase::getSFCurrentAdaptLuminanceIdx(void) const
 }
 
 
+//! Get the HDR2StageData::_sfFinalScreenMaterialDepthChunk field.
+const SFUnrecDepthChunkPtr *HDR2StageDataBase::getSFFinalScreenMaterialDepthChunk(void) const
+{
+    return &_sfFinalScreenMaterialDepthChunk;
+}
+
+SFUnrecDepthChunkPtr *HDR2StageDataBase::editSFFinalScreenMaterialDepthChunk(void)
+{
+    editSField(FinalScreenMaterialDepthChunkFieldMask);
+
+    return &_sfFinalScreenMaterialDepthChunk;
+}
+
+//! Get the value of the HDR2StageData::_sfFinalScreenMaterialDepthChunk field.
+DepthChunk * HDR2StageDataBase::getFinalScreenMaterialDepthChunk(void) const
+{
+    return _sfFinalScreenMaterialDepthChunk.getValue();
+}
+
+//! Set the value of the HDR2StageData::_sfFinalScreenMaterialDepthChunk field.
+void HDR2StageDataBase::setFinalScreenMaterialDepthChunk(DepthChunk * const value)
+{
+    editSField(FinalScreenMaterialDepthChunkFieldMask);
+
+    _sfFinalScreenMaterialDepthChunk.setValue(value);
+}
+
+
 SFInt32 *HDR2StageDataBase::editSFWidth(void)
 {
     editSField(WidthFieldMask);
@@ -1705,6 +1783,34 @@ SFInt32 *HDR2StageDataBase::editSFHeight(void)
 const SFInt32 *HDR2StageDataBase::getSFHeight(void) const
 {
     return &_sfHeight;
+}
+
+
+//! Get the HDR2StageData::_sfBackgroundRenderTarget field.
+const SFUnrecFrameBufferObjectPtr *HDR2StageDataBase::getSFBackgroundRenderTarget(void) const
+{
+    return &_sfBackgroundRenderTarget;
+}
+
+SFUnrecFrameBufferObjectPtr *HDR2StageDataBase::editSFBackgroundRenderTarget(void)
+{
+    editSField(BackgroundRenderTargetFieldMask);
+
+    return &_sfBackgroundRenderTarget;
+}
+
+//! Get the value of the HDR2StageData::_sfBackgroundRenderTarget field.
+FrameBufferObject * HDR2StageDataBase::getBackgroundRenderTarget(void) const
+{
+    return _sfBackgroundRenderTarget.getValue();
+}
+
+//! Set the value of the HDR2StageData::_sfBackgroundRenderTarget field.
+void HDR2StageDataBase::setBackgroundRenderTarget(FrameBufferObject * const value)
+{
+    editSField(BackgroundRenderTargetFieldMask);
+
+    _sfBackgroundRenderTarget.setValue(value);
 }
 
 
@@ -2191,13 +2297,13 @@ SizeT HDR2StageDataBase::getBinSize(ConstFieldMaskArg whichField)
     {
         returnValue += _sfFinalScreenShader.getBinSize();
     }
-    if(FieldBits::NoField != (SharedTextureEnvChunkFieldMask & whichField))
-    {
-        returnValue += _sfSharedTextureEnvChunk.getBinSize();
-    }
     if(FieldBits::NoField != (SharedMaterialChunkFieldMask & whichField))
     {
         returnValue += _sfSharedMaterialChunk.getBinSize();
+    }
+    if(FieldBits::NoField != (BackgroundMaterialFieldMask & whichField))
+    {
+        returnValue += _sfBackgroundMaterial.getBinSize();
     }
     if(FieldBits::NoField != (SceneMaterialFieldMask & whichField))
     {
@@ -2239,6 +2345,10 @@ SizeT HDR2StageDataBase::getBinSize(ConstFieldMaskArg whichField)
     {
         returnValue += _sfCurrentAdaptLuminanceIdx.getBinSize();
     }
+    if(FieldBits::NoField != (FinalScreenMaterialDepthChunkFieldMask & whichField))
+    {
+        returnValue += _sfFinalScreenMaterialDepthChunk.getBinSize();
+    }
     if(FieldBits::NoField != (WidthFieldMask & whichField))
     {
         returnValue += _sfWidth.getBinSize();
@@ -2246,6 +2356,10 @@ SizeT HDR2StageDataBase::getBinSize(ConstFieldMaskArg whichField)
     if(FieldBits::NoField != (HeightFieldMask & whichField))
     {
         returnValue += _sfHeight.getBinSize();
+    }
+    if(FieldBits::NoField != (BackgroundRenderTargetFieldMask & whichField))
+    {
+        returnValue += _sfBackgroundRenderTarget.getBinSize();
     }
     if(FieldBits::NoField != (SceneRenderTargetFieldMask & whichField))
     {
@@ -2340,13 +2454,13 @@ void HDR2StageDataBase::copyToBin(BinaryDataHandler &pMem,
     {
         _sfFinalScreenShader.copyToBin(pMem);
     }
-    if(FieldBits::NoField != (SharedTextureEnvChunkFieldMask & whichField))
-    {
-        _sfSharedTextureEnvChunk.copyToBin(pMem);
-    }
     if(FieldBits::NoField != (SharedMaterialChunkFieldMask & whichField))
     {
         _sfSharedMaterialChunk.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (BackgroundMaterialFieldMask & whichField))
+    {
+        _sfBackgroundMaterial.copyToBin(pMem);
     }
     if(FieldBits::NoField != (SceneMaterialFieldMask & whichField))
     {
@@ -2388,6 +2502,10 @@ void HDR2StageDataBase::copyToBin(BinaryDataHandler &pMem,
     {
         _sfCurrentAdaptLuminanceIdx.copyToBin(pMem);
     }
+    if(FieldBits::NoField != (FinalScreenMaterialDepthChunkFieldMask & whichField))
+    {
+        _sfFinalScreenMaterialDepthChunk.copyToBin(pMem);
+    }
     if(FieldBits::NoField != (WidthFieldMask & whichField))
     {
         _sfWidth.copyToBin(pMem);
@@ -2395,6 +2513,10 @@ void HDR2StageDataBase::copyToBin(BinaryDataHandler &pMem,
     if(FieldBits::NoField != (HeightFieldMask & whichField))
     {
         _sfHeight.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (BackgroundRenderTargetFieldMask & whichField))
+    {
+        _sfBackgroundRenderTarget.copyToBin(pMem);
     }
     if(FieldBits::NoField != (SceneRenderTargetFieldMask & whichField))
     {
@@ -2495,15 +2617,15 @@ void HDR2StageDataBase::copyFromBin(BinaryDataHandler &pMem,
         editSField(FinalScreenShaderFieldMask);
         _sfFinalScreenShader.copyFromBin(pMem);
     }
-    if(FieldBits::NoField != (SharedTextureEnvChunkFieldMask & whichField))
-    {
-        editSField(SharedTextureEnvChunkFieldMask);
-        _sfSharedTextureEnvChunk.copyFromBin(pMem);
-    }
     if(FieldBits::NoField != (SharedMaterialChunkFieldMask & whichField))
     {
         editSField(SharedMaterialChunkFieldMask);
         _sfSharedMaterialChunk.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (BackgroundMaterialFieldMask & whichField))
+    {
+        editSField(BackgroundMaterialFieldMask);
+        _sfBackgroundMaterial.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (SceneMaterialFieldMask & whichField))
     {
@@ -2555,6 +2677,11 @@ void HDR2StageDataBase::copyFromBin(BinaryDataHandler &pMem,
         editSField(CurrentAdaptLuminanceIdxFieldMask);
         _sfCurrentAdaptLuminanceIdx.copyFromBin(pMem);
     }
+    if(FieldBits::NoField != (FinalScreenMaterialDepthChunkFieldMask & whichField))
+    {
+        editSField(FinalScreenMaterialDepthChunkFieldMask);
+        _sfFinalScreenMaterialDepthChunk.copyFromBin(pMem);
+    }
     if(FieldBits::NoField != (WidthFieldMask & whichField))
     {
         editSField(WidthFieldMask);
@@ -2564,6 +2691,11 @@ void HDR2StageDataBase::copyFromBin(BinaryDataHandler &pMem,
     {
         editSField(HeightFieldMask);
         _sfHeight.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (BackgroundRenderTargetFieldMask & whichField))
+    {
+        editSField(BackgroundRenderTargetFieldMask);
+        _sfBackgroundRenderTarget.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (SceneRenderTargetFieldMask & whichField))
     {
@@ -2763,8 +2895,8 @@ HDR2StageDataBase::HDR2StageDataBase(void) :
     _sfBlurVertShader         (NULL),
     _sfCompositeShader        (NULL),
     _sfFinalScreenShader      (NULL),
-    _sfSharedTextureEnvChunk  (NULL),
     _sfSharedMaterialChunk    (NULL),
+    _sfBackgroundMaterial     (NULL),
     _sfSceneMaterial          (NULL),
     _sfLuminanceMapMaterial   (NULL),
     _sfAdaptLuminanceMaterial (NULL),
@@ -2775,8 +2907,10 @@ HDR2StageDataBase::HDR2StageDataBase(void) :
     _sfCompositeMaterial      (NULL),
     _sfFinalScreenMaterial    (NULL),
     _sfCurrentAdaptLuminanceIdx(UInt32(0)),
+    _sfFinalScreenMaterialDepthChunk(NULL),
     _sfWidth                  (Int32(0)),
     _sfHeight                 (Int32(0)),
+    _sfBackgroundRenderTarget (NULL),
     _sfSceneRenderTarget      (NULL),
     _sfLuminanceRenderTarget  (NULL),
     _mfAdaptLuminanceRenderTarget(),
@@ -2803,8 +2937,8 @@ HDR2StageDataBase::HDR2StageDataBase(const HDR2StageDataBase &source) :
     _sfBlurVertShader         (NULL),
     _sfCompositeShader        (NULL),
     _sfFinalScreenShader      (NULL),
-    _sfSharedTextureEnvChunk  (NULL),
     _sfSharedMaterialChunk    (NULL),
+    _sfBackgroundMaterial     (NULL),
     _sfSceneMaterial          (NULL),
     _sfLuminanceMapMaterial   (NULL),
     _sfAdaptLuminanceMaterial (NULL),
@@ -2815,8 +2949,10 @@ HDR2StageDataBase::HDR2StageDataBase(const HDR2StageDataBase &source) :
     _sfCompositeMaterial      (NULL),
     _sfFinalScreenMaterial    (NULL),
     _sfCurrentAdaptLuminanceIdx(source._sfCurrentAdaptLuminanceIdx),
+    _sfFinalScreenMaterialDepthChunk(NULL),
     _sfWidth                  (source._sfWidth                  ),
     _sfHeight                 (source._sfHeight                 ),
+    _sfBackgroundRenderTarget (NULL),
     _sfSceneRenderTarget      (NULL),
     _sfLuminanceRenderTarget  (NULL),
     _mfAdaptLuminanceRenderTarget(),
@@ -2864,9 +3000,9 @@ void HDR2StageDataBase::onCreate(const HDR2StageData *source)
 
         pThis->setFinalScreenShader(source->getFinalScreenShader());
 
-        pThis->setSharedTextureEnvChunk(source->getSharedTextureEnvChunk());
-
         pThis->setSharedMaterialChunk(source->getSharedMaterialChunk());
+
+        pThis->setBackgroundMaterial(source->getBackgroundMaterial());
 
         pThis->setSceneMaterial(source->getSceneMaterial());
 
@@ -2895,6 +3031,10 @@ void HDR2StageDataBase::onCreate(const HDR2StageData *source)
         pThis->setCompositeMaterial(source->getCompositeMaterial());
 
         pThis->setFinalScreenMaterial(source->getFinalScreenMaterial());
+
+        pThis->setFinalScreenMaterialDepthChunk(source->getFinalScreenMaterialDepthChunk());
+
+        pThis->setBackgroundRenderTarget(source->getBackgroundRenderTarget());
 
         pThis->setSceneRenderTarget(source->getSceneRenderTarget());
 
@@ -3160,34 +3300,6 @@ EditFieldHandlePtr HDR2StageDataBase::editHandleFinalScreenShader(void)
     return returnValue;
 }
 
-GetFieldHandlePtr HDR2StageDataBase::getHandleSharedTextureEnvChunk (void) const
-{
-    SFUnrecTextureEnvChunkPtr::GetHandlePtr returnValue(
-        new  SFUnrecTextureEnvChunkPtr::GetHandle(
-             &_sfSharedTextureEnvChunk,
-             this->getType().getFieldDesc(SharedTextureEnvChunkFieldId),
-             const_cast<HDR2StageDataBase *>(this)));
-
-    return returnValue;
-}
-
-EditFieldHandlePtr HDR2StageDataBase::editHandleSharedTextureEnvChunk(void)
-{
-    SFUnrecTextureEnvChunkPtr::EditHandlePtr returnValue(
-        new  SFUnrecTextureEnvChunkPtr::EditHandle(
-             &_sfSharedTextureEnvChunk,
-             this->getType().getFieldDesc(SharedTextureEnvChunkFieldId),
-             this));
-
-    returnValue->setSetMethod(
-        boost::bind(&HDR2StageData::setSharedTextureEnvChunk,
-                    static_cast<HDR2StageData *>(this), _1));
-
-    editSField(SharedTextureEnvChunkFieldMask);
-
-    return returnValue;
-}
-
 GetFieldHandlePtr HDR2StageDataBase::getHandleSharedMaterialChunk (void) const
 {
     SFUnrecMaterialChunkPtr::GetHandlePtr returnValue(
@@ -3212,6 +3324,34 @@ EditFieldHandlePtr HDR2StageDataBase::editHandleSharedMaterialChunk(void)
                     static_cast<HDR2StageData *>(this), _1));
 
     editSField(SharedMaterialChunkFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr HDR2StageDataBase::getHandleBackgroundMaterial (void) const
+{
+    SFUnrecChunkMaterialPtr::GetHandlePtr returnValue(
+        new  SFUnrecChunkMaterialPtr::GetHandle(
+             &_sfBackgroundMaterial,
+             this->getType().getFieldDesc(BackgroundMaterialFieldId),
+             const_cast<HDR2StageDataBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr HDR2StageDataBase::editHandleBackgroundMaterial(void)
+{
+    SFUnrecChunkMaterialPtr::EditHandlePtr returnValue(
+        new  SFUnrecChunkMaterialPtr::EditHandle(
+             &_sfBackgroundMaterial,
+             this->getType().getFieldDesc(BackgroundMaterialFieldId),
+             this));
+
+    returnValue->setSetMethod(
+        boost::bind(&HDR2StageData::setBackgroundMaterial,
+                    static_cast<HDR2StageData *>(this), _1));
+
+    editSField(BackgroundMaterialFieldMask);
 
     return returnValue;
 }
@@ -3502,6 +3642,34 @@ EditFieldHandlePtr HDR2StageDataBase::editHandleCurrentAdaptLuminanceIdx(void)
     return returnValue;
 }
 
+GetFieldHandlePtr HDR2StageDataBase::getHandleFinalScreenMaterialDepthChunk (void) const
+{
+    SFUnrecDepthChunkPtr::GetHandlePtr returnValue(
+        new  SFUnrecDepthChunkPtr::GetHandle(
+             &_sfFinalScreenMaterialDepthChunk,
+             this->getType().getFieldDesc(FinalScreenMaterialDepthChunkFieldId),
+             const_cast<HDR2StageDataBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr HDR2StageDataBase::editHandleFinalScreenMaterialDepthChunk(void)
+{
+    SFUnrecDepthChunkPtr::EditHandlePtr returnValue(
+        new  SFUnrecDepthChunkPtr::EditHandle(
+             &_sfFinalScreenMaterialDepthChunk,
+             this->getType().getFieldDesc(FinalScreenMaterialDepthChunkFieldId),
+             this));
+
+    returnValue->setSetMethod(
+        boost::bind(&HDR2StageData::setFinalScreenMaterialDepthChunk,
+                    static_cast<HDR2StageData *>(this), _1));
+
+    editSField(FinalScreenMaterialDepthChunkFieldMask);
+
+    return returnValue;
+}
+
 GetFieldHandlePtr HDR2StageDataBase::getHandleWidth           (void) const
 {
     SFInt32::GetHandlePtr returnValue(
@@ -3548,6 +3716,34 @@ EditFieldHandlePtr HDR2StageDataBase::editHandleHeight         (void)
 
 
     editSField(HeightFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr HDR2StageDataBase::getHandleBackgroundRenderTarget (void) const
+{
+    SFUnrecFrameBufferObjectPtr::GetHandlePtr returnValue(
+        new  SFUnrecFrameBufferObjectPtr::GetHandle(
+             &_sfBackgroundRenderTarget,
+             this->getType().getFieldDesc(BackgroundRenderTargetFieldId),
+             const_cast<HDR2StageDataBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr HDR2StageDataBase::editHandleBackgroundRenderTarget(void)
+{
+    SFUnrecFrameBufferObjectPtr::EditHandlePtr returnValue(
+        new  SFUnrecFrameBufferObjectPtr::EditHandle(
+             &_sfBackgroundRenderTarget,
+             this->getType().getFieldDesc(BackgroundRenderTargetFieldId),
+             this));
+
+    returnValue->setSetMethod(
+        boost::bind(&HDR2StageData::setBackgroundRenderTarget,
+                    static_cast<HDR2StageData *>(this), _1));
+
+    editSField(BackgroundRenderTargetFieldMask);
 
     return returnValue;
 }
@@ -3975,9 +4171,9 @@ void HDR2StageDataBase::resolveLinks(void)
 
     static_cast<HDR2StageData *>(this)->setFinalScreenShader(NULL);
 
-    static_cast<HDR2StageData *>(this)->setSharedTextureEnvChunk(NULL);
-
     static_cast<HDR2StageData *>(this)->setSharedMaterialChunk(NULL);
+
+    static_cast<HDR2StageData *>(this)->setBackgroundMaterial(NULL);
 
     static_cast<HDR2StageData *>(this)->setSceneMaterial(NULL);
 
@@ -3996,6 +4192,10 @@ void HDR2StageDataBase::resolveLinks(void)
     static_cast<HDR2StageData *>(this)->setCompositeMaterial(NULL);
 
     static_cast<HDR2StageData *>(this)->setFinalScreenMaterial(NULL);
+
+    static_cast<HDR2StageData *>(this)->setFinalScreenMaterialDepthChunk(NULL);
+
+    static_cast<HDR2StageData *>(this)->setBackgroundRenderTarget(NULL);
 
     static_cast<HDR2StageData *>(this)->setSceneRenderTarget(NULL);
 

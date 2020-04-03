@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -52,9 +52,13 @@
 
 #include <cstdlib>
 #include <cstdio>
-#include <boost/assign/list_of.hpp>
 
-#include <OpenSG/OSGConfig.h>
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
+#include "OpenSG/OSGConfig.h"
 
 
 
@@ -62,11 +66,7 @@
 #include "OSGCubesBase.h"
 #include "OSGCubes.h"
 
-#include "boost/bind.hpp"
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
+#include <boost/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -101,18 +101,22 @@ OSG_BEGIN_NAMESPACE
 \***************************************************************************/
 
 #if !defined(OSG_DO_DOC) || defined(OSG_DOC_DEV)
-DataType FieldTraits<Cubes *>::_type("CubesPtr", "MaterialDrawablePtr");
+PointerType FieldTraits<Cubes *, nsOSG>::_type(
+    "CubesPtr", 
+    "MaterialDrawablePtr", 
+    Cubes::getClassType(),
+    nsOSG);
 #endif
 
-OSG_FIELDTRAITS_GETTYPE(Cubes *)
+OSG_FIELDTRAITS_GETTYPE_NS(Cubes *, nsOSG)
 
 OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
                            Cubes *,
-                           0);
+                           nsOSG)
 
 OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
                            Cubes *,
-                           0);
+                           nsOSG)
 
 /***************************************************************************\
  *                         Field Description                               *
@@ -165,11 +169,12 @@ CubesBase::TypeObject CubesBase::_type(
     CubesBase::getClassname(),
     Inherited::getClassname(),
     "NULL",
-    0,
+    nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&CubesBase::createEmptyLocal),
-    Cubes::initMethod,
-    Cubes::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&Cubes::classDescInserter),
+    reinterpret_cast<InitContainerF>(&Cubes::initMethod),
+    reinterpret_cast<ExitContainerF>(&Cubes::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&Cubes::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\"?>\n"
@@ -285,9 +290,9 @@ const MFColor3f *CubesBase::getMFColor(void) const
 
 /*------------------------------ access -----------------------------------*/
 
-UInt32 CubesBase::getBinSize(ConstFieldMaskArg whichField)
+SizeT CubesBase::getBinSize(ConstFieldMaskArg whichField)
 {
-    UInt32 returnValue = Inherited::getBinSize(whichField);
+    SizeT returnValue = Inherited::getBinSize(whichField);
 
     if(FieldBits::NoField != (PositionFieldMask & whichField))
     {
@@ -331,14 +336,17 @@ void CubesBase::copyFromBin(BinaryDataHandler &pMem,
 
     if(FieldBits::NoField != (PositionFieldMask & whichField))
     {
+        editMField(PositionFieldMask, _mfPosition);
         _mfPosition.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (LengthFieldMask & whichField))
     {
+        editMField(LengthFieldMask, _mfLength);
         _mfLength.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (ColorFieldMask & whichField))
     {
+        editMField(ColorFieldMask, _mfColor);
         _mfColor.copyFromBin(pMem);
     }
 }

@@ -59,7 +59,7 @@
 #include <boost/foreach.hpp>
 #include <boost/random.hpp>
 #include <boost/tuple/tuple.hpp>
-#include "boost/tuple/tuple_comparison.hpp"
+#include <boost/tuple/tuple_comparison.hpp>
 #include <boost/multi_array.hpp>
 
 #ifdef OSG_BUILD_ACTIVE
@@ -298,6 +298,61 @@ OSG::Vec3f dice_unit_vector()
     return v;
 }
 
+/*----- create_and_exe_dot_file ---------------------------------------------*/
+
+//#define CREATE_AND_EXE_DOT_FILE
+
+#include <boost/filesystem.hpp>
+
+#ifdef OSG_BUILD_ACTIVE
+#include <OSGDotFileGeneratorGraphOp.h>
+#else
+#include <OpenSG/OSGDotFileGeneratorGraphOp.h>
+#endif
+
+const char* graphviz_dot_executale = "d:/_xxx/Utils/Graphviz/bin/dot.exe";
+const char* graphviz_output_file   = "d:/out.dot";
+
+void create_and_exe_dot_file(OSG::Node* node)
+{
+#ifdef CREATE_AND_EXE_DOT_FILE
+    using namespace OSG;
+
+    namespace fs = ::boost::filesystem;
+
+    fs::path dot_file(graphviz_output_file); dot_file.replace_extension(".dot");
+    fs::path png_file(graphviz_output_file); png_file.replace_extension(".png");
+
+    if (fs::exists(dot_file))
+        fs::remove(dot_file);
+
+    if (fs::exists(png_file))
+        fs::remove(png_file);
+
+    DotFileGeneratorGraphOpRefPtr go = DotFileGeneratorGraphOp::create();
+
+    std::string param("filename=");
+    go->setParams(param + dot_file.string());
+    go->setParams("max_node_children=10 no_name_attachments=true no_ranks=true no_addresses=false");
+
+    go->traverse(node);
+
+    go = NULL;
+
+    if (!fs::exists(dot_file))
+        return;
+
+    fs::path exe_file(graphviz_dot_executale);
+    if (!fs::exists(exe_file))
+        return;
+
+    std::string cmd = exe_file.string();
+    cmd += " -T png " + dot_file.string() + " -o " + png_file.string();
+
+    system(cmd.c_str()) ;
+#endif // CREATE_AND_EXE_DOT_FILE
+}
+
 // ============================================================================
 //
 // Part: Declaration/Implementation of
@@ -357,7 +412,7 @@ Light::Light(Type e)
 
 Light::~Light() 
 {
-    beacon    = NULL;
+    setBeacon(NULL);
     transform = NULL;
 }
 
@@ -471,9 +526,10 @@ OSG::MultiLightChunkTransitPtr create_light_state(const VecLightsT& vLights)
     lightChunk->setUsage(GL_DYNAMIC_DRAW);
     lightChunk->setLayoutType(OSG::MultiLight::SIMPLE_LAYOUT | OSG::MultiLight::CINEMA_LAYOUT);
 
-    lightChunk->setHasEyeToLightSpaceMatrix(true);  // provide a struct entry for the transform from view space to light space
-    lightChunk->setHasCosSpotlightAngle    (true);  // provide a struct entry for the cosine of the spot light angle (defaults to true)
-    lightChunk->setHasSpotlightAngle       (true);  // provide a struct entry for the spot light angle itself (defaults to false)
+    lightChunk->setHasLightSpaceFromEyeSpaceMatrix(true);   // provide a struct entry for the transform from view space to light space
+    lightChunk->setHasCosSpotlightAngle           (true);   // provide a struct entry for the cosine of the spot light angle (defaults to true)
+    lightChunk->setHasTanSpotlightAngle           (true);   // provide a struct entry for the tangens of the spot light angle (defaults to true)
+    lightChunk->setHasSpotlightAngle              (true);   // provide a struct entry for the spot light angle itself (defaults to false)
 
     //lightChunk->setEyeSpace(true);
 
@@ -489,7 +545,7 @@ void update_light_state(OSG::MultiLightChunk* lightChunk, const VecLightsT& vLig
 {
     if (lightChunk)
     {
-        if (lightChunk->numLights() != vLights.size())
+        if (lightChunk->getNumLights() != vLights.size())
         {
             lightChunk->clearLights();
 
@@ -911,7 +967,7 @@ void deinitialize_lights()
 {
     BOOST_FOREACH(const Light& light, lights)
     {
-        scene_node->subChild(light.beacon);
+        scene_node->subChild(light.getBeacon());
     }
 
     lights.clear();
@@ -947,7 +1003,7 @@ void initialize_lights(OSG::UInt32 num)   // helper to create lights
         
         lights[i].create_light_geometry(i+1);
 
-        scene_node->addChild(lights[i].beacon);
+        scene_node->addChild(lights[i].getBeacon());
     }
 
     if (Light::add_dir_test_lights)
@@ -965,18 +1021,19 @@ void change_spot_dir_lights()
 
         switch (Light::force_spot_dir)
         {
-            case 0: light.direction = dice_unit_vector();  break;
-            case 1: light.direction = OSG::Vec3f(0, 0,-1); break;
-            case 2: light.direction = OSG::Vec3f(1, 0, 0); break;
-            case 3: light.direction = OSG::Vec3f(0,-1, 0); break;
-            case 4: light.direction = OSG::Vec3f(1, 0,-1); break;
-            case 5: light.direction = OSG::Vec3f(1,-1,-1); break;
+            case 0: light.setDirection(dice_unit_vector());  break;
+            case 1: light.setDirection(OSG::Vec3f(0, 0,-1)); break;
+            case 2: light.setDirection(OSG::Vec3f(1, 0, 0)); break;
+            case 3: light.setDirection(OSG::Vec3f(0,-1, 0)); break;
+            case 4: light.setDirection(OSG::Vec3f(1, 0,-1)); break;
+            case 5: light.setDirection(OSG::Vec3f(1,-1,-1)); break;
             case 6:
             {
                 static bool increase_flag = true;
 
-                light.direction = Light::dir_test_case_6;
-                light.direction.normalize();
+                OSG::Vec3f direction = Light::dir_test_case_6;
+                direction.normalize();
+                light.setDirection(direction);
 
                 OSG::Vec3f e1(1,0,-1);
                 OSG::Vec3f e2(0,0,-1);
@@ -996,8 +1053,9 @@ void change_spot_dir_lights()
             {
                 static bool increase_flag = true;
 
-                light.direction = Light::dir_test_case_7;
-                light.direction.normalize();
+                OSG::Vec3f direction = Light::dir_test_case_7;
+                direction.normalize();
+                light.setDirection(direction);
 
                 OSG::Vec3f e1(1,-1,-1);
                 OSG::Vec3f e2(0,0,-1);
@@ -1018,8 +1076,9 @@ void change_spot_dir_lights()
             {
                 static bool increase_flag = true;
 
-                light.direction = Light::dir_test_case_8;
-                light.direction.normalize();
+                OSG::Vec3f direction = Light::dir_test_case_8;
+                direction.normalize();
+                light.setDirection(direction);
 
                 OSG::Vec3f e1(0,-1, 0);
                 OSG::Vec3f e2(0, 0,-1);
@@ -1052,22 +1111,24 @@ Light Light::create_light(
 {
     Light l(e);
 
-    l.beacon = OSG::makeCoredNode<OSG::Transform>(&l.transform);
+    OSG::NodeRefPtr beacon = OSG::makeCoredNode<OSG::Transform>(&l.transform);
+
+    l.setBeacon(beacon);
     l.transform->setMatrix(OSG::Matrix::identity());
 
     OSG::Real32 L = box_factor * world_size;
 
     switch (Light::force_spot_dir)
     {
-        case 0: l.direction = dice_unit_vector();  break;
-        case 1: l.direction = OSG::Vec3f(0, 0,-1); break;
-        case 2: l.direction = OSG::Vec3f(1, 0, 0); break;
-        case 3: l.direction = OSG::Vec3f(0,-1, 0); break;
-        case 4: l.direction = OSG::Vec3f(1, 0,-1); break;
-        case 5: l.direction = OSG::Vec3f(1,-1,-1); break;
-        case 6: l.direction = OSG::Vec3f(0, 0,-1); break;
-        case 7: l.direction = OSG::Vec3f(0, 0,-1); break;
-        case 8: l.direction = OSG::Vec3f(0, 0,-1); break;
+        case 0: l.setDirection(dice_unit_vector());  break;
+        case 1: l.setDirection(OSG::Vec3f(0, 0,-1)); break;
+        case 2: l.setDirection(OSG::Vec3f(1, 0, 0)); break;
+        case 3: l.setDirection(OSG::Vec3f(0,-1, 0)); break;
+        case 4: l.setDirection(OSG::Vec3f(1, 0,-1)); break;
+        case 5: l.setDirection(OSG::Vec3f(1,-1,-1)); break;
+        case 6: l.setDirection(OSG::Vec3f(0, 0,-1)); break;
+        case 7: l.setDirection(OSG::Vec3f(0, 0,-1)); break;
+        case 8: l.setDirection(OSG::Vec3f(0, 0,-1)); break;
         case 9: break;
     }
 
@@ -1075,9 +1136,11 @@ Light Light::create_light(
     Light::dir_test_case_7 = OSG::Vec3f(0,0,-1);
     Light::dir_test_case_8 = OSG::Vec3f(0,0,-1);
 
-    l.color.setRandom();
-    l.intensity   = max_light_power * small_die();
-    l.rangeCutOff = L * light_range_die();
+    OSG::Color3f color;
+    color.setRandom();
+
+    l.setIntensity(max_light_power * small_die()*color);
+    l.setRangeCutOff(L * light_range_die());
 
     switch (e)
     {
@@ -1091,49 +1154,49 @@ Light Light::create_light(
             if (Light::add_dir_test_lights)
             {
                 if (test_dir_light_type == 0)
-                    l.direction = OSG::Vec3f(0,0,-1);
+                    l.setDirection(OSG::Vec3f(0,0,-1));
                 if (test_dir_light_type == 1)
-                    l.direction = OSG::Vec3f(0,0,1);
+                    l.setDirection(OSG::Vec3f(0,0,1));
 
-                l.intensity = 0.1f;
+                l.setIntensity(0.1f);
             }
         }
         break;
 
         case OSG::MultiLight::SPOT_LIGHT:
         {
-            l.spotlightAngle = spot_die();
+            l.setSpotlightAngle(spot_die());
         }
         break;
 
         case OSG::MultiLight::CINEMA_LIGHT:
         {
-            l.innerSuperEllipsesWidth  = light_ellipsis_radius_die();
-            l.innerSuperEllipsesHeight = light_ellipsis_radius_die();
+            l.setInnerSuperEllipsesWidth (light_ellipsis_radius_die());
+            l.setInnerSuperEllipsesHeight(light_ellipsis_radius_die());
 
             float f = light_ellipsis_radius_ratio_die();
 
-            l.outerSuperEllipsesWidth  = f * l.innerSuperEllipsesWidth;
-            l.outerSuperEllipsesHeight = f * l.innerSuperEllipsesHeight;
+            l.setOuterSuperEllipsesWidth (f * l.getInnerSuperEllipsesWidth());
+            l.setOuterSuperEllipsesHeight(f * l.getInnerSuperEllipsesHeight());
 
             int n = classic_die();
             switch (n)
             {
             case 1:
             case 2:
-                l.superEllipsesRoundness = light_ellipsis_roundness_die1();
+                l.setSuperEllipsesRoundness(light_ellipsis_roundness_die1());
                 break;
             case 3:
             case 4:
-                l.superEllipsesRoundness = light_ellipsis_roundness_die2();
+                l.setSuperEllipsesRoundness(light_ellipsis_roundness_die2());
                 break;
             case 5:
             case 6:
-                l.superEllipsesRoundness = light_ellipsis_roundness_die3();
+                l.setSuperEllipsesRoundness(light_ellipsis_roundness_die3());
                 break;
             }
 
-            l.superEllipsesTwist = light_ellipsis_twist_die();
+            l.setSuperEllipsesTwist(light_ellipsis_twist_die());
 
             //std::cout << "d = (" << l.direction.x() << ", " << l.direction.y() << ", " << l.direction.z() << ")" << std::endl;
             //std::cout << "a = " << l.innerSuperEllipsesWidth  << std::endl;
@@ -1154,24 +1217,27 @@ Light Light::create_light(
 
 void Light::create_light_geometry(OSG::UInt32 material_idx)
 {
-    if (!beacon) return;
+    if (!getBeacon()) return;
 
-    beacon->clearChildren();
+    getBeacon()->clearChildren();
+
+    OSG::Vec3f c = getIntensity();
+    c.normalize();
 
     Material mat;
-    mat.emissive = color;
+    mat.emissive = c;
     mat.opacity  = 0.7f;
 
     materials[material_idx] = mat;
 
     OSG::ChunkMaterialRefPtr geomState = OSG::ChunkMaterial::create();
 
-    OSG::Real32 R = rangeCutOff;
+    OSG::Real32 R = getRangeCutOff();
     
     if (!correct_light_geometry)
         R = 0.5;
 
-    switch (type)
+    switch (getType())
     {
         case OSG::MultiLight::POINT_LIGHT:
         {
@@ -1185,7 +1251,7 @@ void Light::create_light_geometry(OSG::UInt32 material_idx)
 
             geometry->setMaterial(geomState);
 
-            beacon->addChild(node);
+            getBeacon()->addChild(node);
 
             //
             // Test: Add mini sphere at the origin of the point light sphere
@@ -1220,19 +1286,19 @@ void Light::create_light_geometry(OSG::UInt32 material_idx)
 
             OSG::Real32 h = R;
 
-            OSG::GeometryRefPtr geometry = OSG::makeSpotGeo(h, OSG::osgDegree2Rad(spotlightAngle), 24, 24);
+            OSG::GeometryRefPtr geometry = OSG::makeSpotGeo(h, OSG::osgDegree2Rad(getSpotlightAngle()), 24, 24);
             geometry->setMaterial(geomState);
 
             OSG::TransformRefPtr coneTrans = OSG::Transform::create();
 
             OSG::Matrix rotMat;
-            OSG::MatrixRotateTowards(rotMat, OSG::Vec3f(0.f, 1.f, 0.f), direction);
+            OSG::MatrixRotateTowards(rotMat, OSG::Vec3f(0.f, 1.f, 0.f), getDirection());
             coneTrans->setMatrix(rotMat);
 
             OSG::NodeRefPtr coneTransNode  = OSG::makeNodeFor(coneTrans);
             OSG::NodeRefPtr coneNode       = OSG::makeNodeFor(geometry);
 
-            beacon->addChild(coneTransNode);
+            getBeacon()->addChild(coneTransNode);
             coneTransNode->addChild(coneNode);
 
             //
@@ -1273,20 +1339,20 @@ void Light::create_light_geometry(OSG::UInt32 material_idx)
             OSG::Real32 h = R;
 
             OSG::GeometryRefPtr geometry = OSG::makeCinemaGeo(
-                                                outerSuperEllipsesWidth,
-                                                outerSuperEllipsesHeight,
-                                                superEllipsesRoundness,
-                                                OSG::osgDegree2Rad(superEllipsesTwist),
+                                                getOuterSuperEllipsesWidth(),
+                                                getOuterSuperEllipsesHeight(),
+                                                getSuperEllipsesRoundness(),
+                                                OSG::osgDegree2Rad(getSuperEllipsesTwist()),
                                                 h, 48, 48);
             geometry->setMaterial(geomState);
 
             OSG::Matrix matLSFromWS;
 
             OSG::Matrix matLightPos;
-            matLightPos.setTranslate(position);
+            matLightPos.setTranslate(getPosition());
 
             OSG::Matrix matLightDir;
-            OSG::Quaternion rotLightDir(OSG::Vec3f(0.f, 0.f, 1.f), -direction);
+            OSG::Quaternion rotLightDir(OSG::Vec3f(0.f, 0.f, 1.f), -getDirection());
             matLightDir.setRotate(rotLightDir);
 
             matLSFromWS.mult  (matLightPos);
@@ -1303,7 +1369,7 @@ void Light::create_light_geometry(OSG::UInt32 material_idx)
             OSG::NodeRefPtr coneTransNode  = OSG::makeNodeFor(coneTrans);
             OSG::NodeRefPtr coneNode       = OSG::makeNodeFor(geometry);
 
-            beacon->addChild(coneTransNode);
+            getBeacon()->addChild(coneTransNode);
             coneTransNode->addChild(coneNode);
 
             //
@@ -1658,6 +1724,8 @@ int main(int argc, char **argv)
     
         // show the whole scene
         mgr->showAll();
+
+        create_and_exe_dot_file(mgr->getRoot());
     }
 
     // GLUT main loop
@@ -1972,7 +2040,7 @@ void keyboard(unsigned char k, int x, int y)
         case 'i':
         {
             BOOST_FOREACH(Light& light, lights)
-                light.intensity *= 1.2f;
+                light.setIntensity( light.getIntensity() * 1.2f);
 
             update_light_state(multi_light_chunk, lights);
             glutPostRedisplay();
@@ -1982,8 +2050,8 @@ void keyboard(unsigned char k, int x, int y)
         case 'I':
         {
             BOOST_FOREACH(Light& light, lights)
-                if (light.rangeCutOff / intensityFactor >= OSG::Eps)
-                    light.intensity /= intensityFactor;
+                if (light.getRangeCutOff() / intensityFactor >= OSG::Eps)
+                    light.setIntensity( light.getIntensity() / intensityFactor);
 
             update_light_state(multi_light_chunk, lights);
             glutPostRedisplay();
@@ -2027,7 +2095,7 @@ void keyboard(unsigned char k, int x, int y)
             {
                 Light& light = lights[i];
 
-                light.rangeCutOff *= rangeFactor;
+                light.setRangeCutOff(light.getRangeCutOff() * rangeFactor);
                 light.create_light_geometry(OSG::UInt32(i+1));
             }
 
@@ -2042,9 +2110,9 @@ void keyboard(unsigned char k, int x, int y)
             {
                 Light& light = lights[i];
 
-                if (light.rangeCutOff / rangeFactor >= OSG::Eps)
+                if (light.getRangeCutOff() / rangeFactor >= OSG::Eps)
                 {
-                    light.rangeCutOff /= rangeFactor;
+                    light.setRangeCutOff(light.getRangeCutOff() / rangeFactor);
                     light.create_light_geometry(OSG::UInt32(i+1));
                 }
             }
@@ -2342,7 +2410,7 @@ std::string get_fp_program()
     << endl << ""
     << endl << "uniform mat4  OSGViewMatrix;    // from world space to view space transformation"
     << endl << ""
-    << cluster_shading_stage->getFragmentProgramSnippet()
+    << cluster_shading_stage->getFragmentProgramSnippet(true, true)
     << endl << ""
     << endl << "struct Material"
     << endl << "{"
@@ -2369,106 +2437,6 @@ std::string get_fp_program()
     << endl << "const vec3 cCameraPositionES = vec3(0,0,0); // eye is at vec3(0,0,0) in eye space!"
     << endl << ""
     << endl << "layout(location = 0) out vec4 vFragColor;"
-    << endl << ""
-    << endl << "//"
-    << endl << "// Calculate the attenuation of the light based on the light "
-    << endl << "// range r and the distance d of the light to the current point."
-    << endl << "//"
-    << endl << "float calcAttenuation("
-    << endl << "    in const float r,"
-    << endl << "    in const float d)"
-    << endl << "{"
-    << endl << "    //"
-    << endl << "    // Perform smooth Hermite interpolation between 0 and 1, when e0<x<e1"
-    << endl << "    // float t = clamp((x-e0)/(e1-e0),0.0,1.0);"
-    << endl << "    // smoothstep(e0,e1,x) = t*t*(3-2*t);"
-    << endl << "    //"
-    << endl << "    return 1.0 - smoothstep(0.75 * r, r, d);"
-    << endl << "}"
-    << endl << ""
-    << endl << "//"
-    << endl << "// Calculate the attenuation with respect to the spot light cone."
-    << endl << "// Parameters:"
-    << endl << "//      minCosSpotAngle: the cosine of the spot light angle"
-    << endl << "//      l              :  normalized direction between fragment and light position"
-    << endl << "//      s              :  normalized light direction"
-    << endl << "//"
-    << endl << "float spotAttenuation("
-    << endl << "    in const float minCosSpotAngle,"
-    << endl << "    in const vec3 l,"
-    << endl << "    in const vec3 s)"
-    << endl << "{"
-    << endl << "    //"
-    << endl << "    // Linear interpolate between x and y using weight a"
-    << endl << "    // mix(x,y,a) = x*(1-a)+y*a"
-    << endl << "    //"
-    << endl << "    float maxCosSpotAngle = mix(minCosSpotAngle, 1.0, 0.5);"
-    << endl << "    float l_dot_s = dot(-l, s);"
-    << endl << "    //"
-    << endl << "    // Perform smooth Hermite interpolation between 0 and 1, when e0<x<e1"
-    << endl << "    // float t = clamp((x-e0)/(e1-e0),0.0,1.0);"
-    << endl << "    // smoothstep(e0,e1,x) = t*t*(3-2*t);"
-    << endl << "    //"
-    << endl << "    return smoothstep(minCosSpotAngle, maxCosSpotAngle, l_dot_s);"
-    << endl << "}"
-    << endl << ""
-    << endl << "//"
-    << endl << "// cinema (uber) light super ellipses clipping"
-    << endl << "// Parameters:"
-    << endl << "//      a     :  inner super ellipses width"
-    << endl << "//      b     :  inner super ellipses height"
-    << endl << "//      A     :  outer super ellipses width"
-    << endl << "//      B     :  outer super ellipses height"
-    << endl << "//      r     :  roundness parameter"
-    << endl << "//      theta :  twist parameter"
-    << endl << "//      pos   :  fragment position in light space"
-    << endl << "//"
-    << endl << "//      |x/a|^r + |y/b|^r = 1 <=> a*b*(|b*x|^r + |a*y|^r)^(-1/r) = 1"
-    << endl << "//"
-    << endl << "// smoothstep(e0,e1,x)"
-    << endl << "//      Perform smooth Hermite interpolation between 0 and 1, when e0<x<e1"
-    << endl << "//      float t = clamp((x-e0)/(e1-e0),0.0,1.0);"
-    << endl << "//      smoothstep(e0,e1,x) = t*t*(3-2*t);"
-    << endl << "//"
-    << endl << "float clipSuperEllipses("
-    << endl << "    in float a,"
-    << endl << "    in float b,"
-    << endl << "    in float A,"
-    << endl << "    in float B,"
-    << endl << "    in float r,"
-    << endl << "    in float theta,"
-    << endl << "    in vec3 pos)"
-    << endl << "{"
-    << endl << "    float result = 1.0;"
-    << endl << ""
-    << endl << "    vec2 P = pos.xy / pos.z;"
-    << endl << "    if (all(equal(P, vec2(0.0, 0.0))))"
-    << endl << "        return 1.0;"
-    << endl << ""
-    << endl << "    float cos_theta = cos(-theta);"
-    << endl << "    float sin_theta = sin(-theta);"
-    << endl << ""
-    << endl << "    float x =  abs(cos_theta * P.x - sin_theta * P.y);"
-    << endl << "    float y =  abs(sin_theta * P.x + cos_theta * P.y);"
-    << endl << ""
-    << endl << "    if (r > 50) // basically a square"
-    << endl << "    {"
-    << endl << "        // Simpler case of a square"
-    << endl << "        result = (1.0 - smoothstep(a, A, x)) * (1.0 - smoothstep(b, B, y));"
-    << endl << "    }"
-    << endl << "    else"
-    << endl << "    {"
-    << endl << "        float q = pow(x/a, r) + pow(y/b, r);"
-    << endl << "        float Q = pow(x/A, r) + pow(y/B, r);"
-    << endl << ""
-    << endl << "        if (q <  1) return 1.0;"
-    << endl << "        if (Q >= 1) return 0.0;"
-    << endl << ""
-    << endl << "        result = 1.0 - smoothstep(q, Q, 1.0);"
-    << endl << "    }"
-    << endl << ""
-    << endl << "    return result;"
-    << endl << "}"
     << endl << ""
     << endl << "//"
     << endl << "// directional light contribution"
@@ -2506,7 +2474,7 @@ std::string get_fp_program()
     << endl << "    else"
     << endl << "       pf = pow(n_dot_h, m);"
     << endl << ""
-    << endl << "    vec3 light_intensity = lights.light[i].intensity * lights.light[i].color;"
+    << endl << "    vec3 light_intensity = lights.light[i].intensity;"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
     << endl << "     + light_intensity * materials.material[j].ambient"
@@ -2559,7 +2527,7 @@ std::string get_fp_program()
     << endl << ""
     << endl << "    float attenuation = calcAttenuation(lights.light[i].rangeCutOff, d);"
     << endl << ""
-    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity * lights.light[i].color;"
+    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity;"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
     << endl << "     + light_intensity * materials.material[j].ambient"
@@ -2622,7 +2590,7 @@ std::string get_fp_program()
     << endl << ""
     << endl << "    attenuation *= spotAttenuation(lights.light[i].cosSpotlightAngle, l, s);"
     << endl << ""
-    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity * lights.light[i].color;"
+    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity;"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
     << endl << "     + light_intensity * materials.material[j].ambient"
@@ -2683,7 +2651,7 @@ std::string get_fp_program()
     << endl << ""
     << endl << "    float attenuation = calcAttenuation(lights.light[i].rangeCutOff, d);"
     << endl << ""
-    << endl << "    vec3 p_LS = (lights.light[i].eyeToLightSpaceMatrix * vec4(p, 1.0)).xyz;"
+    << endl << "    vec3 p_LS = (lights.light[i].matLSFromES * vec4(p, 1.0)).xyz;"
     << endl << ""
     << endl << "    attenuation *= clipSuperEllipses("
     << endl << "                            lights.light[i].innerSuperEllipsesWidth,"
@@ -2698,7 +2666,7 @@ std::string get_fp_program()
     << endl << ""
     << endl << "    attenuation = clamp(attenuation, 0.0, 1.0);"
     << endl << ""
-    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity * lights.light[i].color;"
+    << endl << "    vec3 light_intensity = attenuation * lights.light[i].intensity;"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
     << endl << "     + light_intensity * materials.material[j].ambient"

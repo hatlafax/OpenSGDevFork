@@ -43,6 +43,9 @@
 #include "OSGMatrixUtility.h"
 #include "OSGBaseFunctions.h"
 #include "OSGMatrix.h"
+#include "OSGView.h"
+#include "OSGPerspectiveProjection.h"
+#include "OSGOrthographicProjection.h"
 #include "OSGLog.h"
 
 OSG_BEGIN_NAMESPACE
@@ -175,6 +178,26 @@ OSG_BASE_DLLMAPPING bool MatrixOrthogonal(OSG::Matrix &result,
          1.f);
 
     return false;
+}
+
+OSG_BASE_DLLMAPPING bool MatrixOrthogonal(OSG::Matrix &result,
+                                          const OSG::Projection& proj)
+{
+    if (proj.getType() == OSG::Projection::ORTHOGRAPHIC)
+    {
+        const OSG::OrthographicProjection& ortho = 
+            static_cast<const OSG::OrthographicProjection&>(proj);
+        
+        return MatrixOrthogonal(result,
+                                ortho.getLeft(),
+                                ortho.getRight(),
+                                ortho.getBottom(),
+                                ortho.getTop(),
+                                ortho.getZNear(),
+                                ortho.getZFar());
+    }
+ 
+    return true;
 }
 
 OSG_BASE_DLLMAPPING bool MatrixOrthogonal2D(OSG::Matrix &result,
@@ -449,6 +472,24 @@ OSG_BASE_DLLMAPPING bool MatrixPerspective(OSG::Matrix &result,
                    rFar                );
 
     return false;
+}
+
+OSG_BASE_DLLMAPPING bool MatrixPerspective(OSG::Matrix &result,
+                                           const OSG::Projection& proj)
+{
+    if (proj.getType() == OSG::Projection::PERSPECTIVE)
+    {
+        const OSG::PerspectiveProjection& persp = 
+            static_cast<const OSG::PerspectiveProjection&>(proj);
+        
+        return MatrixPerspective(result,
+                                 persp.getFov(),
+                                 persp.getAspect(),
+                                 persp.getZNear(),
+                                 persp.getZFar());
+    }
+ 
+    return true;
 }
 
 OSG_BASE_DLLMAPPING bool MatrixStereoPerspective(OSG::Matrix &projection,
@@ -763,6 +804,15 @@ OSG_BASE_DLLMAPPING bool MatrixLookAt(OSG::Matrix &result,
     return false;
 }
 
+OSG_BASE_DLLMAPPING bool MatrixLookAt(OSG::Matrix &result, 
+                                      OSG::View   &view)
+{
+    return MatrixLookAt(result, 
+                        view.getEye(),
+                        view.getCenter(),
+                        view.getUp());
+}
+
 /*! \warning This matrix is the classical OpenGL lookAt function.
     For setting up the beacon transformation of a OSG::Camera you
     should go for the MatrixLookAt(...) functions.
@@ -864,6 +914,15 @@ OSG_BASE_DLLMAPPING bool MatrixLookAtGL(OSG::Matrix &result,
          1.f);
 
     return false;
+}
+
+OSG_BASE_DLLMAPPING bool MatrixLookAtGL(OSG::Matrix &result, 
+                                      OSG::View   &view)
+{
+    return MatrixLookAtGL(result, 
+                        view.getEye(),
+                        view.getCenter(),
+                        view.getUp());
 }
 
 OSG_BASE_DLLMAPPING bool MatrixProjection(OSG::Matrix &OSG_CHECK_ARG(result),

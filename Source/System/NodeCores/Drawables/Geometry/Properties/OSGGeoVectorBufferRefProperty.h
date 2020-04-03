@@ -78,7 +78,10 @@ class OSG_DRAWABLE_DLLMAPPING GeoVectorBufferRefProperty :
     /*! \name                    State Commands                            */
     /*! \{                                                                 */
 
-    void setGLId(UInt32 uiGLId);
+    void         setGLId         (UInt32 uiGLId);
+
+    UInt32       getOglGLId      (void) const;
+    void         setOglGLId      (UInt32 uiGLId);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -95,6 +98,14 @@ class OSG_DRAWABLE_DLLMAPPING GeoVectorBufferRefProperty :
 
     virtual void *mapBuffer  (GLenum eAccess, DrawEnv *pEnv);
     virtual bool  unmapBuffer(                DrawEnv *pEnv);
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name             OpenGL handling                                  */
+    /*! \{                                                                 */
+
+    virtual void   validate               (DrawEnv *pEnv);
+    virtual Int32  getOpenGLId            (DrawEnv *pEnv);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

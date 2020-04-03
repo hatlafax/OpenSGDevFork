@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+
+<FieldContainer
+   name="KeyValue"
+   parent="FieldContainer"
+   library="Base"
+   structure="concrete"
+   pointerfieldtypes="both"
+   systemcomponent="true"
+   parentsystemcomponent="true"
+   docGroupBase="GrpBaseFieldContainer"
+>
+  <Field
+	 name="key"
+	 type="std::string"
+	 cardinality="single"
+	 visibility="external"
+	 access="public"
+         defaultValue=""
+	 >
+  </Field>
+  <Field
+	 name="value"
+	 type="FieldContainerPtr"
+	 cardinality="single"
+	 visibility="external"
+	 access="public"
+         defaultValue="NULL"
+	 >
+  </Field>
+</FieldContainer>

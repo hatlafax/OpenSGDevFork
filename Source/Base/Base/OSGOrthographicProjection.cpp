@@ -82,6 +82,12 @@ OrthographicProjection::OrthographicProjection(
 {
 }
 
+OrthographicProjection::OrthographicProjection(const Matrix& matProjection)
+: Projection()
+{
+    setValue(matProjection);
+}
+
 OrthographicProjection::~OrthographicProjection()
 {
 }
@@ -103,6 +109,25 @@ OrthographicProjection& OrthographicProjection::operator=(const OrthographicProj
 Projection::Type OrthographicProjection::getType() const
 {
     return Projection::ORTHOGRAPHIC;
+}
+
+void OrthographicProjection::setValue(const Matrix& matProjection)
+{
+    Real32 m00 = matProjection[0][0];
+    Real32 m03 = matProjection[3][0];
+    Real32 m11 = matProjection[1][1];
+    Real32 m13 = matProjection[3][1];
+    Real32 m22 = matProjection[2][2];
+    Real32 m23 = matProjection[3][2];
+    
+    Real32 left   = -(m03 + 1)/m00;
+    Real32 right  =  (1 - m03)/m00;
+    Real32 bottom = -(m13 + 1)/m11;
+    Real32 top    =  (1 - m13)/m11;
+    Real32 zNear  =  (m23 + 1)/m22;
+    Real32 zFar   = -(1 - m23)/m22;
+    
+    setValue(left, right, bottom, top, zNear, zFar);
 }
 
 OSG_END_NAMESPACE

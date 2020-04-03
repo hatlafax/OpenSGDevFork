@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+   name="MultiLightShadowStageData"
+   parent="StageData"
+   library="ContribTechniques"
+   pointerfieldtypes="none"
+   structure="concrete"
+   systemcomponent="true"
+   parentsystemcomponent="true"
+   decoratable="false"
+   useLocalIncludes="false"
+   isNodeCore="false"
+   >
+
+    View dependent Data used by the MultiLightShadowStage.
+
+  <Field
+	 name="width"
+	 type="UInt32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="0"
+	 access="public"
+     >
+  </Field>
+  <Field
+	 name="height"
+	 type="UInt32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="0"
+	 access="public"
+     >
+  </Field>
+  <Field
+	 name="overrideProgChunk"
+	 type="ShaderProgramChunkPtr"
+	 cardinality="single"
+	 visibility="internal"
+	 defaultValue="NULL"
+	 access="public"
+     >
+  </Field>
+  <Field
+	 name="overrideProgram"
+	 type="ShaderProgramPtr"
+	 cardinality="single"
+	 visibility="internal"
+	 defaultValue="NULL"
+	 access="public"
+     >
+  </Field>
+
+</FieldContainer>

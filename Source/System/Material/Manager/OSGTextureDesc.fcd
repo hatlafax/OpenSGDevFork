@@ -1,0 +1,387 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="TextureDesc"
+    parent="FieldContainer"
+    library="System"
+    structure="concrete"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    docGroupBase="GrpSystemMaterial"
+    >
+    This class generally describes material textures. The class has been 
+    desigend among other things to be compatible with the Assimp library 
+    material texture format.
+    <Field
+        name="textureType"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0"
+        >
+        This value defines the type of the texture. Allowed values are
+        defined in the header file: NONE_TEXTURE, UNKNOWN_TEXTURE,
+        ALBEDO_TEXTURE, SPECULAR_TEXTURE,
+        EMISSIVE_TEXTURE, SHININESS_TEXTURE, OPACITY_TEXTURE, NORMALS_TEXTURE, 
+        HEIGHT_TEXTURE, DISPLACEMENT_TEXTURE, REFLECTION_TEXTURE,
+        REFRACTION_TEXTURE, ANISOTROPY_U_TEXTURE, ANISOTROPY_V_TEXTURE,
+        ANISOTROPY_UV_TEXTURE, AMBIENT_OCCLUSION_TEXTURE, ROUGH_TEXTURE,
+        METAL_TEXTURE, ROUGH_METAL_TEXTURE, OCCL_ROUGH_METAL_TEXTURE,
+        IRRADIANCE_TEXTURE, PRE_FILTER_TEXTURE, BRDF_LUT_TEXTURE,
+        STANDARD_MATERIAL_TEXTURE
+    </Field>
+    <Field
+        name="swizzle"
+        type="std::string"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue='"rgba"'
+        >
+        Some textures types use multiple channels. The swizzle string allows to
+        define which channel is used for the specific information. Only combinations
+        of the letters 'r', 'g', 'b' and 'a' are allowed.
+        Example: A OCCL_ROUGH_METAL_TEXTURE texture does have three channles available.
+                 With the string 'rbg' the ambient occlusion is taken from the red channel,
+                 the metalness is taken from the blue channel and the roughness is taken
+                 from the green channel of the texture.
+    </Field>
+    <Field
+        name="isSRGBTexture"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="true"
+        >
+        Whether textures are handled as sRGB or linear images.
+    </Field>
+    <Field
+        name="filename"
+        type="std::string"
+        cardinality="multi"
+        visibility="external"
+        access="public"
+        defaultValue=""
+        >
+        The file name of the image file of the texture. Six image file names can be provided for cube map textures
+        (CUBEMAP_MAPPING). All other environment textures take only one image file name.
+    </Field>
+    <Field
+        name="texUnit"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="-1"
+        >
+        Defines the texture unit binding point for the texture. If the value is -1 (default)
+        the texture unit will be automatically determined.
+    </Field>
+    <Field
+        name="UVChannel"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0"
+        >
+        Defines the UV channel to be used as input mapping coordinates for sampling this texture. 
+        All meshes assigned to this material share the same UV channel setup. For environment
+        textures this field does not make sense and it is ignored.
+    </Field>
+    <Field
+        name="mappingMode"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0"
+        >
+        Define the mapping mode for the texture. Allowed values are defined in the header file:
+        UV_MAPPING, SPHERE_MAPPING, CYLINDER_MAPPING, BOX_MAPPING, PLANE_MAPPING, OTHER_MAPPING.
+    </Field>
+    <Field
+        name="mapAxis"
+        type="Vec3f"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="Vec3f(0.f,0.f,0.f)"
+        >
+        Defines the base axis to compute the mapping coordinates. This is not required for 
+        UV-mapped textures. For instance, if mapping mode is SPHERE_MAPPING, U and V would map 
+        to longitude and latitude of a sphere around the given axis. The axis is given in local 
+        mesh space.
+    </Field>
+    <Field
+        name="environmentMapType"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0"
+        >
+        For environment maps (REFLECTION_TEXTURE, REFRACTION_TEXTURE, IRRADIANCE_TEXTURE
+        and PRE_FILTER_TEXTURE) this field defines two things. At first it defines how the
+        image file is to be handled. E.g. for a HORIZONTAL_CROSS_CUBE_MAP map the six cube 
+        map images are extracted from the provided single image file names automatically.
+        For a CUBE_MAP on the other hand six image file names must be provided, whereas for
+        a EQUIRECTANGULAR_MAP only one image file name needs to be provided. 
+        Secondly, this field defines the texture access pattern in the material shader.
+        All environment maps access the texture with by means of a direction vector of 
+        some kind. However, the EQUIRECTANGULAR_MAP first translates this direction vector
+        into a 2D UV coordinate in the lateral longitude EQUIRECTANGULAR_MAP.
+        Allowed values and number of files that needs to be provided:
+
+        OTHER_MAP                : default, not an environment map
+        EQUIRECTANGULAR_MAP      : one lateral longitude file name expected
+        CUBE_MAP                 : six image files for the six cube faces
+        VERTICAL_CROSS_CUBE_MAP  : one image file for the six cube faces with verical cross ordering
+        HORIZONTAL_CROSS_CUBE_MAP: one image file for the six cube faces with horizontal cross ordering
+        VERTICAL_STRIP_CUBE_MAP  : one image file for the six cube faces with verical stripe ordering
+        HORIZONTAL_STRIP_CUBE_MAP: one image file for the six cube faces with horizontal stripe ordering
+
+        Environment maps do not need an UV channel and they. They might use the provided blendFactor
+        but do not perform an expicit texture operation, transformation or mirroring step.
+    </Field>
+    <Field
+        name="blendFactor"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.f"
+        >
+        Defines the strength or blend factor. With the exception BLEND_OPERATION operation the
+        texture rgb color components are premultiplied by this factor *before* any further processing
+        is done. However, if the operation is BLEND_OPERATION true linear interpolation is performed 
+        between the current color and the texture color with respect to the blendFactor.
+    </Field>
+    <Field
+        name="operation"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0"
+        >
+        Defines the arithmetic operation to be used to combine the n'th texture on the stack with the n-1'th.
+        The first texture is blended with the base color. Allowed values are defined in the header file:
+        MULTIPLY_OPERATION, ADD_OPERATION, SUBTRACT_OPERATION, DIVIDE_OPERATION, SMOOTHADD_OPERATION,
+        SIGNEDADD_OPERATION, REPLACE_OPERATION, DECAL_OPERATION, BLEND_OPERATION.
+        Provided Co=(co,ao) is the original linearized texture color. Then the source color is 
+        Cs=(cs,as)=(b*co,ao) and the previous color should be Cp=(cp,ap).
+        Then the operations perform the following tasks yielding the resulting color Cr=(cr,ar):
+
+        MULTIPLY_OPERATION      : Cr = (cr,ar) = (cp*cs, ap*as)
+        DIVIDE_OPERATION        : Cr = (cr,ar) = (cp/cs, ap*as)
+        ADD_OPERATION           : Cr = (cr,ar) = (cp+cs, ap*as)
+        SUBTRACT_OPERATION      : Cr = (cr,ar) = (cp-cs, ap*as)
+        SMOOTHADD_OPERATION     : Cr = (cr,ar) = (cp+cs - cp*cs, ap*as)
+        SIGNEDADD_OPERATION     : Cr = (cr,ar) = (cp+cs - 0.5, ap*as)
+        REPLACE_OPERATION       : Cr = (cr,ar) = (cs,as)
+        DECAL_OPERATION         : Cr = (cr,ar) = ((1-as)*cp + as*cs, ap)
+        BLEND_OPERATION         : Cr = (cr,ar) = ((1-b)*cp + b*co, ap*as)
+    </Field>
+    <Field
+        name="wrapS"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="GL_REPEAT"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        >
+        Defines the texture mapping mode on the x axis for sampling the texture. Allowed values are
+        GL_CLAMP, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_EDGE, GL_MIRRORED_REPEAT, or GL_REPEAT.
+    </Field>
+    <Field
+        name="wrapT"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="GL_REPEAT"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        >
+        Defines the texture mapping mode on the y axis for sampling the texture. Allowed values are
+        GL_CLAMP, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_EDGE, GL_MIRRORED_REPEAT, or GL_REPEAT.
+    </Field>
+    <Field
+        name="wrapR"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="GL_REPEAT"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        >
+        Defines the texture mapping mode on the z axis for sampling the texture. Allowed values are
+        GL_CLAMP, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_EDGE, GL_MIRRORED_REPEAT, or GL_REPEAT.
+    </Field>
+    <Field
+        name="textureFlags"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0"
+        >
+        Define additional texure flags. Allowed values are defined in the header file:
+        EMPTY_FLAG, INVERT_FLAG, USE_ALPHA_FLAG, IGNORE_ALPHA_FLAG, NORMAL_DIRECTX_FLAG
+    </Field>
+    <Field
+        name="minFilter"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_LINEAR_MIPMAP_LINEAR"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+	>
+        The minimisation filter, default GL_LINEAR_MIPMAP_LINEAR.
+        Allowed values are GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_NEAREST,
+        GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR.
+    </Field>
+    <Field
+        name="magFilter"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_LINEAR"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+	>
+        The magnification filter, default GL_LINEAR.
+        Allowed values are GL_NEAREST, GL_LINEAR.
+    </Field>
+    <Field
+        name="internalFormat"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_NONE"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+	>
+	The internal texture format. If none is provided, the internal format is determined from the image pixel format.
+    </Field>
+    <Field
+        name="externalFormat"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        defaultValue="GL_NONE"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        access="public"
+	>
+        The external texture format - overwrites 
+        external format of image when set to a value not equal to 
+        GL_NONE (which is the default).
+    </Field>
+    <Field
+        name="anisotropy"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="1.0f"
+        access="public"
+        >
+        Anisotropic filtering the default 1.0f means isotropic filtering.
+    </Field>
+    <Field
+        name="mirrorFlags"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0"
+        >
+        If possible, flip the texture image in width, height or depth direction.
+        Allowed values is any combination of the following flags:
+            MIRROR_HORIZONTAL_DIRECTION, MIRROR_VERTICAL_DIRECTION, MIRROR_DEPTH_DIRECTION and
+            MIRROR_HORIZONTAL_DIRECTION_POS_X, MIRROR_HORIZONTAL_DIRECTION_POS_Y, MIRROR_HORIZONTAL_DIRECTION_POS_Z,
+            MIRROR_VERTICAL_DIRECTION_POS_X, MIRROR_VERTICAL_DIRECTION_POS_Y, MIRROR_VERTICAL_DIRECTION_POS_Z,
+            MIRROR_HORIZONTAL_DIRECTION_NEG_X, MIRROR_HORIZONTAL_DIRECTION_NEG_Y, MIRROR_HORIZONTAL_DIRECTION_NEG_Z,
+            MIRROR_VERTICAL_DIRECTION_NEG_X, MIRROR_VERTICAL_DIRECTION_NEG_Y, MIRROR_VERTICAL_DIRECTION_NEG_Z.
+    </Field>
+    <Field
+        name="scale"
+        type="Vec2f"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="Vec2f(1.f,1.f)"
+        >
+        Defined the scale part of the UV transformation.
+    </Field>
+    <Field
+        name="translate"
+        type="Vec2f"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="Vec2f(0.f,0.f)"
+        >
+        Defined the translation part of the UV transformation.
+    </Field>
+    <Field
+        name="rotate"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0.f"
+        >
+        Defined the rotation part specified in radians of the UV transformation.
+        The rotation center is (0f,.0f)
+    </Field>
+    <Field
+        name="hasUVTransform"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="false"
+        >
+        This flag is set to be true is a transformation of the texture coordinates
+        is available.
+    </Field>
+    <Field
+        name="borderColor"
+        type="Color4f"
+        cardinality="single"
+        visibility="external"
+        defaultValue="0,0,0,0"
+        access="public"
+	>
+	Texture border color
+    </Field>
+    <Field
+        name="texImage"
+        type="ImagePtr"
+        cardinality="multi"
+        visibility="external"
+	access="public"
+        defaultValue=""
+        >
+        The texture image for embedded textures.
+    </Field>
+    <Field
+         name="imageMap"
+         type="HashKeyToFieldContainerMap"
+         category="pointer"
+         cardinality="single"
+         visibility="internal"
+         defaultValue="NULL"
+         access="public"
+         >
+        A manager for image resources.
+      </Field>
+
+</FieldContainer>

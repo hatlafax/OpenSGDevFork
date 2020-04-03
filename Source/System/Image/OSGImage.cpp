@@ -64,6 +64,10 @@
 #include "OSGImageFileHandler.h"
 #include "OSGSquish.h"
 
+#include "OSGBaseHash.h"
+
+#include "OSGWindow.h"
+
 /*
 #include "OSGPathHandler.h"
 #include "OSGSceneFileHandler.h"
@@ -88,29 +92,92 @@ OSG_BEGIN_NAMESPACE
 
 UInt32 Image::_formatDic[][2] =
 {
-    { OSG_A_PF,      1 },
-    { OSG_I_PF,      1 },
-    { OSG_L_PF,      1 },
-    { OSG_LA_PF,     2 },
-    { OSG_R_PF,      1 },
-    { OSG_RG_PF,     2 },
-    { OSG_RGB_PF,    3 },
-    { OSG_RGBA_PF,   4 },
-    { OSG_BGR_PF,    3 },
-    { OSG_BGRA_PF,   4 },
-    { OSG_RGB_DXT1,  3 },
-    { OSG_RGBA_DXT1, 4 },
-    { OSG_RGBA_DXT3, 4 },
-    { OSG_RGBA_DXT5, 4 },
-    { OSG_DEPTH_PF,                   1 },
-    { OSG_DEPTH_STENCIL_PF,           1 },
-    { OSG_ALPHA_INTEGER_PF,           1 },
-    { OSG_RGB_INTEGER_PF,             3 },
-    { OSG_RGBA_INTEGER_PF,            4 },
-    { OSG_BGR_INTEGER_PF,             3 },
-    { OSG_BGRA_INTEGER_PF,            4 },
-    { OSG_LUMINANCE_INTEGER_PF,       1 },
-    { OSG_LUMINANCE_ALPHA_INTEGER_PF, 2 }
+    { OSG_A_PF,                             1 },
+    { OSG_I_PF,                             1 },
+    { OSG_L_PF,                             1 },
+    { OSG_LA_PF,                            2 },
+    { OSG_R_PF,                             1 },
+    { OSG_RG_PF,                            2 },
+    { OSG_RGB_PF,                           3 },
+    { OSG_RGBA_PF,                          4 },
+    { OSG_BGR_PF,                           3 },
+    { OSG_BGRA_PF,                          4 },
+    { OSG_RGB_DXT1,                         3 },
+    { OSG_RGBA_DXT1,                        4 },
+    { OSG_RGBA_DXT3,                        4 },
+    { OSG_RGBA_DXT5,                        4 },
+    { OSG_SRGB_DXT1,                        3 },
+    { OSG_SRGB_ALPHA_DXT1,                  4 },
+    { OSG_SRGB_ALPHA_DXT3,                  4 },
+    { OSG_SRGB_ALPHA_DXT5,                  4 },
+    { OSG_RED_RGTC1,                        1 },
+    { OSG_SIGNED_RED_RGTC1,                 1 },
+    { OSG_RG_RGTC2,                         2 },
+    { OSG_SIGNED_RG_RGTC2,                  2 },
+    { OSG_RGBA_BPTC_UNORM,                  4 },
+    { OSG_SRGB_ALPHA_BPTC_UNORM,            4 },
+    { OSG_RGB_BPTC_SIGNED_FLOAT,            3 },
+    { OSG_RGB_BPTC_UNSIGNED_FLOAT,          3 },
+    { OSG_RGBA_ASTC_4x4,                    4 },
+    { OSG_RGBA_ASTC_5x4,                    4 },
+    { OSG_RGBA_ASTC_5x5,                    4 },
+    { OSG_RGBA_ASTC_6x5,                    4 },
+    { OSG_RGBA_ASTC_6x6,                    4 },
+    { OSG_RGBA_ASTC_8x5,                    4 },
+    { OSG_RGBA_ASTC_8x6,                    4 },
+    { OSG_RGBA_ASTC_8x8,                    4 },
+    { OSG_RGBA_ASTC_10x5,                   4 },
+    { OSG_RGBA_ASTC_10x6,                   4 },
+    { OSG_RGBA_ASTC_10x8,                   4 },
+    { OSG_RGBA_ASTC_10x10,                  4 },
+    { OSG_RGBA_ASTC_12x10,                  4 },
+    { OSG_RGBA_ASTC_12x12,                  4 },
+    { OSG_SRGB8_ALPHA8_ASTC_4x4,            4 },
+    { OSG_SRGB8_ALPHA8_ASTC_5x4,            4 },
+    { OSG_SRGB8_ALPHA8_ASTC_5x5,            4 },
+    { OSG_SRGB8_ALPHA8_ASTC_6x5,            4 },
+    { OSG_SRGB8_ALPHA8_ASTC_6x6,            4 },
+    { OSG_SRGB8_ALPHA8_ASTC_8x5,            4 },
+    { OSG_SRGB8_ALPHA8_ASTC_8x6,            4 },
+    { OSG_SRGB8_ALPHA8_ASTC_8x8,            4 },
+    { OSG_SRGB8_ALPHA8_ASTC_10x5,           4 },
+    { OSG_SRGB8_ALPHA8_ASTC_10x6,           4 },
+    { OSG_SRGB8_ALPHA8_ASTC_10x8,           4 },
+    { OSG_SRGB8_ALPHA8_ASTC_10x10,          4 },
+    { OSG_SRGB8_ALPHA8_ASTC_12x10,          4 },
+    { OSG_SRGB8_ALPHA8_ASTC_12x12,          4 },
+    { OSG_RGB8_ETC2,                        3 },
+    { OSG_SRGB8_ETC2,                       3 },
+    { OSG_RGB8_PUNCHTHROUGH_ALPHA1_ETC2,    4 },
+    { OSG_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2,   4 },
+    { OSG_RGBA8_ETC2_EAC,                   4 },
+    { OSG_SRGB8_ALPHA8_ETC2_EAC,            4 },
+    { OSG_R11_EAC,                          1 },
+    { OSG_SIGNED_R11_EAC,                   1 },
+    { OSG_RG11_EAC,                         2 },
+    { OSG_SIGNED_RG11_EAC,                  2 },
+    { OSG_RGB_PVRTC_4BPPV1,                 3 },
+    { OSG_RGB_PVRTC_2BPPV1,                 3 },
+    { OSG_RGBA_PVRTC_4BPPV1,                4 },
+    { OSG_RGBA_PVRTC_2BPPV1,                4 },
+    { OSG_RGBA_PVRTC_4BPPV2,                4 },
+    { OSG_RGBA_PVRTC_2BPPV2,                4 },
+    { OSG_RGB8_ETC1,                        3 },
+    { OSG_SRGB_PVRTC_2BPPV1,                3 },
+    { OSG_SRGB_PVRTC_4BPPV1,                3 },
+    { OSG_SRGB_ALPHA_PVRTC_2BPPV1,          4 },
+    { OSG_SRGB_ALPHA_PVRTC_4BPPV1,          4 },
+    { OSG_SRGB_ALPHA_PVRTC_2BPPV2,          4 },
+    { OSG_SRGB_ALPHA_PVRTC_4BPPV2,          4 },
+    { OSG_DEPTH_PF,                         1 },
+    { OSG_DEPTH_STENCIL_PF,                 1 },
+    { OSG_ALPHA_INTEGER_PF,                 1 },
+    { OSG_RGB_INTEGER_PF,                   3 },
+    { OSG_RGBA_INTEGER_PF,                  4 },
+    { OSG_BGR_INTEGER_PF,                   3 },
+    { OSG_BGRA_INTEGER_PF,                  4 },
+    { OSG_LUMINANCE_INTEGER_PF,             1 },
+    { OSG_LUMINANCE_ALPHA_INTEGER_PF,       2 }
 };
 
 Int32 Image::_typeDic[][2] =
@@ -126,10 +193,105 @@ Int32 Image::_typeDic[][2] =
     { OSG_UINT24_8_IMAGEDATA,    4 }
 };
 
+Image::FormatInfo Image::_formatInfoDic[] =
+{
+    { 0,                                    0, Vec3ub( 0,  0,  0), 0 },
+    { OSG_RGB_DXT1,                         8, Vec3ub( 4,  4,  1), 3 }, // GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+    { OSG_RGBA_DXT1,                        8, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+    { OSG_RGBA_DXT3,                       16, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+    { OSG_RGBA_DXT5,                       16, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+    { OSG_SRGB_DXT1,                        8, Vec3ub( 4,  4,  1), 3 }, // GL_COMPRESSED_SRGB_S3TC_DXT1_EXT
+    { OSG_SRGB_ALPHA_DXT1,                  8, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
+    { OSG_SRGB_ALPHA_DXT3,                 16, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
+    { OSG_SRGB_ALPHA_DXT5,                 16, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
+    { OSG_RED_RGTC1,                        8, Vec3ub( 4,  4,  1), 1 }, // GL_COMPRESSED_RED_RGTC1
+    { OSG_SIGNED_RED_RGTC1,                 8, Vec3ub( 4,  4,  1), 1 }, // GL_COMPRESSED_SIGNED_RED_RGTC1
+    { OSG_RG_RGTC2,                        16, Vec3ub( 4,  4,  1), 2 }, // GL_COMPRESSED_RG_RGTC2
+    { OSG_SIGNED_RG_RGTC2,                 16, Vec3ub( 4,  4,  1), 2 }, // GL_COMPRESSED_SIGNED_RG_RGTC2
+    { OSG_RGBA_BPTC_UNORM,                 16, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_RGBA_BPTC_UNORM
+    { OSG_SRGB_ALPHA_BPTC_UNORM,           16, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM
+    { OSG_RGB_BPTC_SIGNED_FLOAT,           16, Vec3ub( 4,  4,  1), 3 }, // GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT
+    { OSG_RGB_BPTC_UNSIGNED_FLOAT,         16, Vec3ub( 4,  4,  1), 3 }, // GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT
+    { OSG_RGBA_ASTC_4x4,                   16, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_4x4_KHR
+    { OSG_RGBA_ASTC_5x4,                   16, Vec3ub( 5,  4,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_5x4_KHR
+    { OSG_RGBA_ASTC_5x5,                   16, Vec3ub( 5,  5,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_5x5_KHR
+    { OSG_RGBA_ASTC_6x5,                   16, Vec3ub( 6,  5,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_6x5_KHR
+    { OSG_RGBA_ASTC_6x6,                   16, Vec3ub( 6,  6,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_6x6_KHR
+    { OSG_RGBA_ASTC_8x5,                   16, Vec3ub( 8,  5,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_8x5_KHR
+    { OSG_RGBA_ASTC_8x6,                   16, Vec3ub( 8,  6,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_8x6_KHR
+    { OSG_RGBA_ASTC_8x8,                   16, Vec3ub( 8,  8,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_8x8_KHR
+    { OSG_RGBA_ASTC_10x5,                  16, Vec3ub(10,  5,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_10x5_KHR
+    { OSG_RGBA_ASTC_10x6,                  16, Vec3ub(10,  6,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_10x6_KHR
+    { OSG_RGBA_ASTC_10x8,                  16, Vec3ub(10,  8,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_10x8_KHR
+    { OSG_RGBA_ASTC_10x10,                 16, Vec3ub(10, 10,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_10x10_KHR
+    { OSG_RGBA_ASTC_12x10,                 16, Vec3ub(12, 10,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_12x10_KHR
+    { OSG_RGBA_ASTC_12x12,                 16, Vec3ub(12, 12,  1), 4 }, // GL_COMPRESSED_RGBA_ASTC_12x12_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_4x4,           16, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_5x4,           16, Vec3ub( 5,  4,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_5x5,           16, Vec3ub( 5,  5,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_6x5,           16, Vec3ub( 6,  5,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_6x6,           16, Vec3ub( 6,  6,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_8x5,           16, Vec3ub( 8,  5,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_8x6,           16, Vec3ub( 8,  6,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_8x8,           16, Vec3ub( 8,  8,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_10x5,          16, Vec3ub(10,  5,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_10x6,          16, Vec3ub(10,  6,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_10x8,          16, Vec3ub(10,  8,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_10x10,         16, Vec3ub(10, 10,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_12x10,         16, Vec3ub(12, 10,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
+    { OSG_SRGB8_ALPHA8_ASTC_12x12,         16, Vec3ub(12, 12,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
+    { OSG_RGB8_ETC2,                        8, Vec3ub( 4,  4,  1), 3 }, // GL_COMPRESSED_RGB8_ETC2
+    { OSG_SRGB8_ETC2,                       8, Vec3ub( 4,  4,  1), 3 }, // GL_COMPRESSED_SRGB8_ETC2
+    { OSG_RGB8_PUNCHTHROUGH_ALPHA1_ETC2,    8, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
+    { OSG_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2,   8, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
+    { OSG_RGBA8_ETC2_EAC,                  16, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_RGBA8_ETC2_EAC
+    { OSG_SRGB8_ALPHA8_ETC2_EAC,           16, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
+    { OSG_R11_EAC,                          8, Vec3ub( 4,  4,  1), 1 }, // GL_COMPRESSED_R11_EAC
+    { OSG_SIGNED_R11_EAC,                   8, Vec3ub( 4,  4,  1), 1 }, // GL_COMPRESSED_SIGNED_R11_EAC
+    { OSG_RG11_EAC,                        16, Vec3ub( 4,  4,  1), 2 }, // GL_COMPRESSED_RG11_EAC
+    { OSG_SIGNED_RG11_EAC,                 16, Vec3ub( 4,  4,  1), 2 }, // GL_COMPRESSED_SIGNED_RG11_EAC
+    { OSG_RGB_PVRTC_4BPPV1,                32, Vec3ub( 8,  8,  1), 3 }, // GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG
+    { OSG_RGB_PVRTC_2BPPV1,                32, Vec3ub(16,  8,  1), 3 }, // GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG
+    { OSG_RGBA_PVRTC_4BPPV1,               32, Vec3ub( 8,  8,  1), 4 }, // GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
+    { OSG_RGBA_PVRTC_2BPPV1,               32, Vec3ub(16,  8,  1), 4 }, // GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
+    { OSG_RGBA_PVRTC_4BPPV2,                8, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_RGBA_PVRTC_4BPPV2_IMG
+    { OSG_RGBA_PVRTC_2BPPV2,                8, Vec3ub( 8,  4,  1), 4 }, // GL_COMPRESSED_RGBA_PVRTC_2BPPV2_IMG
+    { OSG_RGB8_ETC1,                        8, Vec3ub( 4,  4,  1), 3 }, // GL_COMPRESSED_RGB8_ETC1
+    { OSG_SRGB_PVRTC_2BPPV1,               32, Vec3ub( 8,  8,  1), 3 }, // GL_COMPRESSED_SRGB_PVRTC_2BPPV1_EXT
+    { OSG_SRGB_PVRTC_4BPPV1,               32, Vec3ub(16,  8,  1), 3 }, // GL_COMPRESSED_SRGB_PVRTC_4BPPV1_EXT
+    { OSG_SRGB_ALPHA_PVRTC_2BPPV1,         32, Vec3ub( 8,  8,  1), 4 }, // GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV1_EXT
+    { OSG_SRGB_ALPHA_PVRTC_4BPPV1,         32, Vec3ub(16,  8,  1), 4 }, // GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV1_EXT
+    { OSG_SRGB_ALPHA_PVRTC_2BPPV2,          8, Vec3ub( 8,  4,  1), 4 }, // GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV2_IMG
+    { OSG_SRGB_ALPHA_PVRTC_4BPPV2,          8, Vec3ub( 4,  4,  1), 4 }, // GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV2_IMG
+};
+
+const Image::FormatInfo& Image::getFormatInfo(UInt32 format)
+{
+    std::size_t sz = sizeof(_formatInfoDic) / sizeof(FormatInfo);
+
+    for(std::size_t i = 0; i < sz; i++)
+    {
+        if(_formatInfoDic[i].format == format)
+        {
+            return _formatInfoDic[i];
+        }
+    }
+
+    return _formatInfoDic[0];
+}
+
 /*----------------------------- class specific ----------------------------*/
 
 void Image::initMethod(InitPhase ePhase)
 {
+Inherited::initMethod(ePhase);
+
+    if (ePhase == TypeObject::SystemPost)
+    {
+#ifdef OSG_OGL_TEXTURE_SWIZZLE
+        Window::registerExtension("GL_ARB_texture_swizzle");
+#endif
+    }
 }
 
 /*! Inform parents, when image was changed
@@ -245,6 +407,195 @@ void Image::dump(      UInt32    ,
             break;
         case OSG_RGBA_DXT5:
             pfStr = "RGBA_DXT5";
+            break;
+        case OSG_SRGB_DXT1:
+            pfStr = "SRGB_DXT1";
+            break;
+        case OSG_SRGB_ALPHA_DXT1:
+            pfStr = "SRGB_ALPHA_DXT1";
+            break;
+        case OSG_SRGB_ALPHA_DXT3:
+            pfStr = "SRGB_ALPHA_DXT3";
+            break;
+        case OSG_SRGB_ALPHA_DXT5:
+            pfStr = "SRGB_ALPHA_DXT5";
+            break;
+        case OSG_RED_RGTC1:
+            pfStr = "RED_RGTC1";
+            break;
+        case OSG_SIGNED_RED_RGTC1:
+            pfStr = "SIGNED_RED_RGTC1";
+            break;
+        case OSG_RG_RGTC2:
+            pfStr = "RG_RGTC2";
+            break;
+        case OSG_SIGNED_RG_RGTC2:
+            pfStr = "SIGNED_RG_RGTC2";
+            break;
+        case OSG_RGBA_BPTC_UNORM:
+            pfStr = "RGBA_BPTC_UNORM";
+            break;
+        case OSG_SRGB_ALPHA_BPTC_UNORM:
+            pfStr = "SRGB_ALPHA_BPTC_UNORM";
+            break;
+        case OSG_RGB_BPTC_SIGNED_FLOAT:
+            pfStr = "RGB_BPTC_SIGNED_FLOAT";
+            break;
+        case OSG_RGB_BPTC_UNSIGNED_FLOAT:
+            pfStr = "RGB_BPTC_UNSIGNED_FLOAT";
+            break;
+        case OSG_RGBA_ASTC_4x4:
+            pfStr = "RGBA_ASTC_4x4";
+            break;
+        case OSG_RGBA_ASTC_5x4:
+            pfStr = "RGBA_ASTC_5x4";
+            break;
+        case OSG_RGBA_ASTC_5x5:
+            pfStr = "RGBA_ASTC_5x5";
+            break;
+        case OSG_RGBA_ASTC_6x5:
+            pfStr = "RGBA_ASTC_6x5";
+            break;
+        case OSG_RGBA_ASTC_6x6:
+            pfStr = "RGBA_ASTC_6x6";
+            break;
+        case OSG_RGBA_ASTC_8x5:
+            pfStr = "RGBA_ASTC_8x5";
+            break;
+        case OSG_RGBA_ASTC_8x6:
+            pfStr = "RGBA_ASTC_8x6";
+            break;
+        case OSG_RGBA_ASTC_8x8:
+            pfStr = "RGBA_ASTC_8x8";
+            break;
+        case OSG_RGBA_ASTC_10x5:
+            pfStr = "RGBA_ASTC_10x5";
+            break;
+        case OSG_RGBA_ASTC_10x6:
+            pfStr = "RGBA_ASTC_10x6";
+            break;
+        case OSG_RGBA_ASTC_10x8:
+            pfStr = "RGBA_ASTC_10x8";
+            break;
+        case OSG_RGBA_ASTC_10x10:
+            pfStr = "RGBA_ASTC_10x10";
+            break;
+        case OSG_RGBA_ASTC_12x10:
+            pfStr = "RGBA_ASTC_12x10";
+            break;
+        case OSG_RGBA_ASTC_12x12:
+            pfStr = "RGBA_ASTC_12x12";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_4x4:
+            pfStr = "SRGB8_ALPHA8_ASTC_4x4";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_5x4:
+            pfStr = "SRGB8_ALPHA8_ASTC_5x4";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_5x5:
+            pfStr = "SRGB8_ALPHA8_ASTC_5x5";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_6x5:
+            pfStr = "SRGB8_ALPHA8_ASTC_6x5";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_6x6:
+            pfStr = "SRGB8_ALPHA8_ASTC_6x6";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_8x5:
+            pfStr = "SRGB8_ALPHA8_ASTC_8x5";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_8x6:
+            pfStr = "SRGB8_ALPHA8_ASTC_8x6";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_8x8:
+            pfStr = "SRGB8_ALPHA8_ASTC_8x8";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_10x5:
+            pfStr = "SRGB8_ALPHA8_ASTC_10x5";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_10x6:
+            pfStr = "SRGB8_ALPHA8_ASTC_10x6";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_10x8:
+            pfStr = "SRGB8_ALPHA8_ASTC_10x8";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_10x10:
+            pfStr = "SRGB8_ALPHA8_ASTC_10x10";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_12x10:
+            pfStr = "SRGB8_ALPHA8_ASTC_12x10";
+            break;
+        case OSG_SRGB8_ALPHA8_ASTC_12x12:
+            pfStr = "SRGB8_ALPHA8_ASTC_12x12";
+            break;
+        case OSG_RGB8_ETC2:
+            pfStr = "RGB8_ETC2";
+            break;
+        case OSG_SRGB8_ETC2:
+            pfStr = "SRGB8_ETC2";
+            break;
+        case OSG_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+            pfStr = "RGB8_PUNCHTHROUGH_ALPHA1_ETC2";
+            break;
+        case OSG_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+            pfStr = "SRGB8_PUNCHTHROUGH_ALPHA1_ETC2";
+            break;
+        case OSG_RGBA8_ETC2_EAC:
+            pfStr = "RGBA8_ETC2_EAC";
+            break;
+        case OSG_SRGB8_ALPHA8_ETC2_EAC:
+            pfStr = "SRGB8_ALPHA8_ETC2_EAC";
+            break;
+        case OSG_R11_EAC:
+            pfStr = "R11_EAC";
+            break;
+        case OSG_SIGNED_R11_EAC:
+            pfStr = "SIGNED_R11_EAC";
+            break;
+        case OSG_RG11_EAC:
+            pfStr = "RG11_EAC";
+            break;
+        case OSG_SIGNED_RG11_EAC:
+            pfStr = "SIGNED_RG11_EAC";
+            break;
+        case OSG_RGB_PVRTC_4BPPV1:
+            pfStr = "RGB_PVRTC_4BPPV1";
+            break;
+        case OSG_RGB_PVRTC_2BPPV1:
+            pfStr = "RGB_PVRTC_2BPPV1";
+            break;
+        case OSG_RGBA_PVRTC_4BPPV1:
+            pfStr = "RGBA_PVRTC_4BPPV1";
+            break;
+        case OSG_RGBA_PVRTC_2BPPV1:
+            pfStr = "RGBA_PVRTC_2BPPV1";
+            break;
+        case OSG_RGBA_PVRTC_4BPPV2:
+            pfStr = "RGBA_PVRTC_4BPPV2";
+            break;
+        case OSG_RGBA_PVRTC_2BPPV2:
+            pfStr = "RGBA_PVRTC_2BPPV2";
+            break;
+        case OSG_RGB8_ETC1:
+            pfStr = "RGB8_ETC1";
+            break;
+        case OSG_SRGB_PVRTC_2BPPV1:
+            pfStr = "SRGB_PVRTC_2BPPV1";
+            break;
+        case OSG_SRGB_PVRTC_4BPPV1:
+            pfStr = "SRGB_PVRTC_4BPPV1";
+            break;
+        case OSG_SRGB_ALPHA_PVRTC_2BPPV1:
+            pfStr = "SRGB_ALPHA_PVRTC_2BPPV1";
+            break;
+        case OSG_SRGB_ALPHA_PVRTC_4BPPV1:
+            pfStr = "SRGB_ALPHA_PVRTC_4BPPV1";
+            break;
+        case OSG_SRGB_ALPHA_PVRTC_2BPPV2:
+            pfStr = "SRGB_ALPHA_PVRTC_2BPPV2";
+            break;
+        case OSG_SRGB_ALPHA_PVRTC_4BPPV2:
+            pfStr = "SRGB_ALPHA_PVRTC_4BPPV2";
             break;
         case OSG_DEPTH_PF:
             pfStr = "DEPTH";
@@ -1785,6 +2136,7 @@ bool Image::reformat(const Image::PixelFormat  pixelFormat,
                             break;
 #if defined(GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
                         case OSG_RGB_DXT1:
+                        case OSG_SRGB_DXT1:
                         {
                             iCompressionFlags |= osgsquish::kDxt1;
 
@@ -1807,6 +2159,7 @@ bool Image::reformat(const Image::PixelFormat  pixelFormat,
 #endif
 #if defined(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
                         case OSG_RGBA_DXT1:
+                        case OSG_SRGB_ALPHA_DXT1:
                         {
                             iCompressionFlags |= osgsquish::kDxt1;
 
@@ -1829,6 +2182,7 @@ bool Image::reformat(const Image::PixelFormat  pixelFormat,
 #endif
 #if defined(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
                         case OSG_RGBA_DXT3:
+                        case OSG_SRGB_ALPHA_DXT3:
                         {
                             iCompressionFlags |= osgsquish::kDxt3; 
 
@@ -1851,6 +2205,7 @@ bool Image::reformat(const Image::PixelFormat  pixelFormat,
 #endif
 #if defined(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
                         case OSG_RGBA_DXT5:
+                        case OSG_SRGB_ALPHA_DXT5:
                         {
                             iCompressionFlags |= osgsquish::kDxt5;
 
@@ -2852,6 +3207,8 @@ bool Image::scale(Int32  width,
                    true,
                    getSideCount  ());
 
+    const FormatInfo& info = getFormatInfo(getPixelFormat());
+
     // copy every mipmap in every side in every frame
     for(frame = 0; frame < getFrameCount(); frame++)
     {
@@ -2867,7 +3224,8 @@ bool Image::scale(Int32  width,
 
                 if(mipmap)
                 {
-                    src += calcMipmapSumSize (mipmap,
+                    src += calcMipmapSumSize (info,
+                                              mipmap,
                                               oldWidth,
                                               oldHeight,
                                               oldDepth);
@@ -2946,6 +3304,8 @@ bool Image::mirror(bool   horizontal,
     const UChar8 *src;
     UChar8       *dest;
 
+    const FormatInfo& info = getFormatInfo(getPixelFormat());
+
     // copy every mipmap in every side in every frame
     for(frame = 0; frame < getFrameCount(); frame++)
     {
@@ -2960,7 +3320,7 @@ bool Image::mirror(bool   horizontal,
 
                 if(mipmap)
                 {
-                    src += calcMipmapSumSize(mipmap, width, height, depth);
+                    src += calcMipmapSumSize(info, mipmap, width, height, depth);
                 }
 
                 dest = destImage->editData(mipmap, frame, side);
@@ -3200,6 +3560,1324 @@ bool Image::slice(Int32  offX,
     if(destination == NULL)
     {
         this->set(destImage);
+    }
+
+    return retCode;
+}
+
+/*! Copy a component (color channel) from the source image to this image.
+ */
+
+bool Image::copyComponent(
+    Image* srcImage,     // the source image
+    UInt8  srcComponent, // the channel to copy from the source
+    UInt8  dstComponent, // the channel to modify on the destination (i.e. this)
+    UInt32 format      ) // optionally, the image format of the destination (i.e. this)
+{
+    if (srcImage == NULL)
+    {
+        FWARNING (("Image::copyComponent: no source image!"));
+        return false;
+    }
+
+    if (srcImage->hasCompressedData())
+    {
+        FFATAL (("Image::copyComponent: source image %p has invalid compressed pixel format 0x%x!", static_cast<const void *>(srcImage), srcImage->getPixelFormat()));
+        return false;
+    }
+
+    if (srcImage->getComponents() < srcComponent)
+    {
+        FFATAL (("Image::copyComponent: source image %p has invalid pixel format 0x%x!", static_cast<const void *>(srcImage), srcImage->getPixelFormat()));
+        return false;
+    }
+
+    if (getWidth   () == 0                       ||
+        getWidth   () != srcImage->getWidth   () || 
+        getHeight  () != srcImage->getHeight  () || 
+        getDepth   () != srcImage->getDepth   () ||
+        getDataType() != srcImage->getDataType())
+    {
+        if (format == OSG_INVALID_PF)
+        {
+            format = srcImage->getPixelFormat();
+        }
+
+        set(format,
+            srcImage->getWidth (),
+            srcImage->getHeight(),
+            srcImage->getDepth (),
+            1,
+            1,
+            0.0,
+            0,
+            srcImage->getDataType());
+    }
+
+    if (hasCompressedData())
+    {
+        FFATAL (("Image::copyComponent: destination image %p has invalid compressed pixel format 0x%x!", static_cast<const void *>(this), getPixelFormat()));
+        return false;
+    }
+
+    if (getComponents() < dstComponent)
+    {
+        FFATAL (("Image::copyComponent: destination image %p has invalid pixel format 0x%x!", static_cast<const void *>(this), getPixelFormat()));
+        return false;
+    }
+
+    OSG_ASSERT(getWidth   () == srcImage->getWidth   () &&
+               getHeight  () == srcImage->getHeight  () && 
+               getDepth   () == srcImage->getDepth   () &&
+               getDataType() == srcImage->getDataType());
+
+    OSG_ASSERT(getComponentSize() == srcImage->getComponentSize());
+
+    bool retCode   = true;
+
+    const UChar8* src = srcImage->getData ();
+          UChar8* dst =           editData();
+
+    FDEBUG(("Image::copyComponent(srcImager %p, srcComponent %d, dstComponent %d)\n", srcImage, srcComponent, dstComponent));
+
+    // determine the area to actually copy
+    UInt32 xMin = 0;
+    UInt32 yMin = 0;
+    UInt32 zMin = 0;
+
+    UInt32 xMax = getWidth ();
+    UInt32 yMax = getHeight();
+    UInt32 zMax = getDepth ();
+
+    Int32 compSize = getComponentSize();
+
+    std::vector<UInt8> compBytes(compSize, 0);
+
+    UInt8 srcComponents = srcImage->getComponents();
+    UInt8 dstComponents =           getComponents();
+
+    for(UInt32 z = zMin; z < zMax; z++)
+    {
+        for(UInt32 y = yMin; y < yMax; y++)
+        {
+            for(UInt32 x = xMin; x < xMax; x++)
+            {
+                // 1. read the bytes of the source channel
+                for (UInt8 j = 0; j < srcComponents; j++)
+                {
+                    if (j == srcComponent)
+                    {
+                        for (Int32 k = 0; k < compSize; k++)
+                        {
+                            compBytes[k] = src[ ((z * getHeight() + y) * getWidth() + x) * srcImage->getBpp() + j * compSize + k ];
+                        }
+                    }
+                }
+
+                // 2. write the bytes to the destination channel
+                for (UInt8 j = 0; j < dstComponents; j++)
+                {
+                    if (j == dstComponent)
+                    {
+                        for (Int32 k = 0; k < compSize; k++)
+                        {
+                            dst[ ((z * getHeight() + y) * getWidth() + x) * this->getBpp() + j * compSize + k ] = compBytes[k];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return retCode;
+}
+
+bool Image::copyComponents(
+    Image* srcImage,                     // the source image
+    std::vector<UInt8> vecSrcComponents, // the channels to copy from the source
+    std::vector<UInt8> vecDstComponents, // the channels to modify on the destination (i.e. this)
+    UInt32 format                      ) // optionally, the image format of the destination (i.e. this)
+{
+    if (srcImage == NULL)
+    {
+        FWARNING (("Image::copyComponents: no source image!"));
+        return false;
+    }
+
+    if (srcImage->hasCompressedData())
+    {
+        FFATAL (("Image::copyComponents: source image %p has invalid compressed pixel format 0x%x!", static_cast<const void *>(srcImage), srcImage->getPixelFormat()));
+        return false;
+    }
+
+    if (vecSrcComponents.size() != vecDstComponents.size())
+    {
+        FFATAL (("Image::copyComponents: Size if source and destination components vector differ!"));
+        return false;
+    }
+
+    std::size_t numChannels = vecSrcComponents.size();
+
+    for (std::size_t i = 0; i < numChannels; ++i)
+    {
+        UInt8 srcComponent = vecSrcComponents[i];
+
+        if (srcImage->getComponents() < srcComponent)
+        {
+            FFATAL (("Image::copyComponents: source image %p has invalid pixel format 0x%x!", static_cast<const void *>(srcImage), srcImage->getPixelFormat()));
+            return false;
+        }
+    }
+
+    if (getWidth   () == 0                       ||
+        getWidth   () != srcImage->getWidth   () || 
+        getHeight  () != srcImage->getHeight  () || 
+        getDepth   () != srcImage->getDepth   () ||
+        getDataType() != srcImage->getDataType())
+    {
+        if (format == OSG_INVALID_PF)
+        {
+            format = srcImage->getPixelFormat();
+        }
+
+        set(format,
+            srcImage->getWidth (),
+            srcImage->getHeight(),
+            srcImage->getDepth (),
+            1,
+            1,
+            0.0,
+            0,
+            srcImage->getDataType());
+    }
+
+    if (hasCompressedData())
+    {
+        FFATAL (("Image::copyComponents: destination image %p has invalid compressed pixel format 0x%x!", static_cast<const void *>(this), getPixelFormat()));
+        return false;
+    }
+
+    for (std::size_t i = 0; i < numChannels; ++i)
+    {
+        UInt8 dstComponent = vecDstComponents[i];
+
+        if (getComponents() < dstComponent)
+        {
+            FFATAL (("Image::copyComponents: destination image %p has invalid pixel format 0x%x!", static_cast<const void *>(this), getPixelFormat()));
+            return false;
+        }
+    }
+
+    OSG_ASSERT(getWidth   () == srcImage->getWidth   () &&
+               getHeight  () == srcImage->getHeight  () && 
+               getDepth   () == srcImage->getDepth   () &&
+               getDataType() == srcImage->getDataType());
+
+    OSG_ASSERT(getComponentSize() == srcImage->getComponentSize());
+
+    bool retCode   = true;
+
+    const UChar8* src = srcImage->getData ();
+          UChar8* dst =           editData();
+
+    FDEBUG(("Image::copyComponents(srcImager %p, ...)\n", srcImage));
+
+    // determine the area to actually copy
+    UInt32 xMin = 0;
+    UInt32 yMin = 0;
+    UInt32 zMin = 0;
+
+    UInt32 xMax = getWidth ();
+    UInt32 yMax = getHeight();
+    UInt32 zMax = getDepth ();
+
+    Int32 compSize = getComponentSize();
+
+    std::vector<UInt8> compBytes(compSize, 0);
+
+    UInt8 srcComponents = srcImage->getComponents();
+    UInt8 dstComponents =           getComponents();
+
+    for(UInt32 z = zMin; z < zMax; z++)
+    {
+        for(UInt32 y = yMin; y < yMax; y++)
+        {
+            for(UInt32 x = xMin; x < xMax; x++)
+            {
+                for (std::size_t l = 0; l < numChannels; ++l)
+                {
+                    UInt8 srcComponent = vecSrcComponents[l];
+                    UInt8 dstComponent = vecDstComponents[l];
+
+                    // 1. read the bytes of the source channel
+                    for (UInt8 j = 0; j < srcComponents; j++)
+                    {
+                        if (j == srcComponent)
+                        {
+                            for (Int32 k = 0; k < compSize; k++)
+                            {
+                                compBytes[k] = src[ ((z * getHeight() + y) * getWidth() + x) * srcImage->getBpp() + j * compSize + k ];
+                            }
+                        }
+                    }
+
+                    // 2. write the bytes to the destination channel
+                    for (UInt8 j = 0; j < dstComponents; j++)
+                    {
+                        if (j == dstComponent)
+                        {
+                            for (Int32 k = 0; k < compSize; k++)
+                            {
+                                dst[ ((z * getHeight() + y) * getWidth() + x) * this->getBpp() + j * compSize + k ] = compBytes[k];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return retCode;
+}
+
+template <typename T> inline
+T invertValue(const T v, const T maxValue, bool sRGB)
+{
+    if (sRGB)
+    {
+        Real64 f = maxValue <= 1 ? 1.0 : static_cast<Real64>(maxValue);
+        Real64 s = SRGBToLinear(v / f);
+        s = LinearToSRGB(1.0 - s);
+        return (maxValue <= 1 ? s * f : static_cast<T>(s * f + 0.5));
+    }
+    else
+    {
+        return maxValue - v;
+    }
+}
+
+/*! Copy a component (color channel) from the source image to this image.
+    If the sRGB parameter is true, the components value is first mapped
+    to linear space, then flipped and finally mapped back to sRGB color
+    space.
+ */
+bool Image::flipComponent(UInt8 component, bool sRGB)
+{
+    if (hasCompressedData())
+    {
+        FFATAL (("Image::flipComponent: image %p has invalid compressed pixel format 0x%x!", static_cast<const void *>(this), getPixelFormat()));
+        return false;
+    }
+
+    if (getComponents() < component)
+    {
+        FFATAL (("Image::flipComponent: image %p has invalid pixel format 0x%x!", static_cast<const void *>(this), getPixelFormat()));
+        return false;
+    }
+
+    bool retCode = true;
+
+    UInt8* data = editData();
+    UInt32 size = getSize () / getComponentSize();
+
+    UInt8  *destDataUC8  = data;
+    UInt16 *destDataUC16 = reinterpret_cast<UInt16 *>(data);
+    UInt32 *destDataUC32 = reinterpret_cast<UInt32 *>(data);
+    Real32 *destDataF32  = reinterpret_cast<Real32 *>(data);
+    Real16 *destDataH16  = reinterpret_cast<Real16 *>(data);
+
+    UInt8  nMax8  = TypeTraits<UInt8 >::getMax();
+    UInt16 nMax16 = TypeTraits<UInt16>::getMax();
+    UInt32 nMax32 = TypeTraits<UInt32>::getMax();
+
+    switch (getPixelFormat()) 
+    {
+        //-----------------------------------------------------
+        case OSG_A_PF:
+        case OSG_I_PF:
+        case OSG_L_PF:
+        case OSG_R_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        data[idx] = invertValue(data[idx], nMax8, sRGB);
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        destDataUC16[idx] = invertValue(destDataUC16[idx], nMax16, sRGB);
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        destDataUC32[idx] = invertValue(destDataUC32[idx], nMax32, sRGB);
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        destDataF32[idx] = invertValue(destDataF32[idx], Real32(1.f), sRGB);
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        destDataH16[idx] = invertValue(destDataH16[idx], Real16(1.f), sRGB);
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+
+        case OSG_LA_PF:
+        case OSG_RG_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        data[idx] = component == 0 ? invertValue(data[idx], nMax8, sRGB) : data[idx]; ++idx;
+                        data[idx] = component == 1 ? invertValue(data[idx], nMax8, sRGB) : data[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC16[idx] = component == 0 ? invertValue(destDataUC16[idx], nMax16, sRGB) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 1 ? invertValue(destDataUC16[idx], nMax16, sRGB) : destDataUC16[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC32[idx] = component == 0 ? invertValue(destDataUC32[idx], nMax32, sRGB) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 1 ? invertValue(destDataUC32[idx], nMax32, sRGB) : destDataUC32[idx]; ++idx;
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataF32[idx] = component == 0 ? invertValue(destDataF32[idx], Real32(1.f), sRGB) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 1 ? invertValue(destDataF32[idx], Real32(1.f), sRGB) : destDataF32[idx]; ++idx;
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataH16[idx] = component == 0 ? invertValue(destDataH16[idx], Real16(1.f), sRGB) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 1 ? invertValue(destDataH16[idx], Real16(1.f), sRGB) : destDataH16[idx]; ++idx;
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+
+        case OSG_BGR_PF:
+        case OSG_RGB_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        data[idx] = component == 0 ? invertValue(data[idx], nMax8, sRGB) : data[idx]; ++idx;
+                        data[idx] = component == 1 ? invertValue(data[idx], nMax8, sRGB) : data[idx]; ++idx;
+                        data[idx] = component == 2 ? invertValue(data[idx], nMax8, sRGB) : data[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC16[idx] = component == 0 ? invertValue(destDataUC16[idx], nMax16, sRGB) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 1 ? invertValue(destDataUC16[idx], nMax16, sRGB) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 2 ? invertValue(destDataUC16[idx], nMax16, sRGB) : destDataUC16[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC32[idx] = component == 0 ? invertValue(destDataUC32[idx], nMax32, sRGB) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 1 ? invertValue(destDataUC32[idx], nMax32, sRGB) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 2 ? invertValue(destDataUC32[idx], nMax32, sRGB) : destDataUC32[idx]; ++idx;
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataF32[idx] = component == 0 ? invertValue(destDataF32[idx], Real32(1.f), sRGB) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 1 ? invertValue(destDataF32[idx], Real32(1.f), sRGB) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 2 ? invertValue(destDataF32[idx], Real32(1.f), sRGB) : destDataF32[idx]; ++idx;
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataH16[idx] = component == 0 ? invertValue(destDataH16[idx], Real16(1.f), sRGB) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 1 ? invertValue(destDataH16[idx], Real16(1.f), sRGB) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 2 ? invertValue(destDataH16[idx], Real16(1.f), sRGB) : destDataH16[idx]; ++idx;
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+            
+        case OSG_BGRA_PF:
+        case OSG_RGBA_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        data[idx] = component == 0 ? invertValue(data[idx], nMax8, sRGB) : data[idx]; ++idx;
+                        data[idx] = component == 1 ? invertValue(data[idx], nMax8, sRGB) : data[idx]; ++idx;
+                        data[idx] = component == 2 ? invertValue(data[idx], nMax8, sRGB) : data[idx]; ++idx;
+                        data[idx] = component == 3 ? invertValue(data[idx], nMax8, sRGB) : data[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC16[idx] = component == 0 ? invertValue(destDataUC16[idx], nMax16, sRGB) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 1 ? invertValue(destDataUC16[idx], nMax16, sRGB) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 2 ? invertValue(destDataUC16[idx], nMax16, sRGB) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 3 ? invertValue(destDataUC16[idx], nMax16, sRGB) : destDataUC16[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC32[idx] = component == 0 ? invertValue(destDataUC32[idx], nMax32, sRGB) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 1 ? invertValue(destDataUC32[idx], nMax32, sRGB) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 2 ? invertValue(destDataUC32[idx], nMax32, sRGB) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 3 ? invertValue(destDataUC32[idx], nMax32, sRGB) : destDataUC32[idx]; ++idx;
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataF32[idx] = component == 0 ? invertValue(destDataF32[idx], Real32(1.f), sRGB) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 1 ? invertValue(destDataF32[idx], Real32(1.f), sRGB) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 2 ? invertValue(destDataF32[idx], Real32(1.f), sRGB) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 3 ? invertValue(destDataF32[idx], Real32(1.f), sRGB) : destDataF32[idx]; ++idx;
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataH16[idx] = component == 0 ? invertValue(destDataH16[idx], Real16(1.f), sRGB) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 1 ? invertValue(destDataH16[idx], Real16(1.f), sRGB) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 2 ? invertValue(destDataH16[idx], Real16(1.f), sRGB) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 3 ? invertValue(destDataH16[idx], Real16(1.f), sRGB) : destDataH16[idx]; ++idx;
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+    default:
+        FWARNING (( "Invalid IMAGE_PIXEL_FORMAT\n" ));
+        retCode = false;
+        break;
+    }
+
+    return retCode;
+}
+
+template <typename T> inline
+T setValue(Real64 s, const T maxValue)
+{
+    return (maxValue <= 1 ? s : static_cast<T>(s * static_cast<Real64>(maxValue) + 0.5));
+}
+
+bool Image::setComponent(UInt8 component, Real64 value, bool sRGB)
+{
+    if (hasCompressedData())
+    {
+        FFATAL (("Image::setComponent: image %p has invalid compressed pixel format 0x%x!", static_cast<const void *>(this), getPixelFormat()));
+        return false;
+    }
+
+    if (getComponents() < component)
+    {
+        FFATAL (("Image::setComponent: image %p has invalid pixel format 0x%x!", static_cast<const void *>(this), getPixelFormat()));
+        return false;
+    }
+
+    bool retCode = true;
+
+    if (sRGB)
+    {
+        value = LinearToSRGB(value);
+    }
+
+    UInt8* data = editData();
+    UInt32 size = getSize () / getComponentSize();
+
+    UInt8  *destDataUC8  = data;
+    UInt16 *destDataUC16 = reinterpret_cast<UInt16 *>(data);
+    UInt32 *destDataUC32 = reinterpret_cast<UInt32 *>(data);
+    Real32 *destDataF32  = reinterpret_cast<Real32 *>(data);
+    Real16 *destDataH16  = reinterpret_cast<Real16 *>(data);
+
+    UInt8  nMax8  = TypeTraits<UInt8 >::getMax();
+    UInt16 nMax16 = TypeTraits<UInt16>::getMax();
+    UInt32 nMax32 = TypeTraits<UInt32>::getMax();
+
+    switch (getPixelFormat()) 
+    {
+        //-----------------------------------------------------
+        case OSG_A_PF:
+        case OSG_I_PF:
+        case OSG_L_PF:
+        case OSG_R_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        data[idx] = setValue(value, nMax8);
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        destDataUC16[idx] = setValue(value, nMax16);
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        destDataUC32[idx] = setValue(value, nMax32);
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        destDataF32[idx] = setValue(value, Real32(1.f));
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        destDataH16[idx] = setValue(value, Real16(1.f));
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+
+        case OSG_LA_PF:
+        case OSG_RG_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        data[idx] = component == 0 ? setValue(value, nMax8) : data[idx]; ++idx;
+                        data[idx] = component == 1 ? setValue(value, nMax8) : data[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC16[idx] = component == 0 ? setValue(value, nMax16) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 1 ? setValue(value, nMax16) : destDataUC16[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC32[idx] = component == 0 ? setValue(value, nMax32) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 1 ? setValue(value, nMax32) : destDataUC32[idx]; ++idx;
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataF32[idx] = component == 0 ? setValue(value, Real32(1.f)) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 1 ? setValue(value, Real32(1.f)) : destDataF32[idx]; ++idx;
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataH16[idx] = component == 0 ? setValue(value, Real16(1.f)) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 1 ? setValue(value, Real16(1.f)) : destDataH16[idx]; ++idx;
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+
+        case OSG_BGR_PF:
+        case OSG_RGB_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        data[idx] = component == 0 ? setValue(value, nMax8) : data[idx]; ++idx;
+                        data[idx] = component == 1 ? setValue(value, nMax8) : data[idx]; ++idx;
+                        data[idx] = component == 2 ? setValue(value, nMax8) : data[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC16[idx] = component == 0 ? setValue(value, nMax16) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 1 ? setValue(value, nMax16) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 2 ? setValue(value, nMax16) : destDataUC16[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC32[idx] = component == 0 ? setValue(value, nMax32) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 1 ? setValue(value, nMax32) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 2 ? setValue(value, nMax32) : destDataUC32[idx]; ++idx;
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataF32[idx] = component == 0 ? setValue(value, Real32(1.f)) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 1 ? setValue(value, Real32(1.f)) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 2 ? setValue(value, Real32(1.f)) : destDataF32[idx]; ++idx;
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataH16[idx] = component == 0 ? setValue(value, Real16(1.f)) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 1 ? setValue(value, Real16(1.f)) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 2 ? setValue(value, Real16(1.f)) : destDataH16[idx]; ++idx;
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+            
+        case OSG_BGRA_PF:
+        case OSG_RGBA_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        data[idx] = component == 0 ? setValue(value, nMax8) : data[idx]; ++idx;
+                        data[idx] = component == 1 ? setValue(value, nMax8) : data[idx]; ++idx;
+                        data[idx] = component == 2 ? setValue(value, nMax8) : data[idx]; ++idx;
+                        data[idx] = component == 3 ? setValue(value, nMax8) : data[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC16[idx] = component == 0 ? setValue(value, nMax16) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 1 ? setValue(value, nMax16) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 2 ? setValue(value, nMax16) : destDataUC16[idx]; ++idx;
+                        destDataUC16[idx] = component == 3 ? setValue(value, nMax16) : destDataUC16[idx]; ++idx;
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataUC32[idx] = component == 0 ? setValue(value, nMax32) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 1 ? setValue(value, nMax32) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 2 ? setValue(value, nMax32) : destDataUC32[idx]; ++idx;
+                        destDataUC32[idx] = component == 3 ? setValue(value, nMax32) : destDataUC32[idx]; ++idx;
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataF32[idx] = component == 0 ? setValue(value, Real32(1.f)) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 1 ? setValue(value, Real32(1.f)) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 2 ? setValue(value, Real32(1.f)) : destDataF32[idx]; ++idx;
+                        destDataF32[idx] = component == 3 ? setValue(value, Real32(1.f)) : destDataF32[idx]; ++idx;
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        destDataH16[idx] = component == 0 ? setValue(value, Real16(1.f)) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 1 ? setValue(value, Real16(1.f)) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 2 ? setValue(value, Real16(1.f)) : destDataH16[idx]; ++idx;
+                        destDataH16[idx] = component == 3 ? setValue(value, Real16(1.f)) : destDataH16[idx]; ++idx;
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+    default:
+        FWARNING (( "Invalid IMAGE_PIXEL_FORMAT\n" ));
+        retCode = false;
+        break;
+    }
+
+    return retCode;
+}
+
+template <typename T> inline
+T toSRGBColorSpace(const T v, const T maxValue)
+{
+    Real64 f = maxValue <= 1 ? 1.0 : static_cast<Real64>(maxValue);
+    Real64 s = LinearToSRGB(v / f);
+    return (maxValue <= 1 ? s * f : static_cast<T>(s * f + 0.5));
+}
+
+template <typename T> inline
+T toLinearColorSpace(const T v, const T maxValue)
+{
+    Real64 f = maxValue <= 1 ? 1.0 : static_cast<Real64>(maxValue);
+    Real64 s = SRGBToLinear(v / f);
+    return (maxValue <= 1 ? s * f : static_cast<T>(s * f + 0.5));
+}
+
+/*! This function converts a channel, e.g. from/to liner or sRGB color space.
+ */
+bool Image::convertImage(UInt8 component, ImageConversion task)
+{
+    if (hasCompressedData())
+    {
+        FFATAL (("Image::convertColorSpace: image %p has invalid compressed pixel format 0x%x!", static_cast<const void *>(this), getPixelFormat()));
+        return false;
+    }
+
+    if (getComponents() < component)
+    {
+        FFATAL (("Image::convertColorSpace: image %p has invalid pixel format 0x%x!", static_cast<const void *>(this), getPixelFormat()));
+        return false;
+    }
+
+    bool retCode = true;
+
+    if (task == OSG_CONVERT_NO_OP)
+        return retCode;
+
+    UInt8* data = editData();
+    UInt32 size = getSize () / getComponentSize();
+
+    UInt8  *destDataUC8  = data;
+    UInt16 *destDataUC16 = reinterpret_cast<UInt16 *>(data);
+    UInt32 *destDataUC32 = reinterpret_cast<UInt32 *>(data);
+    Real32 *destDataF32  = reinterpret_cast<Real32 *>(data);
+    Real16 *destDataH16  = reinterpret_cast<Real16 *>(data);
+
+    UInt8  nMax8  = TypeTraits<UInt8 >::getMax();
+    UInt16 nMax16 = TypeTraits<UInt16>::getMax();
+    UInt32 nMax32 = TypeTraits<UInt32>::getMax();
+
+    switch (getPixelFormat()) 
+    {
+        //-----------------------------------------------------
+        case OSG_A_PF:
+        case OSG_I_PF:
+        case OSG_L_PF:
+        case OSG_R_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    data[idx] = toSRGBColorSpace(data[idx], nMax8);
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    data[idx] = toLinearColorSpace(data[idx], nMax8);
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataUC16[idx] = toSRGBColorSpace(destDataUC16[idx], nMax16);
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataUC16[idx] = toLinearColorSpace(destDataUC16[idx], nMax16);
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataUC32[idx] = toSRGBColorSpace(destDataUC32[idx], nMax32);
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataUC32[idx] = toLinearColorSpace(destDataUC32[idx], nMax32);
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataF32[idx] = toSRGBColorSpace(destDataF32[idx], Real32(1.f));
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataF32[idx] = toLinearColorSpace(destDataF32[idx], Real32(1.f));
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size; ++idx)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataH16[idx] = toSRGBColorSpace(destDataH16[idx], Real16(1.f));
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataH16[idx] = toLinearColorSpace(destDataH16[idx], Real16(1.f));
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+
+        case OSG_LA_PF:
+        case OSG_RG_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    data[idx] = component == 0 ? toSRGBColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 1 ? toSRGBColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    data[idx] = component == 0 ? toLinearColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 1 ? toLinearColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                   destDataUC16[idx] = component == 0 ? toSRGBColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                   destDataUC16[idx] = component == 1 ? toSRGBColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx; 
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                   destDataUC16[idx] = component == 0 ? toLinearColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                   destDataUC16[idx] = component == 1 ? toLinearColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                }
+                                break;
+                        }
+                     }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataUC32[idx] = component == 0 ? toSRGBColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 1 ? toSRGBColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataUC32[idx] = component == 0 ? toLinearColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 1 ? toLinearColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataF32[idx] = component == 0 ? toSRGBColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 1 ? toSRGBColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataF32[idx] = component == 0 ? toLinearColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 1 ? toLinearColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataH16[idx] = component == 0 ? toSRGBColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 1 ? toSRGBColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataH16[idx] = component == 0 ? toLinearColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 1 ? toLinearColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+
+        case OSG_BGR_PF:
+        case OSG_RGB_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    data[idx] = component == 0 ? toSRGBColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 1 ? toSRGBColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 2 ? toSRGBColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    data[idx] = component == 0 ? toLinearColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 1 ? toLinearColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 2 ? toLinearColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataUC16[idx] = component == 0 ? toSRGBColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                    destDataUC16[idx] = component == 1 ? toSRGBColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                    destDataUC16[idx] = component == 2 ? toSRGBColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataUC16[idx] = component == 0 ? toLinearColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                    destDataUC16[idx] = component == 1 ? toLinearColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                    destDataUC16[idx] = component == 2 ? toLinearColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataUC32[idx] = component == 0 ? toSRGBColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 1 ? toSRGBColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 2 ? toSRGBColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataUC32[idx] = component == 0 ? toLinearColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 1 ? toLinearColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 2 ? toLinearColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataF32[idx] = component == 0 ? toSRGBColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 1 ? toSRGBColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 2 ? toSRGBColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataF32[idx] = component == 0 ? toLinearColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 1 ? toLinearColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 2 ? toLinearColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataH16[idx] = component == 0 ? toSRGBColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 1 ? toSRGBColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 2 ? toSRGBColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataH16[idx] = component == 0 ? toLinearColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 1 ? toLinearColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 2 ? toLinearColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+            
+        case OSG_BGRA_PF:
+        case OSG_RGBA_PF:
+            switch (getDataType())
+            {
+                case OSG_UINT8_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    data[idx] = component == 0 ? toSRGBColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 1 ? toSRGBColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 2 ? toSRGBColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 3 ? toSRGBColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    data[idx] = component == 0 ? toLinearColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 1 ? toLinearColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 2 ? toLinearColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                    data[idx] = component == 3 ? toLinearColorSpace(data[idx], nMax8) : data[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_UINT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataUC16[idx] = component == 0 ? toSRGBColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                    destDataUC16[idx] = component == 1 ? toSRGBColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                    destDataUC16[idx] = component == 2 ? toSRGBColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                    destDataUC16[idx] = component == 3 ? toSRGBColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataUC16[idx] = component == 0 ? toLinearColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                    destDataUC16[idx] = component == 1 ? toLinearColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                    destDataUC16[idx] = component == 2 ? toLinearColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                    destDataUC16[idx] = component == 3 ? toLinearColorSpace(destDataUC16[idx], nMax16) : destDataUC16[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_UINT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataUC32[idx] = component == 0 ? toSRGBColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 1 ? toSRGBColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 2 ? toSRGBColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 3 ? toSRGBColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataUC32[idx] = component == 0 ? toLinearColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 1 ? toLinearColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 2 ? toLinearColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                    destDataUC32[idx] = component == 3 ? toLinearColorSpace(destDataUC32[idx], nMax32) : destDataUC32[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case OSG_FLOAT32_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataF32[idx] = component == 0 ? toSRGBColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 1 ? toSRGBColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 2 ? toSRGBColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 3 ? toSRGBColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataF32[idx] = component == 0 ? toLinearColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 1 ? toLinearColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 2 ? toLinearColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                    destDataF32[idx] = component == 3 ? toLinearColorSpace(destDataF32[idx], Real32(1.f)) : destDataF32[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                    
+                case OSG_FLOAT16_IMAGEDATA:
+                    for (UInt32 idx = 0; idx < size;)
+                    {
+                        switch (task)
+                        {
+                            case OSG_CONVERT_TO_SRGB_SPACE:
+                                {
+                                    destDataH16[idx] = component == 0 ? toSRGBColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 1 ? toSRGBColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 2 ? toSRGBColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 3 ? toSRGBColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                }
+                                break;
+                            case OSG_CONVERT_TO_LINEAR_SPACE:
+                                {
+                                    destDataH16[idx] = component == 0 ? toLinearColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 1 ? toLinearColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 2 ? toLinearColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                    destDataH16[idx] = component == 3 ? toLinearColorSpace(destDataH16[idx], Real16(1.f)) : destDataH16[idx]; ++idx;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    FWARNING (( "Invalid IMAGE_DATA_TYPE\n" ));
+                    retCode = false;
+                    break;
+            }
+            break;
+    default:
+        FWARNING (( "Invalid IMAGE_PIXEL_FORMAT\n" ));
+        retCode = false;
+        break;
     }
 
     return retCode;
@@ -3807,20 +5485,64 @@ Image::~Image(void)
 bool Image::hasAlphaChannel(void)
 {
     return
-        (getForceAlphaChannel() == true         ) ||
-        (getPixelFormat      () == OSG_RGBA_PF  ) ||
-        (getPixelFormat      () == OSG_BGRA_PF  ) ||
-        (getPixelFormat      () == OSG_RGBA_DXT1) ||
-        (getPixelFormat      () == OSG_RGBA_DXT3) ||
-        (getPixelFormat      () == OSG_RGBA_DXT5) ||
-        (getPixelFormat      () == OSG_A_PF     ) ||
-        (getPixelFormat      () == OSG_I_PF     ) ||
-        (getPixelFormat      () == OSG_LA_PF    ) ||
-
-        (getPixelFormat      () == OSG_ALPHA_INTEGER_PF          ) ||
-        (getPixelFormat      () == OSG_RGBA_INTEGER_PF           ) ||
-        (getPixelFormat      () == OSG_BGRA_INTEGER_PF           ) ||
-        (getPixelFormat      () == OSG_LUMINANCE_ALPHA_INTEGER_PF);
+        (getForceAlphaChannel() == true                              ) ||
+        (getPixelFormat      () == OSG_RGBA_PF                       ) ||
+        (getPixelFormat      () == OSG_BGRA_PF                       ) ||
+        (getPixelFormat      () == OSG_RGBA_DXT1                     ) ||
+        (getPixelFormat      () == OSG_RGBA_DXT3                     ) ||
+        (getPixelFormat      () == OSG_RGBA_DXT5                     ) ||
+        (getPixelFormat      () == OSG_SRGB_ALPHA_DXT1               ) ||
+        (getPixelFormat      () == OSG_SRGB_ALPHA_DXT3               ) ||
+        (getPixelFormat      () == OSG_SRGB_ALPHA_DXT5               ) ||
+        (getPixelFormat      () == OSG_RGBA_BPTC_UNORM               ) ||
+        (getPixelFormat      () == OSG_SRGB_ALPHA_BPTC_UNORM         ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_4x4                 ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_5x4                 ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_5x5                 ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_6x5                 ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_6x6                 ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_8x5                 ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_8x6                 ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_8x8                 ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_10x5                ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_10x6                ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_10x8                ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_10x10               ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_12x10               ) ||
+        (getPixelFormat      () == OSG_RGBA_ASTC_12x12               ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_4x4         ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_5x4         ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_5x5         ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_6x5         ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_6x6         ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_8x5         ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_8x6         ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_8x8         ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_10x5        ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_10x6        ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_10x8        ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_10x10       ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_12x10       ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ASTC_12x12       ) ||
+        (getPixelFormat      () == OSG_RGB8_PUNCHTHROUGH_ALPHA1_ETC2 ) ||
+        (getPixelFormat      () == OSG_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2) ||
+        (getPixelFormat      () == OSG_RGBA8_ETC2_EAC                ) ||
+        (getPixelFormat      () == OSG_SRGB8_ALPHA8_ETC2_EAC         ) ||
+        (getPixelFormat      () == OSG_RGBA_PVRTC_4BPPV1             ) ||
+        (getPixelFormat      () == OSG_RGBA_PVRTC_2BPPV1             ) ||
+        (getPixelFormat      () == OSG_RGBA_PVRTC_4BPPV2             ) ||
+        (getPixelFormat      () == OSG_RGBA_PVRTC_2BPPV2             ) ||
+        (getPixelFormat      () == OSG_SRGB_ALPHA_PVRTC_2BPPV1       ) ||
+        (getPixelFormat      () == OSG_SRGB_ALPHA_PVRTC_4BPPV1       ) ||
+        (getPixelFormat      () == OSG_SRGB_ALPHA_PVRTC_2BPPV2       ) ||
+        (getPixelFormat      () == OSG_SRGB_ALPHA_PVRTC_4BPPV2       ) ||
+        (getPixelFormat      () == OSG_A_PF                          ) ||
+        (getPixelFormat      () == OSG_I_PF                          ) ||
+        (getPixelFormat      () == OSG_LA_PF                         ) ||
+        (getPixelFormat      () == OSG_ALPHA_INTEGER_PF              ) ||
+        (getPixelFormat      () == OSG_RGBA_INTEGER_PF               ) ||
+        (getPixelFormat      () == OSG_BGRA_INTEGER_PF               ) ||
+        (getPixelFormat      () == OSG_LUMINANCE_ALPHA_INTEGER_PF    );
 }
 
 /*! Method to check, whether the alpha channel is just fully transparent/
@@ -3829,8 +5551,10 @@ bool Image::hasAlphaChannel(void)
 bool Image::isAlphaBinary(void)
 {
     return
-        (getForceAlphaBinary() == true         ) ||
-        (getPixelFormat     () == OSG_RGBA_DXT1);
+        (getForceAlphaBinary() == true               ) ||
+        (getPixelFormat     () == OSG_RGBA_DXT1      ) ||
+        (getPixelFormat     () == OSG_SRGB_ALPHA_DXT1)
+        ;
 }
 
 /*! Method to check, whether the data is compressed
@@ -3838,11 +5562,75 @@ bool Image::isAlphaBinary(void)
 bool Image::hasCompressedData(void)
 {
   return
-      (getForceCompressedData() == true         ) ||
-      (getPixelFormat        () == OSG_RGB_DXT1 ) ||
-      (getPixelFormat        () == OSG_RGBA_DXT1) ||
-      (getPixelFormat        () == OSG_RGBA_DXT3) ||
-      (getPixelFormat        () == OSG_RGBA_DXT5);
+      (getForceCompressedData() == true                              ) ||
+      (getPixelFormat        () == OSG_RGB_DXT1                      ) ||
+      (getPixelFormat        () == OSG_RGBA_DXT1                     ) ||
+      (getPixelFormat        () == OSG_RGBA_DXT3                     ) ||
+      (getPixelFormat        () == OSG_RGBA_DXT5                     ) ||
+      (getPixelFormat        () == OSG_SRGB_DXT1                     ) ||
+      (getPixelFormat        () == OSG_SRGB_ALPHA_DXT1               ) ||
+      (getPixelFormat        () == OSG_SRGB_ALPHA_DXT3               ) ||
+      (getPixelFormat        () == OSG_SRGB_ALPHA_DXT5               ) ||
+      (getPixelFormat        () == OSG_RED_RGTC1                     ) ||
+      (getPixelFormat        () == OSG_SIGNED_RED_RGTC1              ) ||
+      (getPixelFormat        () == OSG_RG_RGTC2                      ) ||
+      (getPixelFormat        () == OSG_SIGNED_RG_RGTC2               ) ||
+      (getPixelFormat        () == OSG_RGBA_BPTC_UNORM               ) ||
+      (getPixelFormat        () == OSG_SRGB_ALPHA_BPTC_UNORM         ) ||
+      (getPixelFormat        () == OSG_RGB_BPTC_SIGNED_FLOAT         ) ||
+      (getPixelFormat        () == OSG_RGB_BPTC_UNSIGNED_FLOAT       ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_4x4                 ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_5x4                 ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_5x5                 ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_6x5                 ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_6x6                 ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_8x5                 ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_8x6                 ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_8x8                 ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_10x5                ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_10x6                ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_10x8                ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_10x10               ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_12x10               ) ||
+      (getPixelFormat        () == OSG_RGBA_ASTC_12x12               ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_4x4         ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_5x4         ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_5x5         ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_6x5         ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_6x6         ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_8x5         ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_8x6         ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_8x8         ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_10x5        ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_10x6        ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_10x8        ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_10x10       ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_12x10       ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ASTC_12x12       ) ||
+      (getPixelFormat        () == OSG_RGB8_ETC2                     ) ||
+      (getPixelFormat        () == OSG_SRGB8_ETC2                    ) ||
+      (getPixelFormat        () == OSG_RGB8_PUNCHTHROUGH_ALPHA1_ETC2 ) ||
+      (getPixelFormat        () == OSG_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2) ||
+      (getPixelFormat        () == OSG_RGBA8_ETC2_EAC                ) ||
+      (getPixelFormat        () == OSG_SRGB8_ALPHA8_ETC2_EAC         ) ||
+      (getPixelFormat        () == OSG_R11_EAC                       ) ||
+      (getPixelFormat        () == OSG_SIGNED_R11_EAC                ) ||
+      (getPixelFormat        () == OSG_RG11_EAC                      ) ||
+      (getPixelFormat        () == OSG_SIGNED_RG11_EAC               ) ||
+      (getPixelFormat        () == OSG_RGB_PVRTC_4BPPV1              ) ||
+      (getPixelFormat        () == OSG_RGB_PVRTC_2BPPV1              ) ||
+      (getPixelFormat        () == OSG_RGBA_PVRTC_4BPPV1             ) ||
+      (getPixelFormat        () == OSG_RGBA_PVRTC_2BPPV1             ) ||
+      (getPixelFormat        () == OSG_RGBA_PVRTC_4BPPV2             ) ||
+      (getPixelFormat        () == OSG_RGBA_PVRTC_2BPPV2             ) ||
+      (getPixelFormat        () == OSG_RGB8_ETC1                     ) ||
+      (getPixelFormat        () == OSG_SRGB_PVRTC_2BPPV1             ) ||
+      (getPixelFormat        () == OSG_SRGB_PVRTC_4BPPV1             ) ||
+      (getPixelFormat        () == OSG_SRGB_ALPHA_PVRTC_2BPPV1       ) ||
+      (getPixelFormat        () == OSG_SRGB_ALPHA_PVRTC_4BPPV1       ) ||
+      (getPixelFormat        () == OSG_SRGB_ALPHA_PVRTC_2BPPV2       ) ||
+      (getPixelFormat        () == OSG_SRGB_ALPHA_PVRTC_4BPPV2       )
+      ;
 
 }
 
@@ -3885,10 +5673,11 @@ UInt8 *Image::editDataByTime(Time time, UInt32)
 
 bool Image::calcIsAlphaBinary(void)
 {
-    if(!hasAlphaChannel() || getPixelFormat() == OSG_RGBA_DXT1)
+    if(!hasAlphaChannel() || getPixelFormat() == OSG_RGBA_DXT1 || getPixelFormat() == OSG_SRGB_ALPHA_DXT1)
         return true;
 
-    if(getPixelFormat() == OSG_RGBA_DXT3 || getPixelFormat() == OSG_RGBA_DXT5)
+    if(getPixelFormat() == OSG_RGBA_DXT3       || getPixelFormat() == OSG_RGBA_DXT5      ||
+       getPixelFormat() == OSG_SRGB_ALPHA_DXT3 || getPixelFormat() == OSG_SRGB_ALPHA_DXT5)
     {
         FWARNING(("Image::calcIsAlphaBinary: not implemenetd for DXT3 "
                   "and DXT5 yet, assuming false.\n"));
@@ -4030,28 +5819,36 @@ UInt32 Image::calcMipmapLevelCount(void) const
 
 /*! Method to calculate the mem sum of a mipmap level in byte
  */
+
 UInt32 Image::calcMipmapLevelSize ( UInt32 mipmapNum,
                                     UInt32 w, UInt32 h, UInt32 d) const
 {
-    Int32 sum;
+    const FormatInfo& info = getFormatInfo(getPixelFormat());
+    Int32 sum = calcMipmapLevelSize(info, mipmapNum, w, h, d);
 
+#ifdef OSG_DEBUG
     switch (getPixelFormat())
     {
         case OSG_RGB_DXT1:
         case OSG_RGBA_DXT1:
+        case OSG_SRGB_DXT1:
+        case OSG_SRGB_ALPHA_DXT1:
             sum = (((w?w:1)+3)/4) * (((h?h:1)+3)/4) * 8;
             break;
         case OSG_RGBA_DXT3:
         case OSG_RGBA_DXT5:
+        case OSG_SRGB_ALPHA_DXT3:
+        case OSG_SRGB_ALPHA_DXT5:
             sum = (((w?w:1)+3)/4) * (((h?h:1)+3)/4) * 16;
             break;
+
         default:
             sum = (w?w:1) * (h?h:1) * getBpp();
             break;
     }
 
     sum *= (d?d:1);
-
+#endif
     return sum;
 }
 
@@ -4074,21 +5871,8 @@ UInt32 Image::calcMipmapSumSize(UInt32 mipmapNum,
                                 UInt32 h,
                                 UInt32 d) const
 {
-    Int32 sum = 0;
-
-    if (w && h && d)
-    {
-        while (mipmapNum--)
-        {
-            sum += calcMipmapLevelSize(mipmapNum,w,h,d);
-
-            w >>= 1;
-            h >>= 1;
-            d >>= 1;
-        }
-    }
-
-    return sum;
+    const FormatInfo& info = getFormatInfo(getPixelFormat());
+    return calcMipmapSumSize(info, mipmapNum, w, h, d);
 }
 
 /*! Method to calculate the mem sum of all mipmap levels in byte
@@ -4114,8 +5898,8 @@ bool Image::createData(const UInt8 *data, bool allocMem)
     UInt32 byteCount = 0;
 
     // set bpp
-    UInt32 pixelFormat = 0;
-    UInt32 typeFormat  = 0;
+    UInt32 pixelFormat = 0;     // number of channels,          e.g. OSG_RGB_PF           -> 3
+    UInt32 typeFormat  = 0;     // number of bytes per channel, e.g. OSG_UINT16_IMAGEDATA -> 2
 
     for(i = 0; i < mapSizeFormat; i++)
     {
@@ -4135,8 +5919,8 @@ bool Image::createData(const UInt8 *data, bool allocMem)
         }
     }
 
-    setComponentSize(typeFormat              );
-    setBpp          (pixelFormat * typeFormat);
+    setComponentSize(typeFormat              ); // number of bytes per channel
+    setBpp          (pixelFormat * typeFormat); // number of bytes for all channels, i.e. bytes per pixel
 
     // set dimension
     setDimension(0);
@@ -4157,16 +5941,16 @@ bool Image::createData(const UInt8 *data, bool allocMem)
         setDimension(3);
     }
 
-    // set sideSize
+    // set sideSize, i.e. the total size in bytes that is needed for all mipmap levels
     UInt32 mipmapSumSize = calcMipmapSumSize(getMipMapCount());
     setSideSize (mipmapSumSize);
 
-    // set frameSize
+    // set frameSize, i.e. the number of bytes for all frames
     setFrameSize(getSideSize() * getSideCount());
 
 
     // copy the data
-    if(allocMem && (byteCount = getSize()))
+    if(allocMem && (byteCount = getSize()))     // getSize(withMipmap = true,  withFrames = true, withSides  = true)
     {
         if(getMFPixel()->size() != byteCount)
         {
@@ -4282,9 +6066,11 @@ void Image::calcMipmapOffsets(void)
 
     _mipmapOffset[0] = 0;
 
+    const FormatInfo& info = getFormatInfo(getPixelFormat());
+
     for(UInt32 i=1;i<mipMapCount;++i)
     {
-        sum += calcMipmapLevelSize(i,w,h,d);
+        sum += calcMipmapLevelSize(info, i,w,h,d);
 
         _mipmapOffset[i] = sum;
 
@@ -4296,9 +6082,13 @@ void Image::calcMipmapOffsets(void)
 
 void Image::calcHash(void) const
 {
+#ifdef OSG_USE_XXHASH
+    _hash = Hash64::hash(&_mfPixel[0], _mfPixel.size(), 173);
+#else
     _hash = 173;
 
     boost::hash_range(_hash, _mfPixel.begin(), _mfPixel.end());
+#endif
     _hashValid = true;
 }
 
@@ -4313,17 +6103,17 @@ bool Image::mirrorData(const UInt8 *srcData,
                              bool   vertical,
                              bool   flipDepth)
 {
-    int dx_step = horizontal ? -1 : 1;
-    int dx_start = horizontal ? width-1 : 0;
-    int dy_step = vertical ? -1 : 1;
-    int dy_start = vertical ? height-1 : 0;
-    int dz_step = flipDepth ? -1 : 1;
-    int dz_start = flipDepth ? depth-1 : 0;
+    int dx_step  = horizontal ? -1       : 1;
+    int dx_start = horizontal ? width-1  : 0;
+    int dy_step  = vertical   ? -1       : 1;
+    int dy_start = vertical   ? height-1 : 0;
+    int dz_step  = flipDepth  ? -1       : 1;
+    int dz_start = flipDepth  ? depth-1  : 0;
 
     int dz = dz_start;
     for(int sz = 0; sz < depth; sz++, dz += dz_step)
     {
-        const UInt8 *src_slice = srcData + (sz * getBpp() * width * height);
+        const UInt8 *src_slice = srcData  + (sz * getBpp() * width * height);
         UInt8       *dst_slice = destData + (dz * getBpp() * width * height);
         int dy = dy_start;
         for(int sy = 0; sy < height; sy++, dy += dy_step)
@@ -4379,7 +6169,7 @@ bool Image::operator<(const Image &image)
     Checks first all parameter and afterwards the Image data;
 */
 
-bool Image::operator ==(const Image &image)
+bool Image::operator==(const Image &image)
 {
     unsigned long   i, s = getSize();
 
@@ -4408,7 +6198,7 @@ bool Image::operator ==(const Image &image)
   Checks first all parameter and afterwards the Image data;
  */
 
-bool Image::operator !=(const Image &image)
+bool Image::operator!=(const Image &image)
 {
     return !(*this == image);
 }

@@ -331,7 +331,7 @@ UInt32 ShaderExecutableChunk::handleGL(DrawEnv                 *pEnv,
 
             VertexShaderIt vIt  = _mfVertexShader.begin();
             VertexShaderIt vEnd = _mfVertexShader.end  ();
-            
+
             for(; vIt != vEnd; ++vIt)
             {
                 (*vIt)->validate(pEnv);
@@ -1178,14 +1178,9 @@ void ShaderExecutableChunk::updateVariableLocations(DrawEnv *pEnv,
         ShaderProgramVariables::MFVariablesType::const_iterator mVarEnd =
             pMFVars->end  ();
         
-        OSGGETGLFUNC_GL3_ES(glGetUniformLocation,
-                            osgGlGetUniformLocation,
-                            ShaderProgram::getFuncIdGetUniformLocation());
-
         for(; mVarIt != mVarEnd; ++mVarIt, ++mLocIt)
         {
-            *mLocIt = osgGlGetUniformLocation(uiProgram,
-                                              (*mVarIt)->getName().c_str());
+            osgUniformShaderVariableLocationSwitch(pEnv, *mVarIt, *mLocIt, uiProgram);
         }
     }
 
@@ -1202,14 +1197,9 @@ void ShaderExecutableChunk::updateVariableLocations(DrawEnv *pEnv,
         ShaderProgramVariables::MFProceduralVariablesType::const_iterator 
             mVarEnd = pMFProcVars->end  ();
         
-        OSGGETGLFUNC_GL3_ES(glGetUniformLocation,
-                            osgGlGetUniformLocation,
-                            ShaderProgram::getFuncIdGetUniformLocation());
-
         for(; mVarIt != mVarEnd; ++mVarIt, ++mLocIt)
         {
-            *mLocIt = osgGlGetUniformLocation(uiProgram,
-                                              (*mVarIt)->getName().c_str());
+            osgUniformShaderVariableLocationSwitch(pEnv, *mVarIt, *mLocIt, uiProgram);
         }
     }
 }
@@ -1373,14 +1363,7 @@ void ShaderExecutableChunk::updateProceduralVariables(
 
                 if(*mLocIt == -1)
                 {
-                    OSGGETGLFUNCBYID_GL3_ES(
-                        glGetUniformLocation,
-                        osgGlGetUniformLocation,
-                        ShaderProgram::getFuncIdGetUniformLocation(),
-                        pWin);
-
-                    *mLocIt = osgGlGetUniformLocation(uiProgram,
-                                                      p->getName().c_str());
+                    osgUniformShaderVariableLocationSwitch(pEnv, p, *mLocIt, uiProgram);
 
 #ifdef OSG_MULTISHADER_VARCHUNK
                     if(*mLocIt == -1)
@@ -1402,14 +1385,8 @@ void ShaderExecutableChunk::updateProceduralVariables(
 
                 if(*mLocIt == -1)
                 {
-                    OSGGETGLFUNCBYID_GL3_ES(
-                        glGetUniformLocation,
-                        osgGlGetUniformLocation,
-                        ShaderProgram::getFuncIdGetUniformLocation(),
-                        pWin);
+                    osgUniformShaderVariableLocationSwitch(pEnv, p, *mLocIt, uiProgram);
 
-                    *mLocIt = osgGlGetUniformLocation(uiProgram,
-                                                      p->getName().c_str());
 #ifdef OSG_MULTISHADER_VARCHUNK
                     if(*mLocIt == -1)
                         *mLocIt = -2;

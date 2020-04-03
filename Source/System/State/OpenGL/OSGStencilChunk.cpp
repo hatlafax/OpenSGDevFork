@@ -150,6 +150,8 @@ void StencilChunk::changeFrom(DrawEnv    *pEnv,
 {
     StencilChunk *old = dynamic_cast<StencilChunk *>(old_chunk);
 
+    if (this == old)
+        return;
     pEnv->incNumChunkChanges();
     
     if(_sfStencilFunc.getValue() != GL_NONE)

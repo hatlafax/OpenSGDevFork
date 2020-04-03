@@ -12,4 +12,20 @@
    childFields="both"
    docGroupBase="GrpDrawablesGeometry"
    >
+
+    <Field
+        name="osgGLId"
+        type="UInt32"
+        cardinality="single"
+        visibility="internal"
+        access="public"
+        defaultValue="0"
+        fieldFlags="FClusterLocal"
+	>
+            The OpenSG GL object id for this geo property buffer object. If osgGLId is set, the GL object id
+            is determined by OpenSG. If osgGLId equals 0, the GLId is used directly as the GL object id.
+            An API getOglGLId()/setOglGLId() is provided to get/set the inherited GLId. This brings the
+            interface more in line to the TextureObjRefChunk and the ShaderStorageBufferRefObjChunk
+            classes.
+    </Field>
 </FieldContainer>

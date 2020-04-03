@@ -63,7 +63,7 @@
 #include <boost/foreach.hpp>
 #include <boost/random.hpp>
 #include <boost/tuple/tuple.hpp>
-#include "boost/tuple/tuple_comparison.hpp"
+#include <boost/tuple/tuple_comparison.hpp>
 
 #ifdef OSG_BUILD_ACTIVE
 // Headers
@@ -131,6 +131,14 @@
 #include <OpenSG/OSGPolygonChunk.h>
 #include <OpenSG/OSGTwoSidedLightingChunk.h>
 #endif
+
+//
+// The MultiLightChunk is able to provide fragment shader code snippets
+// that can conveniently be used. In this example the following flag
+// determines if the code generation should be used. See in function
+// get_fp_program.
+//
+#define USE_CODE_FROM_MULTI_LIGHT_CHUNK
 
 // ============================================================================
 //
@@ -454,7 +462,7 @@ OSG::MultiLightChunkTransitPtr create_light_state(const VecLightsT& vLights)
                     OSG::MultiLight::RANGE_LAYOUT |
                     OSG::MultiLight::CINEMA_LAYOUT);
 
-    lightChunk->setHasEyeToLightSpaceMatrix(true);
+    lightChunk->setHasLightSpaceFromEyeSpaceMatrix(true);
     lightChunk->setAutoCalcRanges(true);
 
     BOOST_FOREACH(const Light& light, vLights)
@@ -463,14 +471,14 @@ OSG::MultiLightChunkTransitPtr create_light_state(const VecLightsT& vLights)
 
         lightChunk->setPosition                 (idx, light.position);
         lightChunk->setDirection                (idx, light.direction);
-        lightChunk->setAmbientIntensity         (idx, light.ambientIntensity);
-        lightChunk->setDiffuseIntensity         (idx, light.diffuseIntensity);
-        lightChunk->setSpecularIntensity        (idx, light.specularIntensity);
+        lightChunk->setAmbient                  (idx, light.ambientIntensity);
+        lightChunk->setDiffuse                  (idx, light.diffuseIntensity);
+        lightChunk->setSpecular                 (idx, light.specularIntensity);
         lightChunk->setAttenuation              (idx, OSG::Vec3f(light.constantAttenuation,
                                                                  light.linearAttenuation,
                                                                  light.quadraticAttenuation));
         lightChunk->setSpotlightAngle           (idx, light.spotlightAngle);
-        lightChunk->setSpotExponent             (idx, light.spotExponent);
+        lightChunk->setSpotlightExponent        (idx, light.spotExponent);
         lightChunk->setInnerSuperEllipsesWidth  (idx, light.innerSuperEllipsesWidth);
         lightChunk->setInnerSuperEllipsesHeight (idx, light.innerSuperEllipsesHeight);
         lightChunk->setOuterSuperEllipsesWidth  (idx, light.outerSuperEllipsesWidth);
@@ -489,7 +497,7 @@ void update_light_state(OSG::MultiLightChunk* lightChunk, const VecLightsT& vLig
 {
     if (lightChunk)
     {
-        if (lightChunk->numLights() != vLights.size())
+        if (lightChunk->getNumLights() != vLights.size())
         {
             lightChunk->clearLights();
 
@@ -499,14 +507,14 @@ void update_light_state(OSG::MultiLightChunk* lightChunk, const VecLightsT& vLig
 
                 lightChunk->setPosition                 (idx, light.position);
                 lightChunk->setDirection                (idx, light.direction);
-                lightChunk->setAmbientIntensity         (idx, light.ambientIntensity);
-                lightChunk->setDiffuseIntensity         (idx, light.diffuseIntensity);
-                lightChunk->setSpecularIntensity        (idx, light.specularIntensity);
+                lightChunk->setAmbient                  (idx, light.ambientIntensity);
+                lightChunk->setDiffuse                  (idx, light.diffuseIntensity);
+                lightChunk->setSpecular                 (idx, light.specularIntensity);
                 lightChunk->setAttenuation              (idx, OSG::Vec3f(light.constantAttenuation,
                                                                          light.linearAttenuation,
                                                                          light.quadraticAttenuation));
                 lightChunk->setSpotlightAngle           (idx, light.spotlightAngle);
-                lightChunk->setSpotExponent             (idx, light.spotExponent);
+                lightChunk->setSpotlightExponent        (idx, light.spotExponent);
                 lightChunk->setInnerSuperEllipsesWidth  (idx, light.innerSuperEllipsesWidth);
                 lightChunk->setInnerSuperEllipsesHeight (idx, light.innerSuperEllipsesHeight);
                 lightChunk->setOuterSuperEllipsesWidth  (idx, light.outerSuperEllipsesWidth);
@@ -526,14 +534,14 @@ void update_light_state(OSG::MultiLightChunk* lightChunk, const VecLightsT& vLig
 
                 lightChunk->setPosition                 (idx, light.position);
                 lightChunk->setDirection                (idx, light.direction);
-                lightChunk->setAmbientIntensity         (idx, light.ambientIntensity);
-                lightChunk->setDiffuseIntensity         (idx, light.diffuseIntensity);
-                lightChunk->setSpecularIntensity        (idx, light.specularIntensity);
+                lightChunk->setAmbient                  (idx, light.ambientIntensity);
+                lightChunk->setDiffuse                  (idx, light.diffuseIntensity);
+                lightChunk->setSpecular                 (idx, light.specularIntensity);
                 lightChunk->setAttenuation              (idx, OSG::Vec3f(light.constantAttenuation,
                                                                          light.linearAttenuation,
                                                                          light.quadraticAttenuation));
                 lightChunk->setSpotlightAngle           (idx, light.spotlightAngle);
-                lightChunk->setSpotExponent             (idx, light.spotExponent);
+                lightChunk->setSpotlightExponent        (idx, light.spotExponent);
                 lightChunk->setInnerSuperEllipsesWidth  (idx, light.innerSuperEllipsesWidth);
                 lightChunk->setInnerSuperEllipsesHeight (idx, light.innerSuperEllipsesHeight);
                 lightChunk->setOuterSuperEllipsesWidth  (idx, light.outerSuperEllipsesWidth);
@@ -1222,9 +1230,6 @@ int main(int argc, char **argv)
         OSG::ShaderProgramRefPtr      vertShader = OSG::ShaderProgram::createVertexShader();
         OSG::ShaderProgramRefPtr      fragShader = OSG::ShaderProgram::createFragmentShader();
 
-        vertShader->setProgram(get_vp_program());
-        fragShader->setProgram(get_fp_program());
-
         fragShader->addOSGVariable("OSGViewMatrix");
 
         //
@@ -1265,6 +1270,14 @@ int main(int argc, char **argv)
         //
         ssbo_material_database = create_material_database_state(materials);
         multi_light_chunk      = create_light_state(lights);
+
+        //
+        // the following statements must be done after the creation of the multi_light_chunk
+        // since we let it generate light shader code for us, simplifying our shader code
+        // considerably.
+        //
+        vertShader->setProgram(get_vp_program());
+        fragShader->setProgram(get_fp_program());
 
         //multi_light_chunk->setEyeSpace(true);
 
@@ -2431,30 +2444,31 @@ std::string get_fp_program()
     << endl << "smooth in vec3 vPositionES;         // eye space position"
     << endl << "smooth in vec3 vPositionWS;         // world space position"
     << endl << ""
-    << endl << "const int num_materials = 5000;"
+    << endl << "uniform mat4  OSGViewMatrix;"
     << endl << ""
+#ifdef USE_CODE_FROM_MULTI_LIGHT_CHUNK
+    << multi_light_chunk->getFragmentProgramSnippet(true, true)
+#else
     << endl << "const int POINT_LIGHT       = 1;    // defined in OSGMultiLightChunk.h"
     << endl << "const int DIRECTIONAL_LIGHT = 2;"
     << endl << "const int SPOT_LIGHT        = 3;"
     << endl << "const int CINEMA_LIGHT      = 4;"
     << endl << ""
-    << endl << "uniform mat4  OSGViewMatrix;"
-    << endl << ""
     << endl << "struct Light"
     << endl << "{"
-    << endl << "    mat4  eyeToLightSpaceMatrix;"
+    << endl << "    mat4  matLSFromES;"
     << endl << "    vec3  position;                 // in world space"
     << endl << "    vec3  direction;                // in world space"
-    << endl << "    vec3  Ia;"
-    << endl << "    vec3  Id;"
-    << endl << "    vec3  Is;"
-    << endl << "    float const_attenuation;"
-    << endl << "    float linear_attenuation;"
-    << endl << "    float quadratic_attenuation;"
+    << endl << "    vec3  ambientIntensity;"
+    << endl << "    vec3  diffuseIntensity;"
+    << endl << "    vec3  specularIntensity;"
+    << endl << "    float constantAttenuation;"
+    << endl << "    float linearAttenuation;"
+    << endl << "    float quadraticAttenuation;"
     << endl << "    float rangeCutOn;"
     << endl << "    float rangeCutOff;"
     << endl << "    float cosSpotlightAngle;"
-    << endl << "    float spotExponent;"
+    << endl << "    float spotlightExponent;"
     << endl << "    float innerSuperEllipsesWidth;"
     << endl << "    float innerSuperEllipsesHeight;"
     << endl << "    float outerSuperEllipsesWidth;"
@@ -2469,32 +2483,6 @@ std::string get_fp_program()
     << endl << "{"
     << endl << "    Light light[];"
     << endl << "} lights;"
-    << endl << ""
-    << endl << "struct Material"
-    << endl << "{"
-    << endl << "    vec3 ambient;"
-    << endl << "    vec3 diffuse;"
-    << endl << "    vec3 specular;"
-    << endl << "    vec3 emissive;"
-    << endl << ""
-    << endl << "    float opacity;"
-    << endl << "    float shininess;"
-    << endl << "};"
-    << endl << ""
-    << endl << "layout (std430) buffer Materials"
-    << endl << "{"
-    << endl << "    Material material[num_materials];"
-    << endl << "} materials;"
-    << endl << ""
-    << endl << ""
-    << endl << "layout (std140) uniform GeomState"
-    << endl << "{"
-    << endl << "    int material_index;"
-    << endl << "} geom_state;"
-    << endl << ""
-    << endl << "const vec3 cCameraPositionES = vec3(0,0,0); // eye is at vec3(0,0,0) in eye space!"
-    << endl << ""
-    << endl << "layout(location = 0) out vec4 vFragColor;"
     << endl << ""
     << endl << "//"
     << endl << "// Calculate the attenuation of the light based on its"
@@ -2580,6 +2568,35 @@ std::string get_fp_program()
     << endl << ""
     << endl << "    return result;"
     << endl << "}"
+#endif
+    << endl << ""
+    << endl << "const int num_materials = 5000;"
+    << endl << ""
+    << endl << "struct Material"
+    << endl << "{"
+    << endl << "    vec3 ambient;"
+    << endl << "    vec3 diffuse;"
+    << endl << "    vec3 specular;"
+    << endl << "    vec3 emissive;"
+    << endl << ""
+    << endl << "    float opacity;"
+    << endl << "    float shininess;"
+    << endl << "};"
+    << endl << ""
+    << endl << "layout (std430) buffer Materials"
+    << endl << "{"
+    << endl << "    Material material[num_materials];"
+    << endl << "} materials;"
+    << endl << ""
+    << endl << ""
+    << endl << "layout (std140) uniform GeomState"
+    << endl << "{"
+    << endl << "    int material_index;"
+    << endl << "} geom_state;"
+    << endl << ""
+    << endl << "const vec3 cCameraPositionES = vec3(0,0,0); // eye is at vec3(0,0,0) in eye space!"
+    << endl << ""
+    << endl << "layout(location = 0) out vec4 vFragColor;"
     << endl << ""
     << endl << "//"
     << endl << "// directional light contribution"
@@ -2617,9 +2634,9 @@ std::string get_fp_program()
     << endl << "       pf = pow(n_dot_h, m);"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
-    << endl << "     + lights.light[i].Ia * materials.material[j].ambient"
-    << endl << "     + lights.light[i].Id * materials.material[j].diffuse  * n_dot_l"
-    << endl << "     + lights.light[i].Is * materials.material[j].specular * (m+8)*0.0125 * pf;"
+    << endl << "     + lights.light[i]. ambientIntensity * materials.material[j].ambient"
+    << endl << "     + lights.light[i]. diffuseIntensity * materials.material[j].diffuse  * n_dot_l"
+    << endl << "     + lights.light[i].specularIntensity * materials.material[j].specular * (m+8)*0.0125 * pf;"
     << endl << "}"
     << endl << ""
     << endl << "//"
@@ -2662,15 +2679,15 @@ std::string get_fp_program()
     << endl << "       pf = pow(n_dot_h, m);"
     << endl << ""
     << endl << "    float attenuation = calcAttenuation("
-    << endl << "                            lights.light[i].const_attenuation,"
-    << endl << "                            lights.light[i].linear_attenuation,"
-    << endl << "                            lights.light[i].quadratic_attenuation,"
+    << endl << "                            lights.light[i].constantAttenuation,"
+    << endl << "                            lights.light[i].linearAttenuation,"
+    << endl << "                            lights.light[i].quadraticAttenuation,"
     << endl << "                            d);"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
-    << endl << "     + attenuation * lights.light[i].Ia * materials.material[j].ambient"
-    << endl << "     + attenuation * lights.light[i].Id * materials.material[j].diffuse  * n_dot_l"
-    << endl << "     + attenuation * lights.light[i].Is * materials.material[j].specular * (m+8)*0.0125 * pf;"
+    << endl << "     + attenuation * lights.light[i]. ambientIntensity * materials.material[j].ambient"
+    << endl << "     + attenuation * lights.light[i]. diffuseIntensity * materials.material[j].diffuse  * n_dot_l"
+    << endl << "     + attenuation * lights.light[i].specularIntensity * materials.material[j].specular * (m+8)*0.0125 * pf;"
     << endl << "}"
     << endl << ""
     << endl << "//"
@@ -2717,17 +2734,17 @@ std::string get_fp_program()
     << endl << "       pf = pow(n_dot_h, m);"
     << endl << ""
     << endl << "    float attenuation = calcAttenuation("
-    << endl << "                            lights.light[i].const_attenuation,"
-    << endl << "                            lights.light[i].linear_attenuation,"
-    << endl << "                            lights.light[i].quadratic_attenuation,"
+    << endl << "                            lights.light[i].constantAttenuation,"
+    << endl << "                            lights.light[i].linearAttenuation,"
+    << endl << "                            lights.light[i].quadraticAttenuation,"
     << endl << "                            d);"
     << endl << ""
-    << endl << "    attenuation *= spotAttenuation(lights.light[i].cosSpotlightAngle, lights.light[i].spotExponent, l, s);"
+    << endl << "    attenuation *= spotAttenuation(lights.light[i].cosSpotlightAngle, lights.light[i].spotlightExponent, l, s);"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
-    << endl << "     + attenuation * lights.light[i].Ia * materials.material[j].ambient"
-    << endl << "     + attenuation * lights.light[i].Id * materials.material[j].diffuse  * n_dot_l"
-    << endl << "     + attenuation * lights.light[i].Is * materials.material[j].specular * (m+8)*0.0125 * pf;"
+    << endl << "     + attenuation * lights.light[i]. ambientIntensity * materials.material[j].ambient"
+    << endl << "     + attenuation * lights.light[i]. diffuseIntensity * materials.material[j].diffuse  * n_dot_l"
+    << endl << "     + attenuation * lights.light[i].specularIntensity * materials.material[j].specular * (m+8)*0.0125 * pf;"
     << endl << "}"
     << endl << ""
     << endl << "//"
@@ -2774,12 +2791,12 @@ std::string get_fp_program()
     << endl << "       pf = pow(n_dot_h, m);"
     << endl << ""
     << endl << "    float attenuation = calcAttenuation("
-    << endl << "                            lights.light[i].const_attenuation,"
-    << endl << "                            lights.light[i].linear_attenuation,"
-    << endl << "                            lights.light[i].quadratic_attenuation,"
+    << endl << "                            lights.light[i].constantAttenuation,"
+    << endl << "                            lights.light[i].linearAttenuation,"
+    << endl << "                            lights.light[i].quadraticAttenuation,"
     << endl << "                            d);"
     << endl << ""
-    << endl << "    vec3 p_LS = (lights.light[i].eyeToLightSpaceMatrix * vec4(p, 1.0)).xyz;"
+    << endl << "    vec3 p_LS = (lights.light[i].matLSFromES * vec4(p, 1.0)).xyz;"
     << endl << ""
     << endl << "    attenuation *= clipSuperEllipses("
     << endl << "                            lights.light[i].innerSuperEllipsesWidth,"
@@ -2795,9 +2812,9 @@ std::string get_fp_program()
     << endl << "    attenuation = clamp(attenuation, 0.0, 1.0);"
     << endl << ""
     << endl << "    return materials.material[j].emissive"
-    << endl << "     + attenuation * lights.light[i].Ia * materials.material[j].ambient"
-    << endl << "     + attenuation * lights.light[i].Id * materials.material[j].diffuse  * n_dot_l"
-    << endl << "     + attenuation * lights.light[i].Is * materials.material[j].specular * (m+8)*0.0125 * pf;"
+    << endl << "     + attenuation * lights.light[i]. ambientIntensity * materials.material[j].ambient"
+    << endl << "     + attenuation * lights.light[i]. diffuseIntensity * materials.material[j].diffuse  * n_dot_l"
+    << endl << "     + attenuation * lights.light[i].specularIntensity * materials.material[j].specular * (m+8)*0.0125 * pf;"
     << endl << "}"
     << endl << ""
     << endl << "void main()"

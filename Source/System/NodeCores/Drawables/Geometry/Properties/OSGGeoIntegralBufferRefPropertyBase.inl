@@ -74,6 +74,31 @@ OSG::UInt16 GeoIntegralBufferRefPropertyBase::getClassGroupId(void)
 
 /*------------------------------ get -----------------------------------*/
 
+//! Get the value of the GeoIntegralBufferRefProperty::_sfOsgGLId field.
+
+inline
+UInt32 &GeoIntegralBufferRefPropertyBase::editOsgGLId(void)
+{
+    editSField(OsgGLIdFieldMask);
+
+    return _sfOsgGLId.getValue();
+}
+
+//! Get the value of the GeoIntegralBufferRefProperty::_sfOsgGLId field.
+inline
+      UInt32  GeoIntegralBufferRefPropertyBase::getOsgGLId(void) const
+{
+    return _sfOsgGLId.getValue();
+}
+
+//! Set the value of the GeoIntegralBufferRefProperty::_sfOsgGLId field.
+inline
+void GeoIntegralBufferRefPropertyBase::setOsgGLId(const UInt32 value)
+{
+    editSField(OsgGLIdFieldMask);
+
+    _sfOsgGLId.setValue(value);
+}
 
 
 #ifdef OSG_MT_CPTR_ASPECT
@@ -85,6 +110,9 @@ void GeoIntegralBufferRefPropertyBase::execSync (      GeoIntegralBufferRefPrope
                                   const UInt32             uiSyncInfo)
 {
     Inherited::execSync(pFrom, whichField, oOffsets, syncMode, uiSyncInfo);
+
+    if(FieldBits::NoField != (OsgGLIdFieldMask & whichField))
+        _sfOsgGLId.syncWith(pFrom->_sfOsgGLId);
 }
 #endif
 

@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -53,6 +53,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
 #include "OSGConfig.h"
 
 
@@ -62,10 +67,6 @@
 #include "OSGEGLWindow.h"
 
 #include <boost/bind.hpp>
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -99,18 +100,22 @@ OSG_BEGIN_NAMESPACE
 \***************************************************************************/
 
 #if !defined(OSG_DO_DOC) || defined(OSG_DOC_DEV)
-DataType FieldTraits<EGLWindow *>::_type("EGLWindowPtr", "WindowPtr");
+PointerType FieldTraits<EGLWindow *, nsOSG>::_type(
+    "EGLWindowPtr", 
+    "WindowPtr", 
+    EGLWindow::getClassType(),
+    nsOSG);
 #endif
 
-OSG_FIELDTRAITS_GETTYPE(EGLWindow *)
+OSG_FIELDTRAITS_GETTYPE_NS(EGLWindow *, nsOSG)
 
 OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
                            EGLWindow *,
-                           0);
+                           nsOSG)
 
 OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
                            EGLWindow *,
-                           0);
+                           nsOSG)
 
 /***************************************************************************\
  *                         Field Description                               *
@@ -163,11 +168,12 @@ EGLWindowBase::TypeObject EGLWindowBase::_type(
     EGLWindowBase::getClassname(),
     Inherited::getClassname(),
     "NULL",
-    0,
+    nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&EGLWindowBase::createEmptyLocal),
-    EGLWindow::initMethod,
-    EGLWindow::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&EGLWindow::classDescInserter),
+    reinterpret_cast<InitContainerF>(&EGLWindow::initMethod),
+    reinterpret_cast<ExitContainerF>(&EGLWindow::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&EGLWindow::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\"?>\n"

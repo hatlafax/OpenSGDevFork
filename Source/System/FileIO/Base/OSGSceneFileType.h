@@ -100,6 +100,8 @@ class OSG_SYSTEM_DLLMAPPING SceneFileType : public IOFileTypeBase
 
             bool                    doOverride         (void);
             UInt32                  getOverridePriority(void);
+
+            bool                    getNonStreamIO     (void);
     
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -150,7 +152,9 @@ class OSG_SYSTEM_DLLMAPPING SceneFileType : public IOFileTypeBase
     /*! If true loader can override others. */
     bool                   _override;         
     /*! The priority for overriding. */
-    UInt32                 _overridePriority; 
+    UInt32                 _overridePriority;
+
+    bool                   _nonStreamIO;
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

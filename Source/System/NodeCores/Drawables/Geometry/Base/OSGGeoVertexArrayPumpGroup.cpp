@@ -130,6 +130,10 @@ namespace
         if(slot < info.propIdx->size())
             info.attribIndex[slot] = (*info.propIdx)[slot];
 
+        if (info.attribPtr[slot]         != NULL && 
+            info.attribPtr[slot]->size() == 0      )
+            info.attribPtr[slot] = NULL;
+
         if(info.attribPtr[slot]              != NULL  &&
            info.attribPtr[slot]->getIgnore() == false   )
         {

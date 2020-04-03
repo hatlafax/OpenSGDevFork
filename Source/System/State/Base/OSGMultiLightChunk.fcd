@@ -18,34 +18,260 @@ This chunk represents a number of lights that are exposed to shader code
 in form of a buffer in OpenGL std430 layout format.
 A shader, binding a shader storage block to the very same binding point, 
 is expected to respect the corresponding block layout. The layout is regulated
-by the hasXXX fields of the chunk. If one is set to false the corresponding
-struct entry is omitted.
+by the feature field of the chunk. If a feature is not set the corresponding struct
+entries are omitted. The feature attribute is protected, but getter and setters for 
+each feature are publicly provided.
+
+The following features are supported:
+
+    HAS_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX
+        This flag determines if the matLSFromWS attribute is part of 
+        the shader storage block, i.e. if the "mat4  matLSFromWS;" 
+        entry is contained in the shader struct for the Light.
+
+    HAS_WORLD_SPACE_FROM_LIGHT_SPACE_MATRIX
+        This flag determines if the matWSFromLS attribute is part of 
+        the shader storage block, i.e. if the "mat4  matWSFromLS;" 
+        entry is contained in the shader struct for the Light.
+
+    HAS_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX
+        This flag determines if the matLSFromES attribute is part of 
+        the shader storage block, i.e. if the "mat4  matLSFromES;" 
+        entry is contained in the shader struct for the Light.
+        Attention: If this flag is set the light shader storage block has to
+        be updated with every redraw operation.
+
+    HAS_EYE_SPACE_FROM_LIGHT_SPACE_MATRIX
+        This flag determines if the matESFromLS attribute is part of 
+        the shader storage block, i.e. if the "mat4  matESFromLS;" 
+        entry is contained in the shader struct for the Light.
+        Attention: If this flag is set the light shader storage block has to
+        be updated with every redraw operation.
+
+    HAS_PROJECTION_MATRIX
+        This flag determines if the matProjection attribute is part of 
+        the shader storage block, i.e. if the "mat4  matProjection;" 
+        entry is contained in the shader struct for the Light.
+        Implicitely set the hasProjection flag.
+
+    HAS_INV_PROJECTION_MATRIX
+        This flag determines if the matInvProjection attribute is part of 
+        the shader storage block, i.e. if the "mat4  matInvProjection;" 
+        entry is contained in the shader struct for the Light.
+        Implicitely set the hasProjection flag.
+
+    HAS_PROJECTION_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX
+        This flag determines if the matProjLSFromWS attribute is part of 
+        the shader storage block, i.e. if the "mat4  matProjLSFromWS;" 
+        entry is contained in the shader struct for the Light.
+        Implicitely set the hasProjection flag.
+
+    HAS_INV_PROJECTION_LIGHT_SPACE_FROM_WORLD_SPACE_MATRIX
+        This flag determines if the matInvProjLSFromWS attribute is part of 
+        the shader storage block, i.e. if the "mat4  matInvProjLSFromWS;" 
+        entry is contained in the shader struct for the Light.
+        Implicitely set the hasProjection flag.
+
+    HAS_PROJECTION_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX
+        This flag determines if the matProjLSFromES attribute is part of 
+        the shader storage block, i.e. if the "mat4  matProjLSFromES;" 
+        entry is contained in the shader struct for the Light.
+        Implicitely set the hasProjection flag.
+
+    HAS_INV_PROJECTION_LIGHT_SPACE_FROM_EYE_SPACE_MATRIX
+        This flag determines if the matInvProjLSFromES attribute is part of 
+        the shader storage block, i.e. if the "mat4  matInvProjLSFromES;" 
+        entry is contained in the shader struct for the Light.
+        Implicitely set the hasProjection flag.
+
+    HAS_INTENSITY
+        This flag determines if the color intensity attribute is part of the shader storage block, i.e.
+        if the "vec3 intensity;" entry is contained in the shader struct for the Light.
+
+    HAS_SEPARATE_INTENSITIES
+        This flag determines if the color intensity attributes are part of the shader storage block, i.e.
+        if the "vec3  Ia;", "vec3  Id;" and "vec3 Is;" entries are contained in the shader struct for the Light.
+
+    HAS_ATTENUATION
+        This flag determines if the attenuation attributes are part of the shader storage block, i.e.
+        if the "float constantAttenuation;", "float linearAttenuation;" and "float quadraticAttenuation;"
+        entries are contained in the shader struct for the Light.
+
+    HAS_DECAY_ATTENUATION
+        This flag determines if the attenuation decay attribute  is also part of the shader storage block, i.e.
+        if the "float decayAttenuation" entry is contained in the shader struct for the Light.
+
+    AUTO_CALC_RANGES
+        If this flag is active and the lights have attenuations, then the cut on and cut off ranges
+        are automatically calculated. They are, however, not provided automatically to the shader.
+        For that, you have to set the hasRangeCutOn and hasRangeCutOff flags, respectively.
+
+    HAS_RANGE_CUT_ON
+        This flag determines if the rangeCutOn attribute is part of the shader storage block, i.e.
+        if the "float rangeCutOn;" entry is contained in the shader struct for the Light.
+
+    HAS_RANGE_CUT_OFF
+        This flag determines if the hasRangeCutOff attribute is part of the shader storage block, i.e.
+        if the "float hasRangeCutOff;" entry is contained in the shader struct for the Light.
+
+    HAS_RANGE_NEAR_ZONE
+        This flag determines if the hasRangeNearZone attribute is part of the shader storage block, i.e.
+        if the "float hasRangeNearZone;" entry is contained in the shader struct for the Light.
+
+    HAS_RANGE_FAR_ZONE
+        This flag determines if the hasRangeFarZone attribute is part of the shader storage block, i.e.
+        if the "float hasRangeFarZone;" entry is contained in the shader struct for the Light.
+
+    HAS_SPOTLIGHT_ANGLE
+        This flag determines if the spot light angle attribute is part of the shader storage block, i.e.
+        if the "float spotlightAngle;" entry is contained in the shader struct for the Light.
+        If neither this flag nor the hasCosSpotlightAngle flag is true, then the hasCosSpotlightAngle 
+        flag is treated as if it has value true.
+
+    HAS_COS_SPOTLIGHT_ANGLE
+        This flag determines if the cosine spot light angle attribute is part of the shader storage block, i.e.
+        if the "float cosSpotlightAngle;" entry is contained in the shader struct for the Light.
+        If neither this flag nor the hasSpotlightAngle flag is true, then this flag is treated as if it 
+        has value true.
+
+    HAS_SPOTLIGHT_EXPONENT
+        This flag determines if the spot expenent attribute is part of the shader storage block, i.e.
+        if the "float spotlightExponent;" entry is contained in the shader struct for the Light.
+
+    HAS_SPOTLIGHT_PENUMBRA_ANGLE
+        This flag determines if the spot penumbra angle attribute is part of the shader storage block, i.e.
+        if the "float cosPenumbraCone;" entry is contained in the shader struct for the Light.
+
+    HAS_SPOTLIGHT_PENUMBRA_FACTOR
+        This flag determines if the spot penumbra angle attribute is part of the shader storage block, i.e.
+        if the "float cosPenumbraCone;" entry is contained in the shader struct for the Light. This flag
+        additionally, determines that the penumbra angle is calculated from the spot light cone angle.
+
+    HAS_SPOTLIGHT_PENUMBRA_FROSTBITE
+        This flag determines if the spot light attributes are given in the Frostbite optimized model in the 
+        shader storage block, i.e. if the "float spotScale;"  and "float spotOffset;" entries are contained
+        in the shader struct for the Light.
+
+    HAS_CINEMA_LIGHT
+        This flag determines if the cinema light attributes are part of the shader storage block, i.e.
+        if the "float innerSuperEllipsesWidth;", ... entries are contained in the shader struct for the Light.
+        If true this flag overrides the hasRangeCutOn, hasRangeCutOff, hasRangeNearZone and hasRangeFarZone
+        flags, because cinema lights are described the corresponding attributes.
+        See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html
+             http://www.yaldex.com/open-gl/ch12lev1sec4.html
+             https://en.wikipedia.org/wiki/Superellipse
+
+    HAS_SHADOW
+        This flag determines if the multi light supports shadowing. Is set to true the boolean
+        shadow flag, the shadowIntensity and the shadow index are added to the light struct.
+
+    HAS_GLOBAL_AMBIENT_INTENSITY
+        This flag determines if the multi light supports a global ambient light state, i.e. if a vec3 global color
+        entry 'ambientLight' exists in the light buffer which is to be added to the single light ambient intensities.
+
+    HAS_LENGTH_FACTOR
+        This flag determines if the multi light supports a global length factor light state, i.e. if a float 'lengthFactor'
+        exists in the light buffer which is used for distance attenuation calculations.
+        
+    HAS_PROJECTION
+        This flag determines if the multi light contains a projection matrix for each light, that is whether
+        storage is provided for the projection matrix. It does not decide whether a struct entry for the light
+        in the shader is generated. For that use the dedicated hasProjectionMatrix, hasInvProjectionMatrix,
+        hasProjectionLightSpaceFromWorldSpaceMatrix, hasInvProjectionLightSpaceFromWorldSpaceMatrix,
+        hasProjectionLightSpaceFromEyeSpaceMatrix, hasInvProjectionLightSpaceFromEyeSpaceMatrix
+        flags. Usage of these, however, implicitely set this hasProjection flag.
+        Additionally, the projection matrix is not automatically calculated. That is the duty of the user of the
+        chunk. Typically, the multi light shadow stage does take responsibiltiy for the proper calculation and
+        setting the projection matrix.
+
+    EYE_SPACE
+        The lights position and direction are transformed to eye space before loading into the shader. 
+        On default they are provided in world space.
+
+    The following code features are supported:
+        CODE_DISTANCE_ATTENUATION_CLASSIC
+            The classic OpenGL attenuation function is added to the light code snippet.
+
+        CODE_DISTANCE_ATTENUATION_PHYSICAL
+            A physically based attenuation function is added to the light code snippet.
+
+        CODE_DISTANCE_ATTENUATION_DECAY
+            A physically based attenuation function is added to the light code snippet.
+            An additional decay parameter is used by the function.
+
+        CODE_DISTANCE_ATTENUATION_MIX_PHYSICAL
+            A physically based attenuation function is added to the light code snippet that
+            also respect the classic OpenGL attenuation parameters.
+
+        CODE_DISTANCE_ATTENUATION_MIX_DECAY
+            A physically based attenuation function is added to the light code snippet that
+            also respect the classic OpenGL attenuation parameters.
+            An additional decay parameter is used by the function.
+
+        CODE_DISTANCE_ATTENUATION_SMOOTH_HERMITE
+            An attenuation function based on Hermitian smoothing is added to the light code snippet.
+
+        CODE_SPOT_ATTENUATION_CLASSIC
+            The classic OpenGL spot attenuation function is added to the light code snippet.
+            This model uses the cosine cutoff angle and the spot exponent parameter.
+
+        CODE_SPOT_ATTENUATION_SMOOTH_HERMITE
+            A spot attenuation function based on Hermitian smoothing is added to the light code snippet.
+            This model uses the cosine cutoff angle.
+
+        CODE_SPOT_ATTENUATION_SMOOTH_HERMITE_2
+            A spot attenuation function based on Hermitian smoothing is added to the light code snippet.
+            This model uses the cosine cutoff angle and the cosine penumbra angle.
+
+        CODE_SPOT_ATTENUATION_FROSTBITE
+            A spot attenuation function based in accodrance to the Frostbite engine model.
+            This optimized model uses a scale factor and an offset value.
+                scale  := 1.0f / max (0.001f, (penumbraCos  - coneCos));
+                offset := -coneCos * scale;
+
+    Following is the light structure shown that is valid if all layout features are activated. Usually,
+    one is working only with a part of these members. Some members are expected to be set by the application
+    programmer and some are set by internal machinery of OpenSG.
+
+    struct GlobalLight
+    {
+        vec3  ambientIntensity;
+    }
 
     struct Light
     {
-        mat4  worldToLightSpaceMatrix;
-        mat4  lightToWorldSpaceMatrix;
-        mat4  eyeToLightSpaceMatrix;
-        mat4  lightToEyeSpaceMatrix;
-        mat4  lightPerspectiveMatrix;
-        mat4  invLightPerspectiveMatrix;
+        mat4  matLSFromWS;
+        mat4  matWSFromLS;
+        mat4  matLSFromES;
+        mat4  matESFromLS;
+        mat4  matProjection;
+        mat4  matInvProjection;
+        mat4  matProjLSFromWS;
+        mat4  matInvProjLSFromWS;
+        mat4  matProjLSFromES;
+        mat4  matInvProjLSFromES;
         vec3  position;
         vec3  direction;
-        vec3  color;
         vec3  ambientIntensity;
         vec3  diffuseIntensity;
         vec3  specularIntensity;
-        float intensity;
+        vec3  intensity;
         float constantAttenuation;
         float linearAttenuation;
         float quadraticAttenuation;
+        float decayAttenuation;
+        float lengthFactor;
         float rangeCutOn;
         float rangeCutOff;
         float rangeNearZone;
         float rangeFarZone;
         float cosSpotlightAngle;
+        float tanSpotlightAngle;
         float spotlightAngle;
-        float spotExponent;
+        float spotlightExponent;
+        float spotlightScale;
+        float spotlightOffset;
+        float cosSpotlightPenumbraAngle;
         float innerSuperEllipsesWidth;
         float innerSuperEllipsesHeight;
         float outerSuperEllipsesWidth;
@@ -54,11 +280,15 @@ struct entry is omitted.
         float superEllipsesTwist;
         int   type;
         bool  enabled;
+        bool  shadow;
+        int   shadowDataIndex;
+        int   shadowParameterIndex;
     };
 
     layout (std430) buffer Lights
     {
-        Light light[];
+        GlobalLight global;
+        Light       light[];
     } lights;
 
 The chunk provides a convenient function that allows to adjust the struct layout
@@ -75,7 +305,7 @@ for standard OpenGL lights
         float linearAttenuation;
         float quadraticAttenuation;
         float cosSpotlightAngle;
-        float spotExponent;
+        float spotlightExponent;
         int   type;
         bool  enabled;
     };
@@ -86,8 +316,7 @@ or for simple range lights:
     {
         vec3  position;
         vec3  direction;
-        vec3  color;
-        float intensity;
+        vec3  intensity;
         float rangeCutOff;
         float cosSpotlightAngle;
         int   type;
@@ -95,250 +324,42 @@ or for simple range lights:
     };
 
     <Field
-        name="hasWorldToLightSpaceMatrix"
-        type="bool"
+        name="feature"
+        type="UInt32"
         cardinality="single"
         visibility="external"
-        access="public"
-        defaultValue="false"
+        access="protected"
+        defaultValue="0"
     >
-        This flag determines if the worldToLightSpaceMatrix attribute is part of 
-        the shader storage block, i.e. if the "mat4  worldToLightSpaceMatrix;" 
-        entry is contained in the shader struct for the Light.
+        This value determines the set of attributes that the light struct encompasses.
+        Some technique classes, e.g. the 'MultiLightShadowTechniqueSimple', automatically
+        set some additional features that they need for their proper operation.
+        The application programmer is expected to use the special 'getFragmentProgramSnippet()'
+        function in order to get a compatible light structure layout for his shader.
+        See the shadow examples for illustration.
     </Field>
 
     <Field
-        name="hasLightToWorldSpaceMatrix"
-        type="bool"
+        name="codeFeature"
+        type="UInt32"
         cardinality="single"
         visibility="external"
-        access="public"
-        defaultValue="false"
+        access="protected"
+        defaultValue="0"
     >
-        This flag determines if the lightToWorldSpaceMatrix attribute is part of 
-        the shader storage block, i.e. if the "mat4  lightToWorldSpaceMatrix;" 
-        entry is contained in the shader struct for the Light.
+        This value determines the set of attributes that governs the code generation
+        process for the multi light.
     </Field>
 
     <Field
-        name="hasEyeToLightSpaceMatrix"
-        type="bool"
+        name="globalAmbientIntensity"
+        type="Vec3f"
         cardinality="single"
         visibility="external"
         access="public"
-        defaultValue="false"
+        defaultValue="Vec3f(0,0,0)"
     >
-        This flag determines if the eyeToLightSpaceMatrix attribute is part of 
-        the shader storage block, i.e. if the "mat4  eyeToLightSpaceMatrix;" 
-        entry is contained in the shader struct for the Light.
-        Attention: If this flag is set the light shader storage block has to
-        be updated with every redraw operation.
-    </Field>
-
-    <Field
-        name="hasLightToEyeSpaceMatrix"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the lightToEyeSpaceMatrix attribute is part of 
-        the shader storage block, i.e. if the "mat4  lightToEyeSpaceMatrix;" 
-        entry is contained in the shader struct for the Light.
-        Attention: If this flag is set the light shader storage block has to
-        be updated with every redraw operation.
-    </Field>
-
-    <Field
-        name="hasLightPerspectiveMatrix"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the lightPerspectiveMatrix attribute is part of 
-        the shader storage block, i.e. if the "mat4  lightPerspectiveMatrix;" 
-        entry is contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="hasInvLightPerspectiveMatrix"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the lightToEyeSpaceMatrix attribute is part of 
-        the shader storage block, i.e. if the "mat4  invLightToEyeSpaceMatrix;" 
-        entry is contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="hasColor"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the color attribute is part of the shader storage block, i.e.
-        if the "vec3  color;" entry is contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="hasIntensity"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the intensity attribute is part of the shader storage block, i.e.
-        if the "float intensity;" entry is contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="hasSeparateIntensities"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="true"
-    >
-        This flag determines if the color intensity attributes are part of the shader storage block, i.e.
-        if the "vec3  Ia;", "vec3  Id;" and "vec3 Is;" entries are contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="hasAttenuation"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="true"
-    >
-        This flag determines if the attenuation attributes are part of the shader storage block, i.e.
-        if the "float constantAttenuation;", "float linearAttenuation;" and "float quadraticAttenuation;"
-        entries are contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="autoCalcRanges"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="true"
-    >
-        If this flag is active and the lights have attenuations, then the cut on and cut off ranges
-        are automatically calculated. They are, however, not provided automatically to the shader.
-        For that, you have to set the hasRangeCutOn and hasRangeCutOff flags, respectively.
-    </Field>
-
-    <Field
-        name="hasRangeCutOn"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the rangeCutOn attribute is part of the shader storage block, i.e.
-        if the "float rangeCutOn;" entry is contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="hasRangeCutOff"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the hasRangeCutOff attribute is part of the shader storage block, i.e.
-        if the "float hasRangeCutOff;" entry is contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="hasRangeNearZone"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the hasRangeNearZone attribute is part of the shader storage block, i.e.
-        if the "float hasRangeNearZone;" entry is contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="hasRangeFarZone"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the hasRangeFarZone attribute is part of the shader storage block, i.e.
-        if the "float hasRangeFarZone;" entry is contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="hasCosSpotlightAngle"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="true"
-    >
-        This flag determines if the cosine of the spot light angle attribute is part of the shader storage block, i.e.
-        if the "float  cosSpotlightAngle;" entry is contained in the shader struct for the Light. If neither this flag
-        nor the hasSpotlightAngle flag is true, then this flag is treated as if it has value true.
-    </Field>
-
-    <Field
-        name="hasSpotlightAngle"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the spot light angle attribute is part of the shader storage block, i.e.
-        if the "float  spotlightAngle;" entry is contained in the shader struct for the Light. If neither this flag
-        nor the hasCosSpotlightAngle flag is true, then the hasCosSpotlightAngle flag is treated as if it has value true.
-    </Field>
-
-    <Field
-        name="hasSpotExponent"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="true"
-    >
-        This flag determines if the spot expenent attribute is part of the shader storage block, i.e.
-        if the "float  spotExponent;" entry is contained in the shader struct for the Light.
-    </Field>
-
-    <Field
-        name="hasCinemaLight"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-        This flag determines if the cinema light attributes are part of the shader storage block, i.e.
-        if the "float innerSuperEllipsesWidth;", ... entries are contained in the shader struct for the Light.
-        If true this flag overrides the hasRangeCutOn, hasRangeCutOff, hasRangeNearZone and hasRangeFarZone
-        flags, because cinema lights are described the corresponding attributes.
-        See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html
-             http://www.yaldex.com/open-gl/ch12lev1sec4.html
-             https://en.wikipedia.org/wiki/Superellipse
+    The global ambient light intensity, that is to be added to the single light ambient intensities.
     </Field>
 
     <Field
@@ -362,18 +383,8 @@ or for simple range lights:
     </Field>
 
     <Field
-        name="color"
-        type="Color3f"
-        cardinality="multi"
-        visibility="external"
-        access="protected"
-    >
-    The light's color.
-    </Field>
-
-    <Field
         name="intensity"
-        type="Real32"
+        type="Vec3f"
         cardinality="multi"
         visibility="external"
         access="protected"
@@ -422,6 +433,27 @@ or for simple range lights:
     </Field>
 
     <Field
+        name="decayAttenuation"
+        type="Real32"
+        cardinality="multi"
+        visibility="external"
+        access="protected"
+    >
+    The light's attenuation consiting of the decay parameter.
+    </Field>
+
+    <Field
+        name="lengthFactor"
+        type="Real32"
+        cardinality="multi"
+        visibility="external"
+        access="protected"
+    >
+    All distance attenuation calculation are performed by multiplying the distance with the lengthFactor
+    in order to allow adaptation between differing length unit systems.
+    </Field>
+
+    <Field
         name="spotlightAngle"
         type="Real32"
         cardinality="multi"
@@ -438,7 +470,13 @@ or for simple range lights:
         visibility="external"
         access="protected"
     >
-    The spot angle in degree.
+    The spotlight parameter. The meaning of this parameter dependes on the following flags:
+    HAS_SPOTLIGHT_EXPONENT, HAS_SPOTLIGHT_PENUMBRA_ANGLE or HAS_SPOTLIGHT_PENUMBRA_FACTOR.
+    In case of flag HAS_SPOTLIGHT_PENUMBRA_ANGLE the parameter is expected to be
+    the spot penumbra angle in dedree. In case of flag HAS_SPOTLIGHT_PENUMBRA_FACTOR
+    the parameter is expected to be in the range [0,1] and is used to calculate the
+    spot penumbra angle from the spotlightAngle.
+   
     </Field>
 
     <Field
@@ -527,12 +565,9 @@ or for simple range lights:
         visibility="external"
         access="protected"
     >
-    The cinema light is described among others by a rangeCutOn parameter.
-    In the interval rangeCutOn to rangeCutOff the lighted fragments are
-    fully lit.
-    See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html
-         http://www.yaldex.com/open-gl/ch12lev1sec4.html
-         https://en.wikipedia.org/wiki/Superellipse
+    In the interval rangeCutOn to rangeCutOff the light is active and the
+    fragements are lit. Outside is no light. This parameter can be manually
+    set or automatically calculated.
     </Field>
 
     <Field
@@ -542,12 +577,9 @@ or for simple range lights:
         visibility="external"
         access="protected"
     >
-    The cinema light is described among others by a rangeCutOff parameter.
-    In the interval rangeCutOn to rangeCutOff the lighted fragments are
-    fully lit.
-    See: http://http.developer.nvidia.com/GPUGems/gpugems_ch10.html
-         http://www.yaldex.com/open-gl/ch12lev1sec4.html
-         https://en.wikipedia.org/wiki/Superellipse
+    In the interval rangeCutOn to rangeCutOff the light is active and the
+    fragements are lit. Outside is no light. This parameter can be manually
+    set or automatically calculated.
     </Field>
 
     <Field
@@ -577,6 +609,17 @@ or for simple range lights:
     </Field>
 
     <Field
+        name="projectionMatrix"
+        type="Matrix"
+        cardinality="multi"
+        visibility="external"
+        access="protected"
+    >
+    The light projection matrix. This is typically calculated newly for each render pass and
+    this field allows storage of this calculated matrix. Usally, internally set by OpenSG.
+    </Field>
+
+    <Field
         name="type"
         type="UInt8"
         cardinality="multi"
@@ -597,6 +640,41 @@ or for simple range lights:
     </Field>
 
     <Field
+        name="shadow"
+        type="bool"
+        cardinality="multi"
+        visibility="external"
+        access="protected"
+    >
+    The on/off shadow state of the light.
+    </Field>
+    <Field
+        name="shadowDataIndex"
+        type="Int32"
+        cardinality="multi"
+        visibility="external"
+        access="protected"
+    >
+    The index of the light into the shadow data array. The MultiLightShadowStage does provide an additional
+    shader storage buffer object for each shadowing light. This index points into this array, allowing
+    the shader to access particular runtime information for the shadowing technique at hand.
+    This field is internally set by OpenSG. No user setting necessary.
+    </Field>
+    <Field
+        name="shadowParameterIndex"
+        type="Int32"
+        cardinality="multi"
+        visibility="external"
+        access="protected"
+    >
+    The index of the light into the shadow parameter array. The MultiLightShadowStage does provide an additional
+    shader storage buffer object for the shadowing parameters that each shadowing lights should use. This index 
+    points into this array, allowing the shader to access particular runtime information for the shadowing 
+    technique at hand. The user adds MultiLightShadowParameter instances to the MultiLightShadowStage stage
+    and uses the index of a particular instance for this field.
+    </Field>
+
+    <Field
         name="beacon"
         type="Node"
         category="weakpointer"
@@ -608,26 +686,26 @@ or for simple range lights:
     </Field>
 
     <Field
+        name="normalizeDirection"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="true"
+    >
+    The camera last near value.
+    </Field>
+
+    <Field
         name="beaconMatrix"
         type="Matrix"
         cardinality="multi"
         visibility="internal"
         access="protected"
     >
-        The beacon matrices used for the last render pass.
+    The beacon matrices used for the last render pass. Internally set by OpenSG.
     </Field>
 
-    <Field
-        name="eyeSpace"
-        type="bool"
-        cardinality="single"
-        visibility="external"
-        access="public"
-        defaultValue="false"
-    >
-    The lights position and direction are transformed to eye space before loading into the shader. 
-    On default they are provided in world space.
-    </Field>
 
     <Field
         name="lastCamNear"
@@ -637,7 +715,7 @@ or for simple range lights:
         access="protected"
         defaultValue="0.f"
     >
-        The camera last near value.
+    The camera last near value. Internally set by OpenSG.
     </Field>
 
     <Field
@@ -648,7 +726,7 @@ or for simple range lights:
         access="protected"
         defaultValue="0.f"
     >
-        The camera last far value.
+    The camera last far value. Internally set by OpenSG.
     </Field>
 
     <Field
@@ -658,29 +736,29 @@ or for simple range lights:
         visibility="internal"
         access="protected"
     >
-        The camera last to world matrix.
+    The camera last to world matrix. Internally set by OpenSG.
     </Field>
 
     <Field
-     name="LightBlockName"
-     type="std::string"
-     cardinality="single"
-     visibility="external"
-     access="public"
-     defaultValue='"Lights"'
-     >
-        The shader storage buffer block name for the light buffer.
+        name="LightBlockName"
+        type="std::string"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue='"Lights"'
+    >
+    The shader storage buffer block name for the light buffer.
     </Field>
 
     <Field
-     name="LightVariableName"
-     type="std::string"
-     cardinality="single"
-     visibility="external"
-     access="public"
-     defaultValue='"lights"'
-     >
-        The shader variable name for the light buffer.
+        name="LightVariableName"
+        type="std::string"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue='"lights"'
+    >
+    The shader variable name for the light buffer.
     </Field>
 
 </FieldContainer>

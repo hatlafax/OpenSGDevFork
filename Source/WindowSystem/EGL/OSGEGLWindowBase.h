@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -70,6 +70,7 @@
 #include "OSGEGLWindowFields.h"
 
 OSG_BEGIN_NAMESPACE
+
 
 class EGLWindow;
 
@@ -174,11 +175,11 @@ class OSG_WINDOWEGL_DLLMAPPING EGLWindowBase : public Window
     /*! \name                   Binary Access                              */
     /*! \{                                                                 */
 
-    virtual SizeT getBinSize (ConstFieldMaskArg  whichField);
-    virtual void  copyToBin  (BinaryDataHandler &pMem,
-                              ConstFieldMaskArg  whichField);
-    virtual void  copyFromBin(BinaryDataHandler &pMem,
-                              ConstFieldMaskArg  whichField);
+    virtual SizeT  getBinSize (ConstFieldMaskArg  whichField);
+    virtual void   copyToBin  (BinaryDataHandler &pMem,
+                               ConstFieldMaskArg  whichField);
+    virtual void   copyFromBin(BinaryDataHandler &pMem,
+                               ConstFieldMaskArg  whichField);
 
 
     /*! \}                                                                 */
@@ -252,12 +253,12 @@ class OSG_WINDOWEGL_DLLMAPPING EGLWindowBase : public Window
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-    GetFieldHandlePtr  getHandleDisplay         (void) const;
-    EditFieldHandlePtr editHandleDisplay        (void);
-    GetFieldHandlePtr  getHandleWindow          (void) const;
-    EditFieldHandlePtr editHandleWindow         (void);
-    GetFieldHandlePtr  getHandleContext         (void) const;
-    EditFieldHandlePtr editHandleContext        (void);
+     GetFieldHandlePtr  getHandleDisplay         (void) const;
+     EditFieldHandlePtr editHandleDisplay        (void);
+     GetFieldHandlePtr  getHandleWindow          (void) const;
+     EditFieldHandlePtr editHandleWindow         (void);
+     GetFieldHandlePtr  getHandleContext         (void) const;
+     EditFieldHandlePtr editHandleContext        (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

@@ -39,6 +39,31 @@
 OSG_BEGIN_NAMESPACE
 
 inline
+bool PerspectiveProjection::operator==(
+    const PerspectiveProjection& rhs) const
+{
+    if (&rhs == this)
+        return true;
+
+    return Projection::operator==(rhs) 
+        && _fov    == rhs._fov
+        && _aspect == rhs._aspect;
+}
+
+inline
+bool PerspectiveProjection::equals(
+    const PerspectiveProjection& rhs, 
+    Real32 tol) const
+{
+    if (&rhs == this)
+        return true;
+
+    return Projection::equals(rhs, tol) 
+        && (_fov    - rhs._fov    <= tol) && (rhs._fov    - _fov    <= tol)
+        && (_aspect - rhs._aspect <= tol) && (rhs._aspect - _aspect <= tol);
+}
+
+inline
 Real32 PerspectiveProjection::getFov() const
 {
     return _fov;
@@ -60,6 +85,20 @@ inline
 void PerspectiveProjection::setAspect(Real32 aspect)
 {
     _aspect = aspect;
+}
+
+inline
+void PerspectiveProjection::setValue(
+    Real32 fov,
+    Real32 aspect,
+    Real32 zNear,
+    Real32 zFar)
+{
+    _fov    = fov;
+    _aspect = aspect;
+    
+    setZNear(zNear);
+    setZFar (zFar);
 }
 
 OSG_END_NAMESPACE

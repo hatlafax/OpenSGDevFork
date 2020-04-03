@@ -66,14 +66,19 @@
 #include "OSGDrawEnv.h"
 #include "OSGImageFunctions.h"
 #include "OSGStateOverride.h"
-#include "OSGTextureEnvChunk.h"
 #include "OSGSimpleSHLFunctions.h"
 #include "OSGSimpleSHLVariableChunk.h"
 #include "OSGUniformBufferObjStd140Chunk.h"
 
 #include "OSGMatrixUtility.h"
+#include "OSGShaderUtility.h"
 
 #include "OSGGLU.h"
+#include "OSGGLDebugUtils.h"
+
+#ifdef _DEBUG
+#define OSG_WRITE_SHADER_CODE_TO_FILE
+#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -85,6 +90,27 @@ OSG_BEGIN_NAMESPACE
 static Real64 Log2(Real64 number);
 static Int32 MipmapLevels(Int32 n);
 static std::size_t align_offset(std::size_t base_alignment, std::size_t base_offset);
+
+#ifdef OSG_WRITE_SHADER_CODE_TO_FILE
+static std::string getShaderCodeFile(const Char8* file)
+{
+    std::string dir;
+    const Char8* name  =  getenv(OSG_NAMESPACE_PREFIX"_LOG_FILE");
+    if (name)
+    {
+        dir = name;
+        const std::size_t pos = dir.find_last_of("/\\");
+        if (pos != std::string::npos && dir.size() > pos+1)
+        {
+            dir = dir.substr(0, pos+1);
+        }
+    }
+
+    dir += file;
+
+    return dir;
+}
+#endif
 
 /***************************************************************************\
  *                           Class variables                               *
@@ -134,13 +160,24 @@ void HDR2Stage::initMethod(InitPhase ePhase)
 
 /*----------------------- constructors & destructors ----------------------*/
 
-HDR2Stage::HDR2Stage(void) :
-    Inherited()
+HDR2Stage::HDR2Stage(void)
+: Inherited          (     )
+, _mapUpdate         (     )
+, _mapUpdateUboBuffer(     )
 {
+    _mfFilmicCurveParameters.push_back(0.15f);
+    _mfFilmicCurveParameters.push_back(0.5f);
+    _mfFilmicCurveParameters.push_back(0.1f);
+    _mfFilmicCurveParameters.push_back(0.2f);
+    _mfFilmicCurveParameters.push_back(0.02f);
+    _mfFilmicCurveParameters.push_back(0.3f);
+    _mfFilmicCurveParameters.push_back(11.2f);
 }
 
-HDR2Stage::HDR2Stage(const HDR2Stage &source) :
-    Inherited(source)
+HDR2Stage::HDR2Stage(const HDR2Stage &source)
+: Inherited          (source)
+, _mapUpdate         (     )
+, _mapUpdateUboBuffer(     )
 {
 }
 
@@ -154,6 +191,73 @@ void HDR2Stage::changed(ConstFieldMaskArg whichField,
                         UInt32            origin,
                         BitVector         details)
 {
+    //
+    // The BeaconMatrixFieldMask is deliberately omitted
+    // 
+
+    if((whichField & ( ApplyGammaFieldMask |
+                       AccurateGammaFieldMask |
+                       GammaFieldMask |
+                       ShadowLiftColorFieldMask |
+                       MidToneGammaColorFieldMask |
+                       HighlightGainColorFieldMask |
+                       AdjustLuminanceFieldMask |
+                       PerformBloomFieldMask |
+                       BloomBackgroundFieldMask |
+                       ForceBackgroundFieldMask |
+                       Use_ITU_R_BT_709FieldMask |
+                       TargetFieldMask |
+                       CarryDepthFieldMask |
+                       PerformDitheringFieldMask |
+                       ColorBufferInternalFormatFieldMask |
+                       ColorBufferPixelFormatFieldMask |
+                       ColorBufferTypeFieldMask |
+                       DepthBufferInternalFormatFieldMask |
+                       DepthBufferPixelFormatFieldMask |
+                       DepthBufferTypeFieldMask |
+                       LumBufferInternalFormatFieldMask |
+                       LumBufferPixelFormatFieldMask |
+                       LumBufferTypeFieldMask |
+                       ImageBufferInternalFormatFieldMask |
+                       ImageBufferPixelFormatFieldMask |
+                       ImageBufferTypeFieldMask |
+                       NumSamplesFieldMask |
+                       MipmapLevelFieldMask)) != 0)
+    {
+        UpdateMapT::iterator iter = _mapUpdate.begin();
+        UpdateMapT::iterator end  = _mapUpdate.end  ();
+
+        for (; iter != end; ++iter)
+            iter->second = true;
+    }
+
+    if((whichField & (TauFieldMask |
+                      BloomThresholdFieldMask |
+                      BloomMagnitudeFieldMask |
+                      NumTapsFieldMask |
+                      BlurGaussSigmaFieldMask |
+                      ToneMappingModeFieldMask |
+                      AutoExposureModeFieldMask |
+                      ExposureFieldMask |
+                      KeyValueFieldMask |
+                      ApertureFNumberFieldMask |
+                      ShutterSpeedFieldMask |
+                      ISOFieldMask |
+                      WhiteLevelFieldMask |
+                      SaturationFieldMask |
+                      FilterColorFieldMask |
+                      ContrastFieldMask |
+                      UseLinChromCorrectionFieldMask |
+                      FilmicCurveParametersFieldMask |
+                      DragoBiasFieldMask)) != 0)
+    {
+        UpdateMapT::iterator iter = _mapUpdateUboBuffer.begin();
+        UpdateMapT::iterator end  = _mapUpdateUboBuffer.end  ();
+
+        for (; iter != end; ++iter)
+            iter->second = true;
+    }
+
     Inherited::changed(whichField, origin, details);
 }
 
@@ -163,130 +267,372 @@ void HDR2Stage::dump(      UInt32    OSG_CHECK_ARG(uiIndent),
     SLOG << "Dump HDR2Stage NI" << std::endl;
 }
 
+#if 0
+void HDR2Stage::write_read_back_images(HDR2StageData* pData) const
+{
+    FrameBufferObject*  pBackgroundFBO  = pData->getBackgroundRenderTarget();
+    FrameBufferObject*  pSceneFBO       = pData->getSceneRenderTarget();
+    FrameBufferObject*  pCompositeFBO   = pData->getCompositeRenderTarget();
+
+    TextureBuffer*      pBackgroundTB   = dynamic_cast<TextureBuffer*>(pBackgroundFBO->getColorAttachments(0));
+    TextureBuffer*      pSceneTB        = dynamic_cast<TextureBuffer*>(pSceneFBO     ->getColorAttachments(0));
+    TextureBuffer*      pCompositeTB    = dynamic_cast<TextureBuffer*>(pCompositeFBO ->getColorAttachments(0));
+
+    TextureObjChunk*    pBackgroundTBO  = pBackgroundTB->getTexture();
+    TextureObjChunk*    pSceneTBO       = pSceneTB     ->getTexture();
+    TextureObjChunk*    pCompositeTBO   = pCompositeTB ->getTexture();
+
+    Image*              pBackgroundIMG  = pBackgroundTBO->getImage();
+    Image*              pSceneIMG       = pSceneTBO     ->getImage();
+    Image*              pCompositeIMG   = pCompositeTBO ->getImage();
+
+    //pBackgroundIMG->write("d:/work/BackgroundIMG.tif");
+    //pSceneIMG     ->write("d:/work/SceneIMG.tif");
+    //pCompositeIMG ->write("d:/work/CompositeIMG.tif");
+}
+
+void HDR2Stage::dump_fbo(const char* name, FrameBufferObject* fbo, std::stringstream& ss) const
+{
+    ss << "FrameBufferObject*    p" << name << "FBO = " << std::hex << fbo << std::endl;
+
+    if (fbo == NULL)
+        return;
+
+    TextureBuffer* pColorTexBuffer   = dynamic_cast<TextureBuffer*>(fbo->getColorAttachments(0));
+    if (pColorTexBuffer)
+    {
+        ss << "TextureBuffer*    p" << name << "ColorTB = " << std::hex << pColorTexBuffer << std::endl;
+
+        TextureObjChunk* pTexObjChunk  = pColorTexBuffer->getTexture();
+        Image*           pImg          = pTexObjChunk->getImage();
+
+        ss << "TextureObjChunk* p" << name << "ColorTBO = " << std::hex << pTexObjChunk << std::endl;
+        ss << "Image*           p" << name << "ColorIMG = " << std::hex << pImg << std::endl;
+        ss << "    DataType       = " << convertGLenumToString(pImg->getDataType())               << " = " << std::dec << pImg->getDataType() << std::endl;
+        ss << "    PixelFormat    = " << convertGLenumToString(pImg->getPixelFormat())            << " = " << std::dec << pImg->getPixelFormat() << std::endl;
+        ss << "    InternalFormat = " << convertGLenumToString(pTexObjChunk->getInternalFormat()) << " = " << std::dec << pTexObjChunk->getInternalFormat() << std::endl;
+    }
+
+    TextureBuffer* pDepthTexBuffer   = dynamic_cast<TextureBuffer*>(fbo->getDepthAttachment());
+    if (pDepthTexBuffer)
+    {
+        ss << "TextureBuffer*    p" << name << "DepthTB = " << std::hex << pDepthTexBuffer << std::endl;
+
+        TextureObjChunk* pTexObjChunk  = pDepthTexBuffer->getTexture();
+        Image*           pImg          = pTexObjChunk->getImage();
+
+        ss << "TextureObjChunk* p" << name << "DepthTBO = " << std::hex << pTexObjChunk << std::endl;
+        ss << "Image*           p" << name << "DepthIMG = " << std::hex << pImg << std::endl;
+        ss << "    DataType       = " << convertGLenumToString(pImg->getDataType())               << " = " << std::dec << pImg->getDataType() << std::endl;
+        ss << "    PixelFormat    = " << convertGLenumToString(pImg->getPixelFormat())            << " = " << std::dec << pImg->getPixelFormat() << std::endl;
+        ss << "    InternalFormat = " << convertGLenumToString(pTexObjChunk->getInternalFormat()) << " = " << std::dec << pTexObjChunk->getInternalFormat() << std::endl;
+    }
+
+    TextureBuffer* pStencilTexBuffer = dynamic_cast<TextureBuffer*>(fbo->getStencilAttachment());
+    if (pStencilTexBuffer)
+    {
+        ss << "TextureBuffer*   p" << name << "StencilTB  = " << std::hex << pStencilTexBuffer << std::endl;
+
+        TextureObjChunk* pTexObjChunk  = pStencilTexBuffer->getTexture();
+        Image*           pImg          = pTexObjChunk->getImage();
+
+        ss << "TextureObjChunk* p" << name << "StencilTBO = " << std::hex << pTexObjChunk << std::endl;
+        ss << "Image*           p" << name << "StencilIMG = " << std::hex << pImg << std::endl;
+        ss << "    DataType       = " << convertGLenumToString(pImg->getDataType())               << " = " << std::dec << pImg->getDataType() << std::endl;
+        ss << "    PixelFormat    = " << convertGLenumToString(pImg->getPixelFormat())            << " = " << std::dec << pImg->getPixelFormat() << std::endl;
+        ss << "    InternalFormat = " << convertGLenumToString(pTexObjChunk->getInternalFormat()) << " = " << std::dec << pTexObjChunk->getInternalFormat() << std::endl;
+    }
+
+    RenderBuffer* pColorRenderBuffer   = dynamic_cast<RenderBuffer*>(fbo->getColorAttachments(0));
+    if (pColorRenderBuffer)
+    {
+        ss << "RenderBuffer*    p" << name << "ColorRB = " << std::hex << pColorRenderBuffer << std::endl;
+    }
+
+    RenderBuffer* pDepthRenderBuffer   = dynamic_cast<RenderBuffer*>(fbo->getDepthAttachment());
+    if (pDepthRenderBuffer)
+    {
+        ss << "RenderBuffer*    p" << name << "DepthRB = " << std::hex << pDepthRenderBuffer << std::endl;
+    }
+
+    RenderBuffer* pStencilRenderBuffer = dynamic_cast<RenderBuffer*>(fbo->getStencilAttachment());
+    if (pStencilRenderBuffer)
+    {
+        ss << "RenderBuffer*    p" << name << "StencilRB = " << std::hex << pStencilRenderBuffer << std::endl;
+    }
+
+    ss << std::endl;
+}
+
+std::string HDR2Stage::dump_stage(HDR2StageData* pData) const
+{
+    std::stringstream ss;
+    ss << std::endl;
+
+    FrameBufferObject* pBackgroundFBO      = pData->getBackgroundRenderTarget();
+    FrameBufferObject* pSceneFBO           = pData->getSceneRenderTarget();
+    FrameBufferObject* pInitLuminanceFBO   = pData->getLuminanceRenderTarget();
+    FrameBufferObject* pAdaptLuminanceFBO0 = pData->getAdaptLuminanceRenderTarget(0);
+    FrameBufferObject* pAdaptLuminanceFBO1 = pData->getAdaptLuminanceRenderTarget(1);
+    FrameBufferObject* pThresholdFBO       = pData->getThresholdRenderTarget();
+    FrameBufferObject* pScaleFBO0          = NULL;
+    FrameBufferObject* pScaleFBO1          = NULL;
+    FrameBufferObject* pScaleFBO2          = NULL;
+    if (getPerformBloom())
+    {
+        pScaleFBO0 = pData->getScaleRenderTarget(0);
+        pScaleFBO1 = pData->getScaleRenderTarget(1);
+        pScaleFBO2 = pData->getScaleRenderTarget(2);
+    }
+    FrameBufferObject* pBlurHorizFBO       = pData->getBlurHorizRenderTarget();
+    FrameBufferObject* pBlurVertFBO        = pData->getBlurVertRenderTarget();
+    FrameBufferObject* pCompositeFBO       = pData->getCompositeRenderTarget();
+
+    dump_fbo("Background",      pBackgroundFBO,      ss);
+    dump_fbo("Scene",           pSceneFBO,           ss);
+    dump_fbo("InitLuminance",   pInitLuminanceFBO,   ss);
+    dump_fbo("AdaptLuminance0", pAdaptLuminanceFBO0, ss);
+    dump_fbo("AdaptLuminance1", pAdaptLuminanceFBO1, ss);
+    dump_fbo("Threshold",       pThresholdFBO,       ss);
+    dump_fbo("Scale0",          pScaleFBO0,          ss);
+    dump_fbo("Scale1",          pScaleFBO1,          ss);
+    dump_fbo("Scale2",          pScaleFBO2,          ss);
+    dump_fbo("Composite",       pCompositeFBO,       ss);
+
+    return ss.str();
+}
+#endif
+
+/*------------------------------- Access ------------------------------------*/
+
+Vec3f HDR2Stage::getAdjustedShadowLift() const
+{
+    Vec3f  liftColor = 2.0f * getShadowLiftColor();
+    return liftColor;
+}
+
+Vec3f HDR2Stage::getAdjustedInvMidtoneGamma() const
+{
+    Vec3f  gammaColor = 2.0f * getMidToneGammaColor();
+    Vec3f  invGammaAdjust = Vec3f(1.f/gammaColor[0], 1.f/gammaColor[1], 1.f/gammaColor[2]);
+    return invGammaAdjust;
+}
+
+Vec3f HDR2Stage::getAdjustedHighlightGain() const
+{
+    Vec3f  gainColor = 2.0f * getHighlightGainColor();
+    return gainColor;
+}
+
 /*------------------------------- Draw ------------------------------------*/
 
 Action::ResultE HDR2Stage::renderEnter(Action* action)
 {
+    if (getActivate() == false)
+        return Group::renderEnter(action);
+
     RenderAction* a = dynamic_cast<RenderAction*>(action);
 
-    a->disableDefaultPartition();
+    Viewarea*   pArea = a->getViewarea  ();
+    Camera*     pCam  = a->getCamera    ();
+    Background* pBack = a->getBackground();
+
+    if (pArea == NULL)
+        return Action::Continue;
 
     Int32 iVPWidth  = a->getActivePartition()->getViewportWidth ();
     Int32 iVPHeight = a->getActivePartition()->getViewportHeight();
 
+    HDR2StageDataUnrecPtr pData = a->getData<HDR2StageData *>(_iDataSlotId);
+    if (pData == NULL)
+    {
+        this->initData(a, iVPWidth, iVPHeight);
+#if 0
+        pData = a->getData<HDR2StageData *>(_iDataSlotId);
+        std::string dump_str = dump_stage(pData);
+        ::OutputDebugString(dump_str.c_str());
+        FDEBUG((dump_str.c_str()));
+#endif
+    }
+    else
+    {
+#if 0
+        // only testing: force update
+        HDR2StageData* pStageData = pData;
+        _mapUpdate         [pStageData] = true;
+        _mapUpdateUboBuffer[pStageData] = true;
+#endif
+
+        this->updateData(a, iVPWidth, iVPHeight);
+    }
+
+    pData = a->getData<HDR2StageData *>(_iDataSlotId);
+
+    //
+    // The duty of the HDR stage is to render the final scene into a
+    // texture image and then tonemap that image and add possibly some
+    // bloom effect.
+    // In order to achieve this we must setup some partition groups
+    // that are responsible for some specific task of the rendering.
+    // The following render partitions are setup:
+    //      1. Background RenderPartition:
+    //          This partition renders solely the background into a
+    //          separate texture. This texture is needed if the back-
+    //          ground should not take part in the tonemapping.
+    //          This texture must be ready to use in the HDR post 
+    //          processing pass.
+    //      2. Scene RenderPartition:
+    //          This partition renders the scene content into the scene
+    //          texture. This texture is the input for the HDR post
+    //          processing pass. It is important that the scene render
+    //          partition does not set the background. That is because
+    //          the scene recursion can meet stage nodes that might itself
+    //          add render partitions to the render action. If this happens
+    //          they would be rendered before the scene render partition.
+    //          and the scene render partition's background would then override
+    //          the current image. Therefore the background must be handled
+    //          separately.
+    //      3. HDR Postprocessing RenderPartition:
+    //          This render partition performs all the actual work wrsp. to
+    //          tonemapping and blooming.
+    //      4. Scene Background RenderPartition:
+    //          This partition renders solely the background into the scene
+    //          image. This partition is pushed last and therefore gets 
+    //          rendered first solving the background problems mentioned
+    //          before.
+    //
+
+    a->disableDefaultPartition();
+
     this->beginPartitionGroup(a);
     {
-        this->pushPartition(a);
+        //
+        // Render Background into separate texture
+        //
+        if (getForceBackground())
         {
-            RenderPartition   *pPart    = a   ->getActivePartition();
-            FrameBufferObject *pTarget  = this->getRenderTarget   ();
-            Viewarea          *pArea    = a   ->getViewarea       ();
-            Camera            *pCam     = a   ->getCamera         ();
-            Background        *pBack    = a   ->getBackground     ();
-            
-            if(pTarget == NULL)
+            this->pushPartition(a);
+                                //, RenderPartition::CopyAll);    // ??? all correct here
             {
-                this->initData(a, iVPWidth, iVPHeight);
+                RenderPartition*   pPart   = a    ->getActivePartition();
+                FrameBufferObject* pTarget = pData->getBackgroundRenderTarget();
 
-                pTarget  = this->getRenderTarget();
-            }
-            else
-            {
-                this->updateData(a, iVPWidth, iVPHeight);
-            }
+                setRenderTarget(pTarget);
 
-            pPart->setRenderTarget(pTarget);
-            pPart->getDrawEnv().setTargetBufferFormat(getColorBufferInternalFormat());
+                pPart->setRenderTarget(pTarget);
+                pPart->setWindow(a->getWindow());
 
-#ifdef OSG_DEBUGX
-            std::string szMessage("HDR2: RenderPartition\n");
-            pPart->setDebugString(szMessage          );
-#endif
+                //pPart->calcViewportDimension(0.f, 0.f, 1.f, 1.f, pTarget->getWidth(), pTarget->getHeight());
+                pPart->calcViewportDimension(
+                            pArea->getLeft  (), 
+                            pArea->getBottom(), 
+                            pArea->getRight (), 
+                            pArea->getTop   (), 
+                            
+                            pTarget->getWidth(), 
+                            pTarget->getHeight());
 
-            if(pArea != NULL)
-            {
-                pPart->setWindow  (a->getWindow());
-                
-                if(pTarget != NULL)
-                {
-#if 0
-                    pPart->calcViewportDimension(pArea->getLeft  (),
-                                                 pArea->getBottom(),
-                                                 pArea->getRight (),
-                                                 pArea->getTop   (),
-                                                 
-                                                 pTarget->getWidth    (),
-                                                 pTarget->getHeight   ());
-#endif
-                    pPart->calcViewportDimension(0.f,
-                                                 0.f,
-                                                 1.f,
-                                                 1.f,
-                                                 
-                                                 pTarget->getWidth    (),
-                                                 pTarget->getHeight   ());
-
-                }
-                else
-                {
-                    pPart->calcViewportDimension(pArea->getLeft  (),
-                                                 pArea->getBottom(),
-                                                 pArea->getRight (),
-                                                 pArea->getTop   (),
-                                                 
-                                                 a->getWindow()->getWidth (),
-                                                 a->getWindow()->getHeight());
-                }
 
                 if(pCam != NULL)
                 {
                     Matrix m, t;
                     
-                    // set the projection
-                    pCam->getProjection          (m, 
-                                                  pPart->getViewportWidth (), 
-                                                  pPart->getViewportHeight());
+                    pCam->getProjection           (m, pPart->getViewportWidth(), pPart->getViewportHeight());
+                    pCam->getProjectionTranslation(t, pPart->getViewportWidth(), pPart->getViewportHeight());
+                    pPart->setupProjection        (m, t);
                     
-                    pCam->getProjectionTranslation(t, 
-                                                   pPart->getViewportWidth (), 
-                                                   pPart->getViewportHeight());
-                    
-                    pPart->setupProjection(m, t);
-                    
-                    pCam->getViewing(m, 
-                                     pPart->getViewportWidth (),
-                                     pPart->getViewportHeight());
-                    
-                    
+                    pCam->getViewing   (m, pPart->getViewportWidth(), pPart->getViewportHeight());
                     pPart->setupViewing(m);
                     
-                    pPart->setNear     (pCam->getNear());
-                    pPart->setFar      (pCam->getFar ());
-                    
+                    pPart->setNear(pCam->getNear());
+                    pPart->setFar (pCam->getFar ());
+
                     pPart->calcFrustum();
                 }
                 
                 pPart->setBackground(pBack);
+            
+                // Nothing to do, we only are interested in the background!
             }
+            this->popPartition(a);
+        }
+
+        //
+        // Render scene without background
+        //
+        this->pushPartition(a,  RenderPartition::CopyNothing
+                            //| RenderPartition::CopyStateOverride
+                            //| RenderPartition::CopyViewing
+                            //| RenderPartition::CopyProjection
+                            //| RenderPartition::CopyVisibility
+                            //| RenderPartition::CopyTarget
+                            //| RenderPartition::CopyWindow
+                            //| RenderPartition::CopyViewportSize
+                            //| RenderPartition::CopyFrustum
+                            //| RenderPartition::CopyNearFar
+                              | RenderPartition::CopyVPCamera
+                              | RenderPartition::CopyMatrix
+                            //  | RenderPartition::CopyAll // ??? all correct here
+                            );
+        {
+            RenderPartition*   pPart   = a    ->getActivePartition();
+            FrameBufferObject* pTarget = pData->getSceneRenderTarget();
+           
+            setRenderTarget(pTarget);
+
+            pPart->setRenderTarget(pTarget);
+            pPart->setWindow(a->getWindow());
+
+            pPart->calcViewportDimension(
+                        pArea->getLeft    (), 
+                        pArea->getBottom  (), 
+                        pArea->getRight   (), 
+                        pArea->getTop     (), 
+                            
+                        pTarget->getWidth (), 
+                        pTarget->getHeight());
+
+            if (pCam != NULL)
+            {
+                Matrix m, t;
+                    
+                pCam->getProjection           (m, pPart->getViewportWidth(), pPart->getViewportHeight());
+                pCam->getProjectionTranslation(t, pPart->getViewportWidth(), pPart->getViewportHeight());
+                pPart->setupProjection        (m, t);
+                    
+                pCam->getViewing   (m, pPart->getViewportWidth(), pPart->getViewportHeight());
+                pPart->setupViewing(m);
+                    
+                pPart->setNear(pCam->getNear());
+                pPart->setFar (pCam->getFar ());
+                    
+                pPart->calcFrustum();
+            }
+                
+            //
+            // No background here. The background is handled separately below.
+            //
+            pPart->setBackground(NULL);
             
             this->recurseFromThis(a);
+            a->useNodeList(false);
         }
         this->popPartition(a);
 
         a->getActivePartition()->disable();
 
+        //
+        // The HDR post processing task
+        //
         this->pushPartition(a,
                             (RenderPartition::CopyWindow       |
                              RenderPartition::CopyViewportSize |
-                             RenderPartition::CopyTarget       ),
+                             RenderPartition::CopyTarget 
+                            //| RenderPartition::CopyAll // ??? all correct here
+                                ),
                              RenderPartition::SimpleCallback    );
         {
-            RenderPartition *pPart  = a->getActivePartition();
-
-#ifdef OSG_DEBUGX
-            std::string szMessage("HDR2: PostProcessPartition\n");
-            pPart->setDebugString(szMessage          );
-#endif
+            RenderPartition* pPart = a->getActivePartition();
 
             Matrix m, t;
 
@@ -305,11 +651,60 @@ Action::ResultE HDR2Stage::renderEnter(Action* action)
     }
     this->endPartitionGroup(a);
 
+    //
+    // Render scene background only. Actually this happens first
+    //
+    this->pushPartition(a); //, RenderPartition::CopyAll);    // ??? all correct here
+    {
+        RenderPartition*   pPart   = a    ->getActivePartition();
+        FrameBufferObject* pTarget = pData->getSceneRenderTarget();
+            
+        setRenderTarget(pTarget);
+
+        pPart->setRenderTarget(pTarget);
+        pPart->setWindow(a->getWindow());
+
+        //pPart->calcViewportDimension(0.f, 0.f, 1.f, 1.f, pTarget->getWidth (), pTarget->getHeight());
+        pPart->calcViewportDimension(
+                    pArea->getLeft  (), 
+                    pArea->getBottom(), 
+                    pArea->getRight (), 
+                    pArea->getTop   (), 
+                            
+                    pTarget->getWidth(), 
+                    pTarget->getHeight());
+
+        if(pCam != NULL)
+        {
+            Matrix m, t;
+                    
+            pCam->getProjection           (m, pPart->getViewportWidth(), pPart->getViewportHeight());
+            pCam->getProjectionTranslation(t, pPart->getViewportWidth(), pPart->getViewportHeight());
+            pPart->setupProjection        (m, t);
+                    
+            pCam->getViewing   (m, pPart->getViewportWidth(), pPart->getViewportHeight());
+            pPart->setupViewing(m);
+                    
+            pPart->setNear(pCam->getNear());
+            pPart->setFar (pCam->getFar ());
+                    
+            pPart->calcFrustum();
+        }
+                
+        pPart->setBackground(pBack);
+            
+        // Nothing to do, we only are interested in the background!
+    }
+    this->popPartition(a);
+
     return Action::Skip;
 }
 
 Action::ResultE HDR2Stage::renderLeave(Action *action)
 {
+    if (getActivate() == false)
+        return Group::renderLeave(action);
+
     return Action::Skip;
 }
 
@@ -359,8 +754,6 @@ void HDR2Stage::updateData(RenderAction* pAction,
 
         updateStageData(pData, iVPWidth, iVPHeight);
     }
-
-    
 }
 
 /*---------------------------- StageData ----------------------------------*/
@@ -373,6 +766,9 @@ HDR2StageDataTransitPtr HDR2Stage::setupStageData(Int32 iPixelWidth,
     if(hdrStageData == NULL)
         return HDR2StageDataTransitPtr(NULL);
 
+    _mapUpdate         [hdrStageData] = true;
+    _mapUpdateUboBuffer[hdrStageData] = true;
+
     hdrStageData->setWidth (iPixelWidth );
     hdrStageData->setHeight(iPixelHeight);
 
@@ -382,6 +778,8 @@ HDR2StageDataTransitPtr HDR2Stage::setupStageData(Int32 iPixelWidth,
     setupSharedData     (hdrStageData);
     setupRenderTargets  (hdrStageData, iPixelWidth, iPixelHeight);
     setupMaterials      (hdrStageData);
+
+    Thread::getCurrentChangeList()->commitChanges();
 
     return HDR2StageDataTransitPtr(hdrStageData);
 }
@@ -395,6 +793,9 @@ void HDR2Stage::updateStageData(HDR2StageData* pData,
     if (iPixelWidth != pData->getWidth() || iPixelHeight != pData->getHeight())
         resize = true;
 
+    if (!_mapUpdate[pData] && !_mapUpdateUboBuffer[pData] && !resize)
+        return;
+
     pData->setWidth (iPixelWidth );
     pData->setHeight(iPixelHeight);
 
@@ -406,7 +807,10 @@ void HDR2Stage::updateStageData(HDR2StageData* pData,
 
     updateMaterials    (pData);
 
-    commitChanges();
+    _mapUpdate         [pData] = false;
+    _mapUpdateUboBuffer[pData] = false;
+
+    Thread::getCurrentChangeList()->commitChanges();
 }
 
 /*------------------------ StageData Details ------------------------------*/
@@ -421,6 +825,9 @@ std::size_t HDR2Stage::calcUBOBufferSize()
     ao = align_offset( 4, bo); bo = ao + sizeof(UInt32);   // int   ToneMapTechnique
     ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float Exposure
     ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float KeyValue
+    ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float ApertureFNumber
+    ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float ShutterSpeed
+    ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float ISO
     ao = align_offset( 4, bo); bo = ao + sizeof(UInt32);   // int   AutoExposure
     ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float WhiteLevel
     ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float ShoulderStrength
@@ -431,6 +838,8 @@ std::size_t HDR2Stage::calcUBOBufferSize()
     ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float ToeDenominator
     ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float LinearWhite
     ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float LumSaturation
+    ao = align_offset(16, bo); bo = ao + sizeof(Color3f);  // float filterColor
+    ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float Contrast
     ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float Bias
     ao = align_offset( 4, bo); bo = ao + sizeof(Real32);   // float Tau
     ao = align_offset( 4, bo); bo = ao + sizeof(Int32);    // int   nTaps
@@ -466,11 +875,23 @@ void HDR2Stage::fillUBOBuffer(std::vector<OSG::UInt8>& buffer)
     bo = ao + sizeof(OSG::Real32);
 
     ao = align_offset( 4, bo);
+    *(reinterpret_cast<OSG::Real32*>(&buffer[0] + ao)) = getApertureFNumber();
+    bo = ao + sizeof(Real32);
+
+    ao = align_offset( 4, bo);
+    *(reinterpret_cast<OSG::Real32*>(&buffer[0] + ao)) = getShutterSpeed();
+    bo = ao + sizeof(Real32);
+
+    ao = align_offset( 4, bo);
+    *(reinterpret_cast<OSG::Real32*>(&buffer[0] + ao)) = getISO();
+    bo = ao + sizeof(Real32);
+
+    ao = align_offset( 4, bo);
     *(reinterpret_cast<OSG::UInt32*>(&buffer[0] + ao)) = getAutoExposureMode();
     bo = ao + sizeof(OSG::UInt32);
 
     ao = align_offset( 4, bo);
-    *(reinterpret_cast<OSG::Real32*>(&buffer[0] + ao)) = getWhiteLevel();
+    *(reinterpret_cast<OSG::Real32*>(&buffer[0] + ao)) = osgMax(getWhiteLevel(), 0.01f);
     bo = ao + sizeof(OSG::Real32);
 
     ao = align_offset( 4, bo);
@@ -505,6 +926,16 @@ void HDR2Stage::fillUBOBuffer(std::vector<OSG::UInt8>& buffer)
     *(reinterpret_cast<OSG::Real32*>(&buffer[0] + ao)) = getSaturation();
     bo = ao + sizeof(OSG::Real32);
 
+    Color3f filterColor = sRGBToLinear(getFilterColor());
+
+    ao = align_offset(16, bo);
+    memcpy(&buffer[0] + ao, &filterColor[0], sizeof(Color3f));  bo = ao + sizeof(Color3f);
+    bo = ao + sizeof(Color3f);
+
+    ao = align_offset( 4, bo);
+    *(reinterpret_cast<OSG::Real32*>(&buffer[0] + ao)) = getContrast();
+    bo = ao + sizeof(Real32);
+
     ao = align_offset( 4, bo);
     *(reinterpret_cast<OSG::Real32*>(&buffer[0] + ao)) = getDragoBias();
     bo = ao + sizeof(OSG::Real32);
@@ -526,7 +957,7 @@ void HDR2Stage::fillUBOBuffer(std::vector<OSG::UInt8>& buffer)
     bo = ao + sizeof(OSG::Int32);
 }
 
-void HDR2Stage::setupUBOData(HDR2StageData* pHDRData)
+void HDR2Stage::setupUBOData(HDR2StageData* pData)
 {
     UniformBufferObjStd140ChunkUnrecPtr uboChunk = UniformBufferObjStd140Chunk::createLocal();
     std::vector<OSG::UInt8> buffer(calcUBOBufferSize());
@@ -535,30 +966,29 @@ void HDR2Stage::setupUBOData(HDR2StageData* pHDRData)
     uboChunk->editMFBuffer()->setValues(buffer);
     uboChunk->setUsage(GL_DYNAMIC_DRAW);
 
-    pHDRData->setHdrShaderData(uboChunk);
+    pData->setHdrShaderData(uboChunk);
 }
 
-void HDR2Stage::updateUBOData(HDR2StageData* pHDRData)
+void HDR2Stage::updateUBOData(HDR2StageData* pData)
 {
-    UniformBufferObjStd140Chunk* uboChunk = pHDRData->getHdrShaderData();
-    std::vector<OSG::UInt8> buffer(calcUBOBufferSize());
-    fillUBOBuffer(buffer);
+    if (_mapUpdateUboBuffer[pData])
+    {
+        UniformBufferObjStd140Chunk* uboChunk = pData->getHdrShaderData();
+        std::vector<OSG::UInt8> buffer(calcUBOBufferSize());
+        fillUBOBuffer(buffer);
 
-    uboChunk->editMFBuffer()->setValues(buffer);
+        uboChunk->editMFBuffer()->setValues(buffer);
+    }
 }
 
-void HDR2Stage::setupSharedData(HDR2StageData* pHDRData)
+void HDR2Stage::setupSharedData(HDR2StageData* pData)
 {
-    TextureEnvChunkUnrecPtr texEnvChunk = TextureEnvChunk::createLocal();
-    texEnvChunk->setEnvMode (GL_REPLACE);
-    pHDRData->setSharedTextureEnvChunk(texEnvChunk);
-
     MaterialChunkUnrecPtr matChunk = MaterialChunk::createLocal();
     matChunk->setLit(false);
-    pHDRData->setSharedMaterialChunk(matChunk);
+    pData->setSharedMaterialChunk(matChunk);
 }
 
-void HDR2Stage::updateSharedData(HDR2StageData* pHDRData)
+void HDR2Stage::updateSharedData(HDR2StageData* pData)
 {
 }
 
@@ -567,6 +997,7 @@ void HDR2Stage::setupRenderTargets(
     Int32          iPixelWidth,
     Int32          iPixelHeight)
 {
+    setupBackgroundRenderTarget     (pData, iPixelWidth, iPixelHeight);
     setupSceneRenderTarget          (pData, iPixelWidth, iPixelHeight);
     setupLuminanceRenderTarget      (pData, iPixelWidth, iPixelHeight);
     setupAdaptLuminanceRenderTarget (pData, iPixelWidth, iPixelHeight);
@@ -586,6 +1017,7 @@ void HDR2Stage::updateRenderTargets(
     Int32          iPixelWidth,
     Int32          iPixelHeight)
 {
+    updateBackgroundRenderTarget    (pData, iPixelWidth, iPixelHeight);
     updateSceneRenderTarget         (pData, iPixelWidth, iPixelHeight);
     updateLuminanceRenderTarget     (pData, iPixelWidth, iPixelHeight);
     updateAdaptLuminanceRenderTarget(pData, iPixelWidth, iPixelHeight);
@@ -602,7 +1034,6 @@ void HDR2Stage::updateRenderTargets(
 
 void HDR2Stage::setupMaterials(HDR2StageData* pData)
 {
-    setupSceneMaterial         (pData);
     setupLuminanceMapMaterial  (pData);
     setupAdaptLuminanceMaterial(pData);
 
@@ -620,7 +1051,6 @@ void HDR2Stage::setupMaterials(HDR2StageData* pData)
 
 void HDR2Stage::updateMaterials(HDR2StageData* pData)
 {
-    updateSceneMaterial         (pData);
     updateLuminanceMapMaterial  (pData);
     updateAdaptLuminanceMaterial(pData);
 
@@ -636,6 +1066,62 @@ void HDR2Stage::updateMaterials(HDR2StageData* pData)
     updateFinalScreenMaterial   (pData);
 }
 
+void HDR2Stage::setupBackgroundRenderTarget(
+    HDR2StageData* pData,
+    Int32          iPixelWidth,
+    Int32          iPixelHeight)
+{
+    FrameBufferObjectUnrecPtr pBackgroundFBO = FrameBufferObject::createLocal();
+
+    pBackgroundFBO->setSize(iPixelWidth, iPixelHeight);
+
+    if (getNumSamples() > 0)
+    {
+        pBackgroundFBO->setEnableMultiSample(true);
+        pBackgroundFBO->setColorSamples(getNumSamples());
+    }
+
+    ImageUnrecPtr pBackgroundImg = Image ::createLocal();
+    pBackgroundImg->set(getColorBufferPixelFormat(), iPixelWidth, iPixelHeight, 1, 1, 1, 0.0, 0, getColorBufferType(), false);
+
+    TextureObjChunkUnrecPtr pBackgroundTexObjChunk = TextureObjChunk::createLocal();
+    pBackgroundTexObjChunk->setImage         (pBackgroundImg); 
+    pBackgroundTexObjChunk->setMinFilter     (GL_LINEAR);
+    pBackgroundTexObjChunk->setMagFilter     (GL_LINEAR);
+    pBackgroundTexObjChunk->setWrapS         (GL_REPEAT);
+    pBackgroundTexObjChunk->setWrapT         (GL_REPEAT);
+    pBackgroundTexObjChunk->setInternalFormat(getColorBufferInternalFormat());
+
+    ImageUnrecPtr pDepthImg = Image ::createLocal();
+    pDepthImg->set(getDepthBufferPixelFormat(), iPixelWidth, iPixelHeight, 1, 1, 1, 0.0, 0, getDepthBufferType(), false);
+
+    TextureObjChunkUnrecPtr pDepthTexObjChunk = TextureObjChunk::createLocal();
+    pDepthTexObjChunk->setImage         (pDepthImg); 
+    pDepthTexObjChunk->setMinFilter     (GL_LINEAR);
+    pDepthTexObjChunk->setMagFilter     (GL_LINEAR);
+    pDepthTexObjChunk->setWrapS         (GL_REPEAT);
+    pDepthTexObjChunk->setWrapT         (GL_REPEAT);
+    pDepthTexObjChunk->setInternalFormat(getDepthBufferInternalFormat());
+
+    TextureBufferUnrecPtr pBackgroundTexBuffer = TextureBuffer::createLocal();
+    TextureBufferUnrecPtr pDepthTexBuffer      = TextureBuffer::createLocal();
+
+#if 0
+    pBackgroundFBO->setPostProcessOnDeactivate(true);
+    pBackgroundTexBuffer->setReadBack(true);
+#endif
+
+    pBackgroundTexBuffer->setTexture(pBackgroundTexObjChunk);
+    pDepthTexBuffer     ->setTexture(pDepthTexObjChunk);
+
+    pBackgroundFBO->setColorAttachment(pBackgroundTexBuffer, 0);
+    pBackgroundFBO->setDepthAttachment(pDepthTexBuffer);
+
+    pBackgroundFBO->editMFDrawBuffers()->push_back(GL_COLOR_ATTACHMENT0);
+
+    pData->setBackgroundRenderTarget(pBackgroundFBO);
+}
+
 void HDR2Stage::setupSceneRenderTarget(
     HDR2StageData* pData,
     Int32          iPixelWidth,
@@ -644,7 +1130,7 @@ void HDR2Stage::setupSceneRenderTarget(
     FrameBufferObjectUnrecPtr pSceneFBO = FrameBufferObject::createLocal();
     pSceneFBO->setSize(iPixelWidth, iPixelHeight);
 
-    if (getNumSamples() > 1)
+    if (getNumSamples() > 0)
     {
         pSceneFBO->setEnableMultiSample(true);
         pSceneFBO->setColorSamples(getNumSamples());
@@ -672,20 +1158,29 @@ void HDR2Stage::setupSceneRenderTarget(
     pDepthTexObjChunk->setWrapT         (GL_REPEAT);
     pDepthTexObjChunk->setInternalFormat(getDepthBufferInternalFormat());
 
-    TextureBufferUnrecPtr pSceneTexBuffer = TextureBuffer::createLocal();
-    TextureBufferUnrecPtr pDepthTexBuffer = TextureBuffer::createLocal();
+    TextureBufferUnrecPtr pSceneTexBuffer   = TextureBuffer::createLocal();
+    TextureBufferUnrecPtr pDepthTexBuffer   = TextureBuffer::createLocal();
 
-    pSceneTexBuffer->setTexture(pSceneTexObjChunk);
-    pDepthTexBuffer->setTexture(pDepthTexObjChunk);
+    pSceneTexBuffer  ->setTexture(pSceneTexObjChunk);
+    pDepthTexBuffer  ->setTexture(pDepthTexObjChunk);
 
-    pSceneFBO->setColorAttachment(pSceneTexBuffer, 0);
-    pSceneFBO->setDepthAttachment(pDepthTexBuffer);
+#if 0
+    pSceneFBO->setPostProcessOnDeactivate(true);
+    pSceneTexBuffer->setReadBack(true);
+#endif
+
+    pSceneFBO->setColorAttachment  (pSceneTexBuffer, 0);
+    pSceneFBO->setDepthAttachment  (pDepthTexBuffer);
+
+    if ( (getDepthBufferInternalFormat() == GL_DEPTH24_STENCIL8 || getDepthBufferInternalFormat() == GL_DEPTH32F_STENCIL8)
+       && getDepthBufferPixelFormat   () == GL_DEPTH_STENCIL )
+    {
+        pSceneFBO->setStencilAttachment(pDepthTexBuffer);
+    }
 
     pSceneFBO->editMFDrawBuffers()->push_back(GL_COLOR_ATTACHMENT0);
 
     pData->setSceneRenderTarget(pSceneFBO);
-
-    setRenderTarget(pSceneFBO);
 }
 
 void HDR2Stage::setupLuminanceRenderTarget(
@@ -730,7 +1225,7 @@ void HDR2Stage::setupAdaptLuminanceRenderTarget(
     {
         FrameBufferObjectUnrecPtr pAdaptLuminanceFBO = FrameBufferObject::createLocal();
         pAdaptLuminanceFBO->setSize(iPixelWidth, iPixelHeight);
-        pAdaptLuminanceFBO->setPostProcessOnDeactivate(true);
+        pAdaptLuminanceFBO->setPostProcessOnDeactivate(true);   // ??? ToDo: check if necessary
 
         ImageUnrecPtr pAdaptLuminanceImg = Image ::createLocal();
         pAdaptLuminanceImg->set(getLumBufferPixelFormat(), iPixelWidth, iPixelHeight, 1, levels, 1, 0.0, 0, getLumBufferType(), false);
@@ -895,6 +1390,10 @@ void HDR2Stage::setupCompositeRenderTarget(
     pCompositeTexBuffer->setTexture(pCompositeTexObjChunk);
     pExposureTexBuffer ->setTexture(pExposureTexObjChunk);
 
+#if 0
+    pCompositeFBO->setPostProcessOnDeactivate(true);
+    pCompositeTexBuffer->setReadBack(true);
+#endif
 
     pCompositeFBO->setColorAttachment(pCompositeTexBuffer, 0);
     pCompositeFBO->setColorAttachment(pExposureTexBuffer,  1);
@@ -902,6 +1401,15 @@ void HDR2Stage::setupCompositeRenderTarget(
     pCompositeFBO->editMFDrawBuffers()->push_back(GL_COLOR_ATTACHMENT1);
 
     pData->setCompositeRenderTarget(pCompositeFBO);
+}
+
+void HDR2Stage::updateBackgroundRenderTarget(
+    HDR2StageData* pData,
+    Int32          iPixelWidth,
+    Int32          iPixelHeight)
+{
+    FrameBufferObject* pFBO = pData->getBackgroundRenderTarget();
+    pFBO->resizeAll(iPixelWidth, iPixelHeight);
 }
 
 void HDR2Stage::updateSceneRenderTarget(
@@ -999,24 +1507,18 @@ void HDR2Stage::updateCompositeRenderTarget(
     pFBO->resizeAll(iPixelWidth, iPixelHeight);
 }
 
-void HDR2Stage::setupSceneMaterial(HDR2StageData* pData)
-{
-    ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
-    chunkMat->addChunk(pData->getSharedMaterialChunk());
-
-    pData->setSceneMaterial(chunkMat);
-}
-
 void HDR2Stage::setupLuminanceMapMaterial(HDR2StageData* pData)
 {
     SimpleSHLChunkUnrecPtr shaderChunk = genLuminanceMapShader();
     shaderChunk->addUniformVariable("InputTex0", 0);
+    shaderChunk->addUniformVariable("InputTex1", 1);
     shaderChunk->addUniformVariable("Use_ITU_R_BT_709", getUse_ITU_R_BT_709());
+    shaderChunk->addUniformVariable("ForceBackground",  getForceBackground());
 
     ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
     chunkMat->addChunk(pData->getSharedMaterialChunk());
     chunkMat->addChunk(pData->getSceneTexObjChunk(), 0);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
+    chunkMat->addChunk(pData->getBackgroundTexObjChunk(), 1);
     chunkMat->addChunk(shaderChunk);
 
     pData->setLuminanceMapShader(shaderChunk);
@@ -1040,10 +1542,8 @@ void HDR2Stage::setupAdaptLuminanceMaterial(HDR2StageData* pData)
 
     chunkMat->addChunk(pData->getAdaptLuminanceTexObjChunk(
         !pData->getCurrentAdaptLuminanceIdx()), 0);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
 
     chunkMat->addChunk(pData->getLuminanceTexObjChunk(), 1);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 1);
 
     chunkMat->addChunk(pData->getHdrShaderData(), 0);
     chunkMat->addChunk(shaderChunk);
@@ -1078,13 +1578,8 @@ void HDR2Stage::setupThresholdMaterial(HDR2StageData* pData)
     chunkMat->addChunk(pData->getSharedMaterialChunk());
 
     chunkMat->addChunk(pData->getSceneTexObjChunk(), 0);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
-
     chunkMat->addChunk(pData->getAdaptLuminanceTexObjChunk(pData->getCurrentAdaptLuminanceIdx()), 1);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 1);
-
     chunkMat->addChunk(pData->getDepthTexObjChunk(), 2);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 2);
 
     chunkMat->addChunk(pData->getHdrShaderData(), 0);
 
@@ -1104,10 +1599,7 @@ void HDR2Stage::setupScaleMaterial(HDR2StageData* pData)
     {
         ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
         chunkMat->addChunk(pData->getSharedMaterialChunk());
-
         chunkMat->addChunk(pData->getThresholdTexObjChunk(), 0);
-        chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
-
         chunkMat->addChunk(shaderChunk);
         
         pData->pushToScaleMaterial(chunkMat);
@@ -1117,10 +1609,7 @@ void HDR2Stage::setupScaleMaterial(HDR2StageData* pData)
     {
         ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
         chunkMat->addChunk(pData->getSharedMaterialChunk());
-
         chunkMat->addChunk(pData->getScaleTexObjChunk(0), 0);
-        chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
-
         chunkMat->addChunk(shaderChunk);
         
         pData->pushToScaleMaterial(chunkMat);
@@ -1130,10 +1619,7 @@ void HDR2Stage::setupScaleMaterial(HDR2StageData* pData)
     {
         ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
         chunkMat->addChunk(pData->getSharedMaterialChunk());
-
         chunkMat->addChunk(pData->getScaleTexObjChunk(1), 0);
-        chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
-
         chunkMat->addChunk(shaderChunk);
         
         pData->pushToScaleMaterial(chunkMat);
@@ -1143,10 +1629,7 @@ void HDR2Stage::setupScaleMaterial(HDR2StageData* pData)
     {
         ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
         chunkMat->addChunk(pData->getSharedMaterialChunk());
-
         chunkMat->addChunk(pData->getBlurVertTexObjChunk(), 0);
-        chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
-
         chunkMat->addChunk(shaderChunk);
         
         pData->pushToScaleMaterial(chunkMat);
@@ -1156,10 +1639,7 @@ void HDR2Stage::setupScaleMaterial(HDR2StageData* pData)
     {
         ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
         chunkMat->addChunk(pData->getSharedMaterialChunk());
-
         chunkMat->addChunk(pData->getScaleTexObjChunk(1), 0);
-        chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
-
         chunkMat->addChunk(shaderChunk);
         
         pData->pushToScaleMaterial(chunkMat);
@@ -1175,12 +1655,8 @@ void HDR2Stage::setupBlurHorizMaterial(HDR2StageData* pData)
 
     ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
     chunkMat->addChunk(pData->getSharedMaterialChunk());
-
     chunkMat->addChunk(pData->getBlurVertTexObjChunk(), 0);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
-
     chunkMat->addChunk(pData->getHdrShaderData(), 0);
-
     chunkMat->addChunk(shaderChunk);
 
     pData->setBlurHorizShader(shaderChunk);
@@ -1196,12 +1672,8 @@ void HDR2Stage::setupBlurVertMaterial(HDR2StageData* pData)
 
     ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
     chunkMat->addChunk(pData->getSharedMaterialChunk());
-
     chunkMat->addChunk(pData->getBlurHorizTexObjChunk(), 0);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
-
     chunkMat->addChunk(pData->getHdrShaderData(), 0);
-
     chunkMat->addChunk(shaderChunk);
 
     pData->setBlurVertShader(shaderChunk);
@@ -1222,11 +1694,15 @@ void HDR2Stage::setupCompositeMaterial(HDR2StageData* pData)
         levels = getMipmapLevel();
 
     SimpleSHLChunkUnrecPtr shaderChunk = genCompositeShader();
-    shaderChunk->addUniformVariable("InputTex0", 0);
-    shaderChunk->addUniformVariable("InputTex1", 1);
+    shaderChunk->addUniformVariable("InputTex0", 0);        // scene
+    shaderChunk->addUniformVariable("InputTex1", 1);        // adapted luminance
 
     if (getPerformBloom())
-        shaderChunk->addUniformVariable("InputTex2", 2);
+        shaderChunk->addUniformVariable("InputTex2", 2);    // bloom
+
+    shaderChunk->addUniformVariable("InputTex3", 3);        // background
+    shaderChunk->addUniformVariable("InputTex4", 4);        // depth
+    shaderChunk->addUniformVariable("ForceBackground", getForceBackground());
 
     shaderChunk->addUniformVariable("Level", static_cast<float>(levels));
     shaderChunk->addUniformVariable("Use_ITU_R_BT_709", getUse_ITU_R_BT_709());
@@ -1234,21 +1710,17 @@ void HDR2Stage::setupCompositeMaterial(HDR2StageData* pData)
 
     ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
     chunkMat->addChunk(pData->getSharedMaterialChunk());
-
-    chunkMat->addChunk(pData->getSceneTexObjChunk(), 0);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
-
+    chunkMat->addChunk(pData->getSceneTexObjChunk     (), 0);
     chunkMat->addChunk(pData->getAdaptLuminanceTexObjChunk(pData->getCurrentAdaptLuminanceIdx()), 1);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 1);
 
     if (getPerformBloom())
     {
-        chunkMat->addChunk(pData->getScaleTexObjChunk(0), 2);
-        chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 2);
+        chunkMat->addChunk(pData->getScaleTexObjChunk     (0), 2);
     }
 
+    chunkMat->addChunk(pData->getBackgroundTexObjChunk(), 3);
+    chunkMat->addChunk(pData->getDepthTexObjChunk     (), 4);
     chunkMat->addChunk(shaderChunk);
-
     chunkMat->addChunk(pData->getHdrShaderData(), 0);
 
     pData->setCompositeShader(shaderChunk);
@@ -1261,12 +1733,18 @@ void HDR2Stage::setupFinalScreenMaterial(HDR2StageData* pData)
     shaderChunk->addUniformVariable("InputTex0", 0);
     shaderChunk->addUniformVariable("InputTex1", 1);
     shaderChunk->addUniformVariable("CarryDepth", getCarryDepth());
+    shaderChunk->addUniformVariable("PerformDithering", getPerformDithering());
     shaderChunk->addUniformVariable("LinearizeDepth", getTarget() == LINEARIZED_DEPTH_TEXTURE);
     shaderChunk->addUniformVariable("zNear", pData->getZNear());
     shaderChunk->addUniformVariable("zFar",  pData->getZFar());
     
-    shaderChunk->addUniformVariable("Gamma", getApplyGamma());
+    shaderChunk->addUniformVariable("Gamma",         getGamma());
+    shaderChunk->addUniformVariable("ApplyGamma",    getApplyGamma());
     shaderChunk->addUniformVariable("AccurateGamma", getAccurateGamma());
+
+    shaderChunk->addUniformVariable("ShadowLift",      getAdjustedShadowLift());
+    shaderChunk->addUniformVariable("InvMidtoneGamma", getAdjustedInvMidtoneGamma());
+    shaderChunk->addUniformVariable("HighlightGain",   getAdjustedHighlightGain());
 
     ChunkMaterialUnrecPtr chunkMat = ChunkMaterial::createLocal();
 
@@ -1274,17 +1752,20 @@ void HDR2Stage::setupFinalScreenMaterial(HDR2StageData* pData)
     chunkMat->addChunk(pData->getSharedMaterialChunk());
 
     DepthChunkUnrecPtr depthChunk = DepthChunk::createLocal();
-    if (!getForceBackground())
-        depthChunk->setFunc(GL_ALWAYS);
-    else
-        depthChunk->setFunc(GL_LESS);
 
-    depthChunk->setEnable(true);
+    pData->setFinalScreenMaterialDepthChunk(depthChunk);
+
+    depthChunk->setFunc    (GL_ALWAYS);
+    depthChunk->setEnable  (true);
     depthChunk->setReadOnly(false);
+
     chunkMat->addChunk(depthChunk);
 
     switch (getTarget())
     {
+        case BACKGROUND_TEXTURE:
+            chunkMat->addChunk(pData->getBackgroundTexObjChunk(), 0);
+            break;
         case SCENE_TEXTURE:
             chunkMat->addChunk(pData->getSceneTexObjChunk(), 0);
             break;
@@ -1338,23 +1819,18 @@ void HDR2Stage::setupFinalScreenMaterial(HDR2StageData* pData)
             chunkMat->addChunk(pData->getScaleTexObjChunk(0), 0);
             break;
     }
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 0);
 
     chunkMat->addChunk(pData->getDepthTexObjChunk(), 1);
-    chunkMat->addChunk(pData->getSharedTextureEnvChunk(), 1);
 
     pData->setFinalScreenShader(shaderChunk);
     pData->setFinalScreenMaterial(chunkMat);
-}
-
-void HDR2Stage::updateSceneMaterial(HDR2StageData* pData)
-{
 }
 
 void HDR2Stage::updateLuminanceMapMaterial(HDR2StageData* pData)
 {
     SimpleSHLChunk* shaderChunk = pData->getLuminanceMapShader();
     shaderChunk->updateUniformVariable("Use_ITU_R_BT_709", getUse_ITU_R_BT_709());
+    shaderChunk->updateUniformVariable("ForceBackground",  getForceBackground());
 }
 
 void HDR2Stage::updateAdaptLuminanceMaterial(HDR2StageData* pData)
@@ -1422,6 +1898,7 @@ void HDR2Stage::updateCompositeMaterial(HDR2StageData* pData)
 
     SimpleSHLChunk* shaderChunk = pData->getCompositeShader();
 
+    shaderChunk->updateUniformVariable("ForceBackground",  getForceBackground());
     shaderChunk->updateUniformVariable("Level", static_cast<float>(levels));
     shaderChunk->updateUniformVariable("Use_ITU_R_BT_709", getUse_ITU_R_BT_709());
 
@@ -1435,26 +1912,34 @@ void HDR2Stage::updateFinalScreenMaterial(HDR2StageData* pData)
     SimpleSHLChunk* shaderChunk = pData->getFinalScreenShader();
 
     shaderChunk->updateUniformVariable("CarryDepth", getCarryDepth());
+    shaderChunk->updateUniformVariable("PerformDithering", getPerformDithering());
     shaderChunk->updateUniformVariable("LinearizeDepth", getTarget() == LINEARIZED_DEPTH_TEXTURE);
     shaderChunk->updateUniformVariable("zNear", pData->getZNear());
     shaderChunk->updateUniformVariable("zFar",  pData->getZFar());
-    shaderChunk->updateUniformVariable("Gamma", getApplyGamma());
+
+    shaderChunk->updateUniformVariable("Gamma",         getGamma());
+    shaderChunk->updateUniformVariable("ApplyGamma",    getApplyGamma());
     shaderChunk->updateUniformVariable("AccurateGamma", getAccurateGamma());
+
+    shaderChunk->updateUniformVariable("ShadowLift",      getAdjustedShadowLift());
+    shaderChunk->updateUniformVariable("InvMidtoneGamma", getAdjustedInvMidtoneGamma());
+    shaderChunk->updateUniformVariable("HighlightGain",   getAdjustedHighlightGain());
 
     ChunkMaterial* chunkMat = pData->getFinalScreenMaterial();
 
-    DepthChunkUnrecPtr depthChunk = DepthChunk::createLocal();
-    if (!getForceBackground())
-        depthChunk->setFunc(GL_ALWAYS);
-    else
-        depthChunk->setFunc(GL_LESS);
-
-    depthChunk->setEnable(true);
-    depthChunk->setReadOnly(false);
-    chunkMat->addChunk(depthChunk);
+    DepthChunk* depthChunk = pData->getFinalScreenMaterialDepthChunk();
+    if (depthChunk)
+    {
+        depthChunk->setFunc   (GL_ALWAYS);
+        depthChunk->setEnable (true);
+        depthChunk->setReadOnly(false);
+    }
 
     switch (getTarget())
     {
+        case BACKGROUND_TEXTURE:
+            chunkMat->addChunk(pData->getBackgroundTexObjChunk(), 0);
+            break;
         case SCENE_TEXTURE:
             chunkMat->addChunk(pData->getSceneTexObjChunk(), 0);
             break;
@@ -1567,6 +2052,10 @@ void HDR2Stage::postProcess(DrawEnv *pEnv)
 
     UInt32 currIdx = pData->getCurrentAdaptLuminanceIdx();
     pData->setCurrentAdaptLuminanceIdx(!currIdx);
+
+#if 0
+    write_read_back_images(pData);
+#endif
 }
 
 void HDR2Stage::calcAvgLuminance(DrawEnv* pEnv, HDR2StageData* pData)
@@ -1593,7 +2082,7 @@ void HDR2Stage::calcAvgLuminance(DrawEnv* pEnv, HDR2StageData* pData)
     Int32 iPixelWidth  = pData->getWidth();
     Int32 iPixelHeight = pData->getHeight();
 
-    Int32 w = iPixelWidth;//Int32 w = osgNextPower2(iPixelWidth);
+    Int32 w = iPixelWidth; //Int32 w = osgNextPower2(iPixelWidth);
     Int32 h = iPixelHeight;//Int32 h = osgNextPower2(iPixelHeight);
 
     glViewport(0, 0, w, h);
@@ -2114,6 +2603,26 @@ void HDR2Stage::bloomBlur_UP_SCALED_1(DrawEnv* pEnv, HDR2StageData* pData)
     glViewport(0, 0, iPixelWidth, iPixelHeight);
 }
 
+/*-------------------------------- sRGB -----------------------------------*/
+
+Color3f HDR2Stage::sRGBToLinear(const Color3f& c) const
+{
+    Real32 r = c.red();
+    Real32 g = c.green();
+    Real32 b = c.blue();
+
+    r = sRGBToLinear(r);
+    g = sRGBToLinear(g);
+    b = sRGBToLinear(b);
+
+    return Color3f(r,g,b);
+}
+
+Real32 HDR2Stage::sRGBToLinear(Real32 x) const
+{
+    return (x <= 0.04045) ? x / 12.92 : osgPow((x + 0.055) / 1.055, 2.4);
+}
+
 //########################################################################################################################
 
 void HDR2Stage::composite(DrawEnv* pEnv, HDR2StageData* pData)
@@ -2161,6 +2670,9 @@ void HDR2Stage::genBlockHDRShaderData(std::stringstream& ost)
     ost << "    int   ToneMapTechnique;"                                                << std::endl;
     ost << "    float Exposure;"                                                        << std::endl;
     ost << "    float KeyValue;"                                                        << std::endl;
+    ost << "    float ApertureFNumber;"                                                 << std::endl;
+    ost << "    float ShutterSpeedValue;"                                               << std::endl;
+    ost << "    float ISO;"                                                             << std::endl;
     ost << "    int   AutoExposure;"                                                    << std::endl;
     ost << "    float WhiteLevel;"                                                      << std::endl;
     ost << "    float ShoulderStrength;"                                                << std::endl;
@@ -2171,6 +2683,8 @@ void HDR2Stage::genBlockHDRShaderData(std::stringstream& ost)
     ost << "    float ToeDenominator;"                                                  << std::endl;
     ost << "    float LinearWhite;"                                                     << std::endl;
     ost << "    float LumSaturation;"                                                   << std::endl;
+    ost << "    vec3  FilterColor;"                                                     << std::endl;
+    ost << "    float Contrast;"                                                        << std::endl;
     ost << "    float Bias;"                                                            << std::endl;
     ost << "    float Tau;"                                                             << std::endl;
     ost << "    int   nTaps;"                                                           << std::endl;
@@ -2191,6 +2705,8 @@ void HDR2Stage::genFuncGetPrimaryInputColor(std::stringstream& ost)
 
 void HDR2Stage::genFuncCalcLuminance(std::stringstream& ost)
 {
+    // https://en.wikipedia.org/wiki/Talk:Relative_luminance
+    // https://en.wikipedia.org/wiki/Relative_luminance
     ost << "float CalcLuminance(vec3 color)"                                            << std::endl;
     ost << "{"                                                                          << std::endl;
     ost << "    if (Use_ITU_R_BT_709)"                                                  << std::endl;
@@ -2261,31 +2777,96 @@ void HDR2Stage::genFuncGetDepthValue(std::stringstream& ost)
     ost                                                                                 << std::endl;
 }
 
+void HDR2Stage::genFuncSaturationBasedExp(std::stringstream& ost)
+{
+    // https://placeholderart.wordpress.com/2014/11/16/implementing-a-physically-based-camera-understanding-exposure/
+    // https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/
+    ost << "float SaturationBasedExposure()"                                            << std::endl;
+    ost << "{"                                                                          << std::endl;
+    ost << "    float maxLuminance = (7800.0 / 65.0)"                                   << std::endl;
+    ost << "        * (hdrShaderData.ApertureFNumber * hdrShaderData.ApertureFNumber)"  << std::endl;
+    ost << "        / (hdrShaderData.ISO * hdrShaderData.ShutterSpeedValue);"           << std::endl;
+    ost << "    return log2(1.0 / maxLuminance);"                                       << std::endl;
+    ost << "}"                                                                          << std::endl;
+    ost                                                                                 << std::endl;
+}
+
+void HDR2Stage::genFuncStandardOutputBasedExp(std::stringstream& ost)
+{
+    // https://placeholderart.wordpress.com/2014/11/16/implementing-a-physically-based-camera-understanding-exposure/
+    // https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/
+    ost << "float StandardOutputBasedExposure()"                                        << std::endl;
+    ost << "{"                                                                          << std::endl;
+    ost << "    float middleGrey = 0.18;"                                               << std::endl;
+    ost << "    float lAvg = (1000.0 / 65.0)"                                           << std::endl;
+    ost << "        * (hdrShaderData.ApertureFNumber * hdrShaderData.ApertureFNumber)"  << std::endl;
+    ost << "        / (hdrShaderData.ISO * hdrShaderData.ShutterSpeedValue);"           << std::endl;
+    ost << "    return log2(middleGrey / lAvg);"                                        << std::endl;
+    ost << "}"                                                                          << std::endl;
+    ost                                                                                 << std::endl;
+}
+
+void HDR2Stage::genFuncLog2Exposure(std::stringstream& ost)
+{
+    ost << "const int ciExposureModeManualExposure            = " << MANUAL                << ";" << std::endl;
+    ost << "const int ciExposureModeManualKeyValue            = " << KEY_VALUE             << ";" << std::endl;
+    ost << "const int ciExposureModeAutomatic                 = " << AUTOMATIC             << ";" << std::endl;
+    ost << "const int ciExposureModeManualSaturationBased     = " << SATURATION_BASED      << ";" << std::endl;
+    ost << "const int ciExposureModeManualStandardOutputBased = " << STANDARD_OUTPUT_BASED << ";" << std::endl;
+
+    ost << ""                                                                           << std::endl;
+    ost << "float Log2Exposure(in float avgLuminance)"                                  << std::endl;
+    ost << "{"                                                                          << std::endl;
+    ost << "    float exposure = 0.0f;"                                                 << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    switch (hdrShaderData.AutoExposure)"                                    << std::endl;
+    ost << "    {"                                                                      << std::endl;
+    ost << "        case ciExposureModeManualExposure:"                                 << std::endl;
+    ost << "        {"                                                                  << std::endl;
+    ost << "            exposure = -hdrShaderData.Exposure - 0.263034406;"              << std::endl;
+    ost << "        }"                                                                  << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "        case ciExposureModeManualKeyValue:"                                 << std::endl;
+    ost << "        {"                                                                  << std::endl;
+    ost << "            avgLuminance = max(avgLuminance, 0.00001);"                     << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "            float linearExposure = (hdrShaderData.KeyValue / avgLuminance);"<< std::endl;
+    ost << "            exposure = log2(max(linearExposure, 0.0001));"                  << std::endl;
+    ost << "        }"                                                                  << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "        case ciExposureModeAutomatic:"                                      << std::endl;
+    ost << "        {"                                                                  << std::endl;
+    ost << "            avgLuminance = max(avgLuminance, 0.00001);"                     << std::endl;
+    ost << "            float keyValue = 1.03 - (2.0/(2.0 + Log10(avgLuminance+1.0)));" << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "            float linearExposure = (keyValue / avgLuminance);"              << std::endl;
+    ost << "            exposure = log2(max(linearExposure, 0.0001));"                  << std::endl;
+    ost << "        }"                                                                  << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "        case ciExposureModeManualSaturationBased:"                          << std::endl;
+    ost << "        {"                                                                  << std::endl;
+    ost << "            exposure = SaturationBasedExposure();"                          << std::endl;
+    ost << "        }"                                                                  << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "        case ciExposureModeManualStandardOutputBased:"                      << std::endl;
+    ost << "        {"                                                                  << std::endl;
+    ost << "            exposure = StandardOutputBasedExposure();"                      << std::endl;
+    ost << "        }"                                                                  << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    }"                                                                      << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    return exposure;"                                                       << std::endl;
+    ost << "}"                                                                          << std::endl;
+    ost                                                                                 << std::endl;
+}
+
 void HDR2Stage::genFuncCalcExposedColor(std::stringstream& ost)
 {
-    ost << "vec3 CalcExposedColor(vec3 color, float avgLuminance,"                      << std::endl;
-    ost << "                      float threshold, out float exposure)"                 << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "vec3 CalcExposedColor("                                                     << std::endl;
+    ost << "    vec3 color, float avgLuminance, float threshold)"                       << std::endl;
     ost << "{"                                                                          << std::endl;
-    ost << "    exposure = 0;"                                                          << std::endl;
-    ost << ""                                                                           << std::endl;
-    ost << "    if (hdrShaderData.AutoExposure  >= 1"                                   << std::endl;
-    ost << "      && hdrShaderData.AutoExposure <= 2)"                                  << std::endl;
-    ost << "    {"                                                                      << std::endl;
-    ost << "        avgLuminance = max(avgLuminance, 0.001);"                           << std::endl;
-    ost << ""                                                                           << std::endl;
-    ost << "        float keyValue = 0;"                                                << std::endl;
-    ost << "        if (hdrShaderData.AutoExposure == 1)"                               << std::endl;
-    ost << "            keyValue = hdrShaderData.KeyValue;"                             << std::endl;
-    ost << "        else if (hdrShaderData.AutoExposure == 2)"                          << std::endl;
-    ost << "            keyValue = 1.03 - (2.0 / (2 + Log10(avgLuminance + 1)));"       << std::endl;
-    ost << ""                                                                           << std::endl;
-    ost << "        float linearExposure = (keyValue / avgLuminance);"                  << std::endl;
-    ost << "        exposure = log2(max(linearExposure, 0.0001));"                      << std::endl;
-    ost << "    }"                                                                      << std::endl;
-    ost << "    else"                                                                   << std::endl;
-    ost << "    {"                                                                      << std::endl;
-    ost << "        exposure = hdrShaderData.Exposure;"                                 << std::endl;
-    ost << "    }"                                                                      << std::endl;
+    ost << "    float exposure = Log2Exposure(avgLuminance);"                           << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "    exposure -= threshold;"                                                 << std::endl;
     ost << "    return max(exp2(exposure) * color, 0.0);"                               << std::endl;
@@ -2302,6 +2883,26 @@ void HDR2Stage::genFuncColorCorrection(std::stringstream& ost)
     ost << "                hdrShaderData.LumSaturation + 1 );"                         << std::endl;
     ost << "    else"                                                                   << std::endl;
     ost << "        return Pow(color/pixelLuminance, hdrShaderData.LumSaturation);"     << std::endl;
+    ost << "}"                                                                          << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "vec3 SaturationCorrection(vec3 color, float pixelLuminance)"                << std::endl;
+    ost << "{"                                                                          << std::endl;
+    ost << "    float a = 1.0 - hdrShaderData.LumSaturation;"                           << std::endl;
+    ost << "    return mix(color, vec3(pixelLuminance), a);"                            << std::endl;
+    ost << "}"                                                                          << std::endl;
+    ost                                                                                 << std::endl;
+}
+
+void HDR2Stage::genFuncContrastCorrection(std::stringstream& ost)
+{
+    ost << "const vec3 logMidpoint = vec3(0.18,0.18,0.18);"                             << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "vec3 ContrastCorrection(vec3 color)"                                        << std::endl;
+    ost << "{"                                                                          << std::endl;
+    ost << "    vec3 logColor = log2(color + vec3(0.00001));"                           << std::endl;
+    ost << "    vec3 adjColor = logMidpoint + (logColor - logMidpoint)"                 << std::endl;
+    ost << "                        * hdrShaderData.Contrast;"                          << std::endl;
+    ost << "    return max(vec3(0.0),exp2(adjColor) - vec3(0.00001));"                  << std::endl;
     ost << "}"                                                                          << std::endl;
     ost                                                                                 << std::endl;
 }
@@ -2398,8 +2999,13 @@ void HDR2Stage::genFuncToneMapFilmicALU(std::stringstream& ost)
     ost << "    color = (color * (6.2 * color + 0.5)) / "                               << std::endl;
     ost << "            (color * (6.2 * color + 1.7)+ 0.06);"                           << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "    // result has 1/2.2 baked in"                                           << std::endl;
-    ost << "    return Pow(color, 2.2);"                                                << std::endl;
+    ost << "    // result color is sRGB, i.e. has 1/2.2 baked in"                       << std::endl;
+    ost << "    color = AccurateSRGBToLinear(color);"                                   << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    float pixelLuminance = CalcLuminance(color);"                           << std::endl;
+    ost << "    color = SaturationCorrection(color, pixelLuminance);"                   << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    return color;"                                                          << std::endl;
     ost << "}"                                                                          << std::endl;
     ost                                                                                 << std::endl;
 }
@@ -2411,55 +3017,140 @@ void HDR2Stage::genFuncToneMapFilmicU2(std::stringstream& ost)
     ost << "    vec3 numerator   = U2Func(color);"                                      << std::endl;
     ost << "    vec3 denominator = U2Func(vec3(hdrShaderData.LinearWhite));"            << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "    return numerator / denominator;"                                        << std::endl;
+    ost << "    color = numerator / denominator;"                                       << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    float pixelLuminance = CalcLuminance(color);"                           << std::endl;
+    ost << "    color = SaturationCorrection(color, pixelLuminance);"                   << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    return color;"                                                          << std::endl;
+    ost << "}"                                                                          << std::endl;
+    ost                                                                                 << std::endl;
+}
+
+void HDR2Stage::genFuncToneMapFilmicACES(std::stringstream& ost)
+{
+    // sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
+    ost << "const mat3 matACESIn = mat3("                                               << std::endl;
+    ost << "    0.59719, 0.07600, 0.02840,"                                             << std::endl;
+    ost << "    0.35458, 0.90834, 0.13383,"                                             << std::endl;
+    ost << "    0.04823, 0.01566, 0.83777);"                                            << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "const mat3 matACESOut = mat3("                                              << std::endl;
+    ost << "     1.60475, -0.10208, -0.00327,"                                          << std::endl;
+    ost << "    -0.53108,  1.10813, -0.07276,"                                          << std::endl;
+    ost << "    -0.07367, -0.00605,  1.07602);"                                         << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "vec3 ToneMapFilmicACES(vec3 color)"                                         << std::endl;
+    ost << "{"                                                                          << std::endl;
+    ost << "    color = 1.8 * matACESIn * color;"                                       << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    vec3 a = color * (color + 0.0245786) - 0.000090537;"                    << std::endl;
+    ost << "    vec3 b = color * (0.983729 * color + 0.4329510) + 0.238081;"            << std::endl;
+    ost << "    color = a / b;"                                                         << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    color = matACESOut * color;"                                            << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    float pixelLuminance = CalcLuminance(color);"                           << std::endl;
+    ost << "    color = SaturationCorrection(color, pixelLuminance);"                   << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    return color;"                                                          << std::endl;
+    ost << "}"                                                                          << std::endl;
+    ost                                                                                 << std::endl;
+}
+
+void HDR2Stage::genFuncToneMapFilmicHejl2015(std::stringstream& ost)
+{
+    ost << "vec3 ToneMapFilmicHejl2015(vec3 color)"                                     << std::endl;
+    ost << "{"                                                                          << std::endl;
+    ost << "    vec4 vh = vec4(color, hdrShaderData.WhiteLevel);"                       << std::endl;
+    ost << "    vec4 va = (1.435 * vh) + 0.05;"                                         << std::endl;
+    ost << "    vec4 vf = ((vh * va + 0.004) / ((vh * (va + 0.55) + 0.0491))) - 0.0821;"<< std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    color = vf.xyz / vf.www;"                                               << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    float pixelLuminance = CalcLuminance(color);"                           << std::endl;
+    ost << "    color = SaturationCorrection(color, pixelLuminance);"                   << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    return color;"                                                          << std::endl;
+    ost << "}"                                                                          << std::endl;
+    ost                                                                                 << std::endl;
+}
+
+void HDR2Stage::genFuncToneMapFilmicACES2(std::stringstream& ost)
+{
+    ost << "vec3 ToneMapFilmicACES2(vec3 color)"                                        << std::endl;
+    ost << "{"                                                                          << std::endl;
+    ost << "    vec3 a = color * ( 2.51 * color + 0.03 );"                              << std::endl;
+    ost << "    vec3 b = color * ( 2.43 * color + 0.59 ) + 0.14;"                       << std::endl;
+    ost << "    color = a / b;"                                                         << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    float pixelLuminance = CalcLuminance(color);"                           << std::endl;
+    ost << "    color = SaturationCorrection(color, pixelLuminance);"                   << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    return color;"                                                          << std::endl;
     ost << "}"                                                                          << std::endl;
     ost                                                                                 << std::endl;
 }
 
 void HDR2Stage::genFuncToneMap(std::stringstream& ost)
 {
-    ost << "vec3 ToneMap(vec3 color, float avgLuminance,"                               << std::endl;
-    ost << "             float threshold, out float exposure)"                          << std::endl;
+    ost << "const int ciNoToneMapping               = " << NO_TONE_MAPPING                << ";" << std::endl;
+    ost << "const int ciLogarithmicToneMapping      = " << LOGARITHMIC_TONE_MAPPING       << ";" << std::endl;
+    ost << "const int ciExponentialToneMapping      = " << EXPONENTIAL_TONE_MAPPING       << ";" << std::endl;
+    ost << "const int ciDragoLogarithmicToneMapping = " << DRAGO_LOGARITHMIC_TONE_MAPPING << ";" << std::endl;
+    ost << "const int ciReinhardToneMapping         = " << REINHARD_TONE_MAPPING          << ";" << std::endl;
+    ost << "const int ciReinhardModifiedToneMapping = " << REINHARD_MODIFIED_TONE_MAPPING << ";" << std::endl;
+    ost << "const int ciFilmicHableToneMapping      = " << FILMIC_HABLE_TONE_MAPPING      << ";" << std::endl;
+    ost << "const int ciFilmicUncharted2ToneMapping = " << FILMIC_UNCHARTED2_TONE_MAPPING << ";" << std::endl;
+    ost << "const int ciFilmicAcesToneMapping       = " << FILMIC_ACES_TONE_MAPPING       << ";" << std::endl;
+    ost << "const int ciFilmicHej2015ToneMapping    = " << FILMIC_HEJ2015_TONE_MAPPING    << ";" << std::endl;
+    ost << "const int ciFilmicAces2ToneMapping      = " << FILMIC_ACES_2_TONE_MAPPING     << ";" << std::endl;
+
+    ost << ""                                                                           << std::endl;
+    ost << "vec3 ToneMap("                                                              << std::endl;
+    ost << "    vec3 color, float avgLuminance, float threshold)"                       << std::endl;
     ost << "{"                                                                          << std::endl;
-    ost << "    color = CalcExposedColor(color, avgLuminance, threshold, exposure);"    << std::endl;
+    ost << "    color = CalcExposedColor(color, avgLuminance, threshold);"              << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "    if (hdrShaderData.ToneMapTechnique == 0)"                               << std::endl;
+    ost << "    switch (hdrShaderData.ToneMapTechnique)"                                << std::endl;
     ost << "    {"                                                                      << std::endl;
+    ost << "    case ciNoToneMapping:"                                                  << std::endl;
     ost << "        // Do nothing!"                                                     << std::endl;
-    ost << "    }"                                                                      << std::endl;
-    ost << "    else if (hdrShaderData.ToneMapTechnique == 1)"                          << std::endl;
-    ost << "    {"                                                                      << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    case ciLogarithmicToneMapping:"                                         << std::endl;
     ost << "        color = ToneMapLogarithmic(color);"                                 << std::endl;
-    ost << "    }"                                                                      << std::endl;
-    ost << "    else if (hdrShaderData.ToneMapTechnique == 2)"                          << std::endl;
-    ost << "    {"                                                                      << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    case ciExponentialToneMapping:"                                         << std::endl;
     ost << "        color = ToneMapExponential(color);"                                 << std::endl;
-    ost << "    }"                                                                      << std::endl;
-    ost << "    else if (hdrShaderData.ToneMapTechnique == 3)"                          << std::endl;
-    ost << "    {"                                                                      << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    case ciDragoLogarithmicToneMapping:"                                    << std::endl;
     ost << "        color = ToneMapDragoLogarithmic(color);"                            << std::endl;
-    ost << "    }"                                                                      << std::endl;
-    ost << "    else if (hdrShaderData.ToneMapTechnique == 4)"                          << std::endl;
-    ost << "    {"                                                                      << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    case ciReinhardToneMapping:"                                            << std::endl;
     ost << "        color = ToneMapReinhard(color);"                                    << std::endl;
-    ost << "    }"                                                                      << std::endl;
-    ost << "    else if (hdrShaderData.ToneMapTechnique == 5)"                          << std::endl;
-    ost << "    {"                                                                      << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    case ciReinhardModifiedToneMapping:"                                    << std::endl;
     ost << "        color = ToneMapReinhardModified(color);"                            << std::endl;
-    ost << "    }"                                                                      << std::endl;
-    ost << "    else if (hdrShaderData.ToneMapTechnique == 6)"                          << std::endl;
-    ost << "    {"                                                                      << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    case ciFilmicHableToneMapping:"                                         << std::endl;
     ost << "        color = ToneMapFilmicALU(color);"                                   << std::endl;
-    ost << "    }"                                                                      << std::endl;
-    ost << "    else if (hdrShaderData.ToneMapTechnique == 7)"                          << std::endl;
-    ost << "    {"                                                                      << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    case ciFilmicUncharted2ToneMapping:"                                    << std::endl;
     ost << "        color = ToneMapFilmicU2(color);"                                    << std::endl;
-    ost << "    }"                                                                      << std::endl;
-    ost << "    else"                                                                   << std::endl;
-    ost << "    {"                                                                      << std::endl;
-    ost << "        // Do nothing!"                                                     << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    case ciFilmicAcesToneMapping:"                                          << std::endl;
+    ost << "        color = ToneMapFilmicACES(color);"                                  << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    case ciFilmicHej2015ToneMapping:"                                       << std::endl;
+    ost << "        color = ToneMapFilmicHejl2015(color);"                              << std::endl;
+    ost << "        break;"                                                             << std::endl;
+    ost << "    case ciFilmicAces2ToneMapping:"                                         << std::endl;
+    ost << "        color = ToneMapFilmicACES2(color);"                                 << std::endl;
+    ost << "        break;"                                                             << std::endl;
     ost << "    }"                                                                      << std::endl;
     ost << ""                                                                           << std::endl;
+    ost << "    color *= hdrShaderData.FilterColor;"                                    << std::endl;
+    ost << "    color = ContrastCorrection(color);"                                     << std::endl;
     ost << "    return color;"                                                          << std::endl;
     ost << "}"                                                                          << std::endl;
     ost                                                                                 << std::endl;
@@ -2467,7 +3158,7 @@ void HDR2Stage::genFuncToneMap(std::stringstream& ost)
 
 void HDR2Stage::genFuncCalcGaussianWeight(std::stringstream& ost)
 {
-    ost << "float CalcGaussianWeight(int sampleDist, float sigma)"                                                                          << std::endl;
+    ost << "float CalcGaussianWeight(int sampleDist, float sigma)"                      << std::endl;
     ost << "{"                                                                          << std::endl;
     ost << "    float twoSigma2 = 2.0 * sigma * sigma;"                                 << std::endl;
     ost << ""                                                                           << std::endl;
@@ -2490,53 +3181,66 @@ void HDR2Stage::genFuncGetBloomColor(std::stringstream& ost)
 void HDR2Stage::genFuncGammaCorrection(std::stringstream& ost)
 {
     //
-    // Mixed type power function
-    //
-    genFuncPow(ost);
-
-    //
     // Gamma correction functions
     //
-    ost << "vec3 ApproximationSRGBToLinear(vec3 sRGBCol)"                               << std::endl;
+    ost << "vec3 ApproximationSRGBToLinear(vec3 sRGBCol, float gamma)"                  << std::endl;
     ost << "{"                                                                          << std::endl;
-    ost << "    return Pow(sRGBCol, 2.2);"                                              << std::endl;
+    ost << "    return Pow(sRGBCol, gamma);"                                            << std::endl;
     ost << "}"                                                                          << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "vec3 ApproximationLinearToSRGB(vec3 linearCol)"                             << std::endl;
+    ost << "vec3 ApproximationLinearToSRGB(vec3 linearCol, float gamma)"                << std::endl;
     ost << "{"                                                                          << std::endl;
-    ost << "    return Pow(linearCol, 1.0 / 2.2);"                                      << std::endl;
+    ost << "    return Pow(linearCol, 1.0 / gamma);"                                    << std::endl;
     ost << "}"                                                                          << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "float toLinear(float x)"                                                    << std::endl;
+    ost << "vec3 AccurateSRGBToLinear(vec3 v)"                                          << std::endl;
     ost << "{"                                                                          << std::endl;
-    ost << "    float lo = x / 12.92;"                                                  << std::endl;
-    ost << "    float hi = pow((x + 0.055) / 1.055, 2.4);"                              << std::endl;
-    ost << ""                                                                           << std::endl;
-    ost << "    return (x <= 0.04045) ? lo : hi;"                                       << std::endl;
+    ost << "    vec3 t = step(vec3(0.04045), v.rgb);"                                   << std::endl;
+    ost << "    return mix(v.rgb/12.92, Pow((v.rgb+vec3(0.055))/1.055, 2.4), t);"       << std::endl;
     ost << "}"                                                                          << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "float toSRGB(float x)"                                                      << std::endl;
+    ost << "vec3 AccurateLinearToSRGB(vec3 v)"                                          << std::endl;
     ost << "{"                                                                          << std::endl;
-    ost << "    float lo = x * 12.92;"                                                  << std::endl;
-    ost << "    float hi = (pow(abs(x), 1.0/2.4) * 1.055) - 0.055;"                     << std::endl;
+    ost << "    vec3 t = step(vec3(0.00313067),v.rgb);"                                 << std::endl;
+    ost << "    return mix(v.rgb*12.92, 1.055*Pow(v.rgb, 1.0/2.4)-0.055, t);"           << std::endl;
+    ost << "}"                                                                          << std::endl;
+    ost                                                                                 << std::endl;
+}
+
+
+
+void HDR2Stage::genFuncLiftGammaGainCorrection(std::stringstream& ost)
+{
+    ost << "vec3 LiftGammaGainCorrection(vec3 sRGB)"                                    << std::endl;
+    ost << "{"                                                                          << std::endl;
+    //ost << "    sRGB = clamp(pow(sRGB, InvMidtoneGamma), 0.0, 1.0);"                    << std::endl;
+    //ost << "    return HighlightGain * sRGB + ShadowLift * (vec3(1.0) - sRGB);"         << std::endl;
+    ost << "    sRGB = sRGB*(1.5 - 0.5*ShadowLift) + 0.5*ShadowLift - 0.5;"             << std::endl;
+    ost << "    sRGB = pow(HighlightGain * sRGB, InvMidtoneGamma);"                     << std::endl;
+    ost << "    return clamp(sRGB, 0.0, 1.0);"                                          << std::endl;
+    ost << "}"                                                                          << std::endl;
+    ost                                                                                 << std::endl;
+}
+
+void HDR2Stage::genFuncDithering(std::stringstream& ost)
+{
+    ost << "#define PI 3.14159265359"                                                   << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "    return (x <= 0.0031308) ? lo : hi;"                                     << std::endl;
+    ost << "float rand(const in vec2 uv)"                                               << std::endl;
+    ost << "{"                                                                          << std::endl;
+    ost << "    const float a = 12.9898, b = 78.233, c = 43758.5453;"                   << std::endl;
+    ost << "    float dt = dot( uv.xy, vec2( a,b ) ), sn = mod( dt, PI );"              << std::endl;
+    ost << "    return fract(sin(sn) * c);"                                             << std::endl;
     ost << "}"                                                                          << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "vec3 AccurateSRGBToLinear(vec3 sRGBCol)"                                    << std::endl;
+    ost << "vec3 DitherColor(vec3 color)"                                               << std::endl;
     ost << "{"                                                                          << std::endl;
-    ost << "    vec3 linearRGB = vec3( toLinear(sRGBCol.r),"                            << std::endl;
-    ost << "                           toLinear(sRGBCol.g),"                            << std::endl;
-    ost << "                           toLinear(sRGBCol.b) );"                          << std::endl;
-    ost << "    return linearRGB;"                                                      << std::endl;
-    ost << "}"                                                                          << std::endl;
-    ost << ""                                                                           << std::endl;
-    ost << "vec3 AccurateLinearToSRGB(vec3 linearCol)"                                  << std::endl;
-    ost << "{"                                                                          << std::endl;
-    ost << "    vec3 sRGB = vec3( toSRGB(linearCol.r),"                                 << std::endl;
-    ost << "                      toSRGB(linearCol.g),"                                 << std::endl;
-    ost << "                      toSRGB(linearCol.b) );"                               << std::endl;
-    ost << "    return sRGB;"                                                           << std::endl;
+    ost << "    const float dither_bit = 8.0;"                                          << std::endl;
+    ost << "    float shift = 0.25 * (1.0/(pow(2.0, dither_bit) - 1.0));"               << std::endl;
+    ost << "    vec3  dither_shift  = vec3(shift, -shift, shift);"                      << std::endl;
+    ost << "    float grid_position = rand(gl_FragCoord.xy);"                           << std::endl;
+    ost << "    dither_shift = mix(2.0*dither_shift,-2.0*dither_shift, grid_position );"<< std::endl;
+    ost << "    return color + dither_shift;"                                           << std::endl;
     ost << "}"                                                                          << std::endl;
     ost                                                                                 << std::endl;
 }
@@ -2565,12 +3269,18 @@ void HDR2Stage::genSharedCode(std::stringstream& ost)
     genFuncPow(ost);
 
     //
+    // Color conversion functions
+    //
+    genFuncGammaCorrection(ost);
+
+    //
     // Sample the primary input color
     //
     genFuncGetPrimaryInputColor(ost);
+    genFuncGetDepthValue(ost);
 
     //
-    // Samples average luminace value from given texture at given mip map level
+    // Samples average luminance value from given texture at given mip map level
     //
     genFuncGetAvgLuminance(ost);
 
@@ -2582,7 +3292,19 @@ void HDR2Stage::genSharedCode(std::stringstream& ost)
     //
     // Determines the color based on exposure settings
     //
+    // See: https://placeholderart.wordpress.com/2014/11/21/implementing-a-physically-based-camera-manual-exposure/
+    //
+    genFuncSaturationBasedExp(ost);
+    genFuncStandardOutputBasedExp(ost);
+    genFuncLog2Exposure(ost);
     genFuncCalcExposedColor(ost);
+
+    //
+    // Apply a contrast operation
+    //
+    // See: http://filmicworlds.com/blog/minimal-color-grading-tools/
+    //
+    genFuncContrastCorrection(ost);
 
     //
     // Perform color correction in tone mapping
@@ -2638,6 +3360,7 @@ void HDR2Stage::genSharedCode(std::stringstream& ost)
 
     //
     // Applies the filmic curve from John Hable's presentation
+    // Optimized filmic operator by Jim Hejl and Richard Burgess-Dawson.
     //
     // http://filmicgames.com/archives/75
     // http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff
@@ -2645,7 +3368,7 @@ void HDR2Stage::genSharedCode(std::stringstream& ost)
     genFuncToneMapFilmicALU(ost);
 
     //
-    // Function used by the Uncharte2D tone mapping curve
+    // Function used by the Uncharted2 tone mapping curve
     //
     genFuncU2Func(ost);
 
@@ -2656,6 +3379,21 @@ void HDR2Stage::genSharedCode(std::stringstream& ost)
     // http://de.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting slide 53ff
     //
     genFuncToneMapFilmicU2(ost);
+
+    //
+    // http://filmicworlds.com/blog/filmic-tonemapping-with-piecewise-power-curves/
+    //
+    genFuncToneMapFilmicACES(ost);
+
+    //
+    // https://twitter.com/jimhejl/status/633777619998130176
+    //
+    genFuncToneMapFilmicHejl2015(ost);
+
+    //
+    // https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
+    //
+    genFuncToneMapFilmicACES2(ost);
 
     //
     // Applies exposure and tone mapping to the specific color, and applies
@@ -2697,12 +3435,15 @@ void HDR2Stage::genLuminanceMapFragmentShader(std::stringstream& ost)
     ost << "#extension GL_ARB_uniform_buffer_object:   enable"                          << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "uniform sampler2D InputTex0;"                                               << std::endl;
+    ost << "uniform sampler2D InputTex1;"                                               << std::endl;
     ost << "uniform bool      Use_ITU_R_BT_709;"                                        << std::endl;
+    ost << "uniform bool      ForceBackground;"                                         << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "in vec2 TexCoord;"                                                          << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "layout(location = 0) out float FragColor;   // only red channel"            << std::endl;
     ost << ""                                                                           << std::endl;
+    ost << Shader::getEqualEpsSnippet()                                                 << std::endl;
     //
     // Sample the primary input color
     //
@@ -2721,6 +3462,14 @@ void HDR2Stage::genLuminanceMapFragmentShader(std::stringstream& ost)
     ost << "void main()"                                                                << std::endl;
     ost << "{"                                                                          << std::endl;
     ost << "    vec3 color  = GetPrimaryInputColor(InputTex0);"                         << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    if (ForceBackground)"                                                   << std::endl;
+    ost << "    {"                                                                      << std::endl;
+    ost << "        vec3 background = GetPrimaryInputColor(InputTex1);"                 << std::endl;
+    ost << "        if (OSGEqualEps(color, background, 1.E-6))"                         << std::endl;
+    ost << "            color = vec3(0.5,0.5,0.5);"                                     << std::endl;
+    ost << "    }"                                                                      << std::endl;
+    ost << ""                                                                           << std::endl;
     ost << "    float lum   = CalcLuminance(color);"                                    << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "    FragColor   = lum;"                                                     << std::endl;
@@ -2739,7 +3488,7 @@ void HDR2Stage::genAdaptLuminanceFragmentShader(std::stringstream& ost)
     ost << "uniform sampler2D InputTex1;    // Current luminance map"                   << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "uniform float TimeDelta;        // timer.DeltaSecondsF()"                   << std::endl;
-    ost << "uniform bool  AdjustLuminance;"                                              << std::endl;
+    ost << "uniform bool  AdjustLuminance;"                                             << std::endl;
     ost << ""                                                                           << std::endl;
 
     genBlockHDRShaderData(ost);
@@ -2806,11 +3555,6 @@ void HDR2Stage::genThresholdFragmentShader(std::stringstream& ost)
     ost << "layout (location = 0) out vec4 FragColor;"                                  << std::endl;
     ost << ""                                                                           << std::endl;
 
-    //
-    // Sample the depth value
-    //
-    genFuncGetDepthValue(ost);
-
     genSharedCode(ost);
 
     //
@@ -2822,11 +3566,7 @@ void HDR2Stage::genThresholdFragmentShader(std::stringstream& ost)
     ost << "    vec3 color         = GetPrimaryInputColor(InputTex0);"                  << std::endl;
     ost << "    float depth        = GetDepthValue(InputTex2);"                         << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "    // calculated by the ToneMap function, not used here"                   << std::endl;
-    ost << "    float exposure = 0;"                                                    << std::endl;
-    ost << ""                                                                           << std::endl;
-    ost << "    color = ToneMap(color, avgLuminance,"                                   << std::endl;
-    ost << "                     hdrShaderData.BloomThreshold, exposure);"              << std::endl;
+    ost << "    color = ToneMap(color, avgLuminance, hdrShaderData.BloomThreshold);"    << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "    if (FilterBackground && depth == 1.0)"                                  << std::endl;
     ost << "        FragColor = vec4(0.0);"                                             << std::endl;
@@ -2922,6 +3662,9 @@ void HDR2Stage::genCompositeFragmentShader(std::stringstream& ost)
     {
     ost << "uniform sampler2D InputTex2;    // Bloom map"                               << std::endl;
     }
+    ost << "uniform sampler2D InputTex3;    // Background color map"                    << std::endl;
+    ost << "uniform sampler2D InputTex4;    // Depth value input"                       << std::endl;
+    ost << "uniform bool      ForceBackground;"                                         << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "uniform float     Level;        // Luminance Mip Map Level"                 << std::endl;
     ost << "uniform bool      Use_ITU_R_BT_709;"                                        << std::endl;
@@ -2934,6 +3677,7 @@ void HDR2Stage::genCompositeFragmentShader(std::stringstream& ost)
     ost << "layout (location = 0) out vec4 FragColor;      // final color"              << std::endl;
     ost << "layout (location = 1) out vec3 AvgLuminance;   // exposure map"             << std::endl;
     ost << ""                                                                           << std::endl;
+    ost << Shader::getEqualEpsSnippet()                                                 << std::endl;
 
     //
     // Sample the bloom map
@@ -2950,6 +3694,19 @@ void HDR2Stage::genCompositeFragmentShader(std::stringstream& ost)
     ost << "{"                                                                          << std::endl;
     ost << "    float avgLuminance = GetAvgLuminance(InputTex1);"                       << std::endl;
     ost << "    vec3 color         = GetPrimaryInputColor(InputTex0);"                  << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    if (ForceBackground)"                                                   << std::endl;
+    ost << "    {"                                                                      << std::endl;
+    ost << "        vec3 background = GetPrimaryInputColor(InputTex3);"                 << std::endl;
+    ost << "        float depth     = GetDepthValue(InputTex4);"                        << std::endl;
+    ost << "        if (OSGEqualEps(color, background, 1.E-6) && depth == 1.0)"         << std::endl;
+    ost << "        {"                                                                  << std::endl;
+    ost << "            FragColor = vec4(background, 1.0);"                             << std::endl;
+    ost << "            AvgLuminance = vec3(avgLuminance, avgLuminance, avgLuminance);" << std::endl;
+    ost << "            return;"                                                        << std::endl;
+    ost << "        }"                                                                  << std::endl;
+    ost << "    }"                                                                      << std::endl;
+    ost << ""                                                                           << std::endl;
     if (getPerformBloom())
     {
     ost << "    vec3 bloom         = GetBloomColor(InputTex2);"                         << std::endl;
@@ -2957,14 +3714,15 @@ void HDR2Stage::genCompositeFragmentShader(std::stringstream& ost)
     ost << "    bloom *= hdrShaderData.BloomMagnitude;"                                 << std::endl;
     }
     ost << ""                                                                           << std::endl;
-    ost << "    float exposure = 0;         // calculated by the ToneMap function"      << std::endl;
-    ost << "    const float threshold = 0;"                                             << std::endl;
+    ost << "    float threshold = 0.0;"                                                 << std::endl;
     ost << ""                                                                           << std::endl;
     if (getPerformBloom())
     {
     ost << "    color = color + bloom;"                                                 << std::endl;
+    ost << ""                                                                           << std::endl;
     }
-    ost << "    color = ToneMap(color, avgLuminance, threshold, exposure);"             << std::endl;
+
+    ost << "    color = ToneMap(color, avgLuminance, threshold);"                       << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "    FragColor    = vec4(color, 1.0);"                                       << std::endl;
     ost << "    AvgLuminance = vec3(avgLuminance, avgLuminance, avgLuminance);"         << std::endl;
@@ -2981,13 +3739,20 @@ void HDR2Stage::genFinalScreenFragmentShader(std::stringstream& ost)
     ost << ""                                                                           << std::endl;
     ost << "uniform sampler2D InputTex0;    // Primary color input"                     << std::endl;
     ost << "uniform sampler2D InputTex1;    // Depth value input"                       << std::endl;
-    ost << "uniform bool CarryDepth;"                                                   << std::endl;
-    ost << "uniform bool LinearizeDepth;"                                               << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "uniform bool  CarryDepth;"                                                  << std::endl;
+    ost << "uniform bool  PerformDithering;"                                            << std::endl;
+    ost << "uniform bool  LinearizeDepth;"                                              << std::endl;
     ost << "uniform float zNear;"                                                       << std::endl;
     ost << "uniform float zFar;"                                                        << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "uniform bool Gamma;"                                                        << std::endl;
-    ost << "uniform bool AccurateGamma;"                                                << std::endl;
+    ost << "uniform float Gamma;"                                                       << std::endl;
+    ost << "uniform bool  ApplyGamma;"                                                  << std::endl;
+    ost << "uniform bool  AccurateGamma;"                                               << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "uniform vec3  ShadowLift;"                                                  << std::endl;
+    ost << "uniform vec3  InvMidtoneGamma;"                                             << std::endl;
+    ost << "uniform vec3  HighlightGain;"                                               << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "in vec2 TexCoord;"                                                          << std::endl;
     ost << ""                                                                           << std::endl;
@@ -3006,9 +3771,25 @@ void HDR2Stage::genFinalScreenFragmentShader(std::stringstream& ost)
     genFuncLinearizeZ(ost);
 
     //
+    // Mixed type power function
+    //
+    genFuncPow(ost);
+
+    //
     // Bunch of gamma correction functions
     //
     genFuncGammaCorrection(ost);
+
+
+    //
+    // Lift/Gamma/Gain color correction function
+    //
+    genFuncLiftGammaGainCorrection(ost);
+
+    //
+    // Dithering function
+    //
+    genFuncDithering(ost);
 
     //
     // Write color and depth to screen buffer
@@ -3023,13 +3804,19 @@ void HDR2Stage::genFinalScreenFragmentShader(std::stringstream& ost)
     ost << "        color = vec3(zLinear);"                                             << std::endl;
     ost << "    }"                                                                      << std::endl;
     ost << ""                                                                           << std::endl;
-    ost << "    if (Gamma)"                                                             << std::endl;
+    ost << "    if (ApplyGamma)"                                                        << std::endl;
     ost << "    {"                                                                      << std::endl;
     ost << "        if (AccurateGamma)"                                                 << std::endl;
     ost << "            color = AccurateLinearToSRGB(color);"                           << std::endl;
     ost << "        else"                                                               << std::endl;
-    ost << "            color = ApproximationLinearToSRGB(color);"                      << std::endl;
+    ost << "            color = ApproximationLinearToSRGB(color, Gamma);"               << std::endl;
+    ost << ""                                                                           << std::endl;
     ost << "    }"                                                                      << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    color = LiftGammaGainCorrection(color);"                                << std::endl;
+    ost << ""                                                                           << std::endl;
+    ost << "    if (PerformDithering)"                                                  << std::endl;
+    ost << "        color = DitherColor(color);"                                        << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "    FragColor = vec4(color, 1.0);"                                          << std::endl;
     ost << ""                                                                           << std::endl;
@@ -3051,6 +3838,16 @@ SimpleSHLChunkTransitPtr HDR2Stage::genLuminanceMapShader()
     genCommonVertexShader(vert);
     genLuminanceMapFragmentShader(frag);
 
+#ifdef OSG_WRITE_SHADER_CODE_TO_FILE
+    {
+        std::ofstream outVert(getShaderCodeFile("HDR2LuminanceMapShader.vert"));
+        std::ofstream outFrag(getShaderCodeFile("HDR2LuminanceMapShader.frag"));
+    
+        outVert << vert.str() << std::endl << std::flush;
+        outFrag << frag.str() << std::endl << std::flush;
+    }
+#endif    
+
     simpleSHLChunk->setVertexProgram(vert.str());
     simpleSHLChunk->setFragmentProgram(frag.str());
 
@@ -3066,6 +3863,15 @@ SimpleSHLChunkTransitPtr HDR2Stage::genAdaptLuminanceShader()
     genCommonVertexShader(vert);
     genAdaptLuminanceFragmentShader(frag);
 
+#ifdef OSG_WRITE_SHADER_CODE_TO_FILE
+    {
+        std::ofstream outVert(getShaderCodeFile("HDR2AdaptLuminanceShader.vert"));
+        std::ofstream outFrag(getShaderCodeFile("HDR2AdaptLuminanceShader.frag"));
+    
+        outVert << vert.str() << std::endl << std::flush;
+        outFrag << frag.str() << std::endl << std::flush;
+    }
+#endif    
 
     simpleSHLChunk->setVertexProgram(vert.str());
     simpleSHLChunk->setFragmentProgram(frag.str());
@@ -3082,6 +3888,16 @@ SimpleSHLChunkTransitPtr HDR2Stage::genThresholdShader()
     genCommonVertexShader(vert);
     genThresholdFragmentShader(frag);
 
+#ifdef OSG_WRITE_SHADER_CODE_TO_FILE
+    {
+        std::ofstream outVert(getShaderCodeFile("HDR2ThresholdShader.vert"));
+        std::ofstream outFrag(getShaderCodeFile("HDR2ThresholdShader.frag"));
+    
+        outVert << vert.str() << std::endl << std::flush;
+        outFrag << frag.str() << std::endl << std::flush;
+    }
+#endif    
+
     simpleSHLChunk->setVertexProgram(vert.str());
     simpleSHLChunk->setFragmentProgram(frag.str());
 
@@ -3096,6 +3912,16 @@ SimpleSHLChunkTransitPtr HDR2Stage::genScaleShader()
 
     genCommonVertexShader(vert);
     genScaleFragmentShader(frag);
+
+#ifdef OSG_WRITE_SHADER_CODE_TO_FILE
+    {
+        std::ofstream outVert(getShaderCodeFile("HDR2ScaleShader.vert"));
+        std::ofstream outFrag(getShaderCodeFile("HDR2ScaleShader.frag"));
+    
+        outVert << vert.str() << std::endl << std::flush;
+        outFrag << frag.str() << std::endl << std::flush;
+    }
+#endif    
 
     simpleSHLChunk->setVertexProgram(vert.str());
     simpleSHLChunk->setFragmentProgram(frag.str());
@@ -3112,6 +3938,16 @@ SimpleSHLChunkTransitPtr HDR2Stage::genBloomBlurShader()
     genCommonVertexShader(vert);
     genBloomBlurFragmentShader(frag);
 
+#ifdef OSG_WRITE_SHADER_CODE_TO_FILE
+    {
+        std::ofstream outVert(getShaderCodeFile("HDR2BloomBlurShader.vert"));
+        std::ofstream outFrag(getShaderCodeFile("HDR2BloomBlurShader.frag"));
+    
+        outVert << vert.str() << std::endl << std::flush;
+        outFrag << frag.str() << std::endl << std::flush;
+    }
+#endif    
+
     simpleSHLChunk->setVertexProgram(vert.str());
     simpleSHLChunk->setFragmentProgram(frag.str());
 
@@ -3127,6 +3963,16 @@ SimpleSHLChunkTransitPtr HDR2Stage::genCompositeShader()
     genCommonVertexShader(vert);
     genCompositeFragmentShader(frag);
 
+#ifdef OSG_WRITE_SHADER_CODE_TO_FILE
+    {
+        std::ofstream outVert(getShaderCodeFile("HDR2CompositeShader.vert"));
+        std::ofstream outFrag(getShaderCodeFile("HDR2CompositeShader.frag"));
+    
+        outVert << vert.str() << std::endl << std::flush;
+        outFrag << frag.str() << std::endl << std::flush;
+    }
+#endif    
+
     simpleSHLChunk->setVertexProgram(vert.str());
     simpleSHLChunk->setFragmentProgram(frag.str());
 
@@ -3141,6 +3987,16 @@ SimpleSHLChunkTransitPtr HDR2Stage::genFinalScreenShader()
 
     genCommonVertexShader(vert);
     genFinalScreenFragmentShader(frag);
+
+#ifdef OSG_WRITE_SHADER_CODE_TO_FILE
+    {
+        std::ofstream outVert(getShaderCodeFile("HDR2FinalScreenShader.vert"));
+        std::ofstream outFrag(getShaderCodeFile("HDR2FinalScreenShader.frag"));
+    
+        outVert << vert.str() << std::endl << std::flush;
+        outFrag << frag.str() << std::endl << std::flush;
+    }
+#endif    
 
     simpleSHLChunk->setVertexProgram(vert.str());
     simpleSHLChunk->setFragmentProgram(frag.str());

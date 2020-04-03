@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="MaterialManager"
+    parent="FieldContainer"
+    library="System"
+    structure="abstract"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    docGroupBase="GrpSystemMaterial"
+    >
+    This is the abstract material manager base class. The SceneFileHandler might
+    be provided with a concrete material manager instance. A material manager must
+    implement an interface that gets an a concrete material description instance
+    and returns a Material instance.
+
+    <Field
+        name="window"
+        type="Window"
+        category="weakpointer"
+        cardinality="single"
+        visibility="internal"
+        access="public"
+    >
+    It is often necessary to check the GL version and the GL extensions when generating
+    shader code. Therefore a window instance should be provided to the MaterialManager.
+    </Field>
+
+</FieldContainer>

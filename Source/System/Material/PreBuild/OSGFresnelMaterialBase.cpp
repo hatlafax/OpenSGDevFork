@@ -61,7 +61,7 @@
 #include "OSGConfig.h"
 
 
-#include <OSGGL.h>                        // ColorMaterial default header
+#include "OSGGL.h"                      // ColorMaterial default header
 
 #include "OSGImage.h"                   // Image Class
 

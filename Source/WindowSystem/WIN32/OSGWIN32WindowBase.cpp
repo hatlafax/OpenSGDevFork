@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -53,6 +53,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
 #include "OSGConfig.h"
 
 
@@ -62,10 +67,6 @@
 #include "OSGWIN32Window.h"
 
 #include <boost/bind.hpp>
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -116,11 +117,11 @@ OSG_FIELDTRAITS_GETTYPE_NS(WIN32Window *, nsOSG)
 
 OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
                            WIN32Window *,
-                           nsOSG);
+                           nsOSG)
 
 OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
                            WIN32Window *,
-                           nsOSG);
+                           nsOSG)
 
 /***************************************************************************\
  *                         Field Description                               *
@@ -189,9 +190,10 @@ WIN32WindowBase::TypeObject WIN32WindowBase::_type(
     "NULL",
     nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&WIN32WindowBase::createEmptyLocal),
-    WIN32Window::initMethod,
-    WIN32Window::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&WIN32Window::classDescInserter),
+    reinterpret_cast<InitContainerF>(&WIN32Window::initMethod),
+    reinterpret_cast<ExitContainerF>(&WIN32Window::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&WIN32Window::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\"?>\n"

@@ -125,15 +125,6 @@
         Additionally, it carries the original depth information to the final depth buffer.
   </Field>
   <Field
-	 name="sharedTextureEnvChunk"
-	 type="TextureEnvChunkPtr"
-	 cardinality="single"
-	 visibility="external"
-	 defaultValue="NULL"
-	 access="public"
-	 >
-  </Field>
-  <Field
 	 name="sharedMaterialChunk"
 	 type="MaterialChunkPtr"
 	 cardinality="single"
@@ -142,7 +133,16 @@
 	 access="public"
 	 >
   </Field>
-<Field
+  <Field
+	 name="backgroundMaterial"
+	 type="ChunkMaterialPtr"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="NULL"
+	 access="public"
+	 >
+  </Field>
+  <Field
 	 name="sceneMaterial"
 	 type="ChunkMaterialPtr"
 	 cardinality="single"
@@ -233,6 +233,15 @@
      >
   </Field>
   <Field
+	 name="finalScreenMaterialDepthChunk"
+	 type="DepthChunkPtr"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="NULL"
+	 access="public"
+	 >
+  </Field>
+  <Field
 	 name="width"
 	 type="Int32"
 	 cardinality="single"
@@ -250,7 +259,16 @@
 	 access="public"
      >
   </Field>
-<Field
+  <Field
+	 name="backgroundRenderTarget"
+	 type="FrameBufferObjectPtr"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="NULL"
+	 access="public"
+	 >
+  </Field>
+  <Field
 	 name="sceneRenderTarget"
 	 type="FrameBufferObjectPtr"
 	 cardinality="single"
@@ -259,7 +277,7 @@
 	 access="public"
 	 >
   </Field>
-<Field
+  <Field
 	 name="luminanceRenderTarget"
 	 type="FrameBufferObjectPtr"
 	 cardinality="single"

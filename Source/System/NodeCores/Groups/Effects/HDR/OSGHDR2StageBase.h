@@ -65,8 +65,8 @@
 
 #include "OSGStage.h" // Parent
 
-#include "OSGSysFields.h"               // ApplyGamma type
-#include "OSGBaseFields.h"              // ColorBufferInternalFormat type
+#include "OSGSysFields.h"               // Activate type
+#include "OSGBaseFields.h"              // FilterColor type
 
 #include "OSGHDR2StageFields.h"
 
@@ -95,9 +95,11 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
 
     enum
     {
-        ApplyGammaFieldId = Inherited::NextFieldId,
+        ActivateFieldId = Inherited::NextFieldId,
+        ApplyGammaFieldId = ActivateFieldId + 1,
         AccurateGammaFieldId = ApplyGammaFieldId + 1,
-        AdjustLuminanceFieldId = AccurateGammaFieldId + 1,
+        GammaFieldId = AccurateGammaFieldId + 1,
+        AdjustLuminanceFieldId = GammaFieldId + 1,
         TauFieldId = AdjustLuminanceFieldId + 1,
         PerformBloomFieldId = TauFieldId + 1,
         BloomThresholdFieldId = PerformBloomFieldId + 1,
@@ -111,19 +113,22 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
         AutoExposureModeFieldId = Use_ITU_R_BT_709FieldId + 1,
         ExposureFieldId = AutoExposureModeFieldId + 1,
         KeyValueFieldId = ExposureFieldId + 1,
-        WhiteLevelFieldId = KeyValueFieldId + 1,
+        ApertureFNumberFieldId = KeyValueFieldId + 1,
+        ShutterSpeedFieldId = ApertureFNumberFieldId + 1,
+        ISOFieldId = ShutterSpeedFieldId + 1,
+        WhiteLevelFieldId = ISOFieldId + 1,
         SaturationFieldId = WhiteLevelFieldId + 1,
         UseLinChromCorrectionFieldId = SaturationFieldId + 1,
-        FilmicShoulderStrenghtFieldId = UseLinChromCorrectionFieldId + 1,
-        FilmicLinearStrengthFieldId = FilmicShoulderStrenghtFieldId + 1,
-        FilmicLinearAngleFieldId = FilmicLinearStrengthFieldId + 1,
-        FilmicToeStrengthFieldId = FilmicLinearAngleFieldId + 1,
-        FilmicToeNumeratorFieldId = FilmicToeStrengthFieldId + 1,
-        FilmicToeDenominatorFieldId = FilmicToeNumeratorFieldId + 1,
-        FilmicLinearWhiteFieldId = FilmicToeDenominatorFieldId + 1,
-        DragoBiasFieldId = FilmicLinearWhiteFieldId + 1,
+        FilterColorFieldId = UseLinChromCorrectionFieldId + 1,
+        ContrastFieldId = FilterColorFieldId + 1,
+        ShadowLiftColorFieldId = ContrastFieldId + 1,
+        MidToneGammaColorFieldId = ShadowLiftColorFieldId + 1,
+        HighlightGainColorFieldId = MidToneGammaColorFieldId + 1,
+        FilmicCurveParametersFieldId = HighlightGainColorFieldId + 1,
+        DragoBiasFieldId = FilmicCurveParametersFieldId + 1,
         TargetFieldId = DragoBiasFieldId + 1,
-        CarryDepthFieldId = TargetFieldId + 1,
+        PerformDitheringFieldId = TargetFieldId + 1,
+        CarryDepthFieldId = PerformDitheringFieldId + 1,
         ColorBufferInternalFormatFieldId = CarryDepthFieldId + 1,
         ColorBufferPixelFormatFieldId = ColorBufferInternalFormatFieldId + 1,
         ColorBufferTypeFieldId = ColorBufferPixelFormatFieldId + 1,
@@ -141,10 +146,14 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
         NextFieldId = MipmapLevelFieldId + 1
     };
 
+    static const OSG::BitVector ActivateFieldMask =
+        (TypeTraits<BitVector>::One << ActivateFieldId);
     static const OSG::BitVector ApplyGammaFieldMask =
         (TypeTraits<BitVector>::One << ApplyGammaFieldId);
     static const OSG::BitVector AccurateGammaFieldMask =
         (TypeTraits<BitVector>::One << AccurateGammaFieldId);
+    static const OSG::BitVector GammaFieldMask =
+        (TypeTraits<BitVector>::One << GammaFieldId);
     static const OSG::BitVector AdjustLuminanceFieldMask =
         (TypeTraits<BitVector>::One << AdjustLuminanceFieldId);
     static const OSG::BitVector TauFieldMask =
@@ -173,30 +182,36 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
         (TypeTraits<BitVector>::One << ExposureFieldId);
     static const OSG::BitVector KeyValueFieldMask =
         (TypeTraits<BitVector>::One << KeyValueFieldId);
+    static const OSG::BitVector ApertureFNumberFieldMask =
+        (TypeTraits<BitVector>::One << ApertureFNumberFieldId);
+    static const OSG::BitVector ShutterSpeedFieldMask =
+        (TypeTraits<BitVector>::One << ShutterSpeedFieldId);
+    static const OSG::BitVector ISOFieldMask =
+        (TypeTraits<BitVector>::One << ISOFieldId);
     static const OSG::BitVector WhiteLevelFieldMask =
         (TypeTraits<BitVector>::One << WhiteLevelFieldId);
     static const OSG::BitVector SaturationFieldMask =
         (TypeTraits<BitVector>::One << SaturationFieldId);
     static const OSG::BitVector UseLinChromCorrectionFieldMask =
         (TypeTraits<BitVector>::One << UseLinChromCorrectionFieldId);
-    static const OSG::BitVector FilmicShoulderStrenghtFieldMask =
-        (TypeTraits<BitVector>::One << FilmicShoulderStrenghtFieldId);
-    static const OSG::BitVector FilmicLinearStrengthFieldMask =
-        (TypeTraits<BitVector>::One << FilmicLinearStrengthFieldId);
-    static const OSG::BitVector FilmicLinearAngleFieldMask =
-        (TypeTraits<BitVector>::One << FilmicLinearAngleFieldId);
-    static const OSG::BitVector FilmicToeStrengthFieldMask =
-        (TypeTraits<BitVector>::One << FilmicToeStrengthFieldId);
-    static const OSG::BitVector FilmicToeNumeratorFieldMask =
-        (TypeTraits<BitVector>::One << FilmicToeNumeratorFieldId);
-    static const OSG::BitVector FilmicToeDenominatorFieldMask =
-        (TypeTraits<BitVector>::One << FilmicToeDenominatorFieldId);
-    static const OSG::BitVector FilmicLinearWhiteFieldMask =
-        (TypeTraits<BitVector>::One << FilmicLinearWhiteFieldId);
+    static const OSG::BitVector FilterColorFieldMask =
+        (TypeTraits<BitVector>::One << FilterColorFieldId);
+    static const OSG::BitVector ContrastFieldMask =
+        (TypeTraits<BitVector>::One << ContrastFieldId);
+    static const OSG::BitVector ShadowLiftColorFieldMask =
+        (TypeTraits<BitVector>::One << ShadowLiftColorFieldId);
+    static const OSG::BitVector MidToneGammaColorFieldMask =
+        (TypeTraits<BitVector>::One << MidToneGammaColorFieldId);
+    static const OSG::BitVector HighlightGainColorFieldMask =
+        (TypeTraits<BitVector>::One << HighlightGainColorFieldId);
+    static const OSG::BitVector FilmicCurveParametersFieldMask =
+        (TypeTraits<BitVector>::One << FilmicCurveParametersFieldId);
     static const OSG::BitVector DragoBiasFieldMask =
         (TypeTraits<BitVector>::One << DragoBiasFieldId);
     static const OSG::BitVector TargetFieldMask =
         (TypeTraits<BitVector>::One << TargetFieldId);
+    static const OSG::BitVector PerformDitheringFieldMask =
+        (TypeTraits<BitVector>::One << PerformDitheringFieldId);
     static const OSG::BitVector CarryDepthFieldMask =
         (TypeTraits<BitVector>::One << CarryDepthFieldId);
     static const OSG::BitVector ColorBufferInternalFormatFieldMask =
@@ -230,8 +245,10 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
     static const OSG::BitVector NextFieldMask =
         (TypeTraits<BitVector>::One << NextFieldId);
         
+    typedef SFBool            SFActivateType;
     typedef SFBool            SFApplyGammaType;
     typedef SFBool            SFAccurateGammaType;
+    typedef SFReal32          SFGammaType;
     typedef SFBool            SFAdjustLuminanceType;
     typedef SFReal32          SFTauType;
     typedef SFBool            SFPerformBloomType;
@@ -246,18 +263,21 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
     typedef SFUInt32          SFAutoExposureModeType;
     typedef SFReal32          SFExposureType;
     typedef SFReal32          SFKeyValueType;
+    typedef SFReal32          SFApertureFNumberType;
+    typedef SFReal32          SFShutterSpeedType;
+    typedef SFReal32          SFISOType;
     typedef SFReal32          SFWhiteLevelType;
     typedef SFReal32          SFSaturationType;
     typedef SFBool            SFUseLinChromCorrectionType;
-    typedef SFReal32          SFFilmicShoulderStrenghtType;
-    typedef SFReal32          SFFilmicLinearStrengthType;
-    typedef SFReal32          SFFilmicLinearAngleType;
-    typedef SFReal32          SFFilmicToeStrengthType;
-    typedef SFReal32          SFFilmicToeNumeratorType;
-    typedef SFReal32          SFFilmicToeDenominatorType;
-    typedef SFReal32          SFFilmicLinearWhiteType;
+    typedef SFColor3f         SFFilterColorType;
+    typedef SFReal32          SFContrastType;
+    typedef SFColor3f         SFShadowLiftColorType;
+    typedef SFColor3f         SFMidToneGammaColorType;
+    typedef SFColor3f         SFHighlightGainColorType;
+    typedef MFReal32          MFFilmicCurveParametersType;
     typedef SFReal32          SFDragoBiasType;
     typedef SFUInt32          SFTargetType;
+    typedef SFBool            SFPerformDitheringType;
     typedef SFBool            SFCarryDepthType;
     typedef SFGLenum          SFColorBufferInternalFormatType;
     typedef SFGLenum          SFColorBufferPixelFormatType;
@@ -298,11 +318,17 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
     /*! \{                                                                 */
 
 
+                  SFBool              *editSFActivate       (void);
+            const SFBool              *getSFActivate        (void) const;
+
                   SFBool              *editSFApplyGamma     (void);
             const SFBool              *getSFApplyGamma      (void) const;
 
                   SFBool              *editSFAccurateGamma  (void);
             const SFBool              *getSFAccurateGamma   (void) const;
+
+                  SFReal32            *editSFGamma          (void);
+            const SFReal32            *getSFGamma           (void) const;
 
                   SFBool              *editSFAdjustLuminance(void);
             const SFBool              *getSFAdjustLuminance (void) const;
@@ -346,6 +372,15 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
                   SFReal32            *editSFKeyValue       (void);
             const SFReal32            *getSFKeyValue        (void) const;
 
+                  SFReal32            *editSFApertureFNumber(void);
+            const SFReal32            *getSFApertureFNumber (void) const;
+
+                  SFReal32            *editSFShutterSpeed   (void);
+            const SFReal32            *getSFShutterSpeed    (void) const;
+
+                  SFReal32            *editSFISO            (void);
+            const SFReal32            *getSFISO             (void) const;
+
                   SFReal32            *editSFWhiteLevel     (void);
             const SFReal32            *getSFWhiteLevel      (void) const;
 
@@ -355,32 +390,29 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
                   SFBool              *editSFUseLinChromCorrection(void);
             const SFBool              *getSFUseLinChromCorrection (void) const;
 
-                  SFReal32            *editSFFilmicShoulderStrenght(void);
-            const SFReal32            *getSFFilmicShoulderStrenght (void) const;
+                  SFColor3f           *editSFFilterColor    (void);
+            const SFColor3f           *getSFFilterColor     (void) const;
 
-                  SFReal32            *editSFFilmicLinearStrength(void);
-            const SFReal32            *getSFFilmicLinearStrength (void) const;
+                  SFReal32            *editSFContrast       (void);
+            const SFReal32            *getSFContrast        (void) const;
 
-                  SFReal32            *editSFFilmicLinearAngle(void);
-            const SFReal32            *getSFFilmicLinearAngle (void) const;
+                  SFColor3f           *editSFShadowLiftColor(void);
+            const SFColor3f           *getSFShadowLiftColor (void) const;
 
-                  SFReal32            *editSFFilmicToeStrength(void);
-            const SFReal32            *getSFFilmicToeStrength (void) const;
+                  SFColor3f           *editSFMidToneGammaColor(void);
+            const SFColor3f           *getSFMidToneGammaColor (void) const;
 
-                  SFReal32            *editSFFilmicToeNumerator(void);
-            const SFReal32            *getSFFilmicToeNumerator (void) const;
-
-                  SFReal32            *editSFFilmicToeDenominator(void);
-            const SFReal32            *getSFFilmicToeDenominator (void) const;
-
-                  SFReal32            *editSFFilmicLinearWhite(void);
-            const SFReal32            *getSFFilmicLinearWhite (void) const;
+                  SFColor3f           *editSFHighlightGainColor(void);
+            const SFColor3f           *getSFHighlightGainColor (void) const;
 
                   SFReal32            *editSFDragoBias      (void);
             const SFReal32            *getSFDragoBias       (void) const;
 
                   SFUInt32            *editSFTarget         (void);
             const SFUInt32            *getSFTarget          (void) const;
+
+                  SFBool              *editSFPerformDithering(void);
+            const SFBool              *getSFPerformDithering (void) const;
 
                   SFBool              *editSFCarryDepth     (void);
             const SFBool              *getSFCarryDepth      (void) const;
@@ -428,11 +460,17 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
             const SFInt32             *getSFMipmapLevel     (void) const;
 
 
+                  bool                &editActivate       (void);
+                  bool                 getActivate        (void) const;
+
                   bool                &editApplyGamma     (void);
                   bool                 getApplyGamma      (void) const;
 
                   bool                &editAccurateGamma  (void);
                   bool                 getAccurateGamma   (void) const;
+
+                  Real32              &editGamma          (void);
+                  Real32               getGamma           (void) const;
 
                   bool                &editAdjustLuminance(void);
                   bool                 getAdjustLuminance (void) const;
@@ -476,6 +514,15 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
                   Real32              &editKeyValue       (void);
                   Real32               getKeyValue        (void) const;
 
+                  Real32              &editApertureFNumber(void);
+                  Real32               getApertureFNumber (void) const;
+
+                  Real32              &editShutterSpeed   (void);
+                  Real32               getShutterSpeed    (void) const;
+
+                  Real32              &editISO            (void);
+                  Real32               getISO             (void) const;
+
                   Real32              &editWhiteLevel     (void);
                   Real32               getWhiteLevel      (void) const;
 
@@ -485,32 +532,29 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
                   bool                &editUseLinChromCorrection(void);
                   bool                 getUseLinChromCorrection (void) const;
 
-                  Real32              &editFilmicShoulderStrenght(void);
-                  Real32               getFilmicShoulderStrenght (void) const;
+                  Color3f             &editFilterColor    (void);
+            const Color3f             &getFilterColor     (void) const;
 
-                  Real32              &editFilmicLinearStrength(void);
-                  Real32               getFilmicLinearStrength (void) const;
+                  Real32              &editContrast       (void);
+                  Real32               getContrast        (void) const;
 
-                  Real32              &editFilmicLinearAngle(void);
-                  Real32               getFilmicLinearAngle (void) const;
+                  Color3f             &editShadowLiftColor(void);
+            const Color3f             &getShadowLiftColor (void) const;
 
-                  Real32              &editFilmicToeStrength(void);
-                  Real32               getFilmicToeStrength (void) const;
+                  Color3f             &editMidToneGammaColor(void);
+            const Color3f             &getMidToneGammaColor (void) const;
 
-                  Real32              &editFilmicToeNumerator(void);
-                  Real32               getFilmicToeNumerator (void) const;
-
-                  Real32              &editFilmicToeDenominator(void);
-                  Real32               getFilmicToeDenominator (void) const;
-
-                  Real32              &editFilmicLinearWhite(void);
-                  Real32               getFilmicLinearWhite (void) const;
+                  Color3f             &editHighlightGainColor(void);
+            const Color3f             &getHighlightGainColor (void) const;
 
                   Real32              &editDragoBias      (void);
                   Real32               getDragoBias       (void) const;
 
                   UInt32              &editTarget         (void);
                   UInt32               getTarget          (void) const;
+
+                  bool                &editPerformDithering(void);
+                  bool                 getPerformDithering (void) const;
 
                   bool                &editCarryDepth     (void);
                   bool                 getCarryDepth      (void) const;
@@ -562,8 +606,10 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
     /*! \name                    Field Set                                 */
     /*! \{                                                                 */
 
+            void setActivate       (const bool value);
             void setApplyGamma     (const bool value);
             void setAccurateGamma  (const bool value);
+            void setGamma          (const Real32 value);
             void setAdjustLuminance(const bool value);
             void setTau            (const Real32 value);
             void setPerformBloom   (const bool value);
@@ -578,18 +624,20 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
             void setAutoExposureMode(const UInt32 value);
             void setExposure       (const Real32 value);
             void setKeyValue       (const Real32 value);
+            void setApertureFNumber(const Real32 value);
+            void setShutterSpeed   (const Real32 value);
+            void setISO            (const Real32 value);
             void setWhiteLevel     (const Real32 value);
             void setSaturation     (const Real32 value);
             void setUseLinChromCorrection(const bool value);
-            void setFilmicShoulderStrenght(const Real32 value);
-            void setFilmicLinearStrength(const Real32 value);
-            void setFilmicLinearAngle(const Real32 value);
-            void setFilmicToeStrength(const Real32 value);
-            void setFilmicToeNumerator(const Real32 value);
-            void setFilmicToeDenominator(const Real32 value);
-            void setFilmicLinearWhite(const Real32 value);
+            void setFilterColor    (const Color3f &value);
+            void setContrast       (const Real32 value);
+            void setShadowLiftColor(const Color3f &value);
+            void setMidToneGammaColor(const Color3f &value);
+            void setHighlightGainColor(const Color3f &value);
             void setDragoBias      (const Real32 value);
             void setTarget         (const UInt32 value);
+            void setPerformDithering(const bool value);
             void setCarryDepth     (const bool value);
             void setColorBufferInternalFormat(const GLenum &value);
             void setColorBufferPixelFormat(const GLenum &value);
@@ -664,8 +712,10 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
     /*! \name                      Fields                                  */
     /*! \{                                                                 */
 
+    SFBool            _sfActivate;
     SFBool            _sfApplyGamma;
     SFBool            _sfAccurateGamma;
+    SFReal32          _sfGamma;
     SFBool            _sfAdjustLuminance;
     SFReal32          _sfTau;
     SFBool            _sfPerformBloom;
@@ -680,18 +730,21 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
     SFUInt32          _sfAutoExposureMode;
     SFReal32          _sfExposure;
     SFReal32          _sfKeyValue;
+    SFReal32          _sfApertureFNumber;
+    SFReal32          _sfShutterSpeed;
+    SFReal32          _sfISO;
     SFReal32          _sfWhiteLevel;
     SFReal32          _sfSaturation;
     SFBool            _sfUseLinChromCorrection;
-    SFReal32          _sfFilmicShoulderStrenght;
-    SFReal32          _sfFilmicLinearStrength;
-    SFReal32          _sfFilmicLinearAngle;
-    SFReal32          _sfFilmicToeStrength;
-    SFReal32          _sfFilmicToeNumerator;
-    SFReal32          _sfFilmicToeDenominator;
-    SFReal32          _sfFilmicLinearWhite;
+    SFColor3f         _sfFilterColor;
+    SFReal32          _sfContrast;
+    SFColor3f         _sfShadowLiftColor;
+    SFColor3f         _sfMidToneGammaColor;
+    SFColor3f         _sfHighlightGainColor;
+    MFReal32          _mfFilmicCurveParameters;
     SFReal32          _sfDragoBias;
     SFUInt32          _sfTarget;
+    SFBool            _sfPerformDithering;
     SFBool            _sfCarryDepth;
     SFGLenum          _sfColorBufferInternalFormat;
     SFGLenum          _sfColorBufferPixelFormat;
@@ -734,10 +787,14 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
+     GetFieldHandlePtr  getHandleActivate        (void) const;
+     EditFieldHandlePtr editHandleActivate       (void);
      GetFieldHandlePtr  getHandleApplyGamma      (void) const;
      EditFieldHandlePtr editHandleApplyGamma     (void);
      GetFieldHandlePtr  getHandleAccurateGamma   (void) const;
      EditFieldHandlePtr editHandleAccurateGamma  (void);
+     GetFieldHandlePtr  getHandleGamma           (void) const;
+     EditFieldHandlePtr editHandleGamma          (void);
      GetFieldHandlePtr  getHandleAdjustLuminance (void) const;
      EditFieldHandlePtr editHandleAdjustLuminance(void);
      GetFieldHandlePtr  getHandleTau             (void) const;
@@ -766,30 +823,36 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
      EditFieldHandlePtr editHandleExposure       (void);
      GetFieldHandlePtr  getHandleKeyValue        (void) const;
      EditFieldHandlePtr editHandleKeyValue       (void);
+     GetFieldHandlePtr  getHandleApertureFNumber (void) const;
+     EditFieldHandlePtr editHandleApertureFNumber(void);
+     GetFieldHandlePtr  getHandleShutterSpeed    (void) const;
+     EditFieldHandlePtr editHandleShutterSpeed   (void);
+     GetFieldHandlePtr  getHandleISO             (void) const;
+     EditFieldHandlePtr editHandleISO            (void);
      GetFieldHandlePtr  getHandleWhiteLevel      (void) const;
      EditFieldHandlePtr editHandleWhiteLevel     (void);
      GetFieldHandlePtr  getHandleSaturation      (void) const;
      EditFieldHandlePtr editHandleSaturation     (void);
      GetFieldHandlePtr  getHandleUseLinChromCorrection (void) const;
      EditFieldHandlePtr editHandleUseLinChromCorrection(void);
-     GetFieldHandlePtr  getHandleFilmicShoulderStrenght (void) const;
-     EditFieldHandlePtr editHandleFilmicShoulderStrenght(void);
-     GetFieldHandlePtr  getHandleFilmicLinearStrength (void) const;
-     EditFieldHandlePtr editHandleFilmicLinearStrength(void);
-     GetFieldHandlePtr  getHandleFilmicLinearAngle (void) const;
-     EditFieldHandlePtr editHandleFilmicLinearAngle(void);
-     GetFieldHandlePtr  getHandleFilmicToeStrength (void) const;
-     EditFieldHandlePtr editHandleFilmicToeStrength(void);
-     GetFieldHandlePtr  getHandleFilmicToeNumerator (void) const;
-     EditFieldHandlePtr editHandleFilmicToeNumerator(void);
-     GetFieldHandlePtr  getHandleFilmicToeDenominator (void) const;
-     EditFieldHandlePtr editHandleFilmicToeDenominator(void);
-     GetFieldHandlePtr  getHandleFilmicLinearWhite (void) const;
-     EditFieldHandlePtr editHandleFilmicLinearWhite(void);
+     GetFieldHandlePtr  getHandleFilterColor     (void) const;
+     EditFieldHandlePtr editHandleFilterColor    (void);
+     GetFieldHandlePtr  getHandleContrast        (void) const;
+     EditFieldHandlePtr editHandleContrast       (void);
+     GetFieldHandlePtr  getHandleShadowLiftColor (void) const;
+     EditFieldHandlePtr editHandleShadowLiftColor(void);
+     GetFieldHandlePtr  getHandleMidToneGammaColor (void) const;
+     EditFieldHandlePtr editHandleMidToneGammaColor(void);
+     GetFieldHandlePtr  getHandleHighlightGainColor (void) const;
+     EditFieldHandlePtr editHandleHighlightGainColor(void);
+     GetFieldHandlePtr  getHandleFilmicCurveParameters (void) const;
+     EditFieldHandlePtr editHandleFilmicCurveParameters(void);
      GetFieldHandlePtr  getHandleDragoBias       (void) const;
      EditFieldHandlePtr editHandleDragoBias      (void);
      GetFieldHandlePtr  getHandleTarget          (void) const;
      EditFieldHandlePtr editHandleTarget         (void);
+     GetFieldHandlePtr  getHandlePerformDithering (void) const;
+     EditFieldHandlePtr editHandlePerformDithering(void);
      GetFieldHandlePtr  getHandleCarryDepth      (void) const;
      EditFieldHandlePtr editHandleCarryDepth     (void);
      GetFieldHandlePtr  getHandleColorBufferInternalFormat (void) const;
@@ -820,6 +883,30 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageBase : public Stage
      EditFieldHandlePtr editHandleNumSamples     (void);
      GetFieldHandlePtr  getHandleMipmapLevel     (void) const;
      EditFieldHandlePtr editHandleMipmapLevel    (void);
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                    Field Get                                 */
+    /*! \{                                                                 */
+
+
+                  MFReal32            *editMFFilmicCurveParameters(void);
+            const MFReal32            *getMFFilmicCurveParameters (void) const;
+
+
+                  MFReal32           ::reference editFilmicCurveParameters(const UInt32 index);
+                  Real32               getFilmicCurveParameters (const UInt32 index) const;
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                    Field Set                                 */
+    /*! \{                                                                 */
+
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                Ptr MField Set                                */
+    /*! \{                                                                 */
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

@@ -1,21 +1,22 @@
 // -*- Mode:C++ -*-
 
-#include <OSGFieldContainerUtils.h>
-#include <OSGGLUT.h>
-#include <OSGGLUTWindow.h>
-#include <OSGGroup.h>
-#include <OSGManipulatorManager.h>
-#include <OSGNameAttachment.h>
-#include <OSGNode.h>
-#include <OSGSimpleGeometry.h>
-#include <OSGSimpleSceneManager.h>
-#include <OSGTransform.h>
-#include <OSGTypedGeoIntegralProperty.h>
-#include <OSGSceneGraphUtils.h>
 #include <boost/bind.hpp>
 #include <boost/noncopyable.hpp>
 #include <cstdlib>
 #include <iostream>
+
+#include "OSGFieldContainerUtils.h"
+#include "OSGGLUT.h"
+#include "OSGGLUTWindow.h"
+#include "OSGGroup.h"
+#include "OSGManipulatorManager.h"
+#include "OSGNameAttachment.h"
+#include "OSGNode.h"
+#include "OSGSimpleGeometry.h"
+#include "OSGSimpleSceneManager.h"
+#include "OSGTransform.h"
+#include "OSGTypedGeoIntegralProperty.h"
+#include "OSGSceneGraphUtils.h"
 
 namespace
 {

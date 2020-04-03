@@ -41,6 +41,7 @@
 
 #include "OSGBaseTypes.h"
 #include "OSGVector.h"
+#include "OSGMatrix.h"
 
 OSG_BEGIN_NAMESPACE
 
@@ -58,13 +59,13 @@ class OSG_BASE_DLLMAPPING View
     /*---------------------------------------------------------------------*/
     /*! \name                   Constructors                               */
     /*! \{                                                                 */
-
+    View    ();
     View    (
                 const Pnt3f& eye, 
                 const Pnt3f& center, 
                 const Vec3f& up
             );
-
+    View    (const Matrix& mat, bool isMatWSFromES = false);
     View    (const View& rhs);
 
     /*! \}                                                                 */
@@ -77,6 +78,8 @@ class OSG_BASE_DLLMAPPING View
     /*! \name                    Operators                                 */
     /*! \{                                                                 */
     View&           operator=   (const View& rhs);
+    bool            operator==  (const View& rhs) const;
+    bool            equals      (const View& rhs, Real32 tol) const;
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                    Get/Set                                   */
@@ -89,6 +92,20 @@ class OSG_BASE_DLLMAPPING View
 
     const Vec3f&    getUp       () const;
     void            setUp       (const Vec3f& up);
+
+    Vec3f           getDirection() const;
+    
+    void            setValue    (
+                                    const Pnt3f& eye, 
+                                    const Pnt3f& center, 
+                                    const Vec3f& up
+                                );
+                                
+    void            setValue    (
+                                    const Matrix& mat, 
+                                    bool isMatWSFromES = false
+                                );
+    
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                    Operations                                */
@@ -103,6 +120,9 @@ class OSG_BASE_DLLMAPPING View
   protected:
 
     /*==========================  PRIVATE  ================================*/
+  
+    void            setByMatWSFromES(const Matrix& mat);
+    void            setByMatESFromWS(const Matrix& mat);
 
   private:
     Pnt3f   _eye;

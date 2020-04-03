@@ -72,8 +72,12 @@ class OSG_SYSTEM_DLLMAPPING IOFileTypeBase
     
     enum
     {
-        OSG_READ_SUPPORTED  = 1,  /**< The file type supports reading. */
-        OSG_WRITE_SUPPORTED = 2   /**< The file type supports writing. */
+        OSG_READ_SUPPORTED        = 0x01,  /**< The file type supports reading. */
+        OSG_WRITE_SUPPORTED       = 0x02,  /**< The file type supports writing. */
+        OSG_NOT_ZIP_COMPRESSIBLE  = 0x04,  /**< The file type does not support 
+                                               zip stream compression.          */
+        OSG_STREAMING_UNSUPPORTED = 0x08,  /**< The file type does not support 
+                                                streaming.                      */
     };
     
     /*! \nohierarchy

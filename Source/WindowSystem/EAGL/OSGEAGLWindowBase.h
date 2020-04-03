@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -229,8 +229,8 @@ class OSG_WINDOWEAGL_DLLMAPPING EAGLWindowBase : public Window
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-    GetFieldHandlePtr  getHandleContext         (void) const;
-    EditFieldHandlePtr editHandleContext        (void);
+     GetFieldHandlePtr  getHandleContext         (void) const;
+     EditFieldHandlePtr editHandleContext        (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

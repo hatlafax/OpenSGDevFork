@@ -74,6 +74,12 @@ PerspectiveProjection::PerspectiveProjection(
 {
 }
 
+PerspectiveProjection::PerspectiveProjection(const Matrix& matProjection)
+: Projection()
+{
+    setValue(matProjection);
+}
+
 PerspectiveProjection::~PerspectiveProjection()
 {
 }
@@ -93,6 +99,29 @@ PerspectiveProjection& PerspectiveProjection::operator=(const PerspectiveProject
 Projection::Type PerspectiveProjection::getType() const
 {
     return Projection::PERSPECTIVE;
+}
+
+void PerspectiveProjection::setValue(const Matrix& matProjection)
+{
+    Real32 m00 = matProjection[0][0];
+    Real32 m02 = matProjection[2][0];
+    Real32 m11 = matProjection[1][1];
+    Real32 m12 = matProjection[2][1];
+    Real32 m22 = matProjection[2][2];
+    Real32 m23 = matProjection[3][2];
+
+    //Real32 left   = m23/m00 * (m02 - 1)/(m22 - 1);
+    Real32 right  = m23/m00 * (m02 + 1)/(m22 - 1);
+    //Real32 bottom = m23/m11 * (m12 - 1)/(m22 - 1);
+    Real32 top    = m23/m11 * (m12 + 1)/(m22 - 1);
+    Real32 zNear  = m23 / (m22 - 1);
+    Real32 zFar   = m23 / (m22 + 1);
+
+    Real32 ct     = top/zNear;
+    Real32 fov    = OSG::osgATan(ct);
+    Real32 aspect = right /(zNear * ct);
+    
+    setValue(fov, aspect, zNear, zFar);
 }
 
 OSG_END_NAMESPACE

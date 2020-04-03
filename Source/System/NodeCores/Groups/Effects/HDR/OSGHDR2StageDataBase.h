@@ -66,11 +66,11 @@
 #include "OSGStageData.h" // Parent
 
 #include "OSGSimpleSHLChunkFields.h"    // LuminanceMapShader type
-#include "OSGTextureEnvChunkFields.h"   // SharedTextureEnvChunk type
 #include "OSGMaterialChunkFields.h"     // SharedMaterialChunk type
-#include "OSGChunkMaterialFields.h"     // SceneMaterial type
+#include "OSGChunkMaterialFields.h"     // BackgroundMaterial type
 #include "OSGSysFields.h"               // CurrentAdaptLuminanceIdx type
-#include "OSGFrameBufferObjectFields.h" // SceneRenderTarget type
+#include "OSGDepthChunkFields.h"        // FinalScreenMaterialDepthChunk type
+#include "OSGFrameBufferObjectFields.h" // BackgroundRenderTarget type
 #include "OSGUniformBufferObjStd140ChunkFields.h" // HdrShaderData type
 
 #include "OSGHDR2StageDataFields.h"
@@ -108,9 +108,9 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
         BlurVertShaderFieldId = BlurHorizShaderFieldId + 1,
         CompositeShaderFieldId = BlurVertShaderFieldId + 1,
         FinalScreenShaderFieldId = CompositeShaderFieldId + 1,
-        SharedTextureEnvChunkFieldId = FinalScreenShaderFieldId + 1,
-        SharedMaterialChunkFieldId = SharedTextureEnvChunkFieldId + 1,
-        SceneMaterialFieldId = SharedMaterialChunkFieldId + 1,
+        SharedMaterialChunkFieldId = FinalScreenShaderFieldId + 1,
+        BackgroundMaterialFieldId = SharedMaterialChunkFieldId + 1,
+        SceneMaterialFieldId = BackgroundMaterialFieldId + 1,
         LuminanceMapMaterialFieldId = SceneMaterialFieldId + 1,
         AdaptLuminanceMaterialFieldId = LuminanceMapMaterialFieldId + 1,
         ThresholdMaterialFieldId = AdaptLuminanceMaterialFieldId + 1,
@@ -120,9 +120,11 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
         CompositeMaterialFieldId = BlurVertMaterialFieldId + 1,
         FinalScreenMaterialFieldId = CompositeMaterialFieldId + 1,
         CurrentAdaptLuminanceIdxFieldId = FinalScreenMaterialFieldId + 1,
-        WidthFieldId = CurrentAdaptLuminanceIdxFieldId + 1,
+        FinalScreenMaterialDepthChunkFieldId = CurrentAdaptLuminanceIdxFieldId + 1,
+        WidthFieldId = FinalScreenMaterialDepthChunkFieldId + 1,
         HeightFieldId = WidthFieldId + 1,
-        SceneRenderTargetFieldId = HeightFieldId + 1,
+        BackgroundRenderTargetFieldId = HeightFieldId + 1,
+        SceneRenderTargetFieldId = BackgroundRenderTargetFieldId + 1,
         LuminanceRenderTargetFieldId = SceneRenderTargetFieldId + 1,
         AdaptLuminanceRenderTargetFieldId = LuminanceRenderTargetFieldId + 1,
         ThresholdRenderTargetFieldId = AdaptLuminanceRenderTargetFieldId + 1,
@@ -154,10 +156,10 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
         (TypeTraits<BitVector>::One << CompositeShaderFieldId);
     static const OSG::BitVector FinalScreenShaderFieldMask =
         (TypeTraits<BitVector>::One << FinalScreenShaderFieldId);
-    static const OSG::BitVector SharedTextureEnvChunkFieldMask =
-        (TypeTraits<BitVector>::One << SharedTextureEnvChunkFieldId);
     static const OSG::BitVector SharedMaterialChunkFieldMask =
         (TypeTraits<BitVector>::One << SharedMaterialChunkFieldId);
+    static const OSG::BitVector BackgroundMaterialFieldMask =
+        (TypeTraits<BitVector>::One << BackgroundMaterialFieldId);
     static const OSG::BitVector SceneMaterialFieldMask =
         (TypeTraits<BitVector>::One << SceneMaterialFieldId);
     static const OSG::BitVector LuminanceMapMaterialFieldMask =
@@ -178,10 +180,14 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
         (TypeTraits<BitVector>::One << FinalScreenMaterialFieldId);
     static const OSG::BitVector CurrentAdaptLuminanceIdxFieldMask =
         (TypeTraits<BitVector>::One << CurrentAdaptLuminanceIdxFieldId);
+    static const OSG::BitVector FinalScreenMaterialDepthChunkFieldMask =
+        (TypeTraits<BitVector>::One << FinalScreenMaterialDepthChunkFieldId);
     static const OSG::BitVector WidthFieldMask =
         (TypeTraits<BitVector>::One << WidthFieldId);
     static const OSG::BitVector HeightFieldMask =
         (TypeTraits<BitVector>::One << HeightFieldId);
+    static const OSG::BitVector BackgroundRenderTargetFieldMask =
+        (TypeTraits<BitVector>::One << BackgroundRenderTargetFieldId);
     static const OSG::BitVector SceneRenderTargetFieldMask =
         (TypeTraits<BitVector>::One << SceneRenderTargetFieldId);
     static const OSG::BitVector LuminanceRenderTargetFieldMask =
@@ -219,8 +225,8 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
     typedef SFUnrecSimpleSHLChunkPtr SFBlurVertShaderType;
     typedef SFUnrecSimpleSHLChunkPtr SFCompositeShaderType;
     typedef SFUnrecSimpleSHLChunkPtr SFFinalScreenShaderType;
-    typedef SFUnrecTextureEnvChunkPtr SFSharedTextureEnvChunkType;
     typedef SFUnrecMaterialChunkPtr SFSharedMaterialChunkType;
+    typedef SFUnrecChunkMaterialPtr SFBackgroundMaterialType;
     typedef SFUnrecChunkMaterialPtr SFSceneMaterialType;
     typedef SFUnrecChunkMaterialPtr SFLuminanceMapMaterialType;
     typedef SFUnrecChunkMaterialPtr SFAdaptLuminanceMaterialType;
@@ -231,8 +237,10 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
     typedef SFUnrecChunkMaterialPtr SFCompositeMaterialType;
     typedef SFUnrecChunkMaterialPtr SFFinalScreenMaterialType;
     typedef SFUInt32          SFCurrentAdaptLuminanceIdxType;
+    typedef SFUnrecDepthChunkPtr SFFinalScreenMaterialDepthChunkType;
     typedef SFInt32           SFWidthType;
     typedef SFInt32           SFHeightType;
+    typedef SFUnrecFrameBufferObjectPtr SFBackgroundRenderTargetType;
     typedef SFUnrecFrameBufferObjectPtr SFSceneRenderTargetType;
     typedef SFUnrecFrameBufferObjectPtr SFLuminanceRenderTargetType;
     typedef MFUnrecFrameBufferObjectPtr MFAdaptLuminanceRenderTargetType;
@@ -286,10 +294,10 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
                   SFUnrecSimpleSHLChunkPtr *editSFCompositeShader(void);
             const SFUnrecSimpleSHLChunkPtr *getSFFinalScreenShader(void) const;
                   SFUnrecSimpleSHLChunkPtr *editSFFinalScreenShader(void);
-            const SFUnrecTextureEnvChunkPtr *getSFSharedTextureEnvChunk(void) const;
-                  SFUnrecTextureEnvChunkPtr *editSFSharedTextureEnvChunk(void);
             const SFUnrecMaterialChunkPtr *getSFSharedMaterialChunk(void) const;
                   SFUnrecMaterialChunkPtr *editSFSharedMaterialChunk(void);
+            const SFUnrecChunkMaterialPtr *getSFBackgroundMaterial(void) const;
+                  SFUnrecChunkMaterialPtr *editSFBackgroundMaterial(void);
             const SFUnrecChunkMaterialPtr *getSFSceneMaterial  (void) const;
                   SFUnrecChunkMaterialPtr *editSFSceneMaterial  (void);
             const SFUnrecChunkMaterialPtr *getSFLuminanceMapMaterial(void) const;
@@ -311,12 +319,16 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
 
                   SFUInt32            *editSFCurrentAdaptLuminanceIdx(void);
             const SFUInt32            *getSFCurrentAdaptLuminanceIdx (void) const;
+            const SFUnrecDepthChunkPtr *getSFFinalScreenMaterialDepthChunk(void) const;
+                  SFUnrecDepthChunkPtr *editSFFinalScreenMaterialDepthChunk(void);
 
                   SFInt32             *editSFWidth          (void);
             const SFInt32             *getSFWidth           (void) const;
 
                   SFInt32             *editSFHeight         (void);
             const SFInt32             *getSFHeight          (void) const;
+            const SFUnrecFrameBufferObjectPtr *getSFBackgroundRenderTarget(void) const;
+                  SFUnrecFrameBufferObjectPtr *editSFBackgroundRenderTarget(void);
             const SFUnrecFrameBufferObjectPtr *getSFSceneRenderTarget(void) const;
                   SFUnrecFrameBufferObjectPtr *editSFSceneRenderTarget(void);
             const SFUnrecFrameBufferObjectPtr *getSFLuminanceRenderTarget(void) const;
@@ -365,9 +377,9 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
 
                   SimpleSHLChunk * getFinalScreenShader(void) const;
 
-                  TextureEnvChunk * getSharedTextureEnvChunk(void) const;
-
                   MaterialChunk * getSharedMaterialChunk(void) const;
+
+                  ChunkMaterial * getBackgroundMaterial(void) const;
 
                   ChunkMaterial * getSceneMaterial  (void) const;
 
@@ -390,11 +402,15 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
                   UInt32              &editCurrentAdaptLuminanceIdx(void);
                   UInt32               getCurrentAdaptLuminanceIdx (void) const;
 
+                  DepthChunk * getFinalScreenMaterialDepthChunk(void) const;
+
                   Int32               &editWidth          (void);
                   Int32                getWidth           (void) const;
 
                   Int32               &editHeight         (void);
                   Int32                getHeight          (void) const;
+
+                  FrameBufferObject * getBackgroundRenderTarget(void) const;
 
                   FrameBufferObject * getSceneRenderTarget(void) const;
 
@@ -439,8 +455,8 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
             void setBlurVertShader (SimpleSHLChunk * const value);
             void setCompositeShader(SimpleSHLChunk * const value);
             void setFinalScreenShader(SimpleSHLChunk * const value);
-            void setSharedTextureEnvChunk(TextureEnvChunk * const value);
             void setSharedMaterialChunk(MaterialChunk * const value);
+            void setBackgroundMaterial(ChunkMaterial * const value);
             void setSceneMaterial  (ChunkMaterial * const value);
             void setLuminanceMapMaterial(ChunkMaterial * const value);
             void setAdaptLuminanceMaterial(ChunkMaterial * const value);
@@ -450,8 +466,10 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
             void setCompositeMaterial(ChunkMaterial * const value);
             void setFinalScreenMaterial(ChunkMaterial * const value);
             void setCurrentAdaptLuminanceIdx(const UInt32 value);
+            void setFinalScreenMaterialDepthChunk(DepthChunk * const value);
             void setWidth          (const Int32 value);
             void setHeight         (const Int32 value);
+            void setBackgroundRenderTarget(FrameBufferObject * const value);
             void setSceneRenderTarget(FrameBufferObject * const value);
             void setLuminanceRenderTarget(FrameBufferObject * const value);
             void setThresholdRenderTarget(FrameBufferObject * const value);
@@ -553,8 +571,8 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
     SFUnrecSimpleSHLChunkPtr _sfBlurVertShader;
     SFUnrecSimpleSHLChunkPtr _sfCompositeShader;
     SFUnrecSimpleSHLChunkPtr _sfFinalScreenShader;
-    SFUnrecTextureEnvChunkPtr _sfSharedTextureEnvChunk;
     SFUnrecMaterialChunkPtr _sfSharedMaterialChunk;
+    SFUnrecChunkMaterialPtr _sfBackgroundMaterial;
     SFUnrecChunkMaterialPtr _sfSceneMaterial;
     SFUnrecChunkMaterialPtr _sfLuminanceMapMaterial;
     SFUnrecChunkMaterialPtr _sfAdaptLuminanceMaterial;
@@ -565,8 +583,10 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
     SFUnrecChunkMaterialPtr _sfCompositeMaterial;
     SFUnrecChunkMaterialPtr _sfFinalScreenMaterial;
     SFUInt32          _sfCurrentAdaptLuminanceIdx;
+    SFUnrecDepthChunkPtr _sfFinalScreenMaterialDepthChunk;
     SFInt32           _sfWidth;
     SFInt32           _sfHeight;
+    SFUnrecFrameBufferObjectPtr _sfBackgroundRenderTarget;
     SFUnrecFrameBufferObjectPtr _sfSceneRenderTarget;
     SFUnrecFrameBufferObjectPtr _sfLuminanceRenderTarget;
     MFUnrecFrameBufferObjectPtr _mfAdaptLuminanceRenderTarget;
@@ -624,10 +644,10 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
      EditFieldHandlePtr editHandleCompositeShader(void);
      GetFieldHandlePtr  getHandleFinalScreenShader (void) const;
      EditFieldHandlePtr editHandleFinalScreenShader(void);
-     GetFieldHandlePtr  getHandleSharedTextureEnvChunk (void) const;
-     EditFieldHandlePtr editHandleSharedTextureEnvChunk(void);
      GetFieldHandlePtr  getHandleSharedMaterialChunk (void) const;
      EditFieldHandlePtr editHandleSharedMaterialChunk(void);
+     GetFieldHandlePtr  getHandleBackgroundMaterial (void) const;
+     EditFieldHandlePtr editHandleBackgroundMaterial(void);
      GetFieldHandlePtr  getHandleSceneMaterial   (void) const;
      EditFieldHandlePtr editHandleSceneMaterial  (void);
      GetFieldHandlePtr  getHandleLuminanceMapMaterial (void) const;
@@ -648,10 +668,14 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageDataBase : public StageData
      EditFieldHandlePtr editHandleFinalScreenMaterial(void);
      GetFieldHandlePtr  getHandleCurrentAdaptLuminanceIdx (void) const;
      EditFieldHandlePtr editHandleCurrentAdaptLuminanceIdx(void);
+     GetFieldHandlePtr  getHandleFinalScreenMaterialDepthChunk (void) const;
+     EditFieldHandlePtr editHandleFinalScreenMaterialDepthChunk(void);
      GetFieldHandlePtr  getHandleWidth           (void) const;
      EditFieldHandlePtr editHandleWidth          (void);
      GetFieldHandlePtr  getHandleHeight          (void) const;
      EditFieldHandlePtr editHandleHeight         (void);
+     GetFieldHandlePtr  getHandleBackgroundRenderTarget (void) const;
+     EditFieldHandlePtr editHandleBackgroundRenderTarget(void);
      GetFieldHandlePtr  getHandleSceneRenderTarget (void) const;
      EditFieldHandlePtr editHandleSceneRenderTarget(void);
      GetFieldHandlePtr  getHandleLuminanceRenderTarget (void) const;

@@ -178,6 +178,7 @@ namespace
 
         *bv = RenderPropertiesPool::the()->getFrom1("ShadowFactor");
 
+#ifdef _DEBUG
         fprintf(stderr,
                 "ColorBuffer : 0x%016" PRIx64 " \n"
                 "DepthBuffer : 0x%016" PRIx64 " \n"
@@ -187,6 +188,7 @@ namespace
                 SystemRenderProperties.DepthBuffer,
                 SystemRenderProperties.GBuffer,
                 SystemRenderProperties.ShadowFactor);
+#endif
 
         return true;
     }

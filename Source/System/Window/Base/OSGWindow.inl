@@ -75,6 +75,56 @@ bool Window::hasExtOrVersion(UInt32 extId,
 #endif
 }
 
+inline 
+bool Window::hasExtOrVersionNum(UInt32 extId, 
+                                UInt32 uiGLMajor, 
+                                UInt32 uiGLMinor, 
+                                UInt32 uiGLESMajor, 
+                                UInt32 uiGLESMinor)
+{
+#if defined(OSG_OGL_ES2)
+    return 
+        ((((uiGLESMajor << 8) + uiGLESMinor) <= _glVersion) || 
+        (_availExtensions[extId] & !_sfIgnoreAllExtensions.getValue()));
+#else
+    return 
+        ((((uiGLMajor << 8) + uiGLMinor) <= _glVersion) || 
+         (_availExtensions[extId] & !_sfIgnoreAllExtensions.getValue()));
+#endif
+}
+
+inline
+bool Window::hasGLVersionNum(UInt32 uiGLMajor, UInt32 uiGLMinor, UInt32 uiGLESMajor, UInt32 uiGLESMinor)
+{
+#if defined(OSG_OGL_ES2)
+    return ((uiGLESMajor << 8) + uiGLESMinor) <= _glVersion;
+#else
+    return ((uiGLMajor << 8) + uiGLMinor) <= _glVersion;
+#endif
+}
+
+inline
+bool Window::hasGLVersion(UInt32 uiGLVersion, UInt32 uiGLESVersion)
+{
+#if defined(OSG_OGL_ES2)
+    return uiGLESVersion <= _glVersion;
+#else
+    return uiGLVersion <= _glVersion;
+#endif
+}
+
+inline
+bool Window::hasGLSLVersionNum(UInt32 uiGLSLMajor, UInt32 uiGLSLMinor)
+{
+    return ((uiGLSLMajor << 8) + uiGLSLMinor) <= _glslVersion;
+}
+
+inline
+bool Window::hasGLSLVersion(UInt32 uiGLSLVersion)
+{
+    return uiGLSLVersion <= _glslVersion;
+}
+
 /*! Check if the window has the indicated extension.
     If extId is out of range, then automatically returns false.
  */
@@ -161,6 +211,24 @@ inline
 UInt32 Window::getGLVersion(void)
 {
     return _glVersion;
+}
+
+inline 
+UInt32 Window::getGLSLVersion(void)
+{
+    return _glslVersion;
+}
+
+inline
+const std::string& Window::getGLVendor(void)
+{
+    return _glVendor;
+}
+
+inline
+const std::string& Window::getGLRenderer(void)
+{
+    return _glRenderer;
 }
 
 /*! Return the id of a registered extension. Return -1 if extension not

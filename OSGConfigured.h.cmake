@@ -55,6 +55,10 @@
 
 #cmakedefine OSG_USE_OGLES_PROTOS 1
 
+#cmakedefine OSG_OGL_TEXTURE_SWIZZLE 1
+
+#cmakedefine OSG_USE_XXHASH 1
+
 #if !defined(OSG_GL_INCLUDE_GLEW)
 #cmakedefine OSG_GL_INCLUDE_GLEW 1
 #endif

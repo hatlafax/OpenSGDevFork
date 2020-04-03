@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="CapabilitiesDesc"
+    parent="FieldContainer"
+    library="ContribTechniques"
+    structure="concrete"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    >
+    This class stores platform, requested and runtime capabilties.
+    The class does not determine these capabilities. Its is merely
+    a storage for these values.
+
+    <Field
+        name="platformCapabilities"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="-1"
+        access="public"
+        >
+        The encoded platform capabilities of the current platform.
+    </Field>
+    <Field
+        name="requestedCapabilities"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="-1"
+        access="public"
+        >
+        The encoded requested capabilities of the current platform.
+    </Field>
+    <Field
+        name="runtimeCapabilities"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        defaultValue="0"
+        access="public"
+        >
+        The encoded runtime capabilities of the current platform.
+    </Field>
+</FieldContainer>

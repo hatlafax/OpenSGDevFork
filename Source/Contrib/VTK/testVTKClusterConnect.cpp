@@ -18,6 +18,7 @@
 //
 // press 'c' to connect to the servers and 'd' to disconnect. 
 
+#include <inttypes.h>
 
 #include "OSGConfig.h"
 
@@ -34,6 +35,7 @@
 
 #include "OSGVTKPolyDataMapper.h"
 
+#include "vtkVersionMacros.h"
 #include "vtkStructuredGridReader.h"
 #include "vtkStructuredGrid.h"
 #include "vtkPointData.h"

@@ -500,8 +500,8 @@ basic_unzip_streambuf<charT, traits>::unzip_from_stream(char_type* buffer,
             if (_zip_stream.avail_out < count)
               count = _zip_stream.avail_out;
             memcpy ( _zip_stream.next_out, _zip_stream.next_in, count );
-            _zip_stream.avail_in  -= count;
-            _zip_stream.avail_out -= count;
+            _zip_stream.avail_in  -= static_cast<uInt>(count);
+            _zip_stream.avail_out -= static_cast<uInt>(count);
             _zip_stream.next_in   += count;
             _zip_stream.next_out  += count;
             break;
@@ -515,10 +515,10 @@ basic_unzip_streambuf<charT, traits>::unzip_from_stream(char_type* buffer,
 
     // updating crc
     _crc = crc32(_crc, reinterpret_cast<byte_buffer_type>(buffer),
-                 buffer_size - _zip_stream.avail_out / sizeof(char_type));
+                 static_cast<uInt>(buffer_size) - _zip_stream.avail_out / sizeof(char_type));
         
     std::streamsize n_read = 
-        buffer_size - _zip_stream.avail_out / sizeof(char_type);
+        static_cast<uInt>(buffer_size) - _zip_stream.avail_out / sizeof(char_type);
         
     // check if it is the end
     if (_err == Z_STREAM_END)
@@ -539,7 +539,7 @@ basic_unzip_streambuf<charT, traits>::fill_input_buffer(void)
                   static_cast<std::streamsize>(_input_buffer.size() /
                                                sizeof(char_type)));
         
-    return _zip_stream.avail_in = _istream.gcount()*sizeof(char_type);
+    return _zip_stream.avail_in = static_cast<uInt>(_istream.gcount()*sizeof(char_type));
 }
 
 

@@ -43,9 +43,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <OSGConfig.h>
+#include "OSGConfig.h"
 
-#include <OSGBaseFunctions.h>
+#include "OSGBaseFunctions.h"
 
 #include "OSGFresnelMaterial.h"
 

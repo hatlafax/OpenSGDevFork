@@ -237,7 +237,7 @@ void OSBChunkBlockElement::write(void)
 
         writeFieldHeader("chunks", 
                          "MFUnrecStateChunkPtr", 
-                         _mfSlots.size() * sizeof(UInt32));
+                         static_cast<UInt32>(_mfSlots.size()) * sizeof(UInt32));
 
         wh = editRoot()->getWriteHandler();
         

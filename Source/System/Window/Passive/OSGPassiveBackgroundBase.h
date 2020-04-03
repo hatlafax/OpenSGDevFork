@@ -67,6 +67,7 @@
 
 #include "OSGSysFields.h"               // ClearFrameBufferObject type
 #include "OSGRenderFunctorCallbackFields.h" // ClearCallback type
+#include "OSGFrameBufferObjectFields.h" // Mediator type
 
 #include "OSGPassiveBackgroundFields.h"
 
@@ -97,18 +98,30 @@ class OSG_WINDOW_DLLMAPPING PassiveBackgroundBase : public Background
     {
         ClearFrameBufferObjectFieldId = Inherited::NextFieldId,
         ClearCallbackFieldId = ClearFrameBufferObjectFieldId + 1,
-        NextFieldId = ClearCallbackFieldId + 1
+        UseMediatorFieldId = ClearCallbackFieldId + 1,
+        AutoResizeFieldId = UseMediatorFieldId + 1,
+        MediatorFieldId = AutoResizeFieldId + 1,
+        NextFieldId = MediatorFieldId + 1
     };
 
     static const OSG::BitVector ClearFrameBufferObjectFieldMask =
         (TypeTraits<BitVector>::One << ClearFrameBufferObjectFieldId);
     static const OSG::BitVector ClearCallbackFieldMask =
         (TypeTraits<BitVector>::One << ClearCallbackFieldId);
+    static const OSG::BitVector UseMediatorFieldMask =
+        (TypeTraits<BitVector>::One << UseMediatorFieldId);
+    static const OSG::BitVector AutoResizeFieldMask =
+        (TypeTraits<BitVector>::One << AutoResizeFieldId);
+    static const OSG::BitVector MediatorFieldMask =
+        (TypeTraits<BitVector>::One << MediatorFieldId);
     static const OSG::BitVector NextFieldMask =
         (TypeTraits<BitVector>::One << NextFieldId);
         
     typedef SFBool            SFClearFrameBufferObjectType;
     typedef SFRenderFunctorCallback SFClearCallbackType;
+    typedef SFBool            SFUseMediatorType;
+    typedef SFBool            SFAutoResizeType;
+    typedef SFUnrecFrameBufferObjectPtr SFMediatorType;
 
     /*---------------------------------------------------------------------*/
     /*! \name                    Class Get                                 */
@@ -137,9 +150,25 @@ class OSG_WINDOW_DLLMAPPING PassiveBackgroundBase : public Background
                   SFBool              *editSFClearFrameBufferObject(void);
             const SFBool              *getSFClearFrameBufferObject (void) const;
 
+                  SFBool              *editSFUseMediator    (void);
+            const SFBool              *getSFUseMediator     (void) const;
+
+                  SFBool              *editSFAutoResize     (void);
+            const SFBool              *getSFAutoResize      (void) const;
+            const SFUnrecFrameBufferObjectPtr *getSFMediator       (void) const;
+                  SFUnrecFrameBufferObjectPtr *editSFMediator       (void);
+
 
                   bool                &editClearFrameBufferObject(void);
                   bool                 getClearFrameBufferObject (void) const;
+
+                  bool                &editUseMediator    (void);
+                  bool                 getUseMediator     (void) const;
+
+                  bool                &editAutoResize     (void);
+                  bool                 getAutoResize      (void) const;
+
+                  FrameBufferObject * getMediator       (void) const;
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -147,6 +176,14 @@ class OSG_WINDOW_DLLMAPPING PassiveBackgroundBase : public Background
     /*! \{                                                                 */
 
             void setClearFrameBufferObject(const bool value);
+            void setUseMediator    (const bool value);
+            void setAutoResize     (const bool value);
+            void setMediator       (FrameBufferObject * const value);
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                Ptr Field Set                                 */
+    /*! \{                                                                 */
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -208,6 +245,9 @@ class OSG_WINDOW_DLLMAPPING PassiveBackgroundBase : public Background
 
     SFBool            _sfClearFrameBufferObject;
     SFRenderFunctorCallback _sfClearCallback;
+    SFBool            _sfUseMediator;
+    SFBool            _sfAutoResize;
+    SFUnrecFrameBufferObjectPtr _sfMediator;
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -229,6 +269,7 @@ class OSG_WINDOW_DLLMAPPING PassiveBackgroundBase : public Background
     /*! \name                     onCreate                                */
     /*! \{                                                                 */
 
+    void onCreate(const PassiveBackground *source = NULL);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -239,6 +280,12 @@ class OSG_WINDOW_DLLMAPPING PassiveBackgroundBase : public Background
      EditFieldHandlePtr editHandleClearFrameBufferObject(void);
      GetFieldHandlePtr  getHandleClearCallback   (void) const;
      EditFieldHandlePtr editHandleClearCallback  (void);
+     GetFieldHandlePtr  getHandleUseMediator     (void) const;
+     EditFieldHandlePtr editHandleUseMediator    (void);
+     GetFieldHandlePtr  getHandleAutoResize      (void) const;
+     EditFieldHandlePtr editHandleAutoResize     (void);
+     GetFieldHandlePtr  getHandleMediator        (void) const;
+     EditFieldHandlePtr editHandleMediator       (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

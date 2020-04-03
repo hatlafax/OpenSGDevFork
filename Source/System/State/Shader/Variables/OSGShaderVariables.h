@@ -77,144 +77,147 @@
 OSG_BEGIN_NAMESPACE
 
 OSG_SYSTEM_DLLMAPPING
-void osgUniformShaderVariableSwitch  (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableSwitch        (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableLocation(DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram  );
+OSG_SYSTEM_DLLMAPPING
+void osgUniformShaderVariableLocationSwitch(DrawEnv        *pEnv,
+                                            ShaderVariable *pVar,
+                                            Int32          &loc,
+                                            UInt32          uiProgram);
 
-void osgUniformShaderVariableBool    (DrawEnv        *pEnv,   
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
 
-void osgUniformShaderVariableInt     (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableLocation      (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram  );
 
-void osgUniformShaderVariableUInt    (DrawEnv        *pEnv,
-                                      ShaderVariable *pVar,
-                                      Int32          &loc,
-                                      UInt32          uiProgram,
-                                      bool            warnUnknown);
+void osgUniformShaderVariableBool          (DrawEnv        *pEnv,   
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableReal    (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableInt           (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableVec2f   (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableUInt          (DrawEnv        *pEnv,
+                                            ShaderVariable *pVar,
+                                            Int32          &loc,
+                                            UInt32          uiProgram,
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableVec3f   (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableReal          (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableVec4f   (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableVec2f         (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariablePnt2f   (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableVec3f         (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariablePnt3f   (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableVec4f         (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableMatrix  (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariablePnt2f         (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableMInt    (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariablePnt3f         (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableMUInt   (DrawEnv        *pEnv,
-                                      ShaderVariable *pVar,
-                                      Int32          &loc,
-                                      UInt32          uiProgram,
-                                      bool            warnUnknown);
+void osgUniformShaderVariableMatrix        (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableMReal   (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableMInt          (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableMVec2f  (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableMUInt         (DrawEnv        *pEnv,
+                                            ShaderVariable *pVar,
+                                            Int32          &loc,
+                                            UInt32          uiProgram,
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableMVec3f  (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableMReal         (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableMVec4f  (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableMVec2f        (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderVariableMMatrix (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,  
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableMVec3f        (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderUniformBlockLocation
-                                     (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram  );
+void osgUniformShaderVariableMVec4f        (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderUniformBlockBinding
-                                     (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,  
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderVariableMMatrix       (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,  
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
-void osgUniformShaderStorageBlockLocation
-                                     (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,       
-                                      Int32          &loc,
-                                      UInt32          uiProgram  );
+void osgUniformShaderUniformBlockLocation  (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram  );
 
-void osgUniformShaderStorageBlockBinding
-                                     (DrawEnv        *pEnv,      
-                                      ShaderVariable *pVar,  
-                                      Int32          &loc,
-                                      UInt32          uiProgram, 
-                                      bool            warnUnknown);
+void osgUniformShaderUniformBlockBinding   (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,  
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
+
+void osgUniformShaderStorageBlockLocation  (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,       
+                                            Int32          &loc,
+                                            UInt32          uiProgram  );
+
+void osgUniformShaderStorageBlockBinding   (DrawEnv        *pEnv,      
+                                            ShaderVariable *pVar,  
+                                            Int32          &loc,
+                                            UInt32          uiProgram, 
+                                            bool            warnUnknown);
 
 OSG_END_NAMESPACE
 

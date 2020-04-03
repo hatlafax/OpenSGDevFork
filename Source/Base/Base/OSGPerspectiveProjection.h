@@ -40,6 +40,7 @@
 #define _OSGPERSPECTIVEPROJECTION_H_
 
 #include "OSGBaseTypes.h"
+#include "OSGMatrix.h"
 #include "OSGProjection.h"
 
 OSG_BEGIN_NAMESPACE
@@ -68,6 +69,8 @@ class OSG_BASE_DLLMAPPING PerspectiveProjection : public Projection
                             Real32 zNear,
                             Real32 zFar
                          );
+  
+    PerspectiveProjection(const Matrix& matProjection);
 
     PerspectiveProjection(const PerspectiveProjection& rhs);
 
@@ -82,7 +85,15 @@ class OSG_BASE_DLLMAPPING PerspectiveProjection : public Projection
     /*---------------------------------------------------------------------*/
     /*! \name                    Operators                                 */
     /*! \{                                                                 */
-    PerspectiveProjection& operator=(const PerspectiveProjection& rhs);
+    PerspectiveProjection& operator= (  const PerspectiveProjection& rhs);
+    bool                   operator==(
+                                        const PerspectiveProjection& rhs
+                                      ) const;
+    bool                   equals    (
+                                        const PerspectiveProjection& rhs, 
+                                        Real32 tol
+                                      ) const;
+
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                    Get/Set                                   */
@@ -94,6 +105,14 @@ class OSG_BASE_DLLMAPPING PerspectiveProjection : public Projection
 
     Real32              getAspect       () const;
     void                setAspect       (Real32 aspect);
+    
+    void                setValue        (
+                                            Real32 fov,
+                                            Real32 aspect,
+                                            Real32 zNear,
+                                            Real32 zFar);
+                                            
+    void                setValue        (const Matrix& matProjection);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

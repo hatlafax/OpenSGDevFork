@@ -2,11 +2,11 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
  *                            www.opensg.org                                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -64,24 +64,24 @@
 
 OSG_BEGIN_NAMESPACE
 
+
 class EGLWindow;
 
 OSG_GEN_CONTAINERPTR(EGLWindow);
-
 /*! \ingroup GrpWindowEGLFieldTraits
     \ingroup GrpLibOSGWindowEGL
  */
 template <>
-struct FieldTraits<EGLWindow *> :
-    public FieldTraitsFCPtrBase<EGLWindow *>
+struct FieldTraits<EGLWindow *, nsOSG> :
+    public FieldTraitsFCPtrBase<EGLWindow *, nsOSG>
 {
   private:
 
-    static DataType             _type;
+    static PointerType             _type;
 
   public:
 
-    typedef FieldTraits<EGLWindow *>  Self;
+    typedef FieldTraits<EGLWindow *, nsOSG>  Self;
 
     enum                        { Convertible = NotConvertible };
 
@@ -90,57 +90,55 @@ struct FieldTraits<EGLWindow *> :
     template<typename RefCountPolicy> inline
     static const Char8    *getSName     (void);
 
-//    static const char *getSName(void) { return "SFEGLWindowPtr"; }
     template<typename RefCountPolicy> inline
     static const Char8    *getMName     (void);
 
-//    static const char *getMName(void) { return "MFEGLWindowPtr"; }
 };
 
 template<> inline
-const Char8 *FieldTraits<EGLWindow *, 0>::getSName<RecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<EGLWindow *, nsOSG>::getSName<RecordedRefCountPolicy>(void)
 {
     return "SFRecEGLWindowPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<EGLWindow *, 0>::getSName<UnrecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<EGLWindow *, nsOSG>::getSName<UnrecordedRefCountPolicy>(void)
 {
     return "SFUnrecEGLWindowPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<EGLWindow *, 0>::getSName<WeakRefCountPolicy>(void)
+const Char8 *FieldTraits<EGLWindow *, nsOSG>::getSName<WeakRefCountPolicy>(void)
 {
     return "SFWeakEGLWindowPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<EGLWindow *, 0>::getSName<NoRefCountPolicy>(void)
+const Char8 *FieldTraits<EGLWindow *, nsOSG>::getSName<NoRefCountPolicy>(void)
 {
     return "SFUnrefdEGLWindowPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<EGLWindow *, 0>::getMName<RecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<EGLWindow *, nsOSG>::getMName<RecordedRefCountPolicy>(void)
 {
     return "MFRecEGLWindowPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<EGLWindow *, 0>::getMName<UnrecordedRefCountPolicy>(void)
+const Char8 *FieldTraits<EGLWindow *, nsOSG>::getMName<UnrecordedRefCountPolicy>(void)
 {
     return "MFUnrecEGLWindowPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<EGLWindow *, 0>::getMName<WeakRefCountPolicy>(void)
+const Char8 *FieldTraits<EGLWindow *, nsOSG>::getMName<WeakRefCountPolicy>(void)
 {
     return "MFWeakEGLWindowPtr"; 
 }
 
 template<> inline
-const Char8 *FieldTraits<EGLWindow *, 0>::getMName<NoRefCountPolicy>(void)
+const Char8 *FieldTraits<EGLWindow *, nsOSG>::getMName<NoRefCountPolicy>(void)
 {
     return "MFUnrefdEGLWindowPtr"; 
 }
@@ -149,30 +147,30 @@ const Char8 *FieldTraits<EGLWindow *, 0>::getMName<NoRefCountPolicy>(void)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /*! \ingroup GrpWindowEGLFieldSFields */
 typedef PointerSField<EGLWindow *,
-                      RecordedRefCountPolicy  > SFRecEGLWindowPtr;
+                      RecordedRefCountPolicy, nsOSG  > SFRecEGLWindowPtr;
 /*! \ingroup GrpWindowEGLFieldSFields */
 typedef PointerSField<EGLWindow *,
-                      UnrecordedRefCountPolicy> SFUnrecEGLWindowPtr;
+                      UnrecordedRefCountPolicy, nsOSG> SFUnrecEGLWindowPtr;
 /*! \ingroup GrpWindowEGLFieldSFields */
 typedef PointerSField<EGLWindow *,
-                      WeakRefCountPolicy      > SFWeakEGLWindowPtr;
+                      WeakRefCountPolicy, nsOSG      > SFWeakEGLWindowPtr;
 /*! \ingroup GrpWindowEGLFieldSFields */
 typedef PointerSField<EGLWindow *,
-                      NoRefCountPolicy        > SFUncountedEGLWindowPtr;
+                      NoRefCountPolicy, nsOSG        > SFUncountedEGLWindowPtr;
 
 
 /*! \ingroup GrpWindowEGLFieldMFields */
 typedef PointerMField<EGLWindow *,
-                      RecordedRefCountPolicy  > MFRecEGLWindowPtr;
+                      RecordedRefCountPolicy, nsOSG  > MFRecEGLWindowPtr;
 /*! \ingroup GrpWindowEGLFieldMFields */
 typedef PointerMField<EGLWindow *,
-                      UnrecordedRefCountPolicy> MFUnrecEGLWindowPtr;
+                      UnrecordedRefCountPolicy, nsOSG> MFUnrecEGLWindowPtr;
 /*! \ingroup GrpWindowEGLFieldMFields */
 typedef PointerMField<EGLWindow *,
-                      WeakRefCountPolicy      > MFWeakEGLWindowPtr;
+                      WeakRefCountPolicy, nsOSG      > MFWeakEGLWindowPtr;
 /*! \ingroup GrpWindowEGLFieldMFields */
 typedef PointerMField<EGLWindow *,
-                      NoRefCountPolicy        > MFUncountedEGLWindowPtr;
+                      NoRefCountPolicy, nsOSG        > MFUncountedEGLWindowPtr;
 
 
 

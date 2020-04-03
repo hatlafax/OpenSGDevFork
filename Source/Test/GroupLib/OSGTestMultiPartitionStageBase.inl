@@ -2,9 +2,9 @@
  *                                OpenSG                                     *
  *                                                                           *
  *                                                                           *
- *               Copyright (C) 2000-2006 by the OpenSG Forum                 *
+ *               Copyright (C) 2000-2013 by the OpenSG Forum                 *
  *                                                                           *
- *   contact: dirk@opensg.org, gerrit.voss@vossg.org, jbehr@zgdv.de          *
+ * contact: dirk@opensg.org, gerrit.voss@vossg.org, carsten_neumann@gmx.net  *
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*\
@@ -158,13 +158,12 @@ inline
 }
 
 inline
-Int32 &TestMultiPartitionStageBase::editOrder(const UInt32 index)
+MFInt32            ::reference TestMultiPartitionStageBase::editOrder(const UInt32 index)
 {
     editMField(OrderFieldMask, _mfOrder);
 
     return _mfOrder[index];
 }
-
 
 
 #ifdef OSG_MT_CPTR_ASPECT

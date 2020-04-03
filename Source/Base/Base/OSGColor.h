@@ -141,6 +141,7 @@ class Color3 : public Vector<ValueTypeT, 3>
           ValueType *getValuesRGB(void               );
     const ValueType *getValuesRGB(void               ) const;
 
+          bool       isBlack      (void              ) const;
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -231,6 +232,8 @@ class Color4 : public Vector< ValueTypeT, 4 >
 
           ValueType *getValuesRGBA(void               );
     const ValueType *getValuesRGBA(void               ) const;
+
+          bool       isBlack      (void              ) const;
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="ShaderManager"
+    parent="FieldContainer"
+    library="ContribTechniques"
+    structure="concrete"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    >
+    The shader manager is part of a material factory object.
+    It allows the sharing of ShaderProgramChunk objects.
+    It assembles the ShaderProgramChunks from ShaderProgram
+    objcets that it gets from the embedded ShaderProgramManager
+    instance. A ShaderProgramChunk is identified by a SHA1
+    hash calculated from the hash values of the ShaderPrograms
+    that are contained in the ShaderProgramChunk.
+
+    <Field
+        name="programChunkMap"
+        type="HashKeyToFieldContainerMap"
+        cardinality="single"
+        visibility="external"
+        access="protected"
+        category="pointer"
+        defaultValue="NULL"
+        >
+        The map of SHA1 hash to ShaderProgramChunk objects.
+        The hash is calculated from the ShaderProgram objects
+        within the chunk.
+    </Field>
+
+    <Field
+        name="codeGenerator"
+        type="ShaderCodeGenerator"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        category="pointer"
+        defaultValue="NULL"
+        >
+        A ShaderCodeGenerator is responsible for providing the actual
+        shader program texts for the different shader types.
+        A ShaderCodeGenerator provides a ShaderDescStore helper object
+        that contains the a multi field of ShaderDesc instances.
+    </Field>
+
+    <Field
+        name="programManager"
+        type="ShaderProgramManager"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        category="pointer"
+        defaultValue="NULL"
+        >
+        The ShaderProgramManager is responsible for providing the
+        actual ShaderProgram instance for each ShaderDesc entry from
+        the ShaderDescStore object provided from a ShaderCodeGenerator.
+    </Field>
+
+</FieldContainer>

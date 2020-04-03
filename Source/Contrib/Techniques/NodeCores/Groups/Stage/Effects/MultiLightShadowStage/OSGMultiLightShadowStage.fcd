@@ -1,0 +1,316 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+   name="MultiLightShadowStage"
+   parent="Stage"
+   library="ContribTechniques"
+   pointerfieldtypes="both"
+   structure="concrete"
+   systemcomponent="true"
+   parentsystemcomponent="true"
+   decoratable="false"
+   useLocalIncludes="false"
+   isNodeCore="true"
+   isBundle="false"
+   >
+    This MultiLight shadow stage generates shadows for lights defined by the MultiLight core. For that it generates
+    shadow maps for each enabled shadowing light. The details of the shadow map generation and evaluation are
+    implemented by specialized technique classes that are derived from a common technique base class. Each technique
+    class has an associated technique parameter class that is derived from a common technique parameter base class.
+    The stage implementation is quite similar to the ShadowStage class. Alike to the ShadowStage class which 
+    implements its details in ShadowTreeHandler derived ShadowMapHandler classes, this class implements its details
+    in MultiLightShadowTechniqueBase derived MultiLightShadowTechnique classes. However, these handler classes 
+    do not correspond to the ShadowMapHandler classes, because other strategies are implemented for the MultiLight
+    based case. Anyone is free to implement the missing  MultiLightShadowTechniques if needed.
+    The most important difference to the ShadowStage class is that this stage does not generate a shadow factor map,
+    but provides shader code that must be integrated into the final lighing shader. This shader code differs for the various
+    technique implementations, but, finally, the lighing shader does only have to call one top level function that does 
+    encapsulate all shadow calculation details that must be executed by the shader.
+
+  <Field
+	 name="shadowMode"
+	 type="UInt32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="0"
+	 access="public"
+	 >
+  </Field>
+  <Field
+	 name="activate"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="true"
+	 access="public"
+	 >
+        If the stage is deactivated it does not perform any action on its own but act as a simple Group core.
+  </Field>
+  <Field
+	 name="shadowOn"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="true"
+	 access="public"
+	 >
+        Allow activation/deactivation of the shadow map generation.
+  </Field>
+  <Field
+	 name="useHWPCF"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="true"
+	 access="public"
+	 >
+        Use of shadow sampler to automatically perform hardware percentage closed filtering.
+        This is recommended and not all techniques might support this variation point.
+  </Field>
+  <Field
+	 name="shadowParameter"
+	 type="MultiLightShadowParameterPtr"
+	 cardinality="multi"
+	 visibility="external"
+	 access="protected"
+	 >
+        Shadow parameter for groups of lights. These parameters are provided to the particular fragment shader
+        for evaluation.
+  </Field>
+
+  <Field
+	 name="shadowMapWidth"
+	 type="UInt32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="1024"
+	 access="public"
+	 >
+        A hint for the width of the shadow maps. This value might be taken by the technique class
+        do determine the width of its shadow maps.
+  </Field>
+  <Field
+	 name="shadowMapHeight"
+	 type="UInt32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="1024"
+	 access="public"
+	 >
+        A hint for the height of the shadow maps. This value might be taken by the technique class
+        do determine the height of its shadow maps.
+  </Field>
+
+  <Field
+	 name="filterDistributionSize"
+	 type="Int32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="3"
+	 access="public"
+	 >
+        The filter (PCF, PCSS) distribution size. This value is in the range of 1 to 4, corresponding to 
+        poisson disk sizes of 16, 25, 32 or 64 and box sample sizes of 4x4, 6x6, 8x8 or 10x10. Values
+        that are out of range are clamped to the valid range borders.
+  </Field>
+
+  <Field
+	 name="searchDistributionSize"
+	 type="Int32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="2"
+	 access="public"
+	 >
+        The blocker search (PCF, PCSS) distribution size. This value is in the range of 0 to 3, corresponding to 
+        poisson disk sizes of 9, 16, 25 or 32 and box sample sizes of 2x2, 4x4, 6x6 or 8x8. Values that are out
+        of range are clamped to the valid range borders. Additionally, it is also forced that the search size is
+        always less than the filter size.
+  </Field>
+
+  <Field
+	 name="cullFrontFace"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="false"
+	 access="public"
+	 >
+        Cull front face on shadow map rendering.
+  </Field>
+  <Field
+	 name="offsetBias"
+	 type="Real32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="0.f"
+	 access="public"
+	 >
+	Offset-Bias for Polygon-Offset. Needs to be used with Polygon-Chunk. The Polygon-Chunk is only
+                installed if the value is not zero.
+  </Field>
+  <Field
+	 name="offsetFactor"
+	 type="Real32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="0.f"
+	 access="public"
+	 >
+	Offset-Factor for Polygon-Offset. Needs to be used with Polygon-Chunk. The Polygon-Chunk is only
+                installed if the value is not zero.
+  </Field>
+  <Field
+	 name="enlargeShadowVolumeZ"
+	 type="Real32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="0.01f"
+	 access="public"
+	 >
+	Factor that is used to enlarge the shadow volume for directional lights
+                in z-direction of the light space.
+  </Field>
+
+  <Field
+	 name="excludeNodes"
+	 type="NodePtr"
+	 cardinality="multi"
+	 visibility="external"
+	 access="public"
+	 >
+        Nodes that should not cast shadows at all.
+  </Field>
+  <Field
+	 name="autoExcludeTransparentNodes"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="true"
+	 access="public"
+	 >
+	Usually transparent objects do not cast shadows. Setting this flag to false let the 
+	transparent nodes also cast shadows.
+  </Field>
+  <Field
+        name="multiLightChunk"
+        type="MultiLightChunk"
+        category="weakpointer"
+        cardinality="single"
+        visibility="external"
+        access="public"
+     >
+        The multi light chunk. This chunk is typically managed either by a ChunkMaterial in a MaterialOverrideGroup
+        or by an ClusterShadingStage. In any case, this shadow stage does not manage the multi light chunk but only
+        references it. Therefore it is represented by a weak pointer.
+  </Field>
+  <Field
+	 name="autoSearchMultiLightChunk"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="true"
+	 access="public"
+	 >
+        If true the stage searches for a valid MultiLightChunk upwards in its parent tree.
+  </Field>
+
+  <Field
+	 name="samplerCubeArrayTextureUnit"
+	 type="Int32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="-1"
+	 access="public"
+	 >
+        The texture unit for the samplerCubeArray point light texture. If this value
+        is -1 the greatest possible value -1 is used.
+  </Field>
+  <Field
+	 name="samplerCubeArrayShadowTextureUnit"
+	 type="Int32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="-1"
+	 access="public"
+	 >
+        The texture unit for the samplerCubeArrayShadow point light texture. If this value
+        is -1 the greatest possible value -1 is used.
+  </Field>
+
+  <Field
+	 name="sampler2DArrayTextureUnit"
+	 type="Int32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="-1"
+	 access="public"
+	 >
+        The texture unit for the sampler2DArray directional light texture. If this value
+        is -1 the greatest possible value is used.
+  </Field>
+  <Field
+	 name="sampler2DArrayShadowTextureUnit"
+	 type="Int32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="-1"
+	 access="public"
+	 >
+        The texture unit for the sampler2DArrayShadow directional light texture. If this value
+        is -1 the greatest possible value is used.
+  </Field>
+  <Field
+	 name="shadowDataBindingPnt"
+	 type="Int32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="-1"
+	 access="public"
+	 >
+        The binding point for the shader storage buffer of the shadow data.
+  </Field>
+  <Field
+	 name="shadowParameterBindingPnt"
+	 type="Int32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="-1"
+	 access="public"
+	 >
+        The binding point for the uniform buffer of the shadow parameter.
+  </Field>
+
+  <Field
+	 name="distributionBindingPnt"
+	 type="Int32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="-1"
+	 access="public"
+	 >
+        The binding point for the uniform buffer of the filter and search distributions for
+        the PCF and PCSS techniques.
+  </Field>
+  
+  <Field
+	 name="disableOverride"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="false"
+	 access="public"
+	 >
+  </Field>
+
+    <Field
+	 name="arbTest"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="false"
+	 access="public"
+	 >
+  </Field>
+
+</FieldContainer>

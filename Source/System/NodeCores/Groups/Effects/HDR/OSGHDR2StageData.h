@@ -83,6 +83,7 @@ class OSG_EFFECTGROUPS_DLLMAPPING HDR2StageData : public HDR2StageDataBase
     /*---------------------------------------------------------------------*/
     /*! \name                   Convenience                                */
     /*! \{                                                                 */
+    TextureObjChunk*    getBackgroundTexObjChunk        () const;
     TextureObjChunk*    getSceneTexObjChunk             () const;
     TextureObjChunk*    getDepthTexObjChunk             () const;
     TextureObjChunk*    getLuminanceTexObjChunk         () const;

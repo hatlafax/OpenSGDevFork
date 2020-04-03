@@ -70,7 +70,7 @@ OSG_BEGIN_NAMESPACE
 \***************************************************************************/
 
 StateChunkClass UniformBufferObjBaseChunk::_class("UniformBuffer",
-                                                  osgMaxUniformBufferBindings,  // number if slots
+                                                  osgMaxUniformBufferBindings,  // number of slots
                                                   30);                          // priority
 
 volatile UInt16 UniformBufferObjBaseChunk::_uiChunkCounter = 1;

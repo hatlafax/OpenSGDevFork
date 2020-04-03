@@ -82,6 +82,14 @@ OSG_BEGIN_NAMESPACE
  *                        Field Documentation                              *
 \***************************************************************************/
 
+/*! \var UInt32          GeoIntegralBufferRefPropertyBase::_sfOsgGLId
+    The OpenSG GL object id for this geo property buffer object. If osgGLId is set, the GL object id
+    is determined by OpenSG. If osgGLId equals 0, the GLId is used directly as the GL object id.
+    An API getOglGLId()/setOglGLId() is provided to get/set the inherited GLId. This brings the
+    interface more in line to the TextureObjRefChunk and the ShaderStorageBufferRefObjChunk
+    classes.
+*/
+
 
 /***************************************************************************\
  *                      FieldType/FieldTrait Instantiation                 *
@@ -129,6 +137,24 @@ OSG_EXPORT_PTR_MFIELD(ChildPointerMField,
 
 void GeoIntegralBufferRefPropertyBase::classDescInserter(TypeObject &oType)
 {
+    FieldDescriptionBase *pDesc = NULL;
+
+
+    pDesc = new SFUInt32::Description(
+        SFUInt32::getClassType(),
+        "osgGLId",
+        "The OpenSG GL object id for this geo property buffer object. If osgGLId is set, the GL object id\n"
+        "is determined by OpenSG. If osgGLId equals 0, the GLId is used directly as the GL object id.\n"
+        "An API getOglGLId()/setOglGLId() is provided to get/set the inherited GLId. This brings the\n"
+        "interface more in line to the TextureObjRefChunk and the ShaderStorageBufferRefObjChunk\n"
+        "classes.\n",
+        OsgGLIdFieldId, OsgGLIdFieldMask,
+        true,
+        (Field::FClusterLocal),
+        static_cast<FieldEditMethodSig>(&GeoIntegralBufferRefProperty::editHandleOsgGLId),
+        static_cast<FieldGetMethodSig >(&GeoIntegralBufferRefProperty::getHandleOsgGLId));
+
+    oType.addInitialDesc(pDesc);
 }
 
 
@@ -158,6 +184,22 @@ GeoIntegralBufferRefPropertyBase::TypeObject GeoIntegralBufferRefPropertyBase::_
     "   childFields=\"both\"\n"
     "   docGroupBase=\"GrpDrawablesGeometry\"\n"
     "   >\n"
+    "\n"
+    "    <Field\n"
+    "        name=\"osgGLId\"\n"
+    "        type=\"UInt32\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"internal\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue=\"0\"\n"
+    "        fieldFlags=\"FClusterLocal\"\n"
+    "\t>\n"
+    "            The OpenSG GL object id for this geo property buffer object. If osgGLId is set, the GL object id\n"
+    "            is determined by OpenSG. If osgGLId equals 0, the GLId is used directly as the GL object id.\n"
+    "            An API getOglGLId()/setOglGLId() is provided to get/set the inherited GLId. This brings the\n"
+    "            interface more in line to the TextureObjRefChunk and the ShaderStorageBufferRefObjChunk\n"
+    "            classes.\n"
+    "    </Field>\n"
     "</FieldContainer>\n",
     ""
     );
@@ -182,6 +224,19 @@ UInt32 GeoIntegralBufferRefPropertyBase::getContainerSize(void) const
 /*------------------------- decorator get ------------------------------*/
 
 
+SFUInt32 *GeoIntegralBufferRefPropertyBase::editSFOsgGLId(void)
+{
+    editSField(OsgGLIdFieldMask);
+
+    return &_sfOsgGLId;
+}
+
+const SFUInt32 *GeoIntegralBufferRefPropertyBase::getSFOsgGLId(void) const
+{
+    return &_sfOsgGLId;
+}
+
+
 
 
 
@@ -192,6 +247,10 @@ SizeT GeoIntegralBufferRefPropertyBase::getBinSize(ConstFieldMaskArg whichField)
 {
     SizeT returnValue = Inherited::getBinSize(whichField);
 
+    if(FieldBits::NoField != (OsgGLIdFieldMask & whichField))
+    {
+        returnValue += _sfOsgGLId.getBinSize();
+    }
 
     return returnValue;
 }
@@ -201,6 +260,10 @@ void GeoIntegralBufferRefPropertyBase::copyToBin(BinaryDataHandler &pMem,
 {
     Inherited::copyToBin(pMem, whichField);
 
+    if(FieldBits::NoField != (OsgGLIdFieldMask & whichField))
+    {
+        _sfOsgGLId.copyToBin(pMem);
+    }
 }
 
 void GeoIntegralBufferRefPropertyBase::copyFromBin(BinaryDataHandler &pMem,
@@ -208,6 +271,11 @@ void GeoIntegralBufferRefPropertyBase::copyFromBin(BinaryDataHandler &pMem,
 {
     Inherited::copyFromBin(pMem, whichField);
 
+    if(FieldBits::NoField != (OsgGLIdFieldMask & whichField))
+    {
+        editSField(OsgGLIdFieldMask);
+        _sfOsgGLId.copyFromBin(pMem);
+    }
 }
 
 //! create a new instance of the class
@@ -332,12 +400,14 @@ FieldContainerTransitPtr GeoIntegralBufferRefPropertyBase::shallowCopy(void) con
 /*------------------------- constructors ----------------------------------*/
 
 GeoIntegralBufferRefPropertyBase::GeoIntegralBufferRefPropertyBase(void) :
-    Inherited()
+    Inherited(),
+    _sfOsgGLId                (UInt32(0))
 {
 }
 
 GeoIntegralBufferRefPropertyBase::GeoIntegralBufferRefPropertyBase(const GeoIntegralBufferRefPropertyBase &source) :
-    Inherited(source)
+    Inherited(source),
+    _sfOsgGLId                (source._sfOsgGLId                )
 {
 }
 
@@ -348,6 +418,31 @@ GeoIntegralBufferRefPropertyBase::~GeoIntegralBufferRefPropertyBase(void)
 {
 }
 
+
+GetFieldHandlePtr GeoIntegralBufferRefPropertyBase::getHandleOsgGLId         (void) const
+{
+    SFUInt32::GetHandlePtr returnValue(
+        new  SFUInt32::GetHandle(
+             &_sfOsgGLId,
+             this->getType().getFieldDesc(OsgGLIdFieldId),
+             const_cast<GeoIntegralBufferRefPropertyBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr GeoIntegralBufferRefPropertyBase::editHandleOsgGLId        (void)
+{
+    SFUInt32::EditHandlePtr returnValue(
+        new  SFUInt32::EditHandle(
+             &_sfOsgGLId,
+             this->getType().getFieldDesc(OsgGLIdFieldId),
+             this));
+
+
+    editSField(OsgGLIdFieldMask);
+
+    return returnValue;
+}
 
 
 #ifdef OSG_MT_CPTR_ASPECT

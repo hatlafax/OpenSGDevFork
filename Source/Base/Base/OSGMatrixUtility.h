@@ -45,6 +45,8 @@
 #include "OSGBaseTypes.h"
 #include "OSGVector.h"
 #include "OSGMatrixFwd.h"
+#include "OSGProjection.h"
+#include "OSGView.h"
 
 OSG_BEGIN_NAMESPACE
 
@@ -83,6 +85,11 @@ OSG_BASE_DLLMAPPING bool MatrixOrthogonal        (OSG::Matrix &result,
                                                   OSG::Real32  rHeight, 
                                                   OSG::Real32  rNear, 
                                                   OSG::Real32  rFar       );
+/*! \ingroup GrpBaseBaseMathMatrixFn
+    \relatesalso TransformationMatrix
+ */
+OSG_BASE_DLLMAPPING bool MatrixOrthogonal       (OSG::Matrix &result,
+                                                 const OSG::Projection& proj);
 
 /*! \ingroup GrpBaseBaseMathMatrixFn
     \relatesalso TransformationMatrix
@@ -129,6 +136,12 @@ OSG_BASE_DLLMAPPING bool MatrixPerspective      (OSG::Matrix &result,
                                                  OSG::Real32  rHeight,
                                                  OSG::Real32  rNear, 
                                                  OSG::Real32  rFar        );
+                                                 
+/*! \ingroup GrpBaseBaseMathMatrixFn
+    \relatesalso TransformationMatrix
+ */
+OSG_BASE_DLLMAPPING bool MatrixPerspective      (OSG::Matrix &result,
+                                                 const OSG::Projection& proj);
 
 /*! \ingroup GrpBaseBaseMathMatrixFn
     \relatesalso TransformationMatrix
@@ -185,6 +198,13 @@ OSG_BASE_DLLMAPPING bool MatrixLookAt           (OSG::Matrix &result,
                                                  OSG::Pnt3f   from,
                                                  OSG::Pnt3f   at,
                                                  OSG::Vec3f   up           );
+                                                 
+/*! \ingroup GrpBaseBaseMathMatrixFn
+    \relatesalso TransformationMatrix
+ */
+OSG_BASE_DLLMAPPING bool MatrixLookAt           (OSG::Matrix &result, 
+                                                 OSG::View& view           );
+                                                 
 
 /*! \ingroup GrpBaseBaseMathMatrixFn
     \relatesalso TransformationMatrix
@@ -207,6 +227,12 @@ OSG_BASE_DLLMAPPING bool MatrixLookAtGL         (OSG::Matrix &result,
                                                  OSG::Pnt3f   from,
                                                  OSG::Pnt3f   at,
                                                  OSG::Vec3f   up           );
+                                                 
+/*! \ingroup GrpBaseBaseMathMatrixFn
+    \relatesalso TransformationMatrix
+ */
+OSG_BASE_DLLMAPPING bool MatrixLookAtGL         (OSG::Matrix &result, 
+                                                 OSG::View& view           );
 
 
 /*! \ingroup GrpBaseBaseMathMatrixFn

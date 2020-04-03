@@ -1,0 +1,564 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="MaterialDesc"
+    parent="FieldContainer"
+    library="System"
+    structure="concrete"
+    pointerfieldtypes="both"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    docGroupBase="GrpSystemMaterial"
+    >
+    This class provides a sufficient broad collection of material parameters.
+    It allows to define texture stacks for different texture types. This
+    description class has been designed among other things  to be compatible
+    with the Assimp library material description. In order to fully utilize 
+    the description a sophisticated material and shader backend is needed.
+
+    <Field
+        name="name"
+        type="std::string"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue=""
+        >
+        The name of the material, if available.
+    </Field>
+
+    <Field
+        name="descHash"
+        type="UInt64"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0"
+        >
+        Additional hash value that allows to discriminate different
+        MaterialDesc instances with otherwise identical field values.
+        A MaterialDesc object, for instance, is used to build a DescMaterial
+        instance. Typically, these are managed in order to allow material
+        sharing. Sometimes, however, a separate DescMaterial for identical
+        MaterialDesc objects is needed. This field allows to provide an
+        additional descriminator.
+    </Field>
+
+    <Field
+        name="modeFlags"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        access="protected"
+        defaultValue="0x01"
+        >
+        A number of boolean material modes. For each mode a set and get function is provided.
+            SRGB_COLOR_MODE
+                Any non texture material color value is regarded as an sRGB color space value.
+                This flag is enabled on default.
+            SHADOW_ONLY_MODE
+                The material is only visible in regions that are shadowed.
+            PBR_SPECULAR_MODE
+                The material evaluates the specular workflow in COOK_TORRANCE_SHADING model.
+            UNLIT_MODE
+                The material does not participate in any lighting calculations.
+            HAS_NORMALS_MODE
+                Specifies whether the mesh vertices have normals attached to it.
+            HAS_TANGENTS_AND_BITANGENTS_MODE
+                Specifies whether the mesh vertices have tangents and bitangets attached to it.
+            FLAT_SHADING_MODE
+                Enables flat shading, i.e. the use if the vertice normal vectors without fragment interpolation.
+            OFFSET_POINT_MODE
+                Enables offsetting for points.
+            OFFSET_LINE_MODE
+                Enables offsetting for lines.
+            OFFSET_FILL_MODE
+                Enables offsetting for polygons.
+            XOR_MODE
+                The material shoud set the xor-Render mode specified by a LogicOpChunk.
+            NO_DEPTH_TEST_MODE
+                The material contains a DepthChunk which is not enabled.
+            PBR_CLEAR_COAT_MODE
+                The PBR material should evaluate clear coat information.
+            PBR_SHEEN_COLOR_MODE
+                The PBR material should evaluate sheen color information.
+            PBR_ANISOTROPY_MODE
+                The PBR material should evaluate anisotropy information.
+    </Field>
+
+    <Field
+        name="numUVChannels"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0"
+        >
+        The number of UV channes, i.e. texture coordinates that the material must support.
+        This is mesh information but needed for proper shader code generation.
+    </Field>
+    <Field
+        name="UVDimension"
+        type="UInt8"
+        cardinality="multi"
+        visibility="external"
+        access="public"
+        >
+        The dimensionality of each of the UV channes, i.e. texture coordinates that the
+        material supports. Allowed values are 1, 2 or 3.
+        This is mesh information but needed for proper shader code generation.
+    </Field>
+    <Field
+        name="numColorChannels"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0"
+        >
+        The number of separate color channes that the material must support.
+        This is mesh information but needed for proper shader code generation.
+    </Field>
+
+    <Field
+        name="shadingModel"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="2"
+        >
+        This value defines the shading model that should be used for shading
+        with this material. Allowed values are found in the ShadingModel enumeration
+        in the header file, e.g. NO_SHADING_MODEL, GOURAUD_SHADING_MODEL, PHONG_SHADING_MODEL,
+        BLINN_PHONG_SHADING_MODEL, COOK_TORRANCE_SHADING_MODEL, OREN_NAYAR_SHADING_MODEL, 
+        TOON_SHADING_MODEL, GOOCH_SHADING_MODEL.
+    </Field>
+    <Field
+        name="overrideShadingModel"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0"
+        >
+        This value defines the shading model that took presedence over the actual shading model.
+        This is useful for instance if the material should temporarily be shaded with another
+        shading model. This can e.g. be used for a global GOOCH shading task. This value only
+        takes place if is not equal to NO_SHADING_MODEL.
+    </Field>
+    <Field
+        name="blendMode"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0"
+        >
+        Defines how the final color value in the screen buffer is computed from the given 
+        color at that position and the newly computed color from the material. Simply said, 
+        alpha blending settings. Allowed values are DEFAULT_BLEND_MODE and ADDITIVE_BLEND_MODE.
+    </Field>
+
+    <Field
+        name="emissive"
+        type="Color3f"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.f,0.f,0.f"
+        >
+        The emissive color for the material.
+    </Field>
+    <Field
+        name="albedo"
+        type="Color3f"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.f,0.f,0.f"
+        >
+        The albedo (diffuse) color for the material.
+    </Field>
+    <Field
+        name="specular"
+        type="Color3f"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.f,0.f,0.f"
+        >
+        The specular color for the material.
+    </Field>
+    <Field
+        name="transparent"
+        type="Color3f"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="1.f,1.f,1.f"
+        >
+        Defines the transparent color of the material, this is the color to be multiplied with
+        the color of translucent light to construct the final 'destination color' for a particular 
+        position in the screen buffer.
+    </Field>
+
+    <Field
+        name="reflective"
+        type="Color3f"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="1.f,1.f,1.f"
+        >
+        Defines the reflective color of the material. This is typically scaled by the amount of 
+        incoming light from the direction of mirror reflection. Usually combined with an enviroment
+        lightmap.
+    </Field>
+
+    <Field
+        name="specularStrength"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="1.f"
+        >
+        Scales the specular color of the material.
+        This value is kept separate from the specular color by most modelers, and so do we.
+    </Field>
+    <Field
+        name="emissiveStrength"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="1.f"
+        >
+        Scales the emissive color of the material.
+    </Field>
+    <Field
+        name="opacity"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="1.f"
+        >
+        Defines how transparent objects are rendered with this material.
+        Use this value to decide whether you have to activate alpha blending 
+        for rendering. opacity != 1 usually also implies twosided=true to avoid 
+        cull artifacts.
+    </Field>
+    <Field
+        name="opacityCutOff"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.5f"
+        >
+        Any opacity value less than this value is set to zero. This allows to
+        fight certain artifacts when using opacity textures.
+    </Field>
+
+    <Field
+        name="opacityMode"
+        type="UInt32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0"
+        >
+        This mode governs the interpretation of the opacity value. It can have the
+        following values:
+        NO_OPACITY_MODE     - The mode is not evaluated. Standard handling takes place.
+            This is the default value.
+        OPAQUE_OPACITY_MODE - The rendered output is fully opaque and any alpha value
+            is ignored. A depth value is written for every pixel and mesh sorting is
+            not required for correct output.
+        MASK_OPACITY_MODE   - The rendered output is either fully opaque or fully 
+            transparent depending on the alpha value and the specified opacity cutoff
+            value.
+            If the alpha value is greater than or equal to the alphaCutoff value then
+            it is rendered as fully opaque, otherwise, it is rendered as fully transparent.
+            A depth value is not written for a pixel that is discarded after the alpha test.
+            A depth value is written for all other pixels. Mesh sorting is not required 
+            for correct output.
+        BLEND_OPACITY_MODE  - The rendered output is combined with the background using
+            the normal painting operation.
+            Whether depth value is written or whether to sort is up to the implementation.
+    </Field>
+
+    <Field
+        name="reflectivity"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.f"
+        >
+        Scales the reflective color of the material.
+    </Field>
+    <Field
+        name="reflectance"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.5f"
+        >
+        Defines the perceptual reflectance R at normal incidance according to the fresnel law.
+        The perceptual reflectance R relates to the physical reflectance f0 = (n-1)^2 / (n+1)^2
+        by the equation f0 = 0.16 * R^2, where n is the optical index of refraction for dielectric
+        materials. It follows that R = sqrt(f0/0.16) = 2.5 * (n-1)/(n+1) or n = 2/(1-sqrt(f0)) - 1.
+    </Field>
+    <Field
+        name="bumpScaling"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="1.f"
+        >
+        Bump height scaling.
+    </Field>
+    <Field
+        name="Anisotropy"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.f"
+        >
+        Anisotropy parameter in the range of [-1,1]
+    </Field>
+    <Field
+        name="roughness"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0.5f"
+        >
+        The 'Perceived roughness Rp' for the material. The 'micro facet model roughness Ra' is calculated
+        from the 'Perceived roughness Rp' by equation: Ra = Rp^2.
+        The 'Perceived roughness Rp' is a more user friendly parameter then model roughness Ra.
+        This is used in a PBR shader but has no use in a classical shading model.
+    </Field>
+    <Field
+        name="metalness"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0.f"
+        >
+        The metalness for the material. This is used in a PBR shader but has
+        no use in a classical shading model.
+    </Field>
+
+
+    <Field
+        name="clearCoatStrength"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0.f"
+        >
+        Strength of the clear coat layer. This value is expected to be in range [0,1].
+        This is used in a PBR shader but has no use in a classical shading model.
+    </Field>
+    <Field
+        name="clearCoatRoughness"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0.5f"
+        >
+        Perceived smoothness or roughness of the clear coat layer. This value is expected to be in range [0,1].
+        This is used in a PBR shader but has no use in a classical shading model.
+    </Field>
+    <Field
+        name="sheenColor"
+        type="Color3f"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.04f,0.04f,0.04f"
+        >
+        Specular tint to create two-tone specular fabrics (defaults to 0.04 to match the standard reflectance).
+        This is used in a PBR shader but has no use in a classical shading model.
+    </Field>
+    <Field
+        name="subSurfaceColor"
+        type="Color3f"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0.04f,0.04f,0.04f"
+        >
+        Tint for the diffuse color after scattering and absorption through the material.
+        This is used in a PBR shader but has no use in a classical shading model.
+    </Field>
+
+    <Field
+        name="toonLevels"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="3"
+        >
+        The number of Toon levels for the material used by Toon shading.
+    </Field>
+
+    <Field
+        name="goochCool"
+        type="Color3f"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0.000f, 0.000f, 0.686f"
+        >
+        The cool Gooch color used for Gooch shading.
+    </Field>
+    <Field
+        name="goochWarm"
+        type="Color3f"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0.000f, 0.686f, 0.686f"
+        >
+        The warm Gooch color used for Gooch shading.
+    </Field>
+    <Field
+        name="goochMixin"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="0.796f"
+        >
+        The mix factor used for Gooch shading.
+    </Field>
+    <Field
+        name="goochCoolMixin"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="1.f"
+        >
+        The mix factor used for adapting the cool color in Gooch shading
+        with respect to the albedo color.
+    </Field>
+     <Field
+        name="goochWarmMixin"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="1.f"
+        >
+        The mix factor used for adapting the warm color in Gooch shading
+        with respect to the albedo color.
+    </Field>
+
+    <Field
+        name="cullFace"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="GL_BACK"
+        defaultHeader="&quot;OSGGL.h&quot;"
+    >
+    Defines which side of the polygon is invisible. Set to GL_NONE to not cull anything. See glCullFace.
+    Allowed values: GL_NONE,GL_FRONT,GL_BACK,GL_FRONT_AND_BACK
+    </Field>
+    <Field
+        name="frontFace"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="GL_CCW"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        >
+        Defines which side of the polygon is considered the front side base on vertex ordering
+        of clockwise (CW) of counter clockwise (CCW). defaults to GL_CCW.  See glFrontFace.
+        Allowed values: GL_CCW,GL_CW
+    </Field>
+    <Field
+        name="frontMode"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="GL_FILL"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        >
+        Defines if polygon front sides are rendered filled (default), outlined or as points. See glPolygonMode.
+        Allowed values: GL_FILL,GL_LINE,GL_POINT
+    </Field>
+    <Field
+        name="backMode"
+        type="GLenum"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="GL_FILL"
+        defaultHeader="&quot;OSGGL.h&quot;"
+        >
+        Defines if polygon front sides are rendered filled (default), outlined or as points. See glPolygonMode.
+        Allowed values: GL_FILL,GL_LINE,GL_POINT
+    </Field>
+    <Field
+        name="offsetFactor"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0"
+        >
+        Defines the polygon offset factor. See glPolygonOffset.
+    </Field>
+    <Field
+        name="offsetBias"
+        type="Real32"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="0"
+        >
+        Defines the polygon offset bias. See glPolygonOffset.
+    </Field>
+    <Field
+        name="textureDesc"
+        type="TextureDescPtr"
+        cardinality="multi"
+        visibility="external"
+	access="public"
+        >
+        The list of material textures.
+    </Field>
+
+    <Field
+        name="excludeHashingMask"
+        type="BitVector"
+        cardinality="single"
+        visibility="internal"
+        access="public"
+        defaultValue="0"
+        >
+        All field mask that are contained in this value do not participate in the
+        hash calculation procedure.
+    </Field>
+
+</FieldContainer>

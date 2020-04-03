@@ -111,7 +111,9 @@ class OSG_BASE_DLLMAPPING Projection
     /*! \name                    Operators                                 */
     /*! \{                                                                 */
 
-    Projection&         operator=       (const Projection& rhs);
+    Projection& operator= (const Projection& rhs);
+    bool        operator==(const Projection& rhs) const;
+    bool        equals    (const Projection& rhs, Real32 tol) const;
 
     /*! \}                                                                 */
 

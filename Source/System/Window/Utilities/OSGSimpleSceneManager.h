@@ -115,6 +115,7 @@ class OSG_UTIL_DLLMAPPING SimpleSceneManager : public NavigationManager
     virtual void setUseTraversalAction(bool s               );
     virtual bool getUseTraversalAction(void                 );
 
+    virtual void  show             (Node         *obj       );
     virtual void  showAll          (void                    );
 
     virtual void  useOpenSGLogo    (void                    );

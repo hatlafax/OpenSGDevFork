@@ -55,6 +55,8 @@
 #include "OSGPathHandler.h"
 #include "OSGSingletonHolder.h"
 
+#include "OSGMaterialManager.h"
+
 OSG_BEGIN_NAMESPACE
 
 class GraphOpSeq;
@@ -131,17 +133,19 @@ class OSG_SYSTEM_DLLMAPPING SceneFileHandlerBase
     /*! \name                   Read                                       */
     /*! \{                                                                 */
 
-    virtual NodeTransitPtr read(      std::istream &is, 
-                                const Char8        *ext,
-                                      GraphOpSeq   *graphOpSeq = 
+    virtual NodeTransitPtr read(      std::istream  &is, 
+                                const Char8         *ext,
+                                      GraphOpSeq    *graphOpSeq = 
                                                            _defaultgraphOpSeq,
-                                       Resolver     resolver   = NULL);
+                                      Resolver       resolver      = NULL,
+                                      SceneFileType *sceneFileType = NULL    );
 
-    virtual NodeTransitPtr read(const  Char8       *fileName,
-                                       GraphOpSeq  *graphOpSeq = 
+    virtual NodeTransitPtr read(const Char8         *fileName,
+                                      GraphOpSeq    *graphOpSeq = 
                                                            _defaultgraphOpSeq,
-                                       Resolver     resolver      = NULL,
-                                       bool         bWarnNotFound = true      );
+                                      Resolver       resolver      = NULL,
+                                      SceneFileType *sceneFileType = NULL,
+                                      bool           bWarnNotFound = true    );
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -159,11 +163,14 @@ class OSG_SYSTEM_DLLMAPPING SceneFileHandlerBase
     virtual bool write(Node         * const  node, 
                        std::ostream         &os, 
                        Char8          const *ext, 
-                       bool                  compress = false);
+                       bool                  compress      = false,
+                       SceneFileType*        sceneFileType = NULL);
 
     virtual bool write(Node         * const  node, 
                        Char8          const *fileName, 
-                       bool                  compress = false);
+                       bool                  compress      = false,
+                       SceneFileType*        sceneFileType = NULL);
+
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name               Write Callback                                 */
@@ -195,6 +202,14 @@ class OSG_SYSTEM_DLLMAPPING SceneFileHandlerBase
     
     virtual GraphOpSeq *getDefaultGraphOp(void                  );
     virtual void        setDefaultGraphOp(GraphOpSeq *graphOpSeq);
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                    ShaderManager                             */
+    /*! \{                                                                 */
+    
+    virtual MaterialManager *getMaterialManager(void                    );
+    virtual void             setMaterialManager(MaterialManager* manager);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -260,6 +275,9 @@ class OSG_SYSTEM_DLLMAPPING SceneFileHandlerBase
 
     bool         addSceneFileType(SceneFileType &fileType);
     bool         subSceneFileType(SceneFileType &fileType);
+
+    bool         compressible    (const SceneFileType* fileType);
+    bool         allowStreaming  (const SceneFileType* fileType);
     
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -348,6 +366,8 @@ class OSG_SYSTEM_DLLMAPPING SceneFileHandlerBase
            FileIOWriteCBF _writeFP;
 
            Resolver       _oGlobalResolver;
+
+           MaterialManager *_materialManager;
 
     /*!\brief prohibit default function (move to 'public' if needed) */
     void operator =(const SceneFileHandlerBase &source);

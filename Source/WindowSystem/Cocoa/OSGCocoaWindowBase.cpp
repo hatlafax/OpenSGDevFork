@@ -53,6 +53,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef WIN32 
+#pragma warning(disable: 4355) // turn off 'this' : used in base member initializer list warning
+#pragma warning(disable: 4290) // disable exception specification warning
+#endif
+
 #include "OSGConfig.h"
 
 
@@ -62,10 +67,6 @@
 #include "OSGCocoaWindow.h"
 
 #include <boost/bind.hpp>
-
-#ifdef WIN32 // turn off 'this' : used in base member initializer list warning
-#pragma warning(disable:4355)
-#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -102,11 +103,11 @@ OSG_FIELDTRAITS_GETTYPE_NS(CocoaWindow *, nsOSG)
 
 OSG_EXPORT_PTR_SFIELD_FULL(PointerSField,
                            CocoaWindow *,
-                           nsOSG);
+                           nsOSG)
 
 OSG_EXPORT_PTR_MFIELD_FULL(PointerMField,
                            CocoaWindow *,
-                           nsOSG);
+                           nsOSG)
 
 /***************************************************************************\
  *                         Field Description                               *
@@ -137,9 +138,10 @@ CocoaWindowBase::TypeObject CocoaWindowBase::_type(
     "NULL",
     nsOSG, //Namespace
     reinterpret_cast<PrototypeCreateF>(&CocoaWindowBase::createEmptyLocal),
-    CocoaWindow::initMethod,
-    CocoaWindow::exitMethod,
-    reinterpret_cast<InitalInsertDescFunc>(&CocoaWindow::classDescInserter),
+    reinterpret_cast<InitContainerF>(&CocoaWindow::initMethod),
+    reinterpret_cast<ExitContainerF>(&CocoaWindow::exitMethod),
+    reinterpret_cast<InitalInsertDescFunc>(
+        reinterpret_cast<void *>(&CocoaWindow::classDescInserter)),
     false,
     0,
     "<?xml version=\"1.0\"?>\n"

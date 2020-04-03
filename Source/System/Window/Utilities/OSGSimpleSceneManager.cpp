@@ -717,6 +717,65 @@ void SimpleSceneManager::initialize(void)
     setBeacon(cartN);
 }
 
+/*! show only the obj volume: move out far enough to see it
+ */
+void SimpleSceneManager::show(Node* obj)
+{
+    if(_root == NULL || obj == NULL)
+        return;
+
+    OSG::commitChanges();      // Commit the changes so the volumes are up to date.
+
+    obj->updateVolume();
+
+    Vec3f min,max;
+    obj->getVolume().getBounds( min, max );
+    Vec3f d = max - min;
+
+    // Nothing loaded? Use a unity box
+    if(d.length() < TypeTraits<Real32>::getDefaultEps())
+    {
+        min.setValues(-1.f,-1.f,-1.f);
+        max.setValues( 1.f, 1.f, 1.f);
+        d = max - min;
+    }
+
+    PerspectiveCamera *perCam = 
+        dynamic_pointer_cast<PerspectiveCamera>(_camera);
+
+    OrthographicCamera *ortCam =
+        dynamic_pointer_cast<OrthographicCamera>(_camera);
+
+    Real32 dist = osgMax(d[0],d[1]);
+
+    if (perCam) {
+        dist /= (2 * osgTan(perCam->getFov()/2.f));
+    }
+    else if (ortCam) {
+        ortCam->setVerticalSize(dist);
+    }
+    else {
+        FWARNING(("SimpleSceneManager::showAll: unsupported camera type, "
+                  "may not work properly!\n"));
+    }
+
+    Vec3f up(0,1,0);
+    Pnt3f at((min[0]+max[0])*.5f,(min[1]+max[1])*.5f,(min[2]+max[2])*.5f);
+    Pnt3f from=at;
+    from[2]+=(dist+fabs(max[2]-min[2])*0.5f);
+
+    _navigator.set(from,at,up);
+
+    // adjust the translation factors so that motions are sort of scaled
+    _navigator.setMotionFactor((d[0] + d[1] + d[2]) / 100.f);
+
+    // set the camera to go from 1% of the object to twice its size
+    Real32 diag = osgMax(osgMax(d[0], d[1]), d[2]);
+
+    _camera->setNear (diag / 100.f);
+    _camera->setFar  (10 * diag);
+}
+
 /*! show the whole scene: move out far enough  to see everything
  */
 void SimpleSceneManager::showAll(void)
@@ -786,7 +845,7 @@ void SimpleSceneManager::useOpenSGLogo(void)
 
     ImageFileType::restore(lo, 
                            static_cast<UChar8 *>(LogoData), 
-                           getLogoDataSize()              );
+                           static_cast<Int32   >(getLogoDataSize()));
 
     if(_foreground == NULL)
         _foreground = ImageForeground::create();

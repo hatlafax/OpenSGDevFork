@@ -56,4 +56,122 @@ void HDR2Stage::renderQuad()
     glEnd();
 }
 
+inline
+Real32 HDR2Stage::getFilmicShoulderStrenght() const
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+    return _mfFilmicCurveParameters[FilmicShoulderStrenghtId];
+}
+
+inline
+Real32 HDR2Stage::getFilmicLinearStrength() const
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+    return _mfFilmicCurveParameters[FilmicLinearStrengthId];
+}
+
+inline
+Real32 HDR2Stage::getFilmicLinearAngle() const
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+    return _mfFilmicCurveParameters[FilmicLinearAngleId];
+}
+
+inline
+Real32 HDR2Stage::getFilmicToeStrength() const
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+    return _mfFilmicCurveParameters[FilmicToeStrengthId];
+}
+
+inline
+Real32 HDR2Stage::getFilmicToeNumerator() const
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+    return _mfFilmicCurveParameters[FilmicToeNumeratorId];
+}
+
+inline
+Real32 HDR2Stage::getFilmicToeDenominator() const
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+    return _mfFilmicCurveParameters[FilmicToeDenominatorId];
+}
+
+inline
+Real32 HDR2Stage::getFilmicLinearWhite() const
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+    return _mfFilmicCurveParameters[FilmicLinearWhiteId];
+}
+
+inline
+void HDR2Stage::setFilmicShoulderStrenght(Real32 value)
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+    editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
+
+    _mfFilmicCurveParameters[FilmicShoulderStrenghtId] = value;
+}
+
+inline
+void HDR2Stage::setFilmicLinearStrength(Real32 value)
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+
+    editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
+
+    _mfFilmicCurveParameters[FilmicLinearStrengthId] = value;
+}
+
+inline
+void HDR2Stage::setFilmicLinearAngle(Real32 value)
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+
+    editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
+
+    _mfFilmicCurveParameters[FilmicLinearAngleId] = value;
+}
+
+inline
+void HDR2Stage::setFilmicToeStrength(Real32 value)
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+
+    editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
+
+    _mfFilmicCurveParameters[FilmicToeStrengthId] = value;
+}
+
+inline
+void HDR2Stage::setFilmicToeNumerator(Real32 value)
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+
+    editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
+
+    _mfFilmicCurveParameters[FilmicToeNumeratorId] = value;
+}
+
+inline
+void HDR2Stage::setFilmicToeDenominator(Real32 value)
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+
+    editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
+
+    _mfFilmicCurveParameters[FilmicToeDenominatorId] = value;
+}
+
+inline
+void HDR2Stage::setFilmicLinearWhite(Real32 value)
+{
+    OSG_ASSERT(_mfFilmicCurveParameters.size() == FilmicCurveParameterAccessNumEntries);
+
+    editMField(FilmicCurveParametersFieldMask, _mfFilmicCurveParameters);
+
+    _mfFilmicCurveParameters[FilmicLinearWhiteId] = value;
+}
+
 OSG_END_NAMESPACE

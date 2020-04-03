@@ -8,7 +8,7 @@
 #pragma set woff 1375
 #endif
 
-#include <OSGGL.h>
+#include "OSGGL.h"
 
 #ifdef OSG_WITH_QT5
 #include <QtWidgets/QApplication>
