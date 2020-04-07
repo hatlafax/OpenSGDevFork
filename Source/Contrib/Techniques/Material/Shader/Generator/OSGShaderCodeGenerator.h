@@ -170,6 +170,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGenerator : public ShaderCodeGe
     void    initShaderMaterial4             (Window* pWin);
     void    initHDR2Stage                   (Window* pWin);
     void    initSSAOStage                   (Window* pWin);
+    void    initIBLStage                    (Window* pWin);
     void    initMultiLight                  (Window* pWin);
     void    initMultiLightShadowStage       (Window* pWin);
     void    initClusterShadingStage         (Window* pWin);
@@ -183,6 +184,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGenerator : public ShaderCodeGe
     void    validateShaderMaterial4         ();
     void    validateHDR2Stage               ();
     void    validateSSAOStage               ();
+    void    validateIBLStage                ();
     void    validateMultiLight              ();
     void    validateMultiLightShadowStage   ();
     void    validateClusterShadingStage     ();
@@ -194,6 +196,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGenerator : public ShaderCodeGe
     bool    isValidClusterShadingStage      () const;
     bool    isValidMultiLightShadowStage    () const;
     bool    isValidSSAOStage                () const;
+    bool    isValidIBLStage                 () const;
     bool    isValidMultiLight               () const;
     bool    isValidModernShaderSupport      () const;
     bool    isValidFull440ShaderSupport     () const;

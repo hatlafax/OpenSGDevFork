@@ -36,21 +36,33 @@
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 
-#ifndef _OSGCAPABILITIESDESC_H_
-#define _OSGCAPABILITIESDESC_H_
+#ifndef _OSGIBLSTAGE_H_
+#define _OSGIBLSTAGE_H_
 #ifdef __sgi
 #pragma once
 #endif
 
-#include "OSGCapabilitiesDescBase.h"
+#include <boost/container/flat_map.hpp>
+
+#include "OSGIBLStageBase.h"
+#include "OSGAction.h"
+#include "OSGIBLStageDataFields.h"
+#include "OSGSimpleSHLChunk.h"
 
 OSG_BEGIN_NAMESPACE
 
-/*! \brief CapabilitiesDesc class. See \ref
-           PageContribTechniquesCapabilitiesDesc for a description.
+class DrawEnv;
+class RenderAction;
+class TextureObjChunk;
+class FrameBufferAttachment;
+
+//#define OSG_DEBUG_IBL_STAGE
+
+/*! \brief IBLStage class. See \ref
+           PageContribTechniquesIBLStage for a description.
 */
 
-class OSG_CONTRIBTECHNIQUES_DLLMAPPING CapabilitiesDesc : public CapabilitiesDescBase
+class OSG_CONTRIBTECHNIQUES_DLLMAPPING IBLStage : public IBLStageBase
 {
   protected:
 
@@ -58,62 +70,9 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING CapabilitiesDesc : public CapabilitiesDes
 
   public:
 
-    typedef CapabilitiesDescBase Inherited;
-    typedef CapabilitiesDesc     Self;
+    typedef IBLStageBase Inherited;
+    typedef IBLStage     Self;
 
-    enum Capabilities
-    {
-        FIXED_FUNCTION_PIPELINE = 0x00000001,
-
-        SHADER_MATERIAL_2       = 0x00000002,   // >= OpenGL 2.1, GLSL 1.2
-        SHADER_MATERIAL_3       = 0x00000004,   // >= OpenGL 3.3, GLSL 3.3
-        SHADER_MATERIAL_4       = 0x00000008,   // >= OpenGL 4.4, GLSL 4.4
-
-        SHADER_MATERIAL         = SHADER_MATERIAL_2,
-
-        SILHOUETTES             = 0x00000100,   // Not used here
-        MULTISAMPLE             = 0x00000200,   // Not used here
-        DYNAMIC_VIEWPORT        = 0x00000400,   // Not used here
-        CLIP_PLANES             = 0x00000800,
-
-        HDR                     = 0x00010000,
-        SSAO                    = 0x00020000,
-        MULTILIGHT              = 0x00040000,
-        MULTILIGHT_SHADOW       = 0x00080000,
-        CLUSTER_SHADING         = 0x00100000,
-        IBL                     = 0x00200000,
-
-        BIT_OPERATIONS          = 0x01000000,
-        SWITCH_STATEMENT        = 0x02000000,
-    };
-
-    /*---------------------------------------------------------------------*/
-    /*! \name                   Interface                                  */
-    /*! \{                                                                 */
-
-    bool    bUseCapabilities                (UInt32 capabilities) const;
-    bool    bUsePlatformCapabilities        (UInt32 capabilities) const;
-    bool    bUseRequestedCapabilities       (UInt32 capabilities) const;
-
-    bool    isFallbackFixedFunction         () const;
-    bool    isFallbackShader2               () const;
-    bool    isFallbackShader3               () const;
-    bool    isFallbackShader4               () const;
-
-    bool    hasHDRSupport                   () const;
-    bool    hasClusterShadingSupport        () const;
-    bool    hasMultiLightShadowSupport      () const;
-    bool    hasSSAOSupport                  () const;
-    bool    hasIBLSupport                   () const;
-    bool    hasMultiLightSupport            () const;
-    bool    hasModernShaderSupport          () const;
-    bool    hasFull440ShaderSupport         () const;
-    bool    hasdClipPlanesSupport           () const;
-
-    bool    hasSwitchSupport                () const;
-    bool    hasBitOpsSupport                () const;
-
-    /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                      Sync                                    */
     /*! \{                                                                 */
@@ -131,25 +90,65 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING CapabilitiesDesc : public CapabilitiesDes
                       const BitVector  bvFlags  = 0) const;
 
     /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                    postProcess                               */
+    /*! \{                                                                 */
+
+    void postProcess            (DrawEnv *pEnv);
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                        Data                                  */
+    /*! \{                                                                 */
+
+    void initData  (RenderAction *pAction,
+                    Int32         iVPWidth,
+                    Int32         iVPHeight);
+
+    void updateData(RenderAction *pAction,
+                    Int32         iVPWidth,
+                    Int32         iVPHeight);
+
+    /*! \}                                                                 */
     /*=========================  PROTECTED  ===============================*/
 
   protected:
 
-    // Variables should all be in CapabilitiesDescBase.
+    // Variables should all be in IBLStageBase.
 
     /*---------------------------------------------------------------------*/
     /*! \name                  Constructors                                */
     /*! \{                                                                 */
 
-    CapabilitiesDesc(void);
-    CapabilitiesDesc(const CapabilitiesDesc &source);
+    IBLStage(void);
+    IBLStage(const IBLStage &source);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                   Destructors                                */
     /*! \{                                                                 */
 
-    virtual ~CapabilitiesDesc(void);
+    virtual ~IBLStage(void);
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                         GL                                   */
+    /*! \{                                                                 */
+
+    static UInt32 _uiFramebufferObjectExt;
+    static UInt32 _uiFuncDrawBuffers;
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                   Draw                                       */
+    /*! \{                                                                 */
+
+    Action::ResultE renderEnter (Action *action);
+    Action::ResultE renderLeave (Action *action);
+
+    void            renderQuad  ();
+
+    void            addOverride (IBLStageData* pData, RenderAction* a);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -159,22 +158,59 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING CapabilitiesDesc : public CapabilitiesDes
     static void initMethod(InitPhase ePhase);
 
     /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                   StageData                                  */
+    /*! \{                                                                 */
+
+    IBLStageDataTransitPtr  setupStageData (RenderAction*  pAction,
+                                            Int32          iPixelWidth,
+                                            Int32          iPixelHeight);
+
+    void                    updateStageData(IBLStageData*  pData,
+                                            RenderAction*  pAction,
+                                            Int32          iPixelWidth,
+                                            Int32          iPixelHeight);
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                      Update                                  */
+    /*! \{                                                                 */
+    
+    //
+    // Update need to be done for each stage data separately. Since we
+    // do not have (as far as I know) a proper way to push the update
+    // request into the stage data objects, we settle for the map solution.
+    // On Change, all entries in the maps are set to true and on rendering
+    // of the different windows/views we reset the specific entries separately.
+    // StageData objects, that are passed away, are still accounted in the maps.
+    // But since that are not so many, we don't bother. 
+    //
+    typedef boost::container::flat_map<IBLStageData*, bool> UpdateMapT;
+
+    UpdateMapT  _mapUpdate;
+    
+    /*! \}                                                                 */
     /*==========================  PRIVATE  ================================*/
 
   private:
+#ifdef OSG_DEBUG_IBL_STAGE
+    void            dump_fbo    (const char* name, FrameBufferObject* fbo, std::stringstream& ss) const;
+    std::string     dump_stage  (SSAOStageData* pData) const;
+    void            dump_image (const char* name, FrameBufferAttachment* fba) const;
+#endif
 
     friend class FieldContainer;
-    friend class CapabilitiesDescBase;
+    friend class IBLStageBase;
 
     // prohibit default functions (move to 'public' if you need one)
-    void operator =(const CapabilitiesDesc &source);
+    void operator =(const IBLStage &source);
 };
 
-typedef CapabilitiesDesc *CapabilitiesDescP;
+typedef IBLStage *IBLStageP;
 
 OSG_END_NAMESPACE
 
-#include "OSGCapabilitiesDescBase.inl"
-#include "OSGCapabilitiesDesc.inl"
+#include "OSGIBLStageBase.inl"
+#include "OSGIBLStage.inl"
 
-#endif /* _OSGCAPABILITIESDESC_H_ */
+#endif /* _OSGIBLSTAGE_H_ */

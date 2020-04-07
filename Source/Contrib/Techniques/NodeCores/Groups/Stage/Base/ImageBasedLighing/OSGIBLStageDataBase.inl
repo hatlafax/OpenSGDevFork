@@ -43,7 +43,7 @@
  **           regenerated, which can become necessary at any time.          **
  **                                                                         **
  **     Do not change this file, changes should be done in the derived      **
- **     class ShaderCodeGenerator!
+ **     class IBLStageData!
  **                                                                         **
  *****************************************************************************
 \*****************************************************************************/
@@ -54,81 +54,81 @@ OSG_BEGIN_NAMESPACE
 
 //! access the type of the class
 inline
-OSG::FieldContainerType &ShaderCodeGeneratorBase::getClassType(void)
+OSG::FieldContainerType &IBLStageDataBase::getClassType(void)
 {
     return _type;
 }
 
 //! access the numerical type of the class
 inline
-OSG::UInt32 ShaderCodeGeneratorBase::getClassTypeId(void)
+OSG::UInt32 IBLStageDataBase::getClassTypeId(void)
 {
     return _type.getId();
 }
 
 inline
-OSG::UInt16 ShaderCodeGeneratorBase::getClassGroupId(void)
+OSG::UInt16 IBLStageDataBase::getClassGroupId(void)
 {
     return _type.getGroupId();
 }
 
 /*------------------------------ get -----------------------------------*/
 
-//! Get the value of the ShaderCodeGenerator::_sfLightBindingPnt field.
+//! Get the value of the IBLStageData::_sfWidth field.
 
 inline
-UInt32 &ShaderCodeGeneratorBase::editLightBindingPnt(void)
+UInt32 &IBLStageDataBase::editWidth(void)
 {
-    editSField(LightBindingPntFieldMask);
+    editSField(WidthFieldMask);
 
-    return _sfLightBindingPnt.getValue();
+    return _sfWidth.getValue();
 }
 
-//! Get the value of the ShaderCodeGenerator::_sfLightBindingPnt field.
+//! Get the value of the IBLStageData::_sfWidth field.
 inline
-      UInt32  ShaderCodeGeneratorBase::getLightBindingPnt(void) const
+      UInt32  IBLStageDataBase::getWidth(void) const
 {
-    return _sfLightBindingPnt.getValue();
+    return _sfWidth.getValue();
 }
 
-//! Set the value of the ShaderCodeGenerator::_sfLightBindingPnt field.
+//! Set the value of the IBLStageData::_sfWidth field.
 inline
-void ShaderCodeGeneratorBase::setLightBindingPnt(const UInt32 value)
+void IBLStageDataBase::setWidth(const UInt32 value)
 {
-    editSField(LightBindingPntFieldMask);
+    editSField(WidthFieldMask);
 
-    _sfLightBindingPnt.setValue(value);
+    _sfWidth.setValue(value);
 }
-//! Get the value of the ShaderCodeGenerator::_sfHasClipPlanes field.
+//! Get the value of the IBLStageData::_sfHeight field.
 
 inline
-bool &ShaderCodeGeneratorBase::editHasClipPlanes(void)
+UInt32 &IBLStageDataBase::editHeight(void)
 {
-    editSField(HasClipPlanesFieldMask);
+    editSField(HeightFieldMask);
 
-    return _sfHasClipPlanes.getValue();
-}
-
-//! Get the value of the ShaderCodeGenerator::_sfHasClipPlanes field.
-inline
-      bool  ShaderCodeGeneratorBase::getHasClipPlanes(void) const
-{
-    return _sfHasClipPlanes.getValue();
+    return _sfHeight.getValue();
 }
 
-//! Set the value of the ShaderCodeGenerator::_sfHasClipPlanes field.
+//! Get the value of the IBLStageData::_sfHeight field.
 inline
-void ShaderCodeGeneratorBase::setHasClipPlanes(const bool value)
+      UInt32  IBLStageDataBase::getHeight(void) const
 {
-    editSField(HasClipPlanesFieldMask);
+    return _sfHeight.getValue();
+}
 
-    _sfHasClipPlanes.setValue(value);
+//! Set the value of the IBLStageData::_sfHeight field.
+inline
+void IBLStageDataBase::setHeight(const UInt32 value)
+{
+    editSField(HeightFieldMask);
+
+    _sfHeight.setValue(value);
 }
 
 
 #ifdef OSG_MT_CPTR_ASPECT
 inline
-void ShaderCodeGeneratorBase::execSync (      ShaderCodeGeneratorBase *pFrom,
+void IBLStageDataBase::execSync (      IBLStageDataBase *pFrom,
                                         ConstFieldMaskArg  whichField,
                                         AspectOffsetStore &oOffsets,
                                         ConstFieldMaskArg  syncMode,
@@ -136,42 +136,21 @@ void ShaderCodeGeneratorBase::execSync (      ShaderCodeGeneratorBase *pFrom,
 {
     Inherited::execSync(pFrom, whichField, oOffsets, syncMode, uiSyncInfo);
 
-    if(FieldBits::NoField != (CapabilitiesDescFieldMask & whichField))
-        _sfCapabilitiesDesc.syncWith(pFrom->_sfCapabilitiesDesc);
+    if(FieldBits::NoField != (WidthFieldMask & whichField))
+        _sfWidth.syncWith(pFrom->_sfWidth);
 
-    if(FieldBits::NoField != (HDR2StageFieldMask & whichField))
-        _sfHDR2Stage.syncWith(pFrom->_sfHDR2Stage);
-
-    if(FieldBits::NoField != (ClusterShadingStageFieldMask & whichField))
-        _sfClusterShadingStage.syncWith(pFrom->_sfClusterShadingStage);
-
-    if(FieldBits::NoField != (MultiLightShadowStageFieldMask & whichField))
-        _sfMultiLightShadowStage.syncWith(pFrom->_sfMultiLightShadowStage);
-
-    if(FieldBits::NoField != (SSAOStageFieldMask & whichField))
-        _sfSSAOStage.syncWith(pFrom->_sfSSAOStage);
-
-    if(FieldBits::NoField != (IBLStageFieldMask & whichField))
-        _sfIBLStage.syncWith(pFrom->_sfIBLStage);
-
-    if(FieldBits::NoField != (MultiLightGroupFieldMask & whichField))
-        _sfMultiLightGroup.syncWith(pFrom->_sfMultiLightGroup);
-
-    if(FieldBits::NoField != (LightBindingPntFieldMask & whichField))
-        _sfLightBindingPnt.syncWith(pFrom->_sfLightBindingPnt);
-
-    if(FieldBits::NoField != (HasClipPlanesFieldMask & whichField))
-        _sfHasClipPlanes.syncWith(pFrom->_sfHasClipPlanes);
+    if(FieldBits::NoField != (HeightFieldMask & whichField))
+        _sfHeight.syncWith(pFrom->_sfHeight);
 }
 #endif
 
 
 inline
-const Char8 *ShaderCodeGeneratorBase::getClassname(void)
+const Char8 *IBLStageDataBase::getClassname(void)
 {
-    return "ShaderCodeGenerator";
+    return "IBLStageData";
 }
-OSG_GEN_CONTAINERPTR(ShaderCodeGenerator);
+OSG_GEN_CONTAINERPTR(IBLStageData);
 
 OSG_END_NAMESPACE
 

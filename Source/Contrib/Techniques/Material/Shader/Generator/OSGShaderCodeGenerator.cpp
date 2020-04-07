@@ -51,6 +51,7 @@
 #include "OSGClusterShadingStage.h"
 #include "OSGMultiLightShadowStage.h"
 #include "OSGSSAOStage.h"
+#include "OSGIBLStage.h"
 #include "OSGMultiLightChunk.h"
 #include "OSGMultiLightGroup.h"
 #include "OSGWindow.h"
@@ -239,6 +240,7 @@ void ShaderCodeGenerator::updateEnvironment(Window* win)
         initShaderMaterial4         (win);
         initHDR2Stage               (win);
         initSSAOStage               (win);
+        initIBLStage                (win);
         initMultiLight              (win);
         initMultiLightShadowStage   (win);
         initClusterShadingStage     (win);
@@ -255,6 +257,7 @@ void ShaderCodeGenerator::updateEnvironment(Window* win)
     validateShaderMaterial4         ();
     validateHDR2Stage               ();
     validateSSAOStage               ();
+    validateIBLStage                ();
     validateMultiLight              ();
     validateMultiLightShadowStage   ();
     validateClusterShadingStage     ();
@@ -392,6 +395,25 @@ void ShaderCodeGenerator::initSSAOStage(Window* pWin)
             if (hasVBO && hasUBO && hasFBO && hasFBB && hasPDS && hasSHP)
             {
                 setPlatformCapabilities(getPlatformCapabilities() | CapabilitiesDesc::SSAO);
+            }
+        }
+    }
+}
+
+void ShaderCodeGenerator::initIBLStage(Window* pWin)
+{
+    if (pWin)
+    {
+        bool hasGL   = pWin->hasGLVersionNum(3,3);
+        bool hasGLSL = pWin->hasGLSLVersionNum(3,30);
+
+        if (hasGL && hasGLSL)
+        {
+            bool hasSHP  = pWin->hasExtOrVersion(_extShaderProgram,       0x0200);
+
+            if (hasSHP)
+            {
+                setPlatformCapabilities(getPlatformCapabilities() | CapabilitiesDesc::IBL);
             }
         }
     }
@@ -589,6 +611,29 @@ void ShaderCodeGenerator::validateSSAOStage()
         _extensions.insert("GL_EXT_framebuffer_blit");
         _extensions.insert("GL_EXT_packed_depth_stencil");
         _extensions.insert("GL_ARB_shading_language_100");
+    }
+}
+
+void ShaderCodeGenerator::validateIBLStage()
+{
+    if (bUseCapabilities(CapabilitiesDesc::IBL))
+    {
+        if (
+                getIBLStage() == NULL
+            || !getIBLStage()->getActivate()
+            || isFallbackShader2())
+        {
+            UInt32 runtime_capabilities = getRuntimeCapabilities();
+            runtime_capabilities &= ~CapabilitiesDesc::IBL;
+            setRuntimeCapabilities(runtime_capabilities);
+        }
+    }
+
+    if (bUseCapabilities(CapabilitiesDesc::IBL))
+    {
+        UInt32 requiredGLSLVersion = ((3 << 8) + 30);
+
+        if (_glslVersion < requiredGLSLVersion) _glslVersion = requiredGLSLVersion;
     }
 }
 

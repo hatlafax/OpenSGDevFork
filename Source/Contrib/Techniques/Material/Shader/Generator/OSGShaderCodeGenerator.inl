@@ -145,6 +145,14 @@ bool ShaderCodeGenerator::isValidSSAOStage() const
 }
 
 inline
+bool ShaderCodeGenerator::isValidIBLStage() const
+{
+    OSG_ASSERT(getCapabilitiesDesc() != NULL);
+
+    return getCapabilitiesDesc()->hasIBLSupport();
+}
+
+inline
 bool ShaderCodeGenerator::isValidMultiLight() const
 {
     OSG_ASSERT(getCapabilitiesDesc() != NULL);

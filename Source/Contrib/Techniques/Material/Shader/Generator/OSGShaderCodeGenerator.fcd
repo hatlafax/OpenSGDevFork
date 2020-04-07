@@ -63,6 +63,15 @@
         >
     </Field>
     <Field
+        name="IBLStage"
+        type="IBLStagePtr"
+        cardinality="single"
+        visibility="external"
+        access="public"
+        defaultValue="NULL"
+        >
+    </Field>
+    <Field
         name="multiLightGroup"
         type="MultiLightGroupPtr"
         cardinality="single"

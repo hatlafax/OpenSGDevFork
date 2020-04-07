@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+
+<FieldContainer
+    name="IBLStage"
+    parent="Stage"
+    library="ContribTechniques"
+    pointerfieldtypes="both"
+    structure="concrete"
+    systemcomponent="true"
+    parentsystemcomponent="true"
+    decoratable="false"
+    useLocalIncludes="false"
+    isNodeCore="true"
+    isBundle="false"
+    >
+    This stage provides basic textures used for the image base lighting rendering technique.
+
+    <Field
+        name="activate"
+        type="bool"
+        cardinality="single"
+        visibility="external"
+        defaultValue="true"
+        access="public"
+        >
+        If the stage is deactivated it does not perform any action on its own but act as a simple Group core.
+    </Field>
+
+    <Field
+        name="environmentTexUnit"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="17"
+        >
+        Texture unit for the final irradiance texture map. This texture is activated
+        for the subsequent scene rendering pass. Shaders are expected to provide a sampler
+        for this texture.
+    </Field>
+    
+    <Field
+        name="IrradianceTexUnit"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="18"
+        >
+        Texture unit for the final irradiance texture map. This texture is activated
+        for the subsequent scene rendering pass. Shaders are expected to provide a sampler
+        for this texture.
+    </Field>
+
+    <Field
+        name="PreFilterTexUnit"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="19"
+        >
+        Texture unit for the final prefilter texture map. This texture is activated
+        for the subsequent scene rendering pass. Shaders are expected to provide a sampler
+        for this texture.
+    </Field>
+
+    <Field
+        name="BrdfLutTexUnit"
+        type="Int32"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="20"
+        >
+        Texture unit for the final BRDF LUT texture map. This texture is activated
+        for the subsequent scene rendering pass. Shaders are expected to provide a sampler
+        for this texture.
+    </Field>
+
+    <Field
+        name="environmentTexDesc"
+        type="TextureDescPtr"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="NULL"
+        >
+    </Field>
+
+    <Field
+        name="IrradianceTexDesc"
+        type="TextureDescPtr"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="NULL"
+        >
+    </Field>
+
+    <Field
+        name="PreFilterTexDesc"
+        type="TextureDescPtr"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="NULL"
+        >
+    </Field>
+
+    <Field
+        name="BrdfLutTexDesc"
+        type="TextureDescPtr"
+        cardinality="single"
+        visibility="external"
+	access="public"
+        defaultValue="NULL"
+        >
+    </Field>
+
+    <Field
+        name="environmentTexObjChunk"
+        type="TextureObjChunkPtr"
+        cardinality="single"
+        visibility="internal"
+	access="protected"
+        defaultValue="NULL"
+        >
+    </Field>
+
+    <Field
+        name="IrradianceTexObjChunk"
+        type="TextureObjChunkPtr"
+        cardinality="single"
+        visibility="internal"
+	access="protected"
+        defaultValue="NULL"
+        >
+    </Field>
+
+    <Field
+        name="PreFilterTexObjChunk"
+        type="TextureObjChunkPtr"
+        cardinality="single"
+        visibility="internal"
+	access="protected"
+        defaultValue="NULL"
+        >
+    </Field>
+
+    <Field
+        name="BrdfLutTexObjChunk"
+        type="TextureObjChunkPtr"
+        cardinality="single"
+        visibility="internal"
+	access="protected"
+        defaultValue="NULL"
+        >
+    </Field>
+
+</FieldContainer>

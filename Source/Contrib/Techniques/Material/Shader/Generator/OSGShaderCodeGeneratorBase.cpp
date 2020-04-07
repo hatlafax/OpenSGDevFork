@@ -67,6 +67,7 @@
 #include "OSGClusterShadingStage.h"     // ClusterShadingStage Class
 #include "OSGMultiLightShadowStage.h"   // MultiLightShadowStage Class
 #include "OSGSSAOStage.h"               // SSAOStage Class
+#include "OSGIBLStage.h"                // IBLStage Class
 #include "OSGMultiLightGroup.h"         // MultiLightGroup Class
 
 #include "OSGShaderCodeGeneratorBase.h"
@@ -108,6 +109,10 @@ OSG_BEGIN_NAMESPACE
 */
 
 /*! \var SSAOStage *     ShaderCodeGeneratorBase::_sfSSAOStage
+    
+*/
+
+/*! \var IBLStage *      ShaderCodeGeneratorBase::_sfIBLStage
     
 */
 
@@ -212,6 +217,18 @@ void ShaderCodeGeneratorBase::classDescInserter(TypeObject &oType)
         (Field::SFDefaultFlags | Field::FStdAccess),
         static_cast<FieldEditMethodSig>(&ShaderCodeGenerator::editHandleSSAOStage),
         static_cast<FieldGetMethodSig >(&ShaderCodeGenerator::getHandleSSAOStage));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFUnrecIBLStagePtr::Description(
+        SFUnrecIBLStagePtr::getClassType(),
+        "IBLStage",
+        "",
+        IBLStageFieldId, IBLStageFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&ShaderCodeGenerator::editHandleIBLStage),
+        static_cast<FieldGetMethodSig >(&ShaderCodeGenerator::getHandleIBLStage));
 
     oType.addInitialDesc(pDesc);
 
@@ -323,6 +340,15 @@ ShaderCodeGeneratorBase::TypeObject ShaderCodeGeneratorBase::_type(
     "    <Field\n"
     "        name=\"SSAOStage\"\n"
     "        type=\"SSAOStagePtr\"\n"
+    "        cardinality=\"single\"\n"
+    "        visibility=\"external\"\n"
+    "        access=\"public\"\n"
+    "        defaultValue=\"NULL\"\n"
+    "        >\n"
+    "    </Field>\n"
+    "    <Field\n"
+    "        name=\"IBLStage\"\n"
+    "        type=\"IBLStagePtr\"\n"
     "        cardinality=\"single\"\n"
     "        visibility=\"external\"\n"
     "        access=\"public\"\n"
@@ -524,6 +550,34 @@ void ShaderCodeGeneratorBase::setSSAOStage(SSAOStage * const value)
 }
 
 
+//! Get the ShaderCodeGenerator::_sfIBLStage field.
+const SFUnrecIBLStagePtr *ShaderCodeGeneratorBase::getSFIBLStage(void) const
+{
+    return &_sfIBLStage;
+}
+
+SFUnrecIBLStagePtr  *ShaderCodeGeneratorBase::editSFIBLStage       (void)
+{
+    editSField(IBLStageFieldMask);
+
+    return &_sfIBLStage;
+}
+
+//! Get the value of the ShaderCodeGenerator::_sfIBLStage field.
+IBLStage * ShaderCodeGeneratorBase::getIBLStage(void) const
+{
+    return _sfIBLStage.getValue();
+}
+
+//! Set the value of the ShaderCodeGenerator::_sfIBLStage field.
+void ShaderCodeGeneratorBase::setIBLStage(IBLStage * const value)
+{
+    editSField(IBLStageFieldMask);
+
+    _sfIBLStage.setValue(value);
+}
+
+
 //! Get the ShaderCodeGenerator::_sfMultiLightGroup field.
 const SFUnrecMultiLightGroupPtr *ShaderCodeGeneratorBase::getSFMultiLightGroup(void) const
 {
@@ -608,6 +662,10 @@ SizeT ShaderCodeGeneratorBase::getBinSize(ConstFieldMaskArg whichField)
     {
         returnValue += _sfSSAOStage.getBinSize();
     }
+    if(FieldBits::NoField != (IBLStageFieldMask & whichField))
+    {
+        returnValue += _sfIBLStage.getBinSize();
+    }
     if(FieldBits::NoField != (MultiLightGroupFieldMask & whichField))
     {
         returnValue += _sfMultiLightGroup.getBinSize();
@@ -648,6 +706,10 @@ void ShaderCodeGeneratorBase::copyToBin(BinaryDataHandler &pMem,
     if(FieldBits::NoField != (SSAOStageFieldMask & whichField))
     {
         _sfSSAOStage.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (IBLStageFieldMask & whichField))
+    {
+        _sfIBLStage.copyToBin(pMem);
     }
     if(FieldBits::NoField != (MultiLightGroupFieldMask & whichField))
     {
@@ -693,6 +755,11 @@ void ShaderCodeGeneratorBase::copyFromBin(BinaryDataHandler &pMem,
         editSField(SSAOStageFieldMask);
         _sfSSAOStage.copyFromBin(pMem);
     }
+    if(FieldBits::NoField != (IBLStageFieldMask & whichField))
+    {
+        editSField(IBLStageFieldMask);
+        _sfIBLStage.copyFromBin(pMem);
+    }
     if(FieldBits::NoField != (MultiLightGroupFieldMask & whichField))
     {
         editSField(MultiLightGroupFieldMask);
@@ -722,6 +789,7 @@ ShaderCodeGeneratorBase::ShaderCodeGeneratorBase(void) :
     _sfClusterShadingStage    (NULL),
     _sfMultiLightShadowStage  (NULL),
     _sfSSAOStage              (NULL),
+    _sfIBLStage               (NULL),
     _sfMultiLightGroup        (NULL),
     _sfLightBindingPnt        (UInt32(1)),
     _sfHasClipPlanes          (bool(false))
@@ -735,6 +803,7 @@ ShaderCodeGeneratorBase::ShaderCodeGeneratorBase(const ShaderCodeGeneratorBase &
     _sfClusterShadingStage    (NULL),
     _sfMultiLightShadowStage  (NULL),
     _sfSSAOStage              (NULL),
+    _sfIBLStage               (NULL),
     _sfMultiLightGroup        (NULL),
     _sfLightBindingPnt        (source._sfLightBindingPnt        ),
     _sfHasClipPlanes          (source._sfHasClipPlanes          )
@@ -765,6 +834,8 @@ void ShaderCodeGeneratorBase::onCreate(const ShaderCodeGenerator *source)
         pThis->setMultiLightShadowStage(source->getMultiLightShadowStage());
 
         pThis->setSSAOStage(source->getSSAOStage());
+
+        pThis->setIBLStage(source->getIBLStage());
 
         pThis->setMultiLightGroup(source->getMultiLightGroup());
     }
@@ -910,6 +981,34 @@ EditFieldHandlePtr ShaderCodeGeneratorBase::editHandleSSAOStage      (void)
     return returnValue;
 }
 
+GetFieldHandlePtr ShaderCodeGeneratorBase::getHandleIBLStage        (void) const
+{
+    SFUnrecIBLStagePtr::GetHandlePtr returnValue(
+        new  SFUnrecIBLStagePtr::GetHandle(
+             &_sfIBLStage,
+             this->getType().getFieldDesc(IBLStageFieldId),
+             const_cast<ShaderCodeGeneratorBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr ShaderCodeGeneratorBase::editHandleIBLStage       (void)
+{
+    SFUnrecIBLStagePtr::EditHandlePtr returnValue(
+        new  SFUnrecIBLStagePtr::EditHandle(
+             &_sfIBLStage,
+             this->getType().getFieldDesc(IBLStageFieldId),
+             this));
+
+    returnValue->setSetMethod(
+        boost::bind(&ShaderCodeGenerator::setIBLStage,
+                    static_cast<ShaderCodeGenerator *>(this), _1));
+
+    editSField(IBLStageFieldMask);
+
+    return returnValue;
+}
+
 GetFieldHandlePtr ShaderCodeGeneratorBase::getHandleMultiLightGroup (void) const
 {
     SFUnrecMultiLightGroupPtr::GetHandlePtr returnValue(
@@ -1021,6 +1120,8 @@ void ShaderCodeGeneratorBase::resolveLinks(void)
     static_cast<ShaderCodeGenerator *>(this)->setMultiLightShadowStage(NULL);
 
     static_cast<ShaderCodeGenerator *>(this)->setSSAOStage(NULL);
+
+    static_cast<ShaderCodeGenerator *>(this)->setIBLStage(NULL);
 
     static_cast<ShaderCodeGenerator *>(this)->setMultiLightGroup(NULL);
 

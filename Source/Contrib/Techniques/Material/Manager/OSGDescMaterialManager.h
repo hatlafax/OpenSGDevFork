@@ -51,6 +51,7 @@ class HDR2Stage;
 class ClusterShadingStage;
 class MultiLightShadowStage;
 class SSAOStage;
+class IBLStage;
 class MultiLightChunk;
 class MultiLightGroup;
 class ShaderCodeGenerator;
@@ -127,6 +128,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING DescMaterialManager : public DescMaterial
     bool setClusterShadingStage         (ClusterShadingStage*   stage  ) const;
     bool setMultiLightShadowStage       (MultiLightShadowStage* stage  ) const;
     bool setSSAOStage                   (SSAOStage*             stage  ) const;
+    bool setIBLStage                    (IBLStage*              stage  ) const;
     bool setMultiLightGroup             (MultiLightGroup*       group  ) const;
     bool setLightBindingPnt             (UInt32                 idx    ) const;
     bool setHasClipPlanes               (bool                   flag   ) const;

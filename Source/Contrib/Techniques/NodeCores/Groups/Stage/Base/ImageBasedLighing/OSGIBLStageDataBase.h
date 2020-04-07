@@ -45,14 +45,14 @@
  **           regenerated, which can become necessary at any time.          **
  **                                                                         **
  **     Do not change this file, changes should be done in the derived      **
- **     class ShaderCodeGenerator
+ **     class IBLStageData
  **                                                                         **
  *****************************************************************************
 \*****************************************************************************/
 
 
-#ifndef _OSGSHADERCODEGENERATORBASE_H_
-#define _OSGSHADERCODEGENERATORBASE_H_
+#ifndef _OSGIBLSTAGEDATABASE_H_
+#define _OSGIBLSTAGEDATABASE_H_
 #ifdef __sgi
 #pragma once
 #endif
@@ -63,37 +63,30 @@
 
 //#include "OSGBaseTypes.h"
 
-#include "OSGFieldContainer.h" // Parent
+#include "OSGStageData.h" // Parent
 
-#include "OSGCapabilitiesDescFields.h"  // CapabilitiesDesc type
-#include "OSGHDR2StageFields.h"         // HDR2Stage type
-#include "OSGClusterShadingStageFields.h" // ClusterShadingStage type
-#include "OSGMultiLightShadowStageFields.h" // MultiLightShadowStage type
-#include "OSGSSAOStageFields.h"         // SSAOStage type
-#include "OSGIBLStageFields.h"          // IBLStage type
-#include "OSGMultiLightGroupFields.h"   // MultiLightGroup type
-#include "OSGSysFields.h"               // LightBindingPnt type
+#include "OSGSysFields.h"               // Width type
 
-#include "OSGShaderCodeGeneratorFields.h"
+#include "OSGIBLStageDataFields.h"
 
 OSG_BEGIN_NAMESPACE
 
 
-class ShaderCodeGenerator;
+class IBLStageData;
 
-//! \brief ShaderCodeGenerator Base Class.
+//! \brief IBLStageData Base Class.
 
-class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGeneratorBase : public FieldContainer
+class OSG_CONTRIBTECHNIQUES_DLLMAPPING IBLStageDataBase : public StageData
 {
   public:
 
-    typedef FieldContainer Inherited;
-    typedef FieldContainer ParentContainer;
+    typedef StageData Inherited;
+    typedef StageData ParentContainer;
 
     typedef Inherited::TypeObject TypeObject;
     typedef TypeObject::InitPhase InitPhase;
 
-    OSG_GEN_INTERNALPTR(ShaderCodeGenerator);
+    OSG_GEN_INTERNALPTR(IBLStageData);
 
     /*==========================  PUBLIC  =================================*/
 
@@ -101,48 +94,20 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGeneratorBase : public FieldCon
 
     enum
     {
-        CapabilitiesDescFieldId = Inherited::NextFieldId,
-        HDR2StageFieldId = CapabilitiesDescFieldId + 1,
-        ClusterShadingStageFieldId = HDR2StageFieldId + 1,
-        MultiLightShadowStageFieldId = ClusterShadingStageFieldId + 1,
-        SSAOStageFieldId = MultiLightShadowStageFieldId + 1,
-        IBLStageFieldId = SSAOStageFieldId + 1,
-        MultiLightGroupFieldId = IBLStageFieldId + 1,
-        LightBindingPntFieldId = MultiLightGroupFieldId + 1,
-        HasClipPlanesFieldId = LightBindingPntFieldId + 1,
-        NextFieldId = HasClipPlanesFieldId + 1
+        WidthFieldId = Inherited::NextFieldId,
+        HeightFieldId = WidthFieldId + 1,
+        NextFieldId = HeightFieldId + 1
     };
 
-    static const OSG::BitVector CapabilitiesDescFieldMask =
-        (TypeTraits<BitVector>::One << CapabilitiesDescFieldId);
-    static const OSG::BitVector HDR2StageFieldMask =
-        (TypeTraits<BitVector>::One << HDR2StageFieldId);
-    static const OSG::BitVector ClusterShadingStageFieldMask =
-        (TypeTraits<BitVector>::One << ClusterShadingStageFieldId);
-    static const OSG::BitVector MultiLightShadowStageFieldMask =
-        (TypeTraits<BitVector>::One << MultiLightShadowStageFieldId);
-    static const OSG::BitVector SSAOStageFieldMask =
-        (TypeTraits<BitVector>::One << SSAOStageFieldId);
-    static const OSG::BitVector IBLStageFieldMask =
-        (TypeTraits<BitVector>::One << IBLStageFieldId);
-    static const OSG::BitVector MultiLightGroupFieldMask =
-        (TypeTraits<BitVector>::One << MultiLightGroupFieldId);
-    static const OSG::BitVector LightBindingPntFieldMask =
-        (TypeTraits<BitVector>::One << LightBindingPntFieldId);
-    static const OSG::BitVector HasClipPlanesFieldMask =
-        (TypeTraits<BitVector>::One << HasClipPlanesFieldId);
+    static const OSG::BitVector WidthFieldMask =
+        (TypeTraits<BitVector>::One << WidthFieldId);
+    static const OSG::BitVector HeightFieldMask =
+        (TypeTraits<BitVector>::One << HeightFieldId);
     static const OSG::BitVector NextFieldMask =
         (TypeTraits<BitVector>::One << NextFieldId);
         
-    typedef SFUnrecCapabilitiesDescPtr SFCapabilitiesDescType;
-    typedef SFUnrecHDR2StagePtr SFHDR2StageType;
-    typedef SFUnrecClusterShadingStagePtr SFClusterShadingStageType;
-    typedef SFUnrecMultiLightShadowStagePtr SFMultiLightShadowStageType;
-    typedef SFUnrecSSAOStagePtr SFSSAOStageType;
-    typedef SFUnrecIBLStagePtr SFIBLStageType;
-    typedef SFUnrecMultiLightGroupPtr SFMultiLightGroupType;
-    typedef SFUInt32          SFLightBindingPntType;
-    typedef SFBool            SFHasClipPlanesType;
+    typedef SFUInt32          SFWidthType;
+    typedef SFUInt32          SFHeightType;
 
     /*---------------------------------------------------------------------*/
     /*! \name                    Class Get                                 */
@@ -167,67 +132,27 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGeneratorBase : public FieldCon
     /*! \name                    Field Get                                 */
     /*! \{                                                                 */
 
-            const SFUnrecCapabilitiesDescPtr *getSFCapabilitiesDesc(void) const;
-                  SFUnrecCapabilitiesDescPtr *editSFCapabilitiesDesc(void);
-            const SFUnrecHDR2StagePtr *getSFHDR2Stage      (void) const;
-                  SFUnrecHDR2StagePtr *editSFHDR2Stage      (void);
-            const SFUnrecClusterShadingStagePtr *getSFClusterShadingStage(void) const;
-                  SFUnrecClusterShadingStagePtr *editSFClusterShadingStage(void);
-            const SFUnrecMultiLightShadowStagePtr *getSFMultiLightShadowStage(void) const;
-                  SFUnrecMultiLightShadowStagePtr *editSFMultiLightShadowStage(void);
-            const SFUnrecSSAOStagePtr *getSFSSAOStage      (void) const;
-                  SFUnrecSSAOStagePtr *editSFSSAOStage      (void);
-            const SFUnrecIBLStagePtr  *getSFIBLStage       (void) const;
-                  SFUnrecIBLStagePtr  *editSFIBLStage       (void);
-            const SFUnrecMultiLightGroupPtr *getSFMultiLightGroup(void) const;
-                  SFUnrecMultiLightGroupPtr *editSFMultiLightGroup(void);
 
-                  SFUInt32            *editSFLightBindingPnt(void);
-            const SFUInt32            *getSFLightBindingPnt (void) const;
+                  SFUInt32            *editSFWidth          (void);
+            const SFUInt32            *getSFWidth           (void) const;
 
-                  SFBool              *editSFHasClipPlanes  (void);
-            const SFBool              *getSFHasClipPlanes   (void) const;
+                  SFUInt32            *editSFHeight         (void);
+            const SFUInt32            *getSFHeight          (void) const;
 
 
-                  CapabilitiesDesc * getCapabilitiesDesc(void) const;
+                  UInt32              &editWidth          (void);
+                  UInt32               getWidth           (void) const;
 
-                  HDR2Stage * getHDR2Stage      (void) const;
-
-                  ClusterShadingStage * getClusterShadingStage(void) const;
-
-                  MultiLightShadowStage * getMultiLightShadowStage(void) const;
-
-                  SSAOStage * getSSAOStage      (void) const;
-
-                  IBLStage * getIBLStage       (void) const;
-
-                  MultiLightGroup * getMultiLightGroup(void) const;
-
-                  UInt32              &editLightBindingPnt(void);
-                  UInt32               getLightBindingPnt (void) const;
-
-                  bool                &editHasClipPlanes  (void);
-                  bool                 getHasClipPlanes   (void) const;
+                  UInt32              &editHeight         (void);
+                  UInt32               getHeight          (void) const;
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                    Field Set                                 */
     /*! \{                                                                 */
 
-            void setCapabilitiesDesc(CapabilitiesDesc * const value);
-            void setHDR2Stage      (HDR2Stage * const value);
-            void setClusterShadingStage(ClusterShadingStage * const value);
-            void setMultiLightShadowStage(MultiLightShadowStage * const value);
-            void setSSAOStage      (SSAOStage * const value);
-            void setIBLStage       (IBLStage * const value);
-            void setMultiLightGroup(MultiLightGroup * const value);
-            void setLightBindingPnt(const UInt32 value);
-            void setHasClipPlanes  (const bool value);
-
-    /*! \}                                                                 */
-    /*---------------------------------------------------------------------*/
-    /*! \name                Ptr Field Set                                 */
-    /*! \{                                                                 */
+            void setWidth          (const UInt32 value);
+            void setHeight         (const UInt32 value);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -247,6 +172,33 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGeneratorBase : public FieldCon
 
 
     /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                   Construction                               */
+    /*! \{                                                                 */
+
+    static  IBLStageDataTransitPtr  create          (void);
+    static  IBLStageData           *createEmpty     (void);
+
+    static  IBLStageDataTransitPtr  createLocal     (
+                                               BitVector bFlags = FCLocal::All);
+
+    static  IBLStageData            *createEmptyLocal(
+                                              BitVector bFlags = FCLocal::All);
+
+    static  IBLStageDataTransitPtr  createDependent  (BitVector bFlags);
+
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                       Copy                                   */
+    /*! \{                                                                 */
+
+    virtual FieldContainerTransitPtr shallowCopy     (void) const;
+    virtual FieldContainerTransitPtr shallowCopyLocal(
+                                       BitVector bFlags = FCLocal::All) const;
+    virtual FieldContainerTransitPtr shallowCopyDependent(
+                                                      BitVector bFlags) const;
+
+    /*! \}                                                                 */
     /*=========================  PROTECTED  ===============================*/
 
   protected:
@@ -260,61 +212,39 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGeneratorBase : public FieldCon
     /*! \name                      Fields                                  */
     /*! \{                                                                 */
 
-    SFUnrecCapabilitiesDescPtr _sfCapabilitiesDesc;
-    SFUnrecHDR2StagePtr _sfHDR2Stage;
-    SFUnrecClusterShadingStagePtr _sfClusterShadingStage;
-    SFUnrecMultiLightShadowStagePtr _sfMultiLightShadowStage;
-    SFUnrecSSAOStagePtr _sfSSAOStage;
-    SFUnrecIBLStagePtr _sfIBLStage;
-    SFUnrecMultiLightGroupPtr _sfMultiLightGroup;
-    SFUInt32          _sfLightBindingPnt;
-    SFBool            _sfHasClipPlanes;
+    SFUInt32          _sfWidth;
+    SFUInt32          _sfHeight;
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                   Constructors                               */
     /*! \{                                                                 */
 
-    ShaderCodeGeneratorBase(void);
-    ShaderCodeGeneratorBase(const ShaderCodeGeneratorBase &source);
+    IBLStageDataBase(void);
+    IBLStageDataBase(const IBLStageDataBase &source);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                   Destructors                                */
     /*! \{                                                                 */
 
-    virtual ~ShaderCodeGeneratorBase(void);
+    virtual ~IBLStageDataBase(void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                     onCreate                                */
     /*! \{                                                                 */
 
-    void onCreate(const ShaderCodeGenerator *source = NULL);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                    Generic Field Access                      */
     /*! \{                                                                 */
 
-     GetFieldHandlePtr  getHandleCapabilitiesDesc (void) const;
-     EditFieldHandlePtr editHandleCapabilitiesDesc(void);
-     GetFieldHandlePtr  getHandleHDR2Stage       (void) const;
-     EditFieldHandlePtr editHandleHDR2Stage      (void);
-     GetFieldHandlePtr  getHandleClusterShadingStage (void) const;
-     EditFieldHandlePtr editHandleClusterShadingStage(void);
-     GetFieldHandlePtr  getHandleMultiLightShadowStage (void) const;
-     EditFieldHandlePtr editHandleMultiLightShadowStage(void);
-     GetFieldHandlePtr  getHandleSSAOStage       (void) const;
-     EditFieldHandlePtr editHandleSSAOStage      (void);
-     GetFieldHandlePtr  getHandleIBLStage        (void) const;
-     EditFieldHandlePtr editHandleIBLStage       (void);
-     GetFieldHandlePtr  getHandleMultiLightGroup (void) const;
-     EditFieldHandlePtr editHandleMultiLightGroup(void);
-     GetFieldHandlePtr  getHandleLightBindingPnt (void) const;
-     EditFieldHandlePtr editHandleLightBindingPnt(void);
-     GetFieldHandlePtr  getHandleHasClipPlanes   (void) const;
-     EditFieldHandlePtr editHandleHasClipPlanes  (void);
+     GetFieldHandlePtr  getHandleWidth           (void) const;
+     EditFieldHandlePtr editHandleWidth          (void);
+     GetFieldHandlePtr  getHandleHeight          (void) const;
+     EditFieldHandlePtr editHandleHeight         (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -328,7 +258,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGeneratorBase : public FieldCon
                                  ConstFieldMaskArg  syncMode  ,
                            const UInt32             uiSyncInfo);
 
-            void execSync (      ShaderCodeGeneratorBase *pFrom,
+            void execSync (      IBLStageDataBase *pFrom,
                                  ConstFieldMaskArg  whichField,
                                  AspectOffsetStore &oOffsets,
                                  ConstFieldMaskArg  syncMode  ,
@@ -344,6 +274,11 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGeneratorBase : public FieldCon
     /*---------------------------------------------------------------------*/
     /*! \name                     Aspect Create                            */
     /*! \{                                                                 */
+
+#ifdef OSG_MT_CPTR_ASPECT
+    virtual FieldContainer *createAspectCopy(
+                                    const FieldContainer *pRefAspect) const;
+#endif
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -363,11 +298,11 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING ShaderCodeGeneratorBase : public FieldCon
     /*---------------------------------------------------------------------*/
 
     // prohibit default functions (move to 'public' if you need one)
-    void operator =(const ShaderCodeGeneratorBase &source);
+    void operator =(const IBLStageDataBase &source);
 };
 
-typedef ShaderCodeGeneratorBase *ShaderCodeGeneratorBaseP;
+typedef IBLStageDataBase *IBLStageDataBaseP;
 
 OSG_END_NAMESPACE
 
-#endif /* _OSGSHADERCODEGENERATORBASE_H_ */
+#endif /* _OSGIBLSTAGEDATABASE_H_ */

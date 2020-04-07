@@ -57,6 +57,7 @@
 #include "OSGMultiLightShadowStage.h"
 #include "OSGClusterShadingStage.h"
 #include "OSGSSAOStage.h"
+#include "OSGIBLStage.h"
 
 #include "OSGShaderUtility.h"
 

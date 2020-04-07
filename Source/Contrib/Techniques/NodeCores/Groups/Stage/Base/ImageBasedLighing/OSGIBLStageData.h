@@ -36,21 +36,23 @@
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 
-#ifndef _OSGCAPABILITIESDESC_H_
-#define _OSGCAPABILITIESDESC_H_
+#ifndef _OSGIBLSTAGEDATA_H_
+#define _OSGIBLSTAGEDATA_H_
 #ifdef __sgi
 #pragma once
 #endif
 
-#include "OSGCapabilitiesDescBase.h"
+#include "OSGIBLStageDataBase.h"
 
 OSG_BEGIN_NAMESPACE
 
-/*! \brief CapabilitiesDesc class. See \ref
-           PageContribTechniquesCapabilitiesDesc for a description.
+class TextureObjChunk;
+
+/*! \brief IBLStageData class. See \ref
+           PageContribTechniquesIBLStageData for a description.
 */
 
-class OSG_CONTRIBTECHNIQUES_DLLMAPPING CapabilitiesDesc : public CapabilitiesDescBase
+class OSG_CONTRIBTECHNIQUES_DLLMAPPING IBLStageData : public IBLStageDataBase
 {
   protected:
 
@@ -58,62 +60,9 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING CapabilitiesDesc : public CapabilitiesDes
 
   public:
 
-    typedef CapabilitiesDescBase Inherited;
-    typedef CapabilitiesDesc     Self;
+    typedef IBLStageDataBase Inherited;
+    typedef IBLStageData     Self;
 
-    enum Capabilities
-    {
-        FIXED_FUNCTION_PIPELINE = 0x00000001,
-
-        SHADER_MATERIAL_2       = 0x00000002,   // >= OpenGL 2.1, GLSL 1.2
-        SHADER_MATERIAL_3       = 0x00000004,   // >= OpenGL 3.3, GLSL 3.3
-        SHADER_MATERIAL_4       = 0x00000008,   // >= OpenGL 4.4, GLSL 4.4
-
-        SHADER_MATERIAL         = SHADER_MATERIAL_2,
-
-        SILHOUETTES             = 0x00000100,   // Not used here
-        MULTISAMPLE             = 0x00000200,   // Not used here
-        DYNAMIC_VIEWPORT        = 0x00000400,   // Not used here
-        CLIP_PLANES             = 0x00000800,
-
-        HDR                     = 0x00010000,
-        SSAO                    = 0x00020000,
-        MULTILIGHT              = 0x00040000,
-        MULTILIGHT_SHADOW       = 0x00080000,
-        CLUSTER_SHADING         = 0x00100000,
-        IBL                     = 0x00200000,
-
-        BIT_OPERATIONS          = 0x01000000,
-        SWITCH_STATEMENT        = 0x02000000,
-    };
-
-    /*---------------------------------------------------------------------*/
-    /*! \name                   Interface                                  */
-    /*! \{                                                                 */
-
-    bool    bUseCapabilities                (UInt32 capabilities) const;
-    bool    bUsePlatformCapabilities        (UInt32 capabilities) const;
-    bool    bUseRequestedCapabilities       (UInt32 capabilities) const;
-
-    bool    isFallbackFixedFunction         () const;
-    bool    isFallbackShader2               () const;
-    bool    isFallbackShader3               () const;
-    bool    isFallbackShader4               () const;
-
-    bool    hasHDRSupport                   () const;
-    bool    hasClusterShadingSupport        () const;
-    bool    hasMultiLightShadowSupport      () const;
-    bool    hasSSAOSupport                  () const;
-    bool    hasIBLSupport                   () const;
-    bool    hasMultiLightSupport            () const;
-    bool    hasModernShaderSupport          () const;
-    bool    hasFull440ShaderSupport         () const;
-    bool    hasdClipPlanesSupport           () const;
-
-    bool    hasSwitchSupport                () const;
-    bool    hasBitOpsSupport                () const;
-
-    /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                      Sync                                    */
     /*! \{                                                                 */
@@ -135,21 +84,21 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING CapabilitiesDesc : public CapabilitiesDes
 
   protected:
 
-    // Variables should all be in CapabilitiesDescBase.
+    // Variables should all be in IBLStageDataBase.
 
     /*---------------------------------------------------------------------*/
     /*! \name                  Constructors                                */
     /*! \{                                                                 */
 
-    CapabilitiesDesc(void);
-    CapabilitiesDesc(const CapabilitiesDesc &source);
+    IBLStageData(void);
+    IBLStageData(const IBLStageData &source);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                   Destructors                                */
     /*! \{                                                                 */
 
-    virtual ~CapabilitiesDesc(void);
+    virtual ~IBLStageData(void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -164,17 +113,17 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING CapabilitiesDesc : public CapabilitiesDes
   private:
 
     friend class FieldContainer;
-    friend class CapabilitiesDescBase;
+    friend class IBLStageDataBase;
 
     // prohibit default functions (move to 'public' if you need one)
-    void operator =(const CapabilitiesDesc &source);
+    void operator =(const IBLStageData &source);
 };
 
-typedef CapabilitiesDesc *CapabilitiesDescP;
+typedef IBLStageData *IBLStageDataP;
 
 OSG_END_NAMESPACE
 
-#include "OSGCapabilitiesDescBase.inl"
-#include "OSGCapabilitiesDesc.inl"
+#include "OSGIBLStageDataBase.inl"
+#include "OSGIBLStageData.inl"
 
-#endif /* _OSGCAPABILITIESDESC_H_ */
+#endif /* _OSGIBLSTAGEDATA_H_ */

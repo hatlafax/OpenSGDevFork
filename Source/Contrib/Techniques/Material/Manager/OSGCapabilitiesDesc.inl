@@ -85,6 +85,12 @@ bool CapabilitiesDesc::hasSSAOSupport() const
 }
 
 inline
+bool CapabilitiesDesc::hasIBLSupport() const
+{
+    return bUseCapabilities(CapabilitiesDesc::IBL);
+}
+
+inline
 bool CapabilitiesDesc::hasMultiLightSupport() const
 {
     return bUseCapabilities(CapabilitiesDesc::MULTILIGHT);

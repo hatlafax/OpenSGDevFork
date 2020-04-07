@@ -261,6 +261,18 @@ bool DescMaterialManager::setSSAOStage(SSAOStage* stage) const
     return false;
 }
 
+bool DescMaterialManager::setIBLStage(IBLStage* stage) const
+{
+    ShaderCodeGenerator* generator = getShaderCodeGenerator();
+    if (generator)
+    {
+        generator->setIBLStage(stage);
+        return true;
+    }
+
+    return false;
+}
+
 bool DescMaterialManager::setMultiLightGroup(MultiLightGroup* group) const
 {
     ShaderCodeGenerator* generator = getShaderCodeGenerator();

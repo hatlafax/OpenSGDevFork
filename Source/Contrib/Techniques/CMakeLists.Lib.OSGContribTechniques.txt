@@ -88,6 +88,7 @@ OSG_ADD_DIRECTORY("Source/Contrib/Techniques/Material/Shader/Generator")
 OSG_ADD_DIRECTORY("Source/Contrib/Techniques/NodeCores/Groups/Misc")
 OSG_ADD_DIRECTORY("Source/Contrib/Techniques/NodeCores/Groups/Stage/Base/AmbientOcclusion")
 OSG_ADD_DIRECTORY("Source/Contrib/Techniques/NodeCores/Groups/Stage/Base/ClusterShading")
+OSG_ADD_DIRECTORY("Source/Contrib/Techniques/NodeCores/Groups/Stage/Base/ImageBasedLighing")
 OSG_ADD_DIRECTORY("Source/Contrib/Techniques/NodeCores/Groups/Stage/Effects/MultiLightShadowStage")
 
 ##############################################################################
