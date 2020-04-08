@@ -479,6 +479,12 @@ NodeTransitPtr AssimpSceneFileType::read(
 
                 bool result;
 
+                if (importer_name == "Stereolithography (STL) Importer")
+                {
+                    options.setTransformYToZOnImport(false);
+                    options.setForceTwosided(true);
+                }
+
                 AssimpMaterialProcessor materialProc(options, importer_name, directory);
                 result = materialProc.process(scene);
 
