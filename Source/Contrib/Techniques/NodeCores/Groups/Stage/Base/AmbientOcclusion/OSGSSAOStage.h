@@ -270,7 +270,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING SSAOStage : public SSAOStageBase
 #ifdef OSG_DEBUG_SSAO_STAGE
     void            dump_fbo    (const char* name, FrameBufferObject* fbo, std::stringstream& ss) const;
     std::string     dump_stage  (SSAOStageData* pData) const;
-    void            dump_image (const char* name, FrameBufferAttachment* fba) const;
+    void            dump_image  (const char* name, FrameBufferAttachment* fba) const;
 #endif
 
     friend class FieldContainer;
