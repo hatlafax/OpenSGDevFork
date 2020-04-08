@@ -2895,7 +2895,7 @@ void HDR2Stage::genFuncColorCorrection(std::stringstream& ost)
 
 void HDR2Stage::genFuncContrastCorrection(std::stringstream& ost)
 {
-    ost << "const vec3 logMidpoint = vec3(0.18,0.18,0.18);"                             << std::endl;
+    ost << "const vec3 logMidpoint = log2(vec3(0.18,0.18,0.18));"                       << std::endl;
     ost << ""                                                                           << std::endl;
     ost << "vec3 ContrastCorrection(vec3 color)"                                        << std::endl;
     ost << "{"                                                                          << std::endl;
