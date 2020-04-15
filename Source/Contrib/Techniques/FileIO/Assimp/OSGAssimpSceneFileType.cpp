@@ -96,6 +96,36 @@
 
 OSG_BEGIN_NAMESPACE
 
+#ifdef WIN32
+static std::string from_acp_to_utf8(const std::string& str)
+{
+    int sz = ::MultiByteToWideChar(CP_ACP, 0, &str[0], (int)str.size(), NULL, 0);
+
+    if (sz > 0)
+    {
+        std::wstring tmp(sz, 0);
+	sz = ::MultiByteToWideChar(CP_ACP, 0, &str[0], (int)str.size(), &tmp[0], sz);
+
+        if (sz > 0)
+        {
+            int sz = ::WideCharToMultiByte(CP_UTF8, 0, &tmp[0], (int)tmp.size(), NULL, 0, NULL, NULL);
+
+            if (sz > 0)
+            {
+                std::string result(sz, 0);
+	
+                ::WideCharToMultiByte(CP_UTF8, 0, &tmp[0], (int)tmp.size(), &result[0], (int)result.size(), NULL, NULL);
+
+                if (sz > 0)
+                    return result;
+            }
+        }
+    }
+
+    return std::string();
+}
+#endif
+
 #ifdef OSG_WITH_ASSIMP
 class ProgressHandler : public Assimp::ProgressHandler
 {
@@ -431,7 +461,16 @@ NodeTransitPtr AssimpSceneFileType::read(
                                                           | aiComponent_CAMERAS 
                                                           | aiComponent_ANIMATIONS);
 
-        const aiScene* scene = importer.ReadFile(file, options.getPostProcessingFlags());
+        //
+        // Assimp does expect an utf8 filename.
+        //
+        std::string utf8_file = file;
+#ifdef WIN32
+        std::string encoded_file = file;
+        utf8_file = from_acp_to_utf8(encoded_file);
+#endif
+
+        const aiScene* scene = importer.ReadFile(utf8_file, options.getPostProcessingFlags());
 
         std::string importer_name;
 
@@ -518,36 +557,6 @@ NodeTransitPtr AssimpSceneFileType::read(
 
     return NodeTransitPtr(rootPtr);
 }
-
-#ifdef WIN32
-static std::string from_acp_to_utf8(const std::string& str)
-{
-    int sz = ::MultiByteToWideChar(CP_ACP, 0, &str[0], (int)str.size(), NULL, 0);
-
-    if (sz > 0)
-    {
-        std::wstring tmp(sz, 0);
-	sz = ::MultiByteToWideChar(CP_ACP, 0, &str[0], (int)str.size(), &tmp[0], sz);
-
-        if (sz > 0)
-        {
-            int sz = ::WideCharToMultiByte(CP_UTF8, 0, &tmp[0], (int)tmp.size(), NULL, 0, NULL, NULL);
-
-            if (sz > 0)
-            {
-                std::string result(sz, 0);
-	
-                ::WideCharToMultiByte(CP_UTF8, 0, &tmp[0], (int)tmp.size(), &result[0], (int)result.size(), NULL, NULL);
-
-                if (sz > 0)
-                    return result;
-            }
-        }
-    }
-
-    return std::string();
-}
-#endif
 
 bool AssimpSceneFileType::write(
     Node* const   node, 
