@@ -1334,7 +1334,7 @@ void DescMaterialShaderCodeGenerator::getToneMapProgram(
             << endl << ""
             << endl << "vec3 ContrastCorrection(in vec3 color)"
             << endl << "{"
-            << endl << "    const vec3 logMidpoint = vec3(0.18,0.18,0.18);"
+            << endl << "    const vec3 logMidpoint = log2(vec3(0.18,0.18,0.18));"
             << endl << ""
             << endl << "    vec3 logColor = log2(color + vec3(0.00001));"
             << endl << "    vec3 adjColor = logMidpoint + (logColor - logMidpoint) * environment.contrast;"
