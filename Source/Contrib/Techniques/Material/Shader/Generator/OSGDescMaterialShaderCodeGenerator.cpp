@@ -982,6 +982,10 @@ void DescMaterialShaderCodeGenerator::getFragmentProgram(
     << endl << "        geomContext.V = vec3(0.0, 0.0, 1.0);"
     << endl << "    else"
     << endl << "        geomContext.V = normalize(cCameraPositionES - vPositionES);"
+    << endl << ""
+    //<< endl << "    geomContext.NdotV = abs(dot(geomContext.N, geomContext.V)) + 1e-5;"
+    << endl << "    geomContext.NdotV = clamp(dot(geomContext.N, geomContext.V), 0.001, 1.0);"
+    //<< endl << "    geomContext.NdotV = saturate(dot(geomContext.N, geomContext.V));"
     << endl << "}"
     << endl << ""
     ;
@@ -2174,15 +2178,12 @@ void DescMaterialShaderCodeGenerator::getMainFuncProgram(
             << endl << "        }"
             << endl << "    }"
             << endl << ""
-
+            << endl << "    IndirectShading();"
+            << endl << ""
             << endl << "    vec3 color = outLight.directDiffuse  + outLight.indirectDiffuse"
             << endl << "               + outLight.directSpecular + outLight.indirectSpecular"
             << endl << "               + outLight.emissiveRadiance;"
             << endl << ""
-    ;
-
-    ost
-            << endl << "    color += globalAmbientIntensity() * material.diffuse;"
     ;
 
     if (descMaterial->getHasImageBasedLight())
