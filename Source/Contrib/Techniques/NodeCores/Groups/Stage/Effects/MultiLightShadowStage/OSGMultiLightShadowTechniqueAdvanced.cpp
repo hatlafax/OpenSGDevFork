@@ -729,18 +729,18 @@ void MultiLightShadowTechniqueAdvanced::addOverride(RenderAction* a, DrawEnv* pE
     Int32 iShadowParamBndPnt   = getShadowParameterBindingPnt();
     Int32 iDistributionBndPnt  = getDistributionBindingPnt();
 
-    a->addOverride(    _pointLightTexObj->getClassId() + iPLTextureUnit,       _pointLightTexObj);
-    a->addOverride(      _dirLightTexObj->getClassId() + iDLTextureUnit,         _dirLightTexObj);
+    if (   _pointLightTexObj) a->addOverride(    _pointLightTexObj->getClassId() + iPLTextureUnit,       _pointLightTexObj);
+    if (     _dirLightTexObj) a->addOverride(      _dirLightTexObj->getClassId() + iDLTextureUnit,         _dirLightTexObj);
 
-    a->addOverride(    _pointLightTexObj->getClassId() + iPLShadowTextureUnit, _pointLightTexObj);
-    a->addOverride(      _dirLightTexObj->getClassId() + iDLShadowTextureUnit,   _dirLightTexObj);
+    if (   _pointLightTexObj) a->addOverride(    _pointLightTexObj->getClassId() + iPLShadowTextureUnit, _pointLightTexObj);
+    if (     _dirLightTexObj) a->addOverride(      _dirLightTexObj->getClassId() + iDLShadowTextureUnit,   _dirLightTexObj);
 
-    a->addOverride( _pointLightSampleObj->getClassId() + iPLShadowTextureUnit, _pointLightSampleObj);
-    a->addOverride(   _dirLightSampleObj->getClassId() + iDLShadowTextureUnit,   _dirLightSampleObj);
+    if (_pointLightSampleObj) a->addOverride( _pointLightSampleObj->getClassId() + iPLShadowTextureUnit, _pointLightSampleObj);
+    if (  _dirLightSampleObj) a->addOverride(   _dirLightSampleObj->getClassId() + iDLShadowTextureUnit,   _dirLightSampleObj);
 
-    a->addOverride(     _shadowDataChunk->getClassId() + iShadowDataDBndPnt,     _shadowDataChunk);
-    a->addOverride(    _shadowParamChunk->getClassId() + iShadowParamBndPnt,    _shadowParamChunk);
-    a->addOverride(   _distributionChunk->getClassId() + iDistributionBndPnt,  _distributionChunk);
+    if (    _shadowDataChunk) a->addOverride(     _shadowDataChunk->getClassId() + iShadowDataDBndPnt,     _shadowDataChunk);
+    if (   _shadowParamChunk) a->addOverride(    _shadowParamChunk->getClassId() + iShadowParamBndPnt,    _shadowParamChunk);
+    if (  _distributionChunk) a->addOverride(   _distributionChunk->getClassId() + iDistributionBndPnt,  _distributionChunk);
 
     if (_pStage->getDisableOverride() == false)
     {
@@ -1346,9 +1346,11 @@ void MultiLightShadowTechniqueAdvanced::updateShadowMaps()
     height = _pStage->getShadowMapHeight();
     depth  = osgMax(6, _pointLightNbrMaps * 6);
 
-    if (_pointLightImg->getWidth()  != width 
-     || _pointLightImg->getHeight() != height
-     || _pointLightImg->getDepth()  != depth)
+    if (_pointLightImg && 
+        (   _pointLightImg->getWidth()  != width 
+         || _pointLightImg->getHeight() != height
+         || _pointLightImg->getDepth()  != depth )
+        )
     {
         _pointLightImg->set(Image::OSG_DEPTH_PF, 
                             width, height, depth, 
@@ -1371,9 +1373,11 @@ void MultiLightShadowTechniqueAdvanced::updateShadowMaps()
     height = _pStage->getShadowMapHeight();
     depth  = osgMax(1, _dirLightNbrMaps);
 
-    if (_dirLightImg->getWidth()  != width 
-     || _dirLightImg->getHeight() != height
-     || _dirLightImg->getDepth()  != depth)
+    if (_dirLightImg &&
+        (   _dirLightImg->getWidth()  != width 
+         || _dirLightImg->getHeight() != height
+         || _dirLightImg->getDepth()  != depth )
+       )
     {
         _dirLightImg->set(Image::OSG_DEPTH_PF, 
                           width, height, depth, 
@@ -1394,26 +1398,29 @@ void MultiLightShadowTechniqueAdvanced::updateShadowMaps()
 
     if (getUpdateOffset())
     {
-        Int32 idx = _dirLightChunkMaterial->find(_polygonChunk); // w.l.o.g.
+        if (_dirLightChunkMaterial && _pointLightChunkMaterial)
+        {
+            Int32 idx = _dirLightChunkMaterial->find(_polygonChunk); // w.l.o.g.
         
-        if (_pStage->getOffsetBias() != 0.f || _pStage->getOffsetFactor() != 0.f || _pStage->getCullFrontFace())
-        {
-            _polygonChunk->setOffsetBias  (_pStage->getOffsetBias  ());
-            _polygonChunk->setOffsetFactor(_pStage->getOffsetFactor());
-            _polygonChunk->setCullFace    (_pStage->getCullFrontFace() ?  GL_FRONT : GL_NONE);
+            if (_pStage->getOffsetBias() != 0.f || _pStage->getOffsetFactor() != 0.f || _pStage->getCullFrontFace())
+            {
+                _polygonChunk->setOffsetBias  (_pStage->getOffsetBias  ());
+                _polygonChunk->setOffsetFactor(_pStage->getOffsetFactor());
+                _polygonChunk->setCullFace    (_pStage->getCullFrontFace() ?  GL_FRONT : GL_NONE);
 
-            if (idx == -1)
-            {
-                  _dirLightChunkMaterial->addChunk(_polygonChunk);
-                _pointLightChunkMaterial->addChunk(_polygonChunk);
+                if (idx == -1)
+                {
+                      _dirLightChunkMaterial->addChunk(_polygonChunk);
+                    _pointLightChunkMaterial->addChunk(_polygonChunk);
+                }
             }
-        }
-        else
-        {
-            if (idx != -1)
+            else
             {
-                  _dirLightChunkMaterial->subChunk(_polygonChunk);
-                _pointLightChunkMaterial->subChunk(_polygonChunk);
+                if (idx != -1)
+                {
+                      _dirLightChunkMaterial->subChunk(_polygonChunk);
+                    _pointLightChunkMaterial->subChunk(_polygonChunk);
+                }
             }
         }
     }
