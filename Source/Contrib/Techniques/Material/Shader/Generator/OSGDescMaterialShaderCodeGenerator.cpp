@@ -2194,13 +2194,6 @@ void DescMaterialShaderCodeGenerator::getMainFuncProgram(
         ;
     }
 
-    if (descMaterial->getHasAmbientOcclusion())
-    {
-        ost
-            << endl << "    color *= getMaterialAmbientOcclusion();"
-        ;
-    }
-
     if (pSSAOStage)
     {
         ost
