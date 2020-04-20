@@ -6853,6 +6853,36 @@ void DescMaterial::getFragmentProgramMaterialShadingModel(std::stringstream& ost
     }
 }
 
+void DescMaterial::getFragmentProgramMaterialModelIndirectShading(std::stringstream& ost) const
+{
+    using namespace std;
+
+    ost
+    << endl << "vec3 BRDF_Diffuse_Lambert(const in vec3 diffColor)"
+    << endl << "{"
+    << endl << "    return OSG_INV_PI * diffColor;"
+    << endl << "}"
+    << endl << ""
+    << endl << "void IndirectShading()"
+    << endl << "{"
+    << endl << "    vec3 irradiance = globalAmbientIntensity();"
+    << endl << ""
+    ;
+    if (hasAmbientOcclusion())
+    {
+        ost
+    << endl << "    float ao = getMaterialAmbientOcclusion();"
+    << endl << "    irradiance *= ao;"
+    << endl << ""
+        ;
+    }
+    ost
+    << endl << "    outLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
+    << endl << "}"
+    << endl << ""
+    ;
+}
+
 void DescMaterial::getFragmentProgramMaterialModelNo(std::stringstream& ost) const
 {
     using namespace std;
@@ -6875,19 +6905,9 @@ void DescMaterial::getFragmentProgramMaterialModelGouraud(std::stringstream& ost
 {
     using namespace std;
 
+    getFragmentProgramMaterialModelIndirectShading(ost);
+
     ost
-    << endl << "vec3 BRDF_Diffuse_Lambert(const in vec3 diffColor)"
-    << endl << "{"
-    << endl << "    return OSG_INV_PI * diffColor;"
-    << endl << "}"
-    << endl << ""
-    << endl << "void IndirectShading()"
-    << endl << "{"
-    << endl << "    vec3 irradiance = globalAmbientIntensity();"
-    << endl << ""
-    << endl << "    outLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
-    << endl << "}"
-    << endl << ""
     << endl << "void DirectShading(in vec3 I)"
     << endl << "{"
     << endl << "    geomContext.NdotL = saturate(dot(geomContext.N, geomContext.L));"
@@ -6905,6 +6925,8 @@ void DescMaterial::getFragmentProgramMaterialModelGouraud(std::stringstream& ost
 void DescMaterial::getFragmentProgramMaterialModelPhong(std::stringstream& ost) const
 {
     using namespace std;
+
+    getFragmentProgramMaterialModelIndirectShading(ost);
 
     ost
     << endl << "vec3 F_Schlick(in vec3 F0)"
@@ -6933,11 +6955,6 @@ void DescMaterial::getFragmentProgramMaterialModelPhong(std::stringstream& ost) 
     << endl << "    return OSG_INV_2PI * (2.0 + shininess) * pow(RdotV, shininess);"
     << endl << "}"
     << endl << ""
-    << endl << "vec3 BRDF_Diffuse_Lambert(const in vec3 diffColor)"
-    << endl << "{"
-    << endl << "    return OSG_INV_PI * diffColor;"
-    << endl << "}"
-    << endl << ""
     << endl << "vec3 BRDF_Specular_Phong(const in vec3 specColor, const in float shininess)"
     << endl << "{"
     << endl << "    geomContext.H = normalize(geomContext.L + geomContext.V);"
@@ -6950,13 +6967,6 @@ void DescMaterial::getFragmentProgramMaterialModelPhong(std::stringstream& ost) 
     << endl << "    float D = D_Phong  (shininess);"
     << endl << ""
     << endl << "    return F * ( G * D );"
-    << endl << "}"
-    << endl << ""
-    << endl << "void IndirectShading()"
-    << endl << "{"
-    << endl << "    vec3 irradiance = globalAmbientIntensity();"
-    << endl << ""
-    << endl << "    outLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
     << endl << "}"
     << endl << ""
     << endl << "void DirectShading(in vec3 I)"
@@ -6977,6 +6987,8 @@ void DescMaterial::getFragmentProgramMaterialModelPhong(std::stringstream& ost) 
 void DescMaterial::getFragmentProgramMaterialModelBlinn(std::stringstream& ost) const
 {
     using namespace std;
+
+    getFragmentProgramMaterialModelIndirectShading(ost);
 
     ost
     << endl << "vec3 F_Schlick(in vec3 F0)"
@@ -7002,11 +7014,6 @@ void DescMaterial::getFragmentProgramMaterialModelBlinn(std::stringstream& ost) 
     << endl << "    return OSG_INV_PI * ( material.shininess * 0.5 + 1.0 ) * pow(geomContext.NdotH, shininess);"
     << endl << "}"
     << endl << ""
-    << endl << "vec3 BRDF_Diffuse_Lambert(const in vec3 diffColor)"
-    << endl << "{"
-    << endl << "    return OSG_INV_PI * diffColor;"
-    << endl << "}"
-    << endl << ""
     << endl << "vec3 BRDF_Specular_BlinnPhong(const in vec3 specColor, const in float shininess)"
     << endl << "{"
     << endl << "    geomContext.H = normalize(geomContext.L + geomContext.V);"
@@ -7019,13 +7026,6 @@ void DescMaterial::getFragmentProgramMaterialModelBlinn(std::stringstream& ost) 
     << endl << "    float D = D_BlinnPhong(shininess);"
     << endl << ""
     << endl << "    return F * ( G * D );"
-    << endl << "}"
-    << endl << ""
-    << endl << "void IndirectShading()"
-    << endl << "{"
-    << endl << "    vec3 irradiance = globalAmbientIntensity();"
-    << endl << ""
-    << endl << "    outLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
     << endl << "}"
     << endl << ""
     << endl << "void DirectShading(in vec3 I)"
@@ -7049,8 +7049,9 @@ void DescMaterial::getFragmentProgramMaterialModelCookTorrance(std::stringstream
 
     // See https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#appendix-b-brdf-implementation
 
-    ost
+    getFragmentProgramMaterialModelIndirectShading(ost);
 
+    ost
     //
     // 1. Surface Reflection Ratio (F) Term (Fresnel Law)
     //
@@ -7194,14 +7195,6 @@ void DescMaterial::getFragmentProgramMaterialModelCookTorrance(std::stringstream
     // 4. Diffuse BRDF
     //
 
-    << endl << "//"
-    << endl << "// Diffuse BRDF"
-    << endl << "//"
-    << endl << "vec3 BRDF_Diffuse_Lambert(const in vec3 diffColor)"
-    << endl << "{"
-    << endl << "    return OSG_INV_PI * diffColor;"
-    << endl << "}"
-    << endl << ""
     << endl << "vec3 BRDF_Diffuse_Disney(const in vec3 diffColor, const in float roughness)"
     << endl << "{"
     << endl << "    float energyBias   = lerp(0.0, 0.5, roughness);"
@@ -7219,9 +7212,6 @@ void DescMaterial::getFragmentProgramMaterialModelCookTorrance(std::stringstream
     // 5. Specular BRDF
     //
 
-    << endl << "//"
-    << endl << "// Specular BRDF"
-    << endl << "//"
     << endl << "vec3 BRDF_Specular_GGX(const in vec3 F0, const in float alpha)"
     << endl << "{"
     << endl << "    float F90 = 1.0;"
@@ -7237,7 +7227,12 @@ void DescMaterial::getFragmentProgramMaterialModelCookTorrance(std::stringstream
     //
     // 6. Lighing calculation
     //
-
+/*
+    << endl << "vec3 BRDF_Diffuse_Lambert(const in vec3 diffColor)"
+    << endl << "{"
+    << endl << "    return OSG_INV_PI * diffColor;"
+    << endl << "}"
+    << endl << ""
     << endl << "void IndirectShading()"
     << endl << "{"
     //<< endl << "    vec3  F0  = material.specular;"
@@ -7246,15 +7241,25 @@ void DescMaterial::getFragmentProgramMaterialModelCookTorrance(std::stringstream
     //<< endl << "    vec3 kS = F_Schlick(F0, F90, geomContext.NdotV, material.alphaRoughness);"
     //<< endl << "    vec3 kD = (1.0 - kS) * (1.0 - material.metalness);"
     //<< endl << ""
-    //<< endl << "    vec3 irradiance = globalAmbientIntensity();"
-    //<< endl << ""
-    //<< endl << "    outLight.indirectDiffuse  += kD * irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
-    //<< endl << "    outLight.indirectSpecular += kS * irradiance * BRDF_Diffuse_Lambert(material.specular);"
     << endl << "    vec3 irradiance = globalAmbientIntensity();"
     << endl << ""
-    << endl << "    outLight.indirectDiffuse  += irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
+    ;
+    if (hasAmbientOcclusion())
+    {
+        ost
+    << endl << "    float ao = getMaterialAmbientOcclusion();"
+    << endl << "    irradiance *= ao;"
+    << endl << ""
+        ;
+    }
+    ost
+    //<< endl << "    outLight.indirectDiffuse  += kD * irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
+    //<< endl << "    outLight.indirectSpecular += kS * irradiance * BRDF_Diffuse_Lambert(material.specular);"
+    << endl << "    outLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
     << endl << "}"
     << endl << ""
+*/
+
     << endl << "void DirectShading(in vec3 I)"
     << endl << "{"
     << endl << "    geomContext.H = normalize(geomContext.L + geomContext.V);"
@@ -7317,12 +7322,9 @@ void DescMaterial::getFragmentProgramMaterialModelOrenNayar(std::stringstream& o
 {
     using namespace std;
 
+    getFragmentProgramMaterialModelIndirectShading(ost);
+
     ost
-    << endl << "vec3 BRDF_Diffuse_Lambert(const in vec3 diffColor)"
-    << endl << "{"
-    << endl << "    return OSG_INV_PI * diffColor;"
-    << endl << "}"
-    << endl << ""
     << endl << "//"
     << endl << "// http://blog.selfshadow.com/publications/s2012-shading-course/#course_content"
     << endl << "// http://blog.selfshadow.com/publications/s2012-shading-course/gotanda/s2012_pbs_beyond_blinn_notes_v3.pdf"
@@ -7358,13 +7360,6 @@ void DescMaterial::getFragmentProgramMaterialModelOrenNayar(std::stringstream& o
     << endl << "    return OSG_INV_PI * T * diffColor;"
     << endl << "}"
     << endl << ""
-    << endl << "void IndirectShading()"
-    << endl << "{"
-    << endl << "    vec3 irradiance = globalAmbientIntensity();"
-    << endl << ""
-    << endl << "    outLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
-    << endl << "}"
-    << endl << ""
     << endl << "void DirectShading(in vec3 I)"
     << endl << "{"
     << endl << "    geomContext.NdotL = saturate(dot(geomContext.N, geomContext.L));"
@@ -7377,11 +7372,6 @@ void DescMaterial::getFragmentProgramMaterialModelOrenNayar(std::stringstream& o
     ;
 /*
     ost
-    << endl << "vec3 BRDF_Diffuse_Lambert(const in vec3 diffColor)"
-    << endl << "{"
-    << endl << "    return OSG_INV_PI * diffColor;"
-    << endl << "}"
-    << endl << ""
     << endl << "vec3 BRDF_Diffuse_OrenNayar(const in vec3 diffColor, const in float shininess)"
     << endl << "{"
     << endl << "    float NdotL = max(0.0, dot(geomContext.N, geomContext.L));"
@@ -7407,13 +7397,6 @@ void DescMaterial::getFragmentProgramMaterialModelOrenNayar(std::stringstream& o
     << endl << "    return OSG_INV_PI * T * diffColor;"
     << endl << "}"
     << endl << ""
-    << endl << "void IndirectShading()"
-    << endl << "{"
-    << endl << "    vec3 irradiance = globalAmbientIntensity();"
-    << endl << ""
-    << endl << "    outLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
-    << endl << "}"
-    << endl << ""
     << endl << "void DirectShading(in vec3 I)"
     << endl << "{"
     << endl << "    geomContext.NdotL = saturate(dot(geomContext.N, geomContext.L));"
@@ -7431,6 +7414,8 @@ void DescMaterial::getFragmentProgramMaterialModelOrenNayar(std::stringstream& o
 void DescMaterial::getFragmentProgramMaterialModelToon(std::stringstream& ost) const
 {
     using namespace std;
+
+    getFragmentProgramMaterialModelIndirectShading(ost);
 
     ost
     << endl << "vec3 F_Schlick(in vec3 F0)"
@@ -7456,11 +7441,6 @@ void DescMaterial::getFragmentProgramMaterialModelToon(std::stringstream& ost) c
     << endl << "    return OSG_INV_PI * ( shininess * 0.5 + 1.0 ) * pow(geomContext.NdotH, shininess);"
     << endl << "}"
     << endl << ""
-    << endl << "vec3 BRDF_Diffuse_Lambert(const in vec3 diffColor)"
-    << endl << "{"
-    << endl << "    return OSG_INV_PI * diffColor;"
-    << endl << "}"
-    << endl << ""
     << endl << "vec3 BRDF_Specular_BlinnPhong(const in vec3 specColor, const in float shininess)"
     << endl << "{"
     << endl << "    geomContext.H = normalize(geomContext.L + geomContext.V);"
@@ -7473,13 +7453,6 @@ void DescMaterial::getFragmentProgramMaterialModelToon(std::stringstream& ost) c
     << endl << "    float D = D_BlinnPhong(shininess);"
     << endl << ""
     << endl << "    return F * ( G * D );"
-    << endl << "}"
-    << endl << ""
-    << endl << "void IndirectShading()"
-    << endl << "{"
-    << endl << "    vec3 irradiance = globalAmbientIntensity();"
-    << endl << ""
-    << endl << "    outLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
     << endl << "}"
     << endl << ""
     << endl << "void DirectShading(in vec3 I)"
@@ -7503,6 +7476,8 @@ void DescMaterial::getFragmentProgramMaterialModelToon(std::stringstream& ost) c
 void DescMaterial::getFragmentProgramMaterialModelGooch(std::stringstream& ost) const
 {
     using namespace std;
+
+    getFragmentProgramMaterialModelIndirectShading(ost);
 
     ost
     << endl << "vec3 GoochShading(in float dnl, in float NdotL, in vec3 C)"
@@ -7542,11 +7517,6 @@ void DescMaterial::getFragmentProgramMaterialModelGooch(std::stringstream& ost) 
     << endl << "    return OSG_INV_PI * ( shininess * 0.5 + 1.0 ) * pow(geomContext.NdotH, shininess);"
     << endl << "}"
     << endl << ""
-    << endl << "vec3 BRDF_Diffuse_Lambert(const in vec3 diffColor)"
-    << endl << "{"
-    << endl << "    return OSG_INV_PI * diffColor;"
-    << endl << "}"
-    << endl << ""
     << endl << "vec3 BRDF_Specular_BlinnPhong(const in vec3 specColor, const in float shininess)"
     << endl << "{"
     << endl << "    geomContext.H = normalize(geomContext.L + geomContext.V);"
@@ -7559,13 +7529,6 @@ void DescMaterial::getFragmentProgramMaterialModelGooch(std::stringstream& ost) 
     << endl << "    float D = D_BlinnPhong(shininess);"
     << endl << ""
     << endl << "    return F * ( G * D );"
-    << endl << "}"
-    << endl << ""
-    << endl << "void IndirectShading()"
-    << endl << "{"
-    << endl << "    vec3 irradiance = globalAmbientIntensity();"
-    << endl << ""
-    << endl << "    outLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert(material.diffuse);"
     << endl << "}"
     << endl << ""
     << endl << "void DirectShading(in vec3 I)"
