@@ -622,6 +622,8 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING DescMaterial : public DescMaterialBase
     void getFragmentProgramMaterialInitialization       (std::stringstream& ost) const;
     void getFragmentProgramMaterialShadingModel         (std::stringstream& ost) const;
 
+    void getFragmentProgramMaterialModelIndirectShading (std::stringstream& ost) const;
+
     void getFragmentProgramMaterialModelNo              (std::stringstream& ost) const;
     void getFragmentProgramMaterialModelGouraud         (std::stringstream& ost) const;
     void getFragmentProgramMaterialModelPhong           (std::stringstream& ost) const;
