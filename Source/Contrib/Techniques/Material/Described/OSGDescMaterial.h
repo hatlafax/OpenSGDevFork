@@ -156,8 +156,17 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING DescMaterial : public DescMaterialBase
                                         UInt32 N);
 
     /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                 Custom Field Set                             */
+    /*! \{                                                                 */
 
+    SFUnrecEnvironmentDescPtr*  editSFEnvironmentDesc(void);
+    SFUnrecMaterialDescPtr*     editSFMaterialDesc   (void);
 
+    void                        setEnvironmentDesc(EnvironmentDesc* const value);
+    void                        setMaterialDesc   (MaterialDesc*    const value);
+
+    /*! \}                                                                 */
     /*=========================  PROTECTED  ===============================*/
 
   protected:

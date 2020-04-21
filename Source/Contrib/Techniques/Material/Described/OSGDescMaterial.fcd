@@ -19,6 +19,7 @@
         cardinality="single"
         visibility="external"
         access="public"
+        ptrFieldAccess = "custom"
         defaultValue="NULL"
         >
         The capabilities that are used for code generation.
@@ -30,6 +31,8 @@
         cardinality="single"
         visibility="external"
 	access="public"
+        ptrFieldAccess = "custom"
+        defaultValue="NULL"
         >
         The plain material parameters.
     </Field>

@@ -146,7 +146,7 @@ void DescMaterialBase::classDescInserter(TypeObject &oType)
         "The capabilities that are used for code generation.\n",
         EnvironmentDescFieldId, EnvironmentDescFieldMask,
         false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
+        (Field::SFDefaultFlags | Field::FCustomAccess),
         static_cast<FieldEditMethodSig>(&DescMaterial::editHandleEnvironmentDesc),
         static_cast<FieldGetMethodSig >(&DescMaterial::getHandleEnvironmentDesc));
 
@@ -158,7 +158,7 @@ void DescMaterialBase::classDescInserter(TypeObject &oType)
         "The plain material parameters.\n",
         MaterialDescFieldId, MaterialDescFieldMask,
         false,
-        (Field::SFDefaultFlags | Field::FStdAccess),
+        (Field::SFDefaultFlags | Field::FCustomAccess),
         static_cast<FieldEditMethodSig>(&DescMaterial::editHandleMaterialDesc),
         static_cast<FieldGetMethodSig >(&DescMaterial::getHandleMaterialDesc));
 
@@ -260,6 +260,7 @@ DescMaterialBase::TypeObject DescMaterialBase::_type(
     "        cardinality=\"single\"\n"
     "        visibility=\"external\"\n"
     "        access=\"public\"\n"
+    "        ptrFieldAccess = \"custom\"\n"
     "        defaultValue=\"NULL\"\n"
     "        >\n"
     "        The capabilities that are used for code generation.\n"
@@ -271,6 +272,8 @@ DescMaterialBase::TypeObject DescMaterialBase::_type(
     "        cardinality=\"single\"\n"
     "        visibility=\"external\"\n"
     "\taccess=\"public\"\n"
+    "        ptrFieldAccess = \"custom\"\n"
+    "        defaultValue=\"NULL\"\n"
     "        >\n"
     "        The plain material parameters.\n"
     "    </Field>\n"
@@ -363,38 +366,17 @@ const SFUnrecEnvironmentDescPtr *DescMaterialBase::getSFEnvironmentDesc(void) co
     return &_sfEnvironmentDesc;
 }
 
-SFUnrecEnvironmentDescPtr *DescMaterialBase::editSFEnvironmentDesc(void)
-{
-    editSField(EnvironmentDescFieldMask);
-
-    return &_sfEnvironmentDesc;
-}
-
 //! Get the value of the DescMaterial::_sfEnvironmentDesc field.
 EnvironmentDesc * DescMaterialBase::getEnvironmentDesc(void) const
 {
     return _sfEnvironmentDesc.getValue();
 }
 
-//! Set the value of the DescMaterial::_sfEnvironmentDesc field.
-void DescMaterialBase::setEnvironmentDesc(EnvironmentDesc * const value)
-{
-    editSField(EnvironmentDescFieldMask);
-
-    _sfEnvironmentDesc.setValue(value);
-}
 
 
 //! Get the DescMaterial::_sfMaterialDesc field.
 const SFUnrecMaterialDescPtr *DescMaterialBase::getSFMaterialDesc(void) const
 {
-    return &_sfMaterialDesc;
-}
-
-SFUnrecMaterialDescPtr *DescMaterialBase::editSFMaterialDesc   (void)
-{
-    editSField(MaterialDescFieldMask);
-
     return &_sfMaterialDesc;
 }
 
@@ -404,13 +386,6 @@ MaterialDesc * DescMaterialBase::getMaterialDesc(void) const
     return _sfMaterialDesc.getValue();
 }
 
-//! Set the value of the DescMaterial::_sfMaterialDesc field.
-void DescMaterialBase::setMaterialDesc(MaterialDesc * const value)
-{
-    editSField(MaterialDescFieldMask);
-
-    _sfMaterialDesc.setValue(value);
-}
 
 
 //! Get the DescMaterial::_sfCapabilitiesDesc field.
