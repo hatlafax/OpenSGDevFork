@@ -1002,10 +1002,19 @@ void DescMaterial::changed(ConstFieldMaskArg whichField,
                             UInt32            origin,
                             BitVector         details)
 {
-    if((whichField & (  MaterialDescFieldMask | EnvironmentDescFieldMask )) != 0)
+    if ( (whichField & (  MaterialDescFieldMask | EnvironmentDescFieldMask )) != 0)
     {
-        addMaterialDescObserver();
-        addEnvironmentDescObserver();
+        if ( (whichField &  MaterialDescFieldMask) != 0)
+        {
+            addMaterialDescObserver();
+        }
+
+        if ( (whichField &  EnvironmentDescFieldMask) != 0)
+        {
+            EnvironmentDesc* envDesc1 = this->getEnvironmentDesc();
+
+            addEnvironmentDescObserver();
+        }
 
         _bUpdateMaterial = true;
         _info.invalid    = true;
@@ -1023,9 +1032,6 @@ void DescMaterial::dump(      UInt32    ,
 
 void DescMaterial::resolveLinks(void)
 {
-    removeMaterialDescObserver();
-    removeEnvironmentDescObserver();
-
     Inherited::resolveLinks();
 
     _vertMaterialChunk          = NULL;
@@ -7673,6 +7679,50 @@ TextureDesc* DescMaterial::searchNthTextureDesc(const TextureDescStore& textureD
     }
 
     return result;
+}
+
+SFUnrecEnvironmentDescPtr *DescMaterial::editSFEnvironmentDesc(void)
+{
+    editSField(EnvironmentDescFieldMask);
+
+    return &_sfEnvironmentDesc;
+}
+
+//! Set the value of the DescMaterial::_sfEnvironmentDesc field.
+void DescMaterial::setEnvironmentDesc(EnvironmentDesc * const value)
+{
+    const EnvironmentDesc* envDesc = _sfEnvironmentDesc.getValue();
+
+    if (envDesc && envDesc != value)
+    {
+        removeEnvironmentDescObserver();
+    }
+
+    editSField(EnvironmentDescFieldMask);
+
+    _sfEnvironmentDesc.setValue(value);
+}
+
+SFUnrecMaterialDescPtr *DescMaterial::editSFMaterialDesc   (void)
+{
+    editSField(MaterialDescFieldMask);
+
+    return &_sfMaterialDesc;
+}
+
+//! Set the value of the DescMaterial::_sfMaterialDesc field.
+void DescMaterial::setMaterialDesc(MaterialDesc * const value)
+{
+    const MaterialDesc* matDesc = _sfMaterialDesc.getValue();
+
+    if (matDesc && matDesc != value)
+    {
+        removeMaterialDescObserver();
+    }
+
+    editSField(MaterialDescFieldMask);
+
+    _sfMaterialDesc.setValue(value);
 }
 
 OSG_END_NAMESPACE
