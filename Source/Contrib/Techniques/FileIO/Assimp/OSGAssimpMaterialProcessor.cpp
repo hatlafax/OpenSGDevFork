@@ -192,7 +192,7 @@ bool AssimpMaterialProcessor::process(const aiScene* scene)
             ImageUnrecPtr image = process(texture);
             if (image != NULL)
             {
-                _imageMap.insert(ImageMap::value_type(i, image));
+                _imageMap.insert(ImageMap ::value_type(texture, image));
             }
         }
     }
@@ -205,7 +205,7 @@ bool AssimpMaterialProcessor::process(const aiScene* scene)
 
             aiMaterial* material = scene->mMaterials[i];
 
-            if (process(material, matDesc))
+            if (process(scene, material, matDesc))
             {
                 MeshInfoMap::const_iterator iter = _meshInfoMap.find(i);
                 if (iter != _meshInfoMap.end())
@@ -252,7 +252,7 @@ bool AssimpMaterialProcessor::process(const aiScene* scene)
     return true;
 }
 
-bool AssimpMaterialProcessor::process(const aiMaterial* mat, MaterialDesc* matDesc)
+bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* mat, MaterialDesc* matDesc)
 {
     if(!mat) return false;
 
@@ -517,13 +517,13 @@ bool AssimpMaterialProcessor::process(const aiMaterial* mat, MaterialDesc* matDe
 
     for (std::size_t i = 0; i < types.size(); ++i)
     {
-        process(mat, types[i], matDesc);
+        process(scene, mat, types[i], matDesc);
     }
 
     return true;
 }
 
-void AssimpMaterialProcessor::process(const aiMaterial* mat, aiTextureType type, MaterialDesc* matDesc)
+void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* mat, aiTextureType type, MaterialDesc* matDesc)
 {
     switch (type)
     {
@@ -673,14 +673,12 @@ void AssimpMaterialProcessor::process(const aiMaterial* mat, aiTextureType type,
 
             _filename.clear();
 
-            if (path.data[0] == '*')
+            const aiTexture* texture = scene->GetEmbeddedTexture(path.C_Str());
+
+            if (texture)
             {
-                if (path.length <= 1)
-                    continue;
+                ImageMap::const_iterator iter = _imageMap.find(texture);
 
-                UInt32 iTexIndex = TypeTraits<Int32>::getFromCString(&path.data[1]);
-
-                ImageMap::const_iterator iter = _imageMap.find(iTexIndex);
                 if (iter != _imageMap.end())
                 {
                     texDesc->setTexImage(iter->second);

@@ -136,10 +136,13 @@ NodeTransitPtr AssimpNodeProcessor::process(const aiNode* node, Node* parent)
         {
             Matrix mat = toMatrix(node->mTransformation);
 
-            Quaternion q(Vec3f(0.f, 1.f, 0.f), Vec3f(0.f, 0.f, 1.f));
-            Matrix rotYToZ; rotYToZ.setRotate(q);
+            if (transfOnImport)
+            {
+                Quaternion q(Vec3f(0.f, 1.f, 0.f), Vec3f(0.f, 0.f, 1.f));
+                Matrix rotYToZ; rotYToZ.setRotate(q);
 
-            mat.multLeft(rotYToZ);
+                mat.multLeft(rotYToZ);
+            }
 
             TransformUnrecPtr trafo = Transform::createLocal();
             trafo->setMatrix(mat);

@@ -651,6 +651,11 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpOptions
             TargetRealtime_MaxOptimized   =
                 TargetRealtime_MaxQuality |
                 OptimizeGraph,
+
+            DefaultPostProcessingOptions = 
+                TargetRealtime_MaxOptimized |
+                RemoveComponent             |
+                GlobalScale,
         };
 
         enum Examine
@@ -772,6 +777,9 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpOptions
     bool                getTransformYToZOnImport(void                    ) const;
     void                setTransformYToZOnImport(bool               value);
 
+    Real32              getGlobalScaleOnImport  (void                    ) const;
+    void                setGlobalScaleOnImport  (Real32             value);
+
     UInt32              getShadingModel         (void                    ) const;
     void                setShadingModel         (UInt32             value);
 
@@ -799,6 +807,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpOptions
     bool        _forceTexCoord0;
     bool        _transformUVCoords;
     bool        _writeMtyOnObjExport;
+    Real32      _globalScaleOnImport;
 
     UInt32      _shadingModel;
     std::string _writeFormatIdentifier;

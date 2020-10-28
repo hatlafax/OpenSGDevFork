@@ -100,8 +100,8 @@ public:
 private:
 #ifdef OSG_WITH_ASSIMP
     ImageTransitPtr process     (const aiTexture*  texture);
-    bool            process     (const aiMaterial* mat, MaterialDesc* matDesc);
-    void            process     (const aiMaterial* mat, aiTextureType type, MaterialDesc* matDesc);
+    bool            process     (const aiScene* scene, const aiMaterial* mat, MaterialDesc* matDesc);
+    void            process     (const aiScene* scene, const aiMaterial* mat, aiTextureType type, MaterialDesc* matDesc);
 
     void            adaptTextureImageFile   ();
     bool            checkORMTextureSupport  (const aiMaterial* mat) const;
@@ -114,10 +114,9 @@ private:
 
     typedef AssimpMaterialProcessor      Self;
 
-    typedef std::map<UInt32, ChunkMaterialUnrecPtr> MaterialMap;
-    typedef std::map< Int32, ImageUnrecPtr>         ImageMap;
-
-    typedef std::vector<UInt8> UVDimensionStore;
+    typedef std::map<UInt32,      ChunkMaterialUnrecPtr> MaterialMap;
+    typedef std::map<const void*, ImageUnrecPtr>         ImageMap;
+    typedef std::vector<UInt8>                           UVDimensionStore;
 
     struct MeshInfo
     {
