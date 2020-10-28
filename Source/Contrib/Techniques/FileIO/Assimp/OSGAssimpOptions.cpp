@@ -66,7 +66,7 @@ Char8* AssimpOptions::format_3mf      = "3mf";      // "3mf"      The 3MF-File-F
 Char8* AssimpOptions::format_assjson  = "assjson";  // "json"     Assimp JSON Document
 
 AssimpOptions::AssimpOptions(void)
-: _postProcessingFlags  (TargetRealtime_MaxOptimized|RemoveComponent)//(TargetRealtime_Fast|RemoveComponent)
+: _postProcessingFlags  (DefaultPostProcessingOptions)
 , _preProcessingFlags   (0)
 , _examineFlags         (0xFFFF)
 , _examineFilename      ()
@@ -78,6 +78,7 @@ AssimpOptions::AssimpOptions(void)
 , _forceTexCoord0       (false)
 , _transformUVCoords    (false)
 , _writeMtyOnObjExport  (false)
+, _globalScaleOnImport  (1.f)
 , _shadingModel         (0)
 , _writeFormatIdentifier()
 , _textureSubDirectory  ("textures")
@@ -87,7 +88,7 @@ AssimpOptions::AssimpOptions(void)
 }
 
 AssimpOptions::AssimpOptions(const OptionSet &optSet)
-: _postProcessingFlags  (TargetRealtime_MaxOptimized|RemoveComponent)//(TargetRealtime_Fast|RemoveComponent)
+: _postProcessingFlags  (DefaultPostProcessingOptions)
 , _preProcessingFlags   (0)
 , _examineFlags         (0xFFFF)
 , _examineFilename      ()
@@ -99,6 +100,7 @@ AssimpOptions::AssimpOptions(const OptionSet &optSet)
 , _forceTexCoord0       (false)
 , _transformUVCoords    (false)
 , _writeMtyOnObjExport  (false)
+, _globalScaleOnImport  (1.f)
 , _shadingModel         (0)
 , _writeFormatIdentifier()
 , _textureSubDirectory  ("textures")
@@ -157,6 +159,9 @@ void AssimpOptions::parseOptions(const OptionSet &optSet)
 
     IOFileTypeBase::getOptionAs<bool>(
         optSet, "writeMtyOnObjExport", _writeMtyOnObjExport);
+
+    IOFileTypeBase::getOptionAs<float>(
+        optSet, "globalScaleOnImport", _globalScaleOnImport);
 
     IOFileTypeBase::getOptionAs<UInt32>(
         optSet, "shadingModel", _shadingModel);
@@ -294,6 +299,16 @@ bool AssimpOptions::getWriteMtyOnObjExport(void) const
 void AssimpOptions::setWriteMtyOnObjExport(bool value)
 {
     _writeMtyOnObjExport = value;
+}
+
+Real32 AssimpOptions::getGlobalScaleOnImport(void) const
+{
+    return _globalScaleOnImport;
+}
+
+void AssimpOptions::setGlobalScaleOnImport(Real32 value)
+{
+    _globalScaleOnImport = value;
 }
 
 bool AssimpOptions::getTransformZToYOnExport(void) const

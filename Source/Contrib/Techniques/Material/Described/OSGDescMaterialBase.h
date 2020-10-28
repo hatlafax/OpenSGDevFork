@@ -156,9 +156,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING DescMaterialBase : public ChunkMaterial
     /*! \{                                                                 */
 
             const SFUnrecEnvironmentDescPtr *getSFEnvironmentDesc(void) const;
-                  SFUnrecEnvironmentDescPtr *editSFEnvironmentDesc(void);
             const SFUnrecMaterialDescPtr *getSFMaterialDesc   (void) const;
-                  SFUnrecMaterialDescPtr *editSFMaterialDesc   (void);
             const SFUnrecCapabilitiesDescPtr *getSFCapabilitiesDesc(void) const;
                   SFUnrecCapabilitiesDescPtr *editSFCapabilitiesDesc(void);
 
@@ -198,8 +196,6 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING DescMaterialBase : public ChunkMaterial
     /*! \name                    Field Set                                 */
     /*! \{                                                                 */
 
-            void setEnvironmentDesc(EnvironmentDesc * const value);
-            void setMaterialDesc   (MaterialDesc * const value);
             void setCapabilitiesDesc(CapabilitiesDesc * const value);
             void setVertMaterialBindingPnt(const Int32 value);
             void setFragMaterialBindingPnt(const Int32 value);
