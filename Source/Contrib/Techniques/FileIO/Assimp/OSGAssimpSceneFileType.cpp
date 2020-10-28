@@ -461,6 +461,8 @@ NodeTransitPtr AssimpSceneFileType::read(
                                                           | aiComponent_CAMERAS 
                                                           | aiComponent_ANIMATIONS);
 
+        importer.SetPropertyFloat(AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, options.getGlobalScaleOnImport());
+
         //
         // Assimp does expect an utf8 filename.
         //
@@ -1949,6 +1951,12 @@ void AssimpSceneFileType::handleTexMaterialTextureParamsGLTF2(SceneWriteData& da
         ai_mat->AddProperty(&params.ai_mag_filter,   1, _AI_MATKEY_GLTF_MAPPINGFILTER_MAG_BASE, params.ai_type, params.ai_number);
 
         ai_mat->AddProperty(&params.ai_uv_index, 1, _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE, params.ai_type, params.ai_number);
+
+        if (params.ai_mapping_mode_u == aiTextureMapMode_Decal) params.ai_mapping_mode_u = aiTextureMapMode_Clamp;
+        if (params.ai_mapping_mode_v == aiTextureMapMode_Decal) params.ai_mapping_mode_v = aiTextureMapMode_Clamp;
+
+        ai_mat->AddProperty(&params.ai_mapping_mode_u, 1, _AI_MATKEY_MAPPINGMODE_U_BASE, params.ai_type, params.ai_number);
+        ai_mat->AddProperty(&params.ai_mapping_mode_v, 1, _AI_MATKEY_MAPPINGMODE_V_BASE, params.ai_type, params.ai_number);
     }
 }
 
@@ -2197,8 +2205,8 @@ void AssimpSceneFileType::handleDescMaterial(SceneWriteData& data, const DescMat
 
     switch (matDesc->getCullFace())
     {
-        case GL_NONE: params.ai_twosided = true;
-        case GL_BACK: params.ai_twosided = false;
+        case GL_NONE: params.ai_twosided = true;  break;
+        case GL_BACK: params.ai_twosided = false; break;
     }
 
     if (data.options.getForceTwosided() || osgAbs(1.f - matDesc->getOpacity()) > Eps)
