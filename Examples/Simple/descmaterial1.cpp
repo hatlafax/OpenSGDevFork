@@ -6,18 +6,24 @@
 // and of the material manager DescMaterialManager.
 //
 
+#include <set>
+
 #ifdef OSG_BUILD_ACTIVE
 // Headers
 #include <OSGConfig.h>
 #include <OSGBaseFunctions.h>
 #include <OSGClusterShadingStage.h>
 #include <OSGContainerCollection.h>
+#include <OSGDescMaterial.h>
 #include <OSGDescMaterialManager.h>
 #include <OSGGLUT.h>
 #include <OSGGLUTWindow.h>
 #include <OSGGroup.h>
 #include <OSGHDR2Stage.h>
+#include <OSGMaterial.h>
+#include <OSGMaterialChunkOverrideGroup.h>
 #include <OSGMaterialDesc.h>
+#include <OSGMaterialGroup.h>
 #include <OSGMultiLightGroup.h>
 #include <OSGMultiLightShadowStage.h>
 #include <OSGNameAttachment.h>
@@ -27,18 +33,21 @@
 #include <OSGSolidBackground.h>
 #include <OSGSSAOStage.h>
 #include <OSGTransform.h>
-
 #else
 #include <OpenSG/OSGConfig.h>
 #include <OpenSG/OSGBaseFunctions.h>
 #include <OpenSG/OSGClusterShadingStage.h>
 #include <OpenSG/OSGContainerCollection.h>
+#include <OpenSG/OSGDescMaterial.h>
 #include <OpenSG/OSGDescMaterialManager.h>
 #include <OpenSG/OSGGLUT.h>
 #include <OpenSG/OSGGLUTWindow.h>
 #include <OpenSG/OSGGroup.h>
 #include <OpenSG/OSGHDR2Stage.h>
+#include <OpenSG/OSGMaterial.h>
+#include <OpenSG/OSGMaterialChunkOverrideGroup.h>
 #include <OpenSG/OSGMaterialDesc.h>
+#include <OpenSG/OSGMaterialGroup.h>
 #include <OpenSG/OSGMultiLightGroup.h>
 #include <OpenSG/OSGMultiLightShadowStage.h>
 #include <OpenSG/OSGNameAttachment.h>
@@ -53,20 +62,7 @@
 class find_node_helper
 {
 public:
-    explicit find_node_helper(const char* name) : _str(name), _result(nullptr), _type(nullptr) {}
-    explicit find_node_helper(const std::string& str) : _str(str), _result(nullptr), _type(nullptr) {}
     explicit find_node_helper(const OSG::FieldContainerType* type) : _str(), _result(nullptr), _type(type) {}
-
-    OSG::Action::ResultE enter_name(OSG::Node* node)
-    {
-        using namespace OSG;
-        if (getName(node) && strcmp(getName(node), _str.c_str()) == 0) 
-        {
-            _result = node;
-            return Action::Quit;
-        }
-        return Action::Continue;
-    }
 
     OSG::Action::ResultE enter_type(OSG::Node* node)
     {
@@ -107,6 +103,109 @@ OSG::NodeCore* find_core(OSG::Node* node, const OSG::FieldContainerType& type)
         result = found->getCore();
 
     return result;
+}
+
+class manage_material_helper
+{
+public:
+    explicit manage_material_helper(OSG::DescMaterialManager* mMgr, bool update) : _materialManager(mMgr), _update(update) {}
+
+    OSG::Action::ResultE enter(OSG::Node* node)
+    {
+        using namespace OSG;
+
+        NodeCore* core = node->getCore();
+
+        Material* mat = nullptr;
+
+        MaterialGroup* mgrp = dynamic_cast<MaterialGroup*>(core);
+        if (mgrp) {
+            mat = mgrp->getMaterial();
+        } else {
+            MaterialChunkOverrideGroup* mcogrp = dynamic_cast<MaterialChunkOverrideGroup*>(core);
+            if (mcogrp) {
+                mat = mcogrp->getMaterial();
+            } else {
+                Geometry* geom = dynamic_cast<Geometry*>(core);
+                if (geom) {
+                    mat = geom->getMaterial();
+                }
+            }
+        }
+
+        if (mat)
+        {
+            // The following is a little bit over simplified. In reality, the material could by any of 
+            // MultiPassMaterial, PrimeMaterial, VariantMaterial, SwitchMaterial, DescMaterial, ChunkMaterial,...
+            // Here we expect that only simple models are encountered. Otherwise the example would be somewhat
+            // larger.
+            if (_alreadyProcessed.find(mat) == _alreadyProcessed.end()) {
+                _alreadyProcessed.insert(mat);
+
+                DescMaterial* descMat = dynamic_cast<DescMaterial*>(mat);
+                if (descMat)
+                {
+                    if (_update)
+                        update(descMat);
+                    else
+                        manage(descMat);
+                }
+                else
+                {
+                    // any other material layout that finally may lead to a DescMaterial that we have to
+                    // found...
+                }
+            }
+        }
+
+        return Action::Continue;
+    }
+
+    void update(OSG::DescMaterial* descMat)
+    {
+        using namespace OSG;
+
+        MaterialDesc* matDesc = descMat->getMaterialDesc();
+        if (matDesc)
+        {
+            //commitChanges();
+        }
+    }
+
+    void manage(OSG::DescMaterial* descMat)
+    {
+        using namespace OSG;
+
+        MaterialDesc* matDesc = descMat->getMaterialDesc();
+        if (matDesc)
+        {
+            MaterialDesc::HashKeyType key = matDesc->getHashValue();
+
+            bool result = _materialManager->addMaterial(key, descMat);
+        }
+    }
+
+private:
+    typedef std::set<OSG::Material*> SetMaterialT;
+
+private:
+    OSG::DescMaterialManagerRefPtr _materialManager;
+    SetMaterialT                   _alreadyProcessed;
+    bool                           _update;
+};
+
+void manageDescMaterials(OSG::DescMaterialManager* mgr, OSG::Node* node)
+{
+    using namespace OSG;
+    manage_material_helper helper(mgr, false);
+    traverse(node, boost::bind(&manage_material_helper::enter, &helper, _1));
+}
+
+void updateDescMaterials(OSG::DescMaterialManager* mgr, OSG::Node* node)
+{
+    using namespace OSG;
+    manage_material_helper helper(mgr, true);
+    traverse(node, boost::bind(&manage_material_helper::enter, &helper, _1));
 }
 
 //
@@ -188,13 +287,14 @@ int main(int argc, char **argv)
             materialManager = OSG::DescMaterialManager::createDefault(initFunctor, "", updateFunctor, "");
             materialManager->setWindow(gwin);
 
-            mgr->turnHeadlightOff();
-       
             OSG::HDR2Stage*             hdr2Stage               = dynamic_cast<OSG::HDR2Stage            *>(find_core(scene, OSG::HDR2Stage             ::getClassType()));
             OSG::SSAOStage*             ssaoStage               = dynamic_cast<OSG::SSAOStage            *>(find_core(scene, OSG::SSAOStage             ::getClassType()));
             OSG::MultiLightGroup*       multiLightGroup         = dynamic_cast<OSG::MultiLightGroup      *>(find_core(scene, OSG::MultiLightGroup       ::getClassType()));
             OSG::MultiLightShadowStage* multiLightShadowStage   = dynamic_cast<OSG::MultiLightShadowStage*>(find_core(scene, OSG::MultiLightShadowStage ::getClassType()));
             OSG::ClusterShadingStage*   clusterShadingStage     = dynamic_cast<OSG::ClusterShadingStage  *>(find_core(scene, OSG::ClusterShadingStage   ::getClassType()));
+
+            if (multiLightGroup)
+                mgr->turnHeadlightOff();
         
             materialManager->setHDR2Stage(hdr2Stage);
             materialManager->setClusterShadingStage(clusterShadingStage);
@@ -202,6 +302,21 @@ int main(int argc, char **argv)
             materialManager->setSSAOStage(ssaoStage);
             materialManager->setMultiLightGroup(multiLightGroup);
             materialManager->setLightBindingPnt(1);
+
+            //
+            // The DescMaterialManager does need to know about the DescMaterial objects in the
+            // scene.
+            //
+            manageDescMaterials(materialManager, scene);
+
+            //
+            // Shaders in the scene must possibly be adapted to the platform capabilities.
+            //
+            materialManager->updateProgram();
+
+            OSG::commitChanges();
+
+            mgr->setRoot(scene);
 
             //
             // DataSolid model specific:
@@ -235,9 +350,6 @@ int main(int argc, char **argv)
                 }
             }
 
-            OSG::commitChanges();
-
-            mgr->setRoot(scene);
             mgr->showAll();
 
             OSG::commitChanges();
