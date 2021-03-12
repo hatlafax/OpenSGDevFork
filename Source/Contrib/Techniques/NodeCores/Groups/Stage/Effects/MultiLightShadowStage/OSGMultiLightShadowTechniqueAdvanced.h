@@ -120,8 +120,8 @@ public:
 
     virtual void    initializeAssocData (UInt32 idx) const;
 
-    virtual void    createCamera        (MultiLight::Type type, 
-                                         CameraUnrecPtr&  camera) const;
+    virtual void    createCamera        (MultiLight::TypeOfLight typeOfLight, 
+                                         CameraUnrecPtr&         camera) const;
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                Shadow parameter                              */
@@ -383,7 +383,7 @@ private:
     Real32                  _zNear;
     Real32                  _pseudoNear;
     Real32                  _pseudoFar;
-    MultiLight::Type        _type;
+    MultiLight::TypeOfLight _typeOfLight;
     Vec3f                   _direction;
 
     //

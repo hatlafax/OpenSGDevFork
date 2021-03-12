@@ -41,10 +41,10 @@
 OSG_BEGIN_NAMESPACE
 
 inline
-UInt32 MultiLightGroup::addLight(MultiLight::Type eType)
+UInt32 MultiLightGroup::addLight(MultiLight::TypeOfLight eTypeOfLight)
 {
     MultiLightChunk* pChunk = getChunk();
-    return pChunk->addLight(eType);
+    return pChunk->addLight(eTypeOfLight);
 }
 
 inline
@@ -342,10 +342,10 @@ Real32 MultiLightGroup::getRangeFarZone(const UInt32 idx) const
 }
 
 inline
-MultiLight::Type MultiLightGroup::getType(const UInt32 idx) const
+MultiLight::TypeOfLight MultiLightGroup::getTypeOfLight(const UInt32 idx) const
 {
     const MultiLightChunk* pChunk = getChunk();
-    return pChunk->getType(idx);
+    return pChunk->getTypeOfLight(idx);
 }
 
 inline
@@ -615,10 +615,10 @@ void MultiLightGroup::setRangeFarZone(const UInt32 idx, Real32 farZone)
 }
 
 inline
-void MultiLightGroup::setType(const UInt32 idx, MultiLight::Type eType)
+void MultiLightGroup::setTypeOfLight(const UInt32 idx, MultiLight::TypeOfLight eTypeOfLight)
 {
     MultiLightChunk* pChunk = getChunk();
-    pChunk->setType(idx, eType);
+    pChunk->setTypeOfLight(idx, eTypeOfLight);
 }
 
 inline

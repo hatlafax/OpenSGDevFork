@@ -197,9 +197,9 @@ const Matrix& MultiLight::getProjectionMatrix() const
 }
 
 inline
-MultiLight::Type MultiLight::getType() const
+MultiLight::TypeOfLight MultiLight::getTypeOfLight() const
 {
-    return _type;
+    return _typeOfLight;
 }
 
 inline
@@ -437,9 +437,9 @@ void MultiLight::setProjectionMatrix(const Matrix& projectionMatrix)
 }
 
 inline
-void MultiLight::setType(MultiLight::Type eType)
+void MultiLight::setTypeOfLight(MultiLight::TypeOfLight eTypeOfLight)
 {
-    _type = eType;
+    _typeOfLight = eTypeOfLight;
 }
 
 inline

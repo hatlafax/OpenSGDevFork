@@ -166,7 +166,7 @@ void MultiLightChunk::changed(ConstFieldMaskArg whichField,
                        RangeNearZoneFieldMask |
                        RangeFarZoneFieldMask |
                        ProjectionMatrixFieldMask |
-                       TypeFieldMask |
+                       TypeOfLightFieldMask |
                        EnabledFieldMask |
                        ShadowFieldMask |
                        ShadowDataIndexFieldMask |
@@ -226,7 +226,7 @@ void MultiLightChunk::calcSpotAngle(
     spotlightAngle    = 0.f;
     cosSpotlightAngle = 1.f;
 
-    switch (getType(idx))
+    switch (getTypeOfLight(idx))
     {
         case MultiLight::POINT_LIGHT:
             break;
@@ -306,7 +306,7 @@ void MultiLightChunk::calcRange(
     Real32&  cutOnRange,
     Real32&  cutOffRange) const
 {
-    switch (getType(idx))
+    switch (getTypeOfLight(idx))
     {
         case MultiLight::DIRECTIONAL_LIGHT:
             cutOnRange  = pEnv->getCameraNear();
@@ -335,15 +335,15 @@ void MultiLightChunk::calcRange(
 }
 
 void MultiLightChunk::calcProjectionMatrix(
-    MultiLight::Type type,
-    Real32           spotlightAngle,
-    Real32           zNear,
-    Real32           zFar,
-    const Pnt3f&     lightMin,
-    const Pnt3f&     lightMax,
-    Matrix&          matProjection) const
+    MultiLight::TypeOfLight typeOfLight,
+    Real32                  spotlightAngle,
+    Real32                  zNear,
+    Real32                  zFar,
+    const Pnt3f&            lightMin,
+    const Pnt3f&            lightMax,
+    Matrix&                 matProjection) const
 {
-    switch (type)
+    switch (typeOfLight)
     {
         case MultiLight::POINT_LIGHT:
             MatrixPerspective(matProjection, Pi / 4.f, 1.f, zNear, zFar);
@@ -802,7 +802,7 @@ std::size_t MultiLightChunk::calcLightBufferSize() const
             ao = alignOffset( 4, bo); bo = ao + sizeof(Real32);     // Real32  superEllipsesTwist
         }
 
-        ao = alignOffset( 4, bo); bo = ao + sizeof(Int32);          // UInt8   type
+        ao = alignOffset( 4, bo); bo = ao + sizeof(Int32);          // UInt8   typeOfLight
         ao = alignOffset( 4, bo); bo = ao + sizeof(Int32);          // bool    enabled
 
         if (getHasShadow())
@@ -1462,12 +1462,12 @@ std::vector<UInt8> MultiLightChunk::createLightBuffer(DrawEnv* pEnv) const
 #endif
         }
 
-        ao = alignOffset( 4, bo); *(reinterpret_cast<Int32*>(&buffer[0] + ao)) = Int32(getType(idx)); bo = ao + sizeof(Int32);
-        ao = alignOffset( 4, bo); *(reinterpret_cast<bool* >(&buffer[0] + ao)) = getEnabled(idx);     bo = ao + sizeof(Int32);
+        ao = alignOffset( 4, bo); *(reinterpret_cast<Int32*>(&buffer[0] + ao)) = Int32(getTypeOfLight(idx)); bo = ao + sizeof(Int32);
+        ao = alignOffset( 4, bo); *(reinterpret_cast<bool* >(&buffer[0] + ao)) = getEnabled(idx);            bo = ao + sizeof(Int32);
 
 #ifdef OSG_LOG_MULTILIGHT_SHADER_TEST_CODE
         ss << start_token << "iVal = lights.light[" << idx << "].type;" << end_token << std::endl;
-        ss << start_token << "if (iVal != " << Int32(getType(idx)) << ") flag = false;" << end_token << std::endl;
+        ss << start_token << "if (iVal != " << Int32(getTypeOfLight(idx)) << ") flag = false;" << end_token << std::endl;
 
         ss << start_token << "bVal = lights.light[" << idx << "].enabled;" << end_token << std::endl;
         ss << start_token << "if (bVal != " << (getEnabled(idx) ? "true" : "false") << ") flag = false;" << end_token << std::endl;
@@ -1599,7 +1599,7 @@ void MultiLightChunk::changeFrom(DrawEnv    *pEnv,
 
 /*------------------------------ interface ----------------------------------*/
 
-UInt32 MultiLightChunk::addLight(MultiLight::Type eType)
+UInt32 MultiLightChunk::addLight(MultiLight::TypeOfLight eTypeOfLight)
 {
     if (!check_invariant())
         clearLights();
@@ -1607,7 +1607,7 @@ UInt32 MultiLightChunk::addLight(MultiLight::Type eType)
     editMField(PositionFieldMask,           _mfPosition);
     editMField(DirectionFieldMask,          _mfDirection);
     editMField(SpotlightAngleFieldMask,     _mfSpotlightAngle);
-    editMField(TypeFieldMask,               _mfType);
+    editMField(TypeOfLightFieldMask,        _mfTypeOfLight);
     editMField(EnabledFieldMask,            _mfEnabled);
     editMField(BeaconFieldMask,             _mfBeacon);
     editMField(BeaconMatrixFieldMask,       _mfBeaconMatrix);
@@ -1615,7 +1615,7 @@ UInt32 MultiLightChunk::addLight(MultiLight::Type eType)
     _mfPosition.        push_back(Pnt3f(0.f,0.f,0.f));
     _mfDirection.       push_back(Vec3f(0.f,0.f,1.f));
     _mfSpotlightAngle.  push_back(45.f);
-    _mfType.            push_back(eType);
+    _mfTypeOfLight.     push_back(eTypeOfLight);
     _mfEnabled.         push_back(false);
                         pushToBeacon(NULL);
     _mfBeaconMatrix.    push_back(Matrix());
@@ -1744,7 +1744,7 @@ UInt32 MultiLightChunk::addLight(const MultiLight& light)
     editMField(PositionFieldMask,           _mfPosition);
     editMField(DirectionFieldMask,          _mfDirection);
     editMField(SpotlightAngleFieldMask,     _mfSpotlightAngle);
-    editMField(TypeFieldMask,               _mfType);
+    editMField(TypeOfLightFieldMask,        _mfTypeOfLight);
     editMField(EnabledFieldMask,            _mfEnabled);
     editMField(BeaconFieldMask,             _mfBeacon);
     editMField(BeaconMatrixFieldMask,       _mfBeaconMatrix);
@@ -1752,7 +1752,7 @@ UInt32 MultiLightChunk::addLight(const MultiLight& light)
     _mfPosition.        push_back(light.getPosition());
     _mfDirection.       push_back(light.getDirection());
     _mfSpotlightAngle.  push_back(light.getSpotlightAngle());
-    _mfType.            push_back(light.getType());
+    _mfTypeOfLight.     push_back(light.getTypeOfLight());
     _mfEnabled.         push_back(light.getEnabled());
                         pushToBeacon(light.getBeacon());
     _mfBeaconMatrix.    push_back(Matrix());
@@ -1879,7 +1879,7 @@ void MultiLightChunk::updateLight(const UInt32 idx, const MultiLight& light)
     setPosition         (idx, light.getPosition());
     setDirection        (idx, light.getDirection());
     setSpotlightAngle   (idx, light.getSpotlightAngle());
-    setType             (idx, light.getType());
+    setTypeOfLight      (idx, light.getTypeOfLight());
     setEnabled          (idx, light.getEnabled());
     setBeacon           (idx, light.getBeacon());
 
@@ -1973,7 +1973,7 @@ MultiLight MultiLightChunk::getLight(const UInt32 idx)
 {
     OSG_ASSERT(check_invariant());
 
-    MultiLight light(getType(idx));
+    MultiLight light(getTypeOfLight(idx));
 
     light.setPosition         (getPosition         (idx));
     light.setDirection        (getDirection        (idx));
@@ -2078,7 +2078,7 @@ void MultiLightChunk::removeLight(const UInt32 idx)
     editMField(PositionFieldMask,           _mfPosition);
     editMField(DirectionFieldMask,          _mfDirection);
     editMField(SpotlightAngleFieldMask,     _mfSpotlightAngle);
-    editMField(TypeFieldMask,               _mfType);
+    editMField(TypeOfLightFieldMask,        _mfTypeOfLight);
     editMField(EnabledFieldMask,            _mfEnabled);
     editMField(BeaconFieldMask,             _mfBeacon);
     editMField(BeaconMatrixFieldMask,       _mfBeaconMatrix);
@@ -2086,7 +2086,7 @@ void MultiLightChunk::removeLight(const UInt32 idx)
     _mfPosition.        erase(idx);
     _mfDirection.       erase(idx);
     _mfSpotlightAngle.  erase(idx);
-    _mfType.            erase(idx);
+    _mfTypeOfLight.     erase(idx);
     _mfEnabled.         erase(idx);
     _mfBeacon.          erase(idx);
     _mfBeaconMatrix.    erase(idx);
@@ -2217,7 +2217,7 @@ void MultiLightChunk::clearLights()
     editMField(SuperEllipsesRoundnessFieldMask,     _mfSuperEllipsesRoundness);
     editMField(SuperEllipsesTwistFieldMask,         _mfSuperEllipsesTwist);
     editMField(ProjectionMatrixFieldMask,           _mfProjectionMatrix);
-    editMField(TypeFieldMask,                       _mfType);
+    editMField(TypeOfLightFieldMask,                _mfTypeOfLight);
     editMField(EnabledFieldMask,                    _mfEnabled);
     editMField(ShadowFieldMask,                     _mfShadow);
     editMField(ShadowDataIndexFieldMask,            _mfShadowDataIndex);
@@ -2247,7 +2247,7 @@ void MultiLightChunk::clearLights()
     _mfSuperEllipsesRoundness.  clear();
     _mfSuperEllipsesTwist.      clear();
     _mfProjectionMatrix.        clear();
-    _mfType.                    clear();
+    _mfTypeOfLight.             clear();
     _mfEnabled.                 clear();
     _mfShadow.                  clear();
     _mfShadowDataIndex.         clear();
@@ -2559,12 +2559,12 @@ void MultiLightChunk::force_invariant()
         editMField(SpotlightAngleFieldMask, _mfSpotlightAngle);
         _mfSpotlightAngle.resize(sz, init_light.getSpotlightAngle());
     }
-    if (sz != _mfType.size())
+    if (sz != _mfTypeOfLight.size())
     {
-        std::size_t sz_old = _mfType.size();
+        std::size_t sz_old = _mfTypeOfLight.size();
 
-        editMField(TypeFieldMask, _mfType);
-        _mfType.resize(sz, init_light.getType());
+        editMField(TypeOfLightFieldMask, _mfTypeOfLight);
+        _mfTypeOfLight.resize(sz, init_light.getTypeOfLight());
     }
     if (sz != _mfEnabled.size())
     {

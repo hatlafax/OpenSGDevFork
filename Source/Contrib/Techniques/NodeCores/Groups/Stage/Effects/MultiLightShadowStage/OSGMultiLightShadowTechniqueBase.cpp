@@ -171,16 +171,16 @@ void MultiLightShadowTechniqueBase::initializeAssocData(UInt32 idx) const
     data.transform = Transform::createLocal();
     data.beacon    = makeNodeFor(data.transform);
 
-    createCamera(data.type, data.camera);
+    createCamera(data.typeOfLight, data.camera);
 
     data.camera->setBeacon(data.beacon);
 }
 
 void MultiLightShadowTechniqueBase::createCamera(
-    MultiLight::Type type, 
-    CameraUnrecPtr&  camera) const
+    MultiLight::TypeOfLight typeOfLight, 
+    CameraUnrecPtr&         camera) const
 {
-    if (type == MultiLight::DIRECTIONAL_LIGHT)
+    if (typeOfLight == MultiLight::DIRECTIONAL_LIGHT)
     {
         camera = MatrixCamera::createLocal();
     }

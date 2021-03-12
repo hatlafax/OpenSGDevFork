@@ -265,6 +265,14 @@ class OSG_BASE_DLLMAPPING EditFieldHandle : public FieldHandle
         const TypePtrVector     &ignoreTypes    = TypePtrVector(),
         const TypeIdVector      &shareGroupIds  = TypeIdVector (),
         const TypeIdVector      &ignoreGroupIds = TypeIdVector ()) const = 0;
+
+    virtual bool cloneValuesEx(
+              GetFieldHandlePtr  pSrc,
+        const TypePtrVector     &shareTypes       = TypePtrVector(),
+        const TypePtrVector     &shareDynTypes    = TypePtrVector(),
+        const TypePtrVector     &ignoreTypes      = TypePtrVector(),
+        const TypeIdVector      &shareGroupIds    = TypeIdVector (),
+        const TypeIdVector      &ignoreGroupIds   = TypeIdVector ()) const = 0;
 };
 
 /*! \ingroup GrpBaseFieldContainerHandle
@@ -486,6 +494,14 @@ class EditSFieldHandle : public EditFieldHandle
         const TypeIdVector      &shareGroupIds  = TypeIdVector (),
         const TypeIdVector      &ignoreGroupIds = TypeIdVector ()) const;
 
+    virtual bool cloneValuesEx(
+              GetFieldHandlePtr  pSrc,
+        const TypePtrVector     &shareTypes       = TypePtrVector(),
+        const TypePtrVector     &shareDynTypes    = TypePtrVector(),
+        const TypePtrVector     &ignoreTypes      = TypePtrVector(),
+        const TypeIdVector      &shareGroupIds    = TypeIdVector (),
+        const TypeIdVector      &ignoreGroupIds   = TypeIdVector ()) const;
+
     /*---------------------------------------------------------------------*/
 
     FieldT *getField(void);
@@ -572,6 +588,14 @@ class EditMFieldHandle : public EditFieldHandle
         const TypePtrVector     &ignoreTypes    = TypePtrVector(),
         const TypeIdVector      &shareGroupIds  = TypeIdVector (),
         const TypeIdVector      &ignoreGroupIds = TypeIdVector ()) const;
+
+    virtual bool cloneValuesEx(
+              GetFieldHandlePtr  pSrc,
+        const TypePtrVector     &shareTypes       = TypePtrVector(),
+        const TypePtrVector     &shareDynTypes    = TypePtrVector(),
+        const TypePtrVector     &ignoreTypes      = TypePtrVector(),
+        const TypeIdVector      &shareGroupIds    = TypeIdVector (),
+        const TypeIdVector      &ignoreGroupIds   = TypeIdVector ()) const;
 
     /*---------------------------------------------------------------------*/
 

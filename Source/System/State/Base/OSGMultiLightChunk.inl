@@ -235,10 +235,10 @@ const Matrix& MultiLightChunk::getProjectionMatrix(const UInt32 idx) const
 }
 
 inline
-MultiLight::Type MultiLightChunk::getType(const UInt32 idx) const
+MultiLight::TypeOfLight MultiLightChunk::getTypeOfLight(const UInt32 idx) const
 {
-    OSG_ASSERT(idx < _mfType.size());
-    return static_cast<MultiLight::Type>(Inherited::getType(idx));
+    OSG_ASSERT(idx < _mfTypeOfLight.size());
+    return static_cast<MultiLight::TypeOfLight>(Inherited::getTypeOfLight(idx));
 }
 
 inline
@@ -539,11 +539,11 @@ void MultiLightChunk::setProjectionMatrix(const UInt32 idx, const Matrix& projec
 }
 
 inline
-void MultiLightChunk::setType(const UInt32 idx, MultiLight::Type eType)
+void MultiLightChunk::setTypeOfLight(const UInt32 idx, MultiLight::TypeOfLight eTypeOfLight)
 {
-    OSG_ASSERT(idx < _mfType.size());
-    if (getType(idx) != eType)
-        editType(idx) = eType;
+    OSG_ASSERT(idx < _mfTypeOfLight.size());
+    if (getTypeOfLight(idx) != eTypeOfLight)
+        editTypeOfLight(idx) = eTypeOfLight;
 }
 
 inline
@@ -662,7 +662,7 @@ bool MultiLightChunk::check_invariant() const
     
     return sz == _mfDirection.size() 
         && sz == _mfSpotlightAngle.size() 
-        && sz == _mfType.size() 
+        && sz == _mfTypeOfLight.size() 
         && sz == _mfEnabled.size() 
         && sz == _mfBeacon.size()
         && sz == _mfBeaconMatrix.size();
@@ -1459,7 +1459,7 @@ void MultiLightChunk::calcLightSpaceMatrixLSFromWS(
     UInt32   idx,
     Matrix&  matLSFromWS) const
 {
-    switch (getType(idx))
+    switch (getTypeOfLight(idx))
     {
         case MultiLight::POINT_LIGHT:
             calcPointLightMatrixLSFromWS(getBeacon(idx), getPosition(idx), matLSFromWS);
@@ -1480,7 +1480,7 @@ void MultiLightChunk::calcLightSpaceMatrixLSFromES(
     UInt32   idx,
     Matrix&  matLSFromES) const
 {
-    switch (getType(idx))
+    switch (getTypeOfLight(idx))
     {
         case MultiLight::POINT_LIGHT:
             calcPointLightMatrixLSFromES(pEnv, getBeacon(idx), getPosition(idx), matLSFromES);
@@ -1502,7 +1502,7 @@ void MultiLightChunk::calcLightSpaceMatricesLSFrom(
     Matrix&  matLSFromWS, 
     Matrix&  matLSFromES) const
 {
-    switch (getType(idx))
+    switch (getTypeOfLight(idx))
     {
         case MultiLight::POINT_LIGHT:
             calcPointLightMatricesLSFrom(pEnv, getBeacon(idx), getPosition(idx), matLSFromWS, matLSFromES);
@@ -1556,7 +1556,7 @@ void MultiLightChunk::calcProjectionMatrix(
     Real32 zNear, zFar;
     calcFrustumZ(pEnv, idx, zNear, zFar);
 
-    calcProjectionMatrix(getType(idx), spotlightAngle, zNear, zFar, lightMin, lightMax, matProjection);
+    calcProjectionMatrix(getTypeOfLight(idx), spotlightAngle, zNear, zFar, lightMin, lightMax, matProjection);
 }
 
 inline
@@ -1645,7 +1645,7 @@ void MultiLightChunk::calcProjectionMatrix(
     Real32 spotlightAngle, cosSpotlightAngle;
     calcSpotAngle(idx, spotlightAngle, cosSpotlightAngle);
 
-    calcProjectionMatrix(getType(idx), spotlightAngle, zNear, zFar, lightMin, lightMax, matProjection);
+    calcProjectionMatrix(getTypeOfLight(idx), spotlightAngle, zNear, zFar, lightMin, lightMax, matProjection);
 }
 
 inline
@@ -1731,16 +1731,16 @@ void MultiLightChunk::calcInvLightSpaceProjectionMatrixLSFromES(
 
 inline
 void MultiLightChunk::calcInvProjectionMatrix(
-    MultiLight::Type type,
-    Real32           spotlightAngle,
-    Real32           zNear,
-    Real32           zFar,
-    const Pnt3f&     lightMin,
-    const Pnt3f&     lightMax,
-    Matrix&          matInvProjection) const
+    MultiLight::TypeOfLight typeOfLight,
+    Real32                  spotlightAngle,
+    Real32                  zNear,
+    Real32                  zFar,
+    const Pnt3f&            lightMin,
+    const Pnt3f&            lightMax,
+    Matrix&                 matInvProjection) const
 {
     Matrix  matProjection;
-    calcProjectionMatrix(type, spotlightAngle, zNear, zFar, lightMin, lightMax, matProjection);
+    calcProjectionMatrix(typeOfLight, spotlightAngle, zNear, zFar, lightMin, lightMax, matProjection);
 
     matProjection.inverse(matInvProjection);
 }

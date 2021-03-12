@@ -55,7 +55,7 @@ OSG_BEGIN_NAMESPACE
 class OSG_SYSTEM_DLLMAPPING  MultiLight
 {
 public:
-    enum Type
+    enum TypeOfLight
     {
         POINT_LIGHT = 1,
         DIRECTIONAL_LIGHT = 2,
@@ -150,7 +150,7 @@ public:
           Real32               getRangeNearZone                 () const;
           Real32               getRangeFarZone                  () const;
     const Matrix&              getProjectionMatrix              () const;
-          Type                 getType                          () const;
+          TypeOfLight          getTypeOfLight                   () const;
           bool                 getEnabled                       () const;
           bool                 getShadow                        () const;
           Int32                getShadowDataIndex               () const;
@@ -191,14 +191,14 @@ public:
           void                 setRangeNearZone                 (Real32 nearZone);
           void                 setRangeFarZone                  (Real32 farZone);
           void                 setProjectionMatrix              (const Matrix& projectionMatrix);
-          void                 setType                          (Type eType);
+          void                 setTypeOfLight                   (TypeOfLight eType);
           void                 setEnabled                       (bool flag);
           void                 setShadow                        (bool flag);
           void                 setShadowDataIndex               (Int32 shadowDataIndex);
           void                 setShadowParameterIndex          (Int32 shadowParameterIndex);
           void                 setBeacon                        (Node* const beacon);
 
-    explicit MultiLight(Type e);
+    explicit MultiLight(TypeOfLight e);
 
 private:
     Pnt3f       _position;
@@ -223,7 +223,7 @@ private:
     Real32      _rangeNearZone;
     Real32      _rangeFarZone;
     Matrix      _projectionMatrix;
-    Type        _type;
+    TypeOfLight _typeOfLight;
     bool        _enabled;
     bool        _shadow;
     Int32       _shadowDataIndex;

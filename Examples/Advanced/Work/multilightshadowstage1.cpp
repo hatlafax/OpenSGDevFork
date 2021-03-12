@@ -913,7 +913,7 @@ void Example::create_light_geometry(bool frustum, const OSG::MultiLight& light, 
     else
         R = 0.4f;
     
-    switch (light.getType())
+    switch (light.getTypeOfLight())
     {
         case OSG::MultiLight::POINT_LIGHT:
         {
@@ -1049,7 +1049,7 @@ void Example::update_light_geometry(const OSG::MultiLight& light)
 {
     if (!light.getBeacon()) return;
 
-    switch (light.getType())
+    switch (light.getTypeOfLight())
     {
         case OSG::MultiLight::SPOT_LIGHT:
         {
@@ -4312,13 +4312,13 @@ OSG::Real32 Example::GetLightSpotExponent() const
 
 void Example::SetLightType(int value)
 {
-    _multiLightGroup->setType(_current_light_index, static_cast<OSG::MultiLight::Type>(value));
+    _multiLightGroup->setTypeOfLight(_current_light_index, static_cast<OSG::MultiLight::TypeOfLight>(value));
     glutPostRedisplay();
 }
 
 int Example::GetLightType() const
 {
-    return static_cast<int>(_multiLightGroup->getType(_current_light_index));
+    return static_cast<int>(_multiLightGroup->getTypeOfLight(_current_light_index));
 }
 
 void Example::SetLightEnabled(bool value)

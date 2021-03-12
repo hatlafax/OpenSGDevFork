@@ -1,3 +1,5 @@
+// OpenSG Tutorial Example: descmaterial1.cpp
+//
 // Loading a model containing DescMaterials.
 //
 // This example shows the basic usage of the 'description' material DescMaterial
@@ -290,10 +292,10 @@ int main(int argc, char **argv)
             OSG::MultiLightGroup*       multiLightGroup         = dynamic_cast<OSG::MultiLightGroup      *>(find_core(scene, OSG::MultiLightGroup       ::getClassType()));
             OSG::MultiLightShadowStage* multiLightShadowStage   = dynamic_cast<OSG::MultiLightShadowStage*>(find_core(scene, OSG::MultiLightShadowStage ::getClassType()));
             OSG::ClusterShadingStage*   clusterShadingStage     = dynamic_cast<OSG::ClusterShadingStage  *>(find_core(scene, OSG::ClusterShadingStage   ::getClassType()));
-        
+
             if (multiLightGroup)
                 mgr->turnHeadlightOff();
-
+        
             materialManager->setHDR2Stage(hdr2Stage);
             materialManager->setClusterShadingStage(clusterShadingStage);
             materialManager->setMultiLightShadowStage(multiLightShadowStage);

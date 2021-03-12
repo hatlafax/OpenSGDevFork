@@ -590,6 +590,59 @@ FieldContainerTransitPtr deepClone(
               std::vector<OSG::UInt16>()                                      );
 
 
+OSG_BASE_DLLMAPPING
+FieldContainerTransitPtr deepCloneEx(      
+          FieldContainer const *                       src,
+    const std::vector<std::string>                    &shareTypeNames,
+
+    const std::vector<std::string>                    &shareDynTypeNames =
+              std::vector<std::string>(),
+
+    const std::vector<std::string>                    &ignoreTypeNames   =
+              std::vector<std::string>(),
+
+    const std::vector<std::string>                    &shareGroupNames   =
+              std::vector<std::string>(),
+
+    const std::vector<std::string>                    &ignoreGroupNames  =
+              std::vector<std::string>()                                 );
+
+OSG_BASE_DLLMAPPING
+FieldContainerTransitPtr deepCloneEx(
+          OSG::FieldContainer const *                       src,
+    const std::vector<OSG::UInt16>                         &shareGroupIds,
+
+    const std::vector<OSG::UInt16>                         &ignoreGroupIds   =
+              std::vector<OSG::UInt16>()                                     );
+
+OSG_BASE_DLLMAPPING
+FieldContainerTransitPtr deepCloneEx(      
+          OSG::FieldContainer const *                  src,
+    const std::string                                 &shareTypesString,
+    const std::string                                 &shareDynTypesString =
+              std::string(),
+
+    const std::string                                 &ignoreTypesString   =
+              std::string()                                                );
+
+OSG_BASE_DLLMAPPING
+FieldContainerTransitPtr deepCloneEx(
+          OSG::FieldContainer const *                       src,
+    const std::vector<const OSG::ReflexiveContainerType *> &shareTypes        =
+              std::vector<const OSG::ReflexiveContainerType *>(),
+
+    const std::vector<const OSG::ReflexiveContainerType *> &shareDynTypes     =
+              std::vector<const OSG::ReflexiveContainerType *>(),
+
+    const std::vector<const OSG::ReflexiveContainerType *> &ignoreTypes       =
+              std::vector<const OSG::ReflexiveContainerType *>(),
+
+    const std::vector<OSG::UInt16>                         &shareGroupIds     =
+              std::vector<OSG::UInt16>(),
+
+    const std::vector<OSG::UInt16>                         &ignoreGroupIds    =
+              std::vector<OSG::UInt16>()                                      );
+
 OSG_END_NAMESPACE
 
 #include "OSGTransitPtr.h"

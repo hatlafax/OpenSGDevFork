@@ -276,7 +276,7 @@ private:
 //
 struct Light
 {
-    enum Type
+    enum TypeOfLight
     {
         directional_light = OSG::MultiLight::DIRECTIONAL_LIGHT,
         point_light       = OSG::MultiLight::POINT_LIGHT,
@@ -284,12 +284,12 @@ struct Light
         cinema_light      = OSG::MultiLight::CINEMA_LIGHT
     };
 
-    OSG::MultiLight::Type getType() const { return static_cast<OSG::MultiLight::Type>(type); }
+    OSG::MultiLight::TypeOfLight getTypeOfLight() const { return static_cast<OSG::MultiLight::TypeOfLight>(typeOfLight); }
 
-    explicit Light(Type e);
+    explicit Light(TypeOfLight e);
             ~Light();
 
-    static Light create_light(Type e, OSG::UInt32 material_idx);
+    static Light create_light(TypeOfLight e, OSG::UInt32 material_idx);
 
     OSG::Pnt3f   position;                  // light position in object space for point and spot lights
     OSG::Vec3f   direction;                 // direction of directional light or spot light in object space
@@ -308,7 +308,7 @@ struct Light
     OSG::Real32  superEllipsesRoundness;    // cinema light parameter
     OSG::Real32  superEllipsesTwist;        // cinema light parameter
 
-    OSG::Int32   type;                  // the type of light: see OSG::MultiLight::LightType
+    OSG::Int32   typeOfLight;           // the type of light: see OSG::MultiLight::LightType
     bool         enabled;               // on/off state of the light
 
     OSG::NodeRefPtr         beacon;     // the light beacon that if defined evaluates the position parameter
@@ -319,7 +319,7 @@ struct Light
 typedef std::vector<Light>  VecLightsT;         // multiple lights
 VecLightsT lights;                              // the lights of the scene
 
-Light::Light(Type e) 
+Light::Light(TypeOfLight e) 
 : position(0.f, 0.f, 0.f)
 , direction(0.f, 0.f, 1.f)
 , ambientIntensity(1.f,1.f,1.f)
@@ -336,7 +336,7 @@ Light::Light(Type e)
 , outerSuperEllipsesHeight(1.3f)
 , superEllipsesRoundness(0.45f)
 , superEllipsesTwist(0.f)
-, type(e)
+, typeOfLight(e)
 , enabled(true)
 , beacon(NULL)
 , transform(NULL)
@@ -467,7 +467,7 @@ OSG::MultiLightChunkTransitPtr create_light_state(const VecLightsT& vLights)
 
     BOOST_FOREACH(const Light& light, vLights)
     {
-        OSG::UInt32 idx = lightChunk->addLight(light.getType());
+        OSG::UInt32 idx = lightChunk->addLight(light.getTypeOfLight());
 
         lightChunk->setPosition                 (idx, light.position);
         lightChunk->setDirection                (idx, light.direction);
@@ -486,7 +486,7 @@ OSG::MultiLightChunkTransitPtr create_light_state(const VecLightsT& vLights)
         lightChunk->setSuperEllipsesRoundness   (idx, light.superEllipsesRoundness);
         lightChunk->setSuperEllipsesTwist       (idx, light.superEllipsesTwist);
         lightChunk->setEnabled                  (idx, light.enabled);
-        lightChunk->setType                     (idx, light.getType());
+        lightChunk->setTypeOfLight              (idx, light.getTypeOfLight());
         lightChunk->setBeacon                   (idx, light.beacon);
     }
 
@@ -503,7 +503,7 @@ void update_light_state(OSG::MultiLightChunk* lightChunk, const VecLightsT& vLig
 
             BOOST_FOREACH(const Light& light, vLights)
             {
-                OSG::UInt32 idx = lightChunk->addLight(light.getType());
+                OSG::UInt32 idx = lightChunk->addLight(light.getTypeOfLight());
 
                 lightChunk->setPosition                 (idx, light.position);
                 lightChunk->setDirection                (idx, light.direction);
@@ -522,7 +522,7 @@ void update_light_state(OSG::MultiLightChunk* lightChunk, const VecLightsT& vLig
                 lightChunk->setSuperEllipsesRoundness   (idx, light.superEllipsesRoundness);
                 lightChunk->setSuperEllipsesTwist       (idx, light.superEllipsesTwist);
                 lightChunk->setEnabled                  (idx, light.enabled);
-                lightChunk->setType                     (idx, light.getType());
+                lightChunk->setTypeOfLight              (idx, light.getTypeOfLight());
                 lightChunk->setBeacon                   (idx, light.beacon);
             }
         }
@@ -549,7 +549,7 @@ void update_light_state(OSG::MultiLightChunk* lightChunk, const VecLightsT& vLig
                 lightChunk->setSuperEllipsesRoundness   (idx, light.superEllipsesRoundness);
                 lightChunk->setSuperEllipsesTwist       (idx, light.superEllipsesTwist);
                 lightChunk->setEnabled                  (idx, light.enabled);
-                lightChunk->setType                     (idx, light.getType());
+                lightChunk->setTypeOfLight              (idx, light.getTypeOfLight());
                 lightChunk->setBeacon                   (idx, light.beacon);
             }
         }
@@ -837,7 +837,7 @@ void initialize_lights(OSG::UInt32 num)   // helper to create lights
     for (OSG::UInt32 i = 0; i < num; ++i)
     {
         int n = classic_die();
-        Light::Type type;
+        Light::TypeOfLight type;
         if (n <= 4)
               type = Light::cinema_light;
         else if (n <= 5)
@@ -851,7 +851,7 @@ void initialize_lights(OSG::UInt32 num)   // helper to create lights
 }
 
 Light Light::create_light(
-    Type e,                     // type of the light
+    TypeOfLight e,              // type of the light
     OSG::UInt32 material_idx)   // index in to the material storage for light animation
 {
     Light l(e);
