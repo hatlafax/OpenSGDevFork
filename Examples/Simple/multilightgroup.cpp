@@ -226,7 +226,7 @@ private:
 //
 struct Light
 {
-    enum Type
+    enum TypeOfLight
     {
         directional_light = OSG::MultiLight::DIRECTIONAL_LIGHT,
         point_light       = OSG::MultiLight::POINT_LIGHT,
@@ -234,19 +234,19 @@ struct Light
         cinema_light      = OSG::MultiLight::CINEMA_LIGHT
     };
 
-    OSG::MultiLight::Type getType() const { return static_cast<OSG::MultiLight::Type>(type); }
+    OSG::MultiLight::TypeOfLight getTypeOfLight() const { return static_cast<OSG::MultiLight::TypeOfLight>(typeOfLight); }
 
-    explicit Light(Type e);
+    explicit Light(TypeOfLight e);
             ~Light();
 
-    static Light create_light(Type e, OSG::UInt32 material_idx);
+    static Light create_light(TypeOfLight e, OSG::UInt32 material_idx);
 
     OSG::Pnt3f   position;          // light position in object space for point and spot lights
     OSG::Vec3f   direction;         // direction of directional light or spot light in object space
     OSG::Vec3f   intensity;         // the color intensity of the light
     OSG::Real32  range;             // the range of the light, i.e. the light sphere radius of influence
     OSG::Real32  spotlightAngle;    // the cone angle in case of a spot light
-    OSG::Int32   type;              // the type of light: see OSG::MultiLight::LightType
+    OSG::Int32   typeOfLight;       // the type of light: see OSG::MultiLight::LightType
     bool         enabled;           // on/off state of the light
 
     OSG::NodeRefPtr         beacon;     // the light beacon that if defined evaluates the position parameter
@@ -257,13 +257,13 @@ struct Light
 typedef std::vector<Light>  VecLightsT;         // multiple lights
 VecLightsT lights;                              // the lights of the scene
 
-Light::Light(Type e) 
+Light::Light(TypeOfLight e) 
 : position(0.f, 0.f, 0.f)
 , direction(0.f, 0.f, 1.f)
 , intensity(1.f,1.f,1.f)
 , range(1.f)
 , spotlightAngle(20.f)
-, type(e)
+, typeOfLight(e)
 , enabled(true)
 , beacon(NULL)
 , transform(NULL)
@@ -389,7 +389,7 @@ OSG::MultiLightGroupTransitPtr create_light_state(const VecLightsT& vLights)
 
     BOOST_FOREACH(const Light& light, vLights)
     {
-        OSG::UInt32 idx = lightGroup->addLight(light.getType());
+        OSG::UInt32 idx = lightGroup->addLight(light.getTypeOfLight());
 
         lightGroup->setPosition        (idx, light.position);
         lightGroup->setDirection       (idx, light.direction);
@@ -397,7 +397,7 @@ OSG::MultiLightGroupTransitPtr create_light_state(const VecLightsT& vLights)
         lightGroup->setRange           (idx, light.range);
         lightGroup->setSpotlightAngle  (idx, light.spotlightAngle);
         lightGroup->setEnabled         (idx, light.enabled);
-        lightGroup->setType            (idx, light.getType());
+        lightGroup->setTypeOfLight     (idx, light.getTypeOfLight());
         lightGroup->setBeacon          (idx, light.beacon);
     }
 
@@ -414,7 +414,7 @@ void update_light_state(OSG::MultiLightGroup* lightGroup, const VecLightsT& vLig
 
             BOOST_FOREACH(const Light& light, vLights)
             {
-                OSG::UInt32 idx = lightGroup->addLight(light.getType());
+                OSG::UInt32 idx = lightGroup->addLight(light.getTypeOfLight());
 
                 lightGroup->setPosition        (idx, light.position);
                 lightGroup->setDirection       (idx, light.direction);
@@ -422,7 +422,7 @@ void update_light_state(OSG::MultiLightGroup* lightGroup, const VecLightsT& vLig
                 lightGroup->setRange           (idx, light.range);
                 lightGroup->setSpotlightAngle  (idx, light.spotlightAngle);
                 lightGroup->setEnabled         (idx, light.enabled);
-                lightGroup->setType            (idx, light.getType());
+                lightGroup->setTypeOfLight     (idx, light.getTypeOfLight());
                 lightGroup->setBeacon          (idx, light.beacon);
             }
         }
@@ -437,7 +437,7 @@ void update_light_state(OSG::MultiLightGroup* lightGroup, const VecLightsT& vLig
                 lightGroup->setIntensity       (idx, light.intensity);
                 lightGroup->setRange           (idx, light.range);
                 lightGroup->setSpotlightAngle  (idx, light.spotlightAngle);
-                lightGroup->setType            (idx, light.getType());
+                lightGroup->setTypeOfLight     (idx, light.getTypeOfLight());
                 lightGroup->setEnabled         (idx, light.enabled);
                 lightGroup->setBeacon          (idx, light.beacon);
             }
@@ -728,19 +728,19 @@ void initialize_lights(OSG::UInt32 num)   // helper to create lights
     {
         
         int n = classic_die();
-        Light::Type type;
+        Light::TypeOfLight typeOfLight;
         if (n <= 3)
-            type = Light::point_light;
+            typeOfLight = Light::point_light;
         else
-            type = Light::spot_light;
+            typeOfLight = Light::spot_light;
 
-        lights.push_back(Light::create_light(type, i+1));
+        lights.push_back(Light::create_light(typeOfLight, i+1));
         scene_node->addChild(lights[i].beacon);
     }
 }
 
 Light Light::create_light(
-    Type e,                     // type of the light
+    TypeOfLight e,              // type of the light
     OSG::UInt32 material_idx)   // index in to the material storage for light animation
 {
     Light l(e);

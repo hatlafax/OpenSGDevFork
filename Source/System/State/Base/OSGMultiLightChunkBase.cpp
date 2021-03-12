@@ -534,7 +534,7 @@ OSG_BEGIN_NAMESPACE
     this field allows storage of this calculated matrix. Usally, internally set by OpenSG.
 */
 
-/*! \var UInt8           MultiLightChunkBase::_mfType
+/*! \var UInt8           MultiLightChunkBase::_mfTypeOfLight
     Stores the light's type. This can be any of the set {POINT_LIGHT, DIRECTIONAL_LIGHT, SPOT_LIGHT, CINEMA_LIGHT}.
 */
 
@@ -969,13 +969,13 @@ void MultiLightChunkBase::classDescInserter(TypeObject &oType)
 
     pDesc = new MFUInt8::Description(
         MFUInt8::getClassType(),
-        "type",
+        "typeOfLight",
         "Stores the light's type. This can be any of the set {POINT_LIGHT, DIRECTIONAL_LIGHT, SPOT_LIGHT, CINEMA_LIGHT}.\n",
-        TypeFieldId, TypeFieldMask,
+        TypeOfLightFieldId, TypeOfLightFieldMask,
         false,
         (Field::MFDefaultFlags | Field::FStdAccess),
-        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleType),
-        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleType));
+        static_cast<FieldEditMethodSig>(&MultiLightChunk::editHandleTypeOfLight),
+        static_cast<FieldGetMethodSig >(&MultiLightChunk::getHandleTypeOfLight));
 
     oType.addInitialDesc(pDesc);
 
@@ -1766,7 +1766,7 @@ MultiLightChunkBase::TypeObject MultiLightChunkBase::_type(
     "    </Field>\n"
     "\n"
     "    <Field\n"
-    "        name=\"type\"\n"
+    "        name=\"typeOfLight\"\n"
     "        type=\"UInt8\"\n"
     "        cardinality=\"multi\"\n"
     "        visibility=\"external\"\n"
@@ -2565,16 +2565,16 @@ const MFMatrix *MultiLightChunkBase::getMFProjectionMatrix(void) const
 }
 
 
-MFUInt8 *MultiLightChunkBase::editMFType(void)
+MFUInt8 *MultiLightChunkBase::editMFTypeOfLight(void)
 {
-    editMField(TypeFieldMask, _mfType);
+    editMField(TypeOfLightFieldMask, _mfTypeOfLight);
 
-    return &_mfType;
+    return &_mfTypeOfLight;
 }
 
-const MFUInt8 *MultiLightChunkBase::getMFType(void) const
+const MFUInt8 *MultiLightChunkBase::getMFTypeOfLight(void) const
 {
-    return &_mfType;
+    return &_mfTypeOfLight;
 }
 
 
@@ -2901,9 +2901,9 @@ SizeT MultiLightChunkBase::getBinSize(ConstFieldMaskArg whichField)
     {
         returnValue += _mfProjectionMatrix.getBinSize();
     }
-    if(FieldBits::NoField != (TypeFieldMask & whichField))
+    if(FieldBits::NoField != (TypeOfLightFieldMask & whichField))
     {
-        returnValue += _mfType.getBinSize();
+        returnValue += _mfTypeOfLight.getBinSize();
     }
     if(FieldBits::NoField != (EnabledFieldMask & whichField))
     {
@@ -3062,9 +3062,9 @@ void MultiLightChunkBase::copyToBin(BinaryDataHandler &pMem,
     {
         _mfProjectionMatrix.copyToBin(pMem);
     }
-    if(FieldBits::NoField != (TypeFieldMask & whichField))
+    if(FieldBits::NoField != (TypeOfLightFieldMask & whichField))
     {
-        _mfType.copyToBin(pMem);
+        _mfTypeOfLight.copyToBin(pMem);
     }
     if(FieldBits::NoField != (EnabledFieldMask & whichField))
     {
@@ -3246,10 +3246,10 @@ void MultiLightChunkBase::copyFromBin(BinaryDataHandler &pMem,
         editMField(ProjectionMatrixFieldMask, _mfProjectionMatrix);
         _mfProjectionMatrix.copyFromBin(pMem);
     }
-    if(FieldBits::NoField != (TypeFieldMask & whichField))
+    if(FieldBits::NoField != (TypeOfLightFieldMask & whichField))
     {
-        editMField(TypeFieldMask, _mfType);
-        _mfType.copyFromBin(pMem);
+        editMField(TypeOfLightFieldMask, _mfTypeOfLight);
+        _mfTypeOfLight.copyFromBin(pMem);
     }
     if(FieldBits::NoField != (EnabledFieldMask & whichField))
     {
@@ -3461,7 +3461,7 @@ MultiLightChunkBase::MultiLightChunkBase(void) :
     _mfRangeNearZone          (),
     _mfRangeFarZone           (),
     _mfProjectionMatrix       (),
-    _mfType                   (),
+    _mfTypeOfLight            (),
     _mfEnabled                (),
     _mfShadow                 (),
     _mfShadowDataIndex        (),
@@ -3504,7 +3504,7 @@ MultiLightChunkBase::MultiLightChunkBase(const MultiLightChunkBase &source) :
     _mfRangeNearZone          (source._mfRangeNearZone          ),
     _mfRangeFarZone           (source._mfRangeFarZone           ),
     _mfProjectionMatrix       (source._mfProjectionMatrix       ),
-    _mfType                   (source._mfType                   ),
+    _mfTypeOfLight            (source._mfTypeOfLight            ),
     _mfEnabled                (source._mfEnabled                ),
     _mfShadow                 (source._mfShadow                 ),
     _mfShadowDataIndex        (source._mfShadowDataIndex        ),
@@ -4174,27 +4174,27 @@ EditFieldHandlePtr MultiLightChunkBase::editHandleProjectionMatrix(void)
     return returnValue;
 }
 
-GetFieldHandlePtr MultiLightChunkBase::getHandleType            (void) const
+GetFieldHandlePtr MultiLightChunkBase::getHandleTypeOfLight     (void) const
 {
     MFUInt8::GetHandlePtr returnValue(
         new  MFUInt8::GetHandle(
-             &_mfType,
-             this->getType().getFieldDesc(TypeFieldId),
+             &_mfTypeOfLight,
+             this->getType().getFieldDesc(TypeOfLightFieldId),
              const_cast<MultiLightChunkBase *>(this)));
 
     return returnValue;
 }
 
-EditFieldHandlePtr MultiLightChunkBase::editHandleType           (void)
+EditFieldHandlePtr MultiLightChunkBase::editHandleTypeOfLight    (void)
 {
     MFUInt8::EditHandlePtr returnValue(
         new  MFUInt8::EditHandle(
-             &_mfType,
-             this->getType().getFieldDesc(TypeFieldId),
+             &_mfTypeOfLight,
+             this->getType().getFieldDesc(TypeOfLightFieldId),
              this));
 
 
-    editMField(TypeFieldMask, _mfType);
+    editMField(TypeOfLightFieldMask, _mfTypeOfLight);
 
     return returnValue;
 }
@@ -4645,7 +4645,7 @@ void MultiLightChunkBase::resolveLinks(void)
                                       oOffsets);
 #endif
 #ifdef OSG_MT_CPTR_ASPECT
-    _mfType.terminateShare(Thread::getCurrentAspect(),
+    _mfTypeOfLight.terminateShare(Thread::getCurrentAspect(),
                                       oOffsets);
 #endif
 #ifdef OSG_MT_CPTR_ASPECT

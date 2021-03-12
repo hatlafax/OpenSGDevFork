@@ -69,7 +69,7 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
           void                 setLayoutType                    (UInt32 layout);
 
           UInt32               getNumLights                     () const;
-          UInt32               addLight                         (MultiLight::Type eType);
+          UInt32               addLight                         (MultiLight::TypeOfLight eTypeOfLight);
           UInt32               addLight                         (const MultiLight& light);
           void                 updateLight                      (const UInt32 idx, const MultiLight& light);
           MultiLight           getLight                         (const UInt32 idx);
@@ -81,38 +81,38 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
           void                 setGlobalAmbientIntensity        (const Color3f& color);
           void                 setGlobalAmbientIntensity        (Real32 red, Real32 green, Real32 blue);
 
-    const Pnt3f&               getPosition                      (const UInt32 idx) const;
-    const Vec3f&               getDirection                     (const UInt32 idx) const;
-    const Vec3f&               getIntensity                     (const UInt32 idx) const;
-    const Vec3f&               getAmbient                       (const UInt32 idx) const;
-    const Vec3f&               getDiffuse                       (const UInt32 idx) const;
-    const Vec3f&               getSpecular                      (const UInt32 idx) const;
-    const Vec3f&               getAttenuation                   (const UInt32 idx) const;
-          Real32               getDecayAttenuation              (const UInt32 idx) const;
-          Real32               getLengthFactor                  (const UInt32 idx) const;
-          Real32               getRange                         (const UInt32 idx) const;
-          Real32               getSpotlightAngle                (const UInt32 idx) const;
-          Real32               getSpotlightParameter            (const UInt32 idx) const;
-          Real32               getSpotlightExponent             (const UInt32 idx) const;
-          Real32               getSpotlightPenumbraAngle        (const UInt32 idx) const;
-          Real32               getSpotlightPenumbraFactor       (const UInt32 idx) const;
-          Real32               getInnerSuperEllipsesWidth       (const UInt32 idx) const;
-          Real32               getInnerSuperEllipsesHeight      (const UInt32 idx) const;
-          Real32               getOuterSuperEllipsesWidth       (const UInt32 idx) const;
-          Real32               getOuterSuperEllipsesHeight      (const UInt32 idx) const;
-          Real32               getSuperEllipsesRoundness        (const UInt32 idx) const;
-          Real32               getSuperEllipsesTwist            (const UInt32 idx) const;
-          Real32               getRangeCutOn                    (const UInt32 idx) const;
-          Real32               getRangeCutOff                   (const UInt32 idx) const;
-          Real32               getRangeNearZone                 (const UInt32 idx) const;
-          Real32               getRangeFarZone                  (const UInt32 idx) const;
-    const Matrix&              getProjectionMatrix              (const UInt32 idx) const;
-          MultiLight::Type     getType                          (const UInt32 idx) const;
-          bool                 getEnabled                       (const UInt32 idx) const;
-          bool                 getShadow                        (const UInt32 idx) const;
-          Int32                getShadowDataIndex               (const UInt32 idx) const;
-          Int32                getShadowParameterIndex          (const UInt32 idx) const;
-          Node*                getBeacon                        (const UInt32 idx) const;
+    const Pnt3f&                   getPosition                      (const UInt32 idx) const;
+    const Vec3f&                   getDirection                     (const UInt32 idx) const;
+    const Vec3f&                   getIntensity                     (const UInt32 idx) const;
+    const Vec3f&                   getAmbient                       (const UInt32 idx) const;
+    const Vec3f&                   getDiffuse                       (const UInt32 idx) const;
+    const Vec3f&                   getSpecular                      (const UInt32 idx) const;
+    const Vec3f&                   getAttenuation                   (const UInt32 idx) const;
+          Real32                   getDecayAttenuation              (const UInt32 idx) const;
+          Real32                   getLengthFactor                  (const UInt32 idx) const;
+          Real32                   getRange                         (const UInt32 idx) const;
+          Real32                   getSpotlightAngle                (const UInt32 idx) const;
+          Real32                   getSpotlightParameter            (const UInt32 idx) const;
+          Real32                   getSpotlightExponent             (const UInt32 idx) const;
+          Real32                   getSpotlightPenumbraAngle        (const UInt32 idx) const;
+          Real32                   getSpotlightPenumbraFactor       (const UInt32 idx) const;
+          Real32                   getInnerSuperEllipsesWidth       (const UInt32 idx) const;
+          Real32                   getInnerSuperEllipsesHeight      (const UInt32 idx) const;
+          Real32                   getOuterSuperEllipsesWidth       (const UInt32 idx) const;
+          Real32                   getOuterSuperEllipsesHeight      (const UInt32 idx) const;
+          Real32                   getSuperEllipsesRoundness        (const UInt32 idx) const;
+          Real32                   getSuperEllipsesTwist            (const UInt32 idx) const;
+          Real32                   getRangeCutOn                    (const UInt32 idx) const;
+          Real32                   getRangeCutOff                   (const UInt32 idx) const;
+          Real32                   getRangeNearZone                 (const UInt32 idx) const;
+          Real32                   getRangeFarZone                  (const UInt32 idx) const;
+    const Matrix&                  getProjectionMatrix              (const UInt32 idx) const;
+          MultiLight::TypeOfLight  getTypeOfLight                   (const UInt32 idx) const;
+          bool                     getEnabled                       (const UInt32 idx) const;
+          bool                     getShadow                        (const UInt32 idx) const;
+          Int32                    getShadowDataIndex               (const UInt32 idx) const;
+          Int32                    getShadowParameterIndex          (const UInt32 idx) const;
+          Node*                    getBeacon                        (const UInt32 idx) const;
 
           void                 setPosition                      (const UInt32 idx, const Pnt3f& position);
           void                 setDirection                     (const UInt32 idx, const Vec3f& direction);
@@ -148,7 +148,7 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
           void                 setRangeNearZone                 (const UInt32 idx, Real32 nearZone);
           void                 setRangeFarZone                  (const UInt32 idx, Real32 farZone);
           void                 setProjectionMatrix              (const UInt32 idx, const Matrix& projectionMatrix);
-          void                 setType                          (const UInt32 idx, MultiLight::Type eType);
+          void                 setTypeOfLight                   (const UInt32 idx, MultiLight::TypeOfLight eTypeOfLight);
           void                 setEnabled                       (const UInt32 idx, bool flag);
           void                 setShadow                        (const UInt32 idx, bool flag);
           void                 setShadowDataIndex               (const UInt32 idx, Int32 shadowDataIndex);
@@ -434,22 +434,22 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunk : public MultiLightChunkBase
                 Matrix&          matInvLightSpaceProjectionLSFromES) const;
 
     void    calcProjectionMatrix                        (
-                MultiLight::Type type,
-                Real32           cosSpotlightAngle,
-                Real32           zNear,
-                Real32           zFar,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matProjection) const;
+                MultiLight::TypeOfLight typeOfLight,
+                Real32                  cosSpotlightAngle,
+                Real32                  zNear,
+                Real32                  zFar,
+                const Pnt3f&            lightMin,      // Corners of the light view volume
+                const Pnt3f&            lightMax,      // used for directional lights only.
+                Matrix&                 matProjection) const;
 
     void    calcInvProjectionMatrix                     (
-                MultiLight::Type type,
-                Real32           cosSpotlightAngle,
-                Real32           zNear,
-                Real32           zFar,
-                const Pnt3f&     lightMin,      // Corners of the light view volume
-                const Pnt3f&     lightMax,      // used for directional lights only.
-                Matrix&          matInvProjection) const;
+                MultiLight::TypeOfLight typeOfLight,
+                Real32                  cosSpotlightAngle,
+                Real32                  zNear,
+                Real32                  zFar,
+                const Pnt3f&            lightMin,      // Corners of the light view volume
+                const Pnt3f&            lightMax,      // used for directional lights only.
+                Matrix&                 matInvProjection) const;
 
     //
     // The following convenience function do take credit of the currently stored

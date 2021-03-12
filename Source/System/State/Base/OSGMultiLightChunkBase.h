@@ -123,8 +123,8 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
         RangeNearZoneFieldId = RangeCutOffFieldId + 1,
         RangeFarZoneFieldId = RangeNearZoneFieldId + 1,
         ProjectionMatrixFieldId = RangeFarZoneFieldId + 1,
-        TypeFieldId = ProjectionMatrixFieldId + 1,
-        EnabledFieldId = TypeFieldId + 1,
+        TypeOfLightFieldId = ProjectionMatrixFieldId + 1,
+        EnabledFieldId = TypeOfLightFieldId + 1,
         ShadowFieldId = EnabledFieldId + 1,
         ShadowDataIndexFieldId = ShadowFieldId + 1,
         ShadowParameterIndexFieldId = ShadowDataIndexFieldId + 1,
@@ -189,8 +189,8 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
         (TypeTraits<BitVector>::One << RangeFarZoneFieldId);
     static const OSG::BitVector ProjectionMatrixFieldMask =
         (TypeTraits<BitVector>::One << ProjectionMatrixFieldId);
-    static const OSG::BitVector TypeFieldMask =
-        (TypeTraits<BitVector>::One << TypeFieldId);
+    static const OSG::BitVector TypeOfLightFieldMask =
+        (TypeTraits<BitVector>::One << TypeOfLightFieldId);
     static const OSG::BitVector EnabledFieldMask =
         (TypeTraits<BitVector>::One << EnabledFieldId);
     static const OSG::BitVector ShadowFieldMask =
@@ -243,7 +243,7 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     typedef MFReal32          MFRangeNearZoneType;
     typedef MFReal32          MFRangeFarZoneType;
     typedef MFMatrix          MFProjectionMatrixType;
-    typedef MFUInt8           MFTypeType;
+    typedef MFUInt8           MFTypeOfLightType;
     typedef MFBool            MFEnabledType;
     typedef MFBool            MFShadowType;
     typedef MFInt32           MFShadowDataIndexType;
@@ -404,7 +404,7 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
     MFReal32          _mfRangeNearZone;
     MFReal32          _mfRangeFarZone;
     MFMatrix          _mfProjectionMatrix;
-    MFUInt8           _mfType;
+    MFUInt8           _mfTypeOfLight;
     MFBool            _mfEnabled;
     MFBool            _mfShadow;
     MFInt32           _mfShadowDataIndex;
@@ -495,8 +495,8 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
      EditFieldHandlePtr editHandleRangeFarZone   (void);
      GetFieldHandlePtr  getHandleProjectionMatrix (void) const;
      EditFieldHandlePtr editHandleProjectionMatrix(void);
-     GetFieldHandlePtr  getHandleType            (void) const;
-     EditFieldHandlePtr editHandleType           (void);
+     GetFieldHandlePtr  getHandleTypeOfLight     (void) const;
+     EditFieldHandlePtr editHandleTypeOfLight    (void);
      GetFieldHandlePtr  getHandleEnabled         (void) const;
      EditFieldHandlePtr editHandleEnabled        (void);
      GetFieldHandlePtr  getHandleShadow          (void) const;
@@ -600,8 +600,8 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
                   MFMatrix            *editMFProjectionMatrix(void);
             const MFMatrix            *getMFProjectionMatrix (void) const;
 
-                  MFUInt8             *editMFType           (void);
-            const MFUInt8             *getMFType            (void) const;
+                  MFUInt8             *editMFTypeOfLight    (void);
+            const MFUInt8             *getMFTypeOfLight     (void) const;
 
                   MFBool              *editMFEnabled        (void);
             const MFBool              *getMFEnabled         (void) const;
@@ -702,8 +702,8 @@ class OSG_SYSTEM_DLLMAPPING MultiLightChunkBase : public ShaderStorageBufferObjS
                   MFMatrix           ::reference editProjectionMatrix(const UInt32 index);
             const Matrix              &getProjectionMatrix (const UInt32 index) const;
 
-                  MFUInt8            ::reference editType           (const UInt32 index);
-                  UInt8                getType            (const UInt32 index) const;
+                  MFUInt8            ::reference editTypeOfLight    (const UInt32 index);
+                  UInt8                getTypeOfLight     (const UInt32 index) const;
 
                   MFBool             ::reference editEnabled        (const UInt32 index);
                   bool                 getEnabled         (const UInt32 index) const;

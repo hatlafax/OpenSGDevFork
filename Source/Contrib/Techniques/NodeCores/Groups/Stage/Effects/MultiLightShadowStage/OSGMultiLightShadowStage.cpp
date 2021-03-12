@@ -780,7 +780,7 @@ bool MultiLightShadowStage::inspectMultiLight(MultiLightShadowStageData* pData)
             if (vLightAssocData[idx].enabled && vLightAssocData[idx].shadow)
                 has_active_light = true;
 
-            if (   pChunk->getType                (idx) != vLightAssocData[idx].type
+            if (   pChunk->getTypeOfLight         (idx) != vLightAssocData[idx].typeOfLight
                 || pChunk->getEnabled             (idx) != vLightAssocData[idx].enabled
                 || pChunk->getShadow              (idx) != vLightAssocData[idx].shadow
                 || pChunk->getShadowParameterIndex(idx) != vLightAssocData[idx].shadowParamIdx)
@@ -809,7 +809,7 @@ bool MultiLightShadowStage::inspectMultiLight(MultiLightShadowStageData* pData)
 
         for (UInt32 idx = 0; idx < num_lights; ++idx)
         {
-            vLightAssocData[idx].type           = pChunk->getType                (idx);
+            vLightAssocData[idx].typeOfLight    = pChunk->getTypeOfLight         (idx);
             vLightAssocData[idx].enabled        = pChunk->getEnabled             (idx);
             vLightAssocData[idx].shadow         = pChunk->getShadow              (idx);
             vLightAssocData[idx].shadowParamIdx = pChunk->getShadowParameterIndex(idx);
@@ -828,7 +828,7 @@ bool MultiLightShadowStage::inspectMultiLight(MultiLightShadowStageData* pData)
                 //
                 pTechnique->initializeAssocData(idx);
                 
-                switch (vLightAssocData[idx].type) {
+                switch (vLightAssocData[idx].typeOfLight) {
                     case MultiLight::DIRECTIONAL_LIGHT:
                         vDirLightIndices.push_back(idx);
                         break;

@@ -117,8 +117,8 @@ public:
 
     virtual void    initializeAssocData (UInt32 idx) const;
 
-    virtual void    createCamera        (MultiLight::Type type, 
-                                         CameraUnrecPtr&  camera) const;
+    virtual void    createCamera        (MultiLight::TypeOfLight typeOfLight, 
+                                         CameraUnrecPtr&         camera) const;
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                Shadow parameter                              */

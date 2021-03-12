@@ -385,8 +385,8 @@ void MultiLightShadowTechniqueSimplest::initializeAssocData(UInt32 idx) const
 }
 
 void MultiLightShadowTechniqueSimplest::createCamera(
-    MultiLight::Type type, 
-    CameraUnrecPtr&  camera) const
+    MultiLight::TypeOfLight typeOfLight, 
+    CameraUnrecPtr&         camera) const
 {
     // empty implementation: variation detail not used for technique
 }
@@ -948,7 +948,7 @@ void MultiLightShadowTechniqueSimplest::renderShadowMaps(RenderAction* a, DrawEn
             pMLChunk->calcFrustumZ(pEnv, idx, zNear, zFar);
 
             Pnt3f  lightMin, lightMax;
-            if ( vLightAssocData[idx].type == MultiLight::DIRECTIONAL_LIGHT)
+            if ( vLightAssocData[idx].typeOfLight == MultiLight::DIRECTIONAL_LIGHT)
             {
                 calcOrthoShadowViewVolume(matWSFromMS, matLSFromWS, camFrust, sceneBB, lightMin, lightMax);
 
@@ -984,9 +984,9 @@ void MultiLightShadowTechniqueSimplest::renderShadowMaps(RenderAction* a, DrawEn
             Pnt3f  position;
             pMLChunk->calcPosition(pEnv, idx, position, false);
 
-            if ( vLightAssocData[idx].type == MultiLight::DIRECTIONAL_LIGHT 
-              || vLightAssocData[idx].type == MultiLight::SPOT_LIGHT 
-              || vLightAssocData[idx].type == MultiLight::CINEMA_LIGHT)
+            if ( vLightAssocData[idx].typeOfLight == MultiLight::DIRECTIONAL_LIGHT 
+              || vLightAssocData[idx].typeOfLight == MultiLight::SPOT_LIGHT 
+              || vLightAssocData[idx].typeOfLight == MultiLight::CINEMA_LIGHT)
             {
                 OSG_ASSERT(dir_light_iter != dir_light_end);
                 const ShadowMapData& data = *dir_light_iter;
@@ -1036,7 +1036,7 @@ void MultiLightShadowTechniqueSimplest::renderShadowMaps(RenderAction* a, DrawEn
                 dir_light_iter++;
             }
             else
-            if (vLightAssocData[idx].type == MultiLight::POINT_LIGHT)
+            if (vLightAssocData[idx].typeOfLight == MultiLight::POINT_LIGHT)
             {
                 _shadowData[idx].shadowIndex = pointShadowIndex;
                 pointShadowIndex++;

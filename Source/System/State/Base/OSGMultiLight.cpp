@@ -63,7 +63,7 @@ OSG_BEGIN_NAMESPACE
  *                           Instance methods                              *
 \***************************************************************************/
 
-MultiLight::MultiLight(Type e)
+MultiLight::MultiLight(TypeOfLight e)
     : _position(0.f,0.f,0.f)
     , _direction(0.f,0.f,1.f)
     , _intensity(1.f,1.f,1.f)
@@ -86,7 +86,7 @@ MultiLight::MultiLight(Type e)
     , _rangeNearZone(0.f)
     , _rangeFarZone(0.f)
     , _projectionMatrix()
-    , _type(e)
+    , _typeOfLight(e)
     , _enabled(true)
     , _shadow(false)
     , _shadowDataIndex(-1)

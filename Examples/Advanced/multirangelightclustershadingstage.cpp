@@ -368,10 +368,10 @@ void create_and_exe_dot_file(OSG::Node* node)
 //
 struct Light : public OSG::MultiLight
 {
-    explicit Light(Type e);
+    explicit Light(TypeOfLight e);
             ~Light();
 
-    static Light create_light(Type e, OSG::Int32 test_dir_light_type = -1);
+    static Light create_light(TypeOfLight e, OSG::Int32 test_dir_light_type = -1);
 
     void create_light_geometry(OSG::UInt32 material_idx);
 
@@ -404,7 +404,7 @@ OSG::Vec3f  Light::dir_test_case_8        = OSG::Vec3f(0,0,-1);
 typedef std::vector<Light>  VecLightsT;         // multiple lights
 VecLightsT lights;                              // the lights of the scene
 
-Light::Light(Type e) 
+Light::Light(TypeOfLight e) 
 : MultiLight(e)
 , transform(NULL)
 , curve(dice_knots(true))
@@ -981,25 +981,25 @@ void initialize_lights(OSG::UInt32 num)   // helper to create lights
     {
         
         int n = classic_die();
-        Light::Type type;
+        Light::TypeOfLight typeOfLight;
 
         switch (n)
         {
         case 1:
         case 2:
-            type = OSG::MultiLight::POINT_LIGHT;
+            typeOfLight = OSG::MultiLight::POINT_LIGHT;
             break;
         case 3:
         case 4:
-            type = OSG::MultiLight::SPOT_LIGHT;
+            typeOfLight = OSG::MultiLight::SPOT_LIGHT;
             break;
         case 5:
         case 6:
-            type = OSG::MultiLight::CINEMA_LIGHT;
+            typeOfLight = OSG::MultiLight::CINEMA_LIGHT;
             break;
         }
 
-        lights.push_back(Light::create_light(type));
+        lights.push_back(Light::create_light(typeOfLight));
         
         lights[i].create_light_geometry(i+1);
 
@@ -1106,7 +1106,7 @@ void change_spot_dir_lights()
 }
 
 Light Light::create_light(
-    Type e,                         // type of the light
+    TypeOfLight e,                  // type of the light
     OSG::Int32 test_dir_light_type) // for special testing directional lights
 {
     Light l(e);
@@ -1237,7 +1237,7 @@ void Light::create_light_geometry(OSG::UInt32 material_idx)
     if (!correct_light_geometry)
         R = 0.5;
 
-    switch (getType())
+    switch (getTypeOfLight())
     {
         case OSG::MultiLight::POINT_LIGHT:
         {

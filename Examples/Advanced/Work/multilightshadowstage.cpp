@@ -1011,7 +1011,7 @@ void keyboard(unsigned char k, int x, int y)
                }
 
                std::string name;
-               switch (multiLightGroup->getType(light1_idx))
+               switch (multiLightGroup->getTypeOfLight(light1_idx))
                {
                case OSG::MultiLight::POINT_LIGHT:        name = "point light"; break;
                case OSG::MultiLight::DIRECTIONAL_LIGHT:  name = "directional light"; break;
@@ -1044,7 +1044,7 @@ void keyboard(unsigned char k, int x, int y)
                }
 
                std::string name;
-               switch (multiLightGroup->getType(light2_idx))
+               switch (multiLightGroup->getTypeOfLight(light2_idx))
                {
                case OSG::MultiLight::POINT_LIGHT:        name = "point light"; break;
                case OSG::MultiLight::DIRECTIONAL_LIGHT:  name = "directional light"; break;

@@ -137,7 +137,7 @@ MultiLightShadowTechniqueAdvanced::MultiLightShadowTechniqueAdvanced(
 , _zNear                    (0.f)
 , _pseudoNear               (0.f)
 , _pseudoFar                (1.f)
-, _type                     (MultiLight::POINT_LIGHT)
+, _typeOfLight              (MultiLight::POINT_LIGHT)
 // Runtime data
 , _maxNbrOfSplits           (0)
 , _maxNbrOfSplitsLast       (0)
@@ -562,8 +562,8 @@ void MultiLightShadowTechniqueAdvanced::initializeAssocData(UInt32 idx) const
 }
 
 void MultiLightShadowTechniqueAdvanced::createCamera(
-    MultiLight::Type type, 
-    CameraUnrecPtr&  camera) const
+    MultiLight::TypeOfLight typeOfLight, 
+    CameraUnrecPtr&         camera) const
 {
     // empty implementation: variation detail not used for technique
 }
@@ -806,9 +806,9 @@ void MultiLightShadowTechniqueAdvanced::calcShadowAlgorithmData(RenderAction* a,
             _algorithmData[idx].lightPositionWS = lightPos;
 
             Vec3f lightPosDir;
-            if (vLightAssocData[idx].type == MultiLight::DIRECTIONAL_LIGHT
-             || vLightAssocData[idx].type == MultiLight::SPOT_LIGHT 
-             || vLightAssocData[idx].type == MultiLight::CINEMA_LIGHT)
+            if (vLightAssocData[idx].typeOfLight == MultiLight::DIRECTIONAL_LIGHT
+             || vLightAssocData[idx].typeOfLight == MultiLight::SPOT_LIGHT 
+             || vLightAssocData[idx].typeOfLight == MultiLight::CINEMA_LIGHT)
             {
                 pMLChunk->calcDirection(pEnv, idx, lightPosDir, false);
                 lightPosDir.normalize();
@@ -819,7 +819,7 @@ void MultiLightShadowTechniqueAdvanced::calcShadowAlgorithmData(RenderAction* a,
             }
 
             Pnt3f  lightMin, lightMax;
-            if (vLightAssocData[idx].type == MultiLight::DIRECTIONAL_LIGHT)
+            if (vLightAssocData[idx].typeOfLight == MultiLight::DIRECTIONAL_LIGHT)
             {
                 calcOrthoShadowViewVolume(matWSFromMS, matLSFromWS, camFrust, sceneBB, lightMin, lightMax);
                 zFarLight = osgMin(zFarLight, lightMax.z());
@@ -850,7 +850,7 @@ void MultiLightShadowTechniqueAdvanced::calcShadowAlgorithmData(RenderAction* a,
             {
                 focusingFeasible = true;    // Assumption
 
-                if (vLightAssocData[idx].type == MultiLight::POINT_LIGHT)
+                if (vLightAssocData[idx].typeOfLight == MultiLight::POINT_LIGHT)
                 {
                     PolygonBody body;
                     body.add(camFrust);
@@ -987,7 +987,7 @@ void MultiLightShadowTechniqueAdvanced::calcShadowAlgorithmData(RenderAction* a,
 
             if (focusingFeasible)
             {
-                if (vLightAssocData[idx].type == MultiLight::DIRECTIONAL_LIGHT)
+                if (vLightAssocData[idx].typeOfLight == MultiLight::DIRECTIONAL_LIGHT)
                 {
                     if (_useLiSP || _updateLightUp)
                     {
@@ -1059,7 +1059,7 @@ void MultiLightShadowTechniqueAdvanced::calcShadowAlgorithmData(RenderAction* a,
                     FrustumVolume cameraFrustum;
                     cameraFrustum.setPlanesOutwards(matProjESFromWS);
 
-                    Projection::Type projectionType = (vLightAssocData[idx].type == MultiLight::DIRECTIONAL_LIGHT) 
+                    Projection::Type projectionType = (vLightAssocData[idx].typeOfLight == MultiLight::DIRECTIONAL_LIGHT) 
                                                             ? Projection::ORTHOGRAPHIC 
                                                             : Projection::PERSPECTIVE;
 
@@ -1086,7 +1086,7 @@ void MultiLightShadowTechniqueAdvanced::calcShadowAlgorithmData(RenderAction* a,
                             }
 
                             const FrustumVolume* pLightFrust = NULL;
-                            if (vLightAssocData[idx].type != MultiLight::DIRECTIONAL_LIGHT)
+                            if (vLightAssocData[idx].typeOfLight != MultiLight::DIRECTIONAL_LIGHT)
                                 pLightFrust = &lightFrust;
                         
                             Matrix matliSP = _liSP.getLiSPMtx(split, body, cameraFrustum, pLightFrust, sceneBB, _depthRange);
@@ -1132,7 +1132,7 @@ void MultiLightShadowTechniqueAdvanced::calcShadowAlgorithmData(RenderAction* a,
 
                 _algorithmData[idx].matProjection[split] = matNewProjection;
 
-                if ( vLightAssocData[idx].type == MultiLight::POINT_LIGHT
+                if ( vLightAssocData[idx].typeOfLight == MultiLight::POINT_LIGHT
                   && !_focusing)
                 {
                     _pointLightNbrMaps += 1;
@@ -1468,10 +1468,10 @@ void MultiLightShadowTechniqueAdvanced::renderShadowMaps(RenderAction* a, DrawEn
                 const Real32  zNear         = _shadowData   [idx].zNear        [split];
                 const Real32  zFar          = _shadowData   [idx].zFar         [split];
 
-                if ( (vLightAssocData[idx].type == MultiLight::DIRECTIONAL_LIGHT     )
-                  || (vLightAssocData[idx].type == MultiLight::SPOT_LIGHT            )
-                  || (vLightAssocData[idx].type == MultiLight::CINEMA_LIGHT          )
-                  || (vLightAssocData[idx].type == MultiLight::POINT_LIGHT && focused) 
+                if ( (vLightAssocData[idx].typeOfLight == MultiLight::DIRECTIONAL_LIGHT     )
+                  || (vLightAssocData[idx].typeOfLight == MultiLight::SPOT_LIGHT            )
+                  || (vLightAssocData[idx].typeOfLight == MultiLight::CINEMA_LIGHT          )
+                  || (vLightAssocData[idx].typeOfLight == MultiLight::POINT_LIGHT && focused) 
                    )
                 {
                     OSG_ASSERT(dir_light_iter != dir_light_end);
@@ -1524,7 +1524,7 @@ void MultiLightShadowTechniqueAdvanced::renderShadowMaps(RenderAction* a, DrawEn
                     dir_light_iter++;
                 }
                 else
-                if (vLightAssocData[idx].type == MultiLight::POINT_LIGHT)
+                if (vLightAssocData[idx].typeOfLight == MultiLight::POINT_LIGHT)
                 {
                     _shadowData[idx].shadowIndex[split] = pointShadowIndex;
                     pointShadowIndex++;
@@ -1644,8 +1644,8 @@ void MultiLightShadowTechniqueAdvanced::initShadowAlgorithmState(
     UInt32           lightIdx,
     bool             isOrthoCamera)
 {
-    _type      = pMLChunk->getType(lightIdx);
-    _direction = pMLChunk->getDirection(lightIdx);
+    _typeOfLight = pMLChunk->getTypeOfLight(lightIdx);
+    _direction   = pMLChunk->getDirection(lightIdx);
 
     bool useDefault = true;
     Int32 shadowParamIdx = pMLChunk->getShadowParameterIndex(lightIdx);
@@ -1727,7 +1727,7 @@ bool MultiLightShadowTechniqueAdvanced::isFocusingFeasable() const
 {
     bool feasable = false;
 
-    switch (_type)
+    switch (_typeOfLight)
     {
         case MultiLight::DIRECTIONAL_LIGHT:
             feasable = true;

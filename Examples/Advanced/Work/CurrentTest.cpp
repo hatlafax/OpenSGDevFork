@@ -1,427 +1,447 @@
-#include <string>
-#include <iostream>
-#include <GL/glut.h>
-//#include <GL/glx.h>
-#include <GL/gl.h>
+// Loading a model containing DescMaterials.
+//
+// This example shows the basic usage of the 'description' material DescMaterial
+// and of the material manager DescMaterialManager.
+//
 
-#include <OpenSG/OSGBackground.h>
-#include <OpenSG/OSGSimpleStage.h>
-#include <OpenSG/OSGFrameBufferObject.h>
-#include <OpenSG/OSGTextureBuffer.h>
-#include <OpenSG/OSGRenderBuffer.h>
-#include <OpenSG/OSGTextureObjChunk.h>
-#include <OpenSG/OSGTextureEnvChunk.h>
-#include <OpenSG/OSGTexGenChunk.h>
-#include <OpenSG/OSGGeometry.h>
-#include <OpenSG/OSGSimpleGeometry.h>
-#include <OpenSG/OSGSimpleTexturedMaterial.h>
+#include <set>
 
+#ifdef OSG_BUILD_ACTIVE
+// Headers
+#include <OSGConfig.h>
+#include <OSGBaseFunctions.h>
+#include <OSGClusterShadingStage.h>
+#include <OSGContainerCollection.h>
+#include <OSGDescMaterial.h>
+#include <OSGDescMaterialManager.h>
+#include <OSGGLUT.h>
+#include <OSGGLUTWindow.h>
+#include <OSGGroup.h>
+#include <OSGHDR2Stage.h>
+#include <OSGMaterial.h>
+#include <OSGMaterialChunkOverrideGroup.h>
+#include <OSGMaterialDesc.h>
+#include <OSGMaterialGroup.h>
+#include <OSGMultiLightGroup.h>
+#include <OSGMultiLightShadowStage.h>
+#include <OSGNameAttachment.h>
+#include <OSGSceneFileHandler.h>
+#include <OSGShaderProgram.h>
+#include <OSGSimpleSceneManager.h>
+#include <OSGSolidBackground.h>
+#include <OSGSSAOStage.h>
+#include <OSGTransform.h>
+#else
+#include <OpenSG/OSGConfig.h>
+#include <OpenSG/OSGBaseFunctions.h>
+#include <OpenSG/OSGClusterShadingStage.h>
+#include <OpenSG/OSGContainerCollection.h>
+#include <OpenSG/OSGDescMaterial.h>
+#include <OpenSG/OSGDescMaterialManager.h>
 #include <OpenSG/OSGGLUT.h>
 #include <OpenSG/OSGGLUTWindow.h>
-#include <OpenSG/OSGPassiveWindow.h>
-#include <OpenSG/OSGViewport.h>
-#include <OpenSG/OSGRenderAction.h>
-#include <OpenSG/OSGSolidBackground.h>
-#include <OpenSG/OSGFBOViewport.h>
-
-#include <OpenSG/OSGTransform.h>
-#include <OpenSG/OSGPerspectiveCamera.h>
-#include <OpenSG/OSGDirectionalLight.h>
+#include <OpenSG/OSGGroup.h>
+#include <OpenSG/OSGHDR2Stage.h>
+#include <OpenSG/OSGMaterial.h>
+#include <OpenSG/OSGMaterialChunkOverrideGroup.h>
+#include <OpenSG/OSGMaterialDesc.h>
+#include <OpenSG/OSGMaterialGroup.h>
+#include <OpenSG/OSGMultiLightGroup.h>
+#include <OpenSG/OSGMultiLightShadowStage.h>
+#include <OpenSG/OSGNameAttachment.h>
+#include <OpenSG/OSGSceneFileHandler.h>
 #include <OpenSG/OSGShaderProgram.h>
-#include <OpenSG/OSGShaderProgramChunk.h>
-#include <OpenSG/OSGDeferredShadingStage.h>
+#include <OpenSG/OSGSimpleSceneManager.h>
+#include <OpenSG/OSGSolidBackground.h>
+#include <OpenSG/OSGSSAOStage.h>
+#include <OpenSG/OSGTransform.h>
+#endif
 
-#define GLSL(shader) #shader
-
-using namespace std;
-using namespace OSG;
-
-string DSAmbient_vp_glsl =
-"#version 120\n"
-GLSL(
-void main(void) {
-    gl_Position = ftransform();
-}
-);
-
-string DSAmbient_fp_glsl =
-"#version 120\n"
-"#extension GL_ARB_texture_rectangle : require\n"
-"#extension GL_ARB_texture_rectangle : enable\n"
-GLSL(
-uniform sampler2DRect  texBufNorm;
-uniform vec2           vpOffset;
-void main(void) {
-    vec2 lookup = gl_FragCoord.xy - vpOffset;
-    vec3 norm   = texture2DRect(texBufNorm, lookup).xyz;
-    if(dot(norm, norm) < 0.95) discard;
-    else gl_FragColor = vec4(0.02, 0.02, 0.02, 1.);
-}
-);
-
-string DSGBuffer_vp_glsl =
-"#version 120\n"
-GLSL(
-varying vec4 vertPos;
-varying vec3 vertNorm;
-void main(void) {
-    vertPos        = gl_ModelViewMatrix * gl_Vertex;
-    vertNorm       = gl_NormalMatrix    * gl_Normal;
-    gl_TexCoord[0] = gl_MultiTexCoord0;
-    gl_FrontColor  = gl_Color;
-    gl_Position    = ftransform();
-}
-);
-
-string DSGBuffer_fp_glsl =
-"#version 120\n"
-GLSL(
-varying vec4      vertPos;
-varying vec3      vertNorm;
-uniform sampler2D tex0;
-float luminance(vec4 color) {
-    return dot(color, vec4(0.3, 0.59, 0.11, 0.0));
-}
-void main(void) {
-    vec3 pos = vertPos.xyz / vertPos.w;
-    float ambVal  = luminance(gl_Color);
-    vec3  diffCol = gl_FrontMaterial.diffuse.rgb;
-    gl_FragData[0] = vec4(pos, ambVal);
-    gl_FragData[1] = vec4(normalize(vertNorm), 0);
-    gl_FragData[2] = vec4(diffCol, 0);
-}
-);
-
-string DSDirLight_vp_glsl =
-"#version 120\n"
-GLSL(
-void main(void) {
-    gl_Position = ftransform();
-}
-);
-
-string DSDirLight_fp_glsl =
-"#version 120\n"
-"#extension GL_ARB_texture_rectangle : require\n"
-"#extension GL_ARB_texture_rectangle : enable\n"
-GLSL(
-// compute directional light INDEX for fragment at POS with normal NORM
-// and diffuse material color MDIFF
-vec4 computeDirLight(int index, vec3 pos, vec3 norm, vec4 mDiff) {
-    vec4  color    = vec4(0., 0., 0., 0.);
-    vec3  lightDir = gl_LightSource[index].position.xyz;
-    float NdotL    = max(dot(norm, lightDir), 0.);
-    if(NdotL > 0.) color = NdotL * mDiff * gl_LightSource[index].diffuse;
-    return color;
-}
-
-// DS input buffers
-uniform sampler2DRect     texBufPos;
-uniform sampler2DRect     texBufNorm;
-uniform sampler2DRect     texBufDiff;
-uniform vec2              vpOffset;
-
-// DS pass
-void main(void) {
-    vec2 lookup = gl_FragCoord.xy - vpOffset;
-    vec3 norm   = texture2DRect(texBufNorm, lookup).xyz;
-    if(dot(norm, norm) < 0.95) discard;
-    else {
-        vec4  posAmb = texture2DRect(texBufPos,  lookup);
-        vec3  pos    = posAmb.xyz;
-        float amb    = posAmb.w;
-        vec4  mDiff  = texture2DRect(texBufDiff, lookup);
-        gl_FragColor = computeDirLight(0, pos, norm, mDiff);
-    }
-}
-);
-
-struct OsgTestScene2
+class find_node_helper
 {
-    TransformUnrecPtr camBeacon;
-    NodeUnrecPtr camBeaconNode;
-    PerspectiveCameraUnrecPtr cam;
-    SolidBackgroundUnrecPtr background;
-    NodeUnrecPtr lightNode;
-    DirectionalLightUnrecPtr light;
+public:
+    explicit find_node_helper(const OSG::FieldContainerType* type) : _str(), _result(nullptr), _type(type) {}
 
-    NodeUnrecPtr dsStageN;
-    DeferredShadingStageUnrecPtr dsStage;
-    ShaderProgramUnrecPtr lightVP;
-    ShaderProgramUnrecPtr lightFP;
-    ShaderProgramChunkUnrecPtr lightSH;
-
-    int fboWidth = 256;
-    int fboHeight = 256;
-    FrameBufferObjectRefPtr fbo;
-    TextureObjChunkRefPtr   fboTex;
-    ImageRefPtr             fboTexImg;
-    TextureObjChunkRefPtr   fboDTex;
-    ImageRefPtr             fboDTexImg;
-
-    // render once ressources
-    RenderActionRefPtr ract;
-    WindowRecPtr win;
-    ViewportRecPtr view;
-    FBOViewportRecPtr fboView;
-
-    //GLXContext glc;
-    //Display* dpy;
-    //XID XWinID;
-
-    OsgTestScene2()
+    OSG::Action::ResultE enter_type(OSG::Node* node)
     {
-        cout << "OsgTestScene2" << endl;
+        using namespace OSG;
 
-        // camera
-        camBeacon = Transform::create();
-        camBeaconNode = makeNodeFor( camBeacon );
-        cam = PerspectiveCamera::create();
-        cam->setBeacon(camBeaconNode);
-        cam->setFov   (osgDegree2Rad(90));
-        cam->setNear  (0.1f);
-        cam->setFar   (1000);
-
-        // light
-        light = DirectionalLight::create();
-        lightNode = makeNodeFor(light);
-        light->setAmbient  (.3f, .3f, .3f, 1);
-        light->setDiffuse  ( 1,  1,  1, 1);
-        light->setDirection( 0,  -1, 0   );
-        light->setBeacon   (camBeaconNode);
-
-        // background
-        background = SolidBackground::create();
-        background->setColor(Color3f(0,1,0));
-
-        // scene
-        NodeUnrecPtr torus = makeTorus(.5, 2, 16, 16);
-        lightNode->addChild(camBeaconNode);
-        lightNode->addChild(torus);
-
-        Matrix m;
-        m.setTranslate(Vec3f(0,0,5));
-        camBeacon->setMatrix(m);
-
-
-        // deferred stage
-        ShaderProgramUnrecPtr      vpGBuffer = ShaderProgram::createVertexShader  ();
-        ShaderProgramUnrecPtr      fpGBuffer = ShaderProgram::createFragmentShader();
-        ShaderProgramUnrecPtr      vpAmbient = ShaderProgram::createVertexShader  ();
-        ShaderProgramUnrecPtr      fpAmbient = ShaderProgram::createFragmentShader();
-        ShaderProgramChunkUnrecPtr shGBuffer = ShaderProgramChunk::create();
-        ShaderProgramChunkUnrecPtr shAmbient = ShaderProgramChunk::create();
-
-        dsStage  = DeferredShadingStage::create();
-        dsStageN = makeNodeFor(dsStage);
-        //dsStageN = makeNodeFor(Group::create());
-        dsStage->setCamera(cam);
-        dsStage->setBackground(background);
-        dsStageN->addChild(lightNode);
-
-        dsStage->editMFPixelFormats()->push_back(Image::OSG_RGBA_PF);// positions (RGB) + ambient (A) term buffer
-        dsStage->editMFPixelTypes  ()->push_back(Image::OSG_FLOAT32_IMAGEDATA);
-        dsStage->editMFPixelFormats()->push_back(Image::OSG_RGB_PF); // normals (RGB) buffer
-        dsStage->editMFPixelTypes  ()->push_back(Image::OSG_FLOAT32_IMAGEDATA);
-        dsStage->editMFPixelFormats()->push_back(Image::OSG_RGB_PF); // diffuse (RGB) buffer
-        dsStage->editMFPixelTypes  ()->push_back(Image::OSG_UINT8_IMAGEDATA);
-
-        // G Buffer shader (one for the whole scene)
-        vpGBuffer->setProgram(DSGBuffer_vp_glsl);
-        fpGBuffer->setProgram(DSGBuffer_fp_glsl);
-        fpGBuffer->addUniformVariable<Int32>("tex0", 0);
-        shGBuffer->addShader(vpGBuffer);
-        shGBuffer->addShader(fpGBuffer);
-        dsStage->setGBufferProgram(shGBuffer);
-
-        // ambient shader
-        vpAmbient->setProgram(DSAmbient_vp_glsl);
-        fpAmbient->setProgram(DSAmbient_fp_glsl);
-        fpAmbient->addUniformVariable<Int32>("texBufNorm", 1);
-        shAmbient->addShader(vpAmbient);
-        shAmbient->addShader(fpAmbient);
-        dsStage->setAmbientProgram(shAmbient);
-
-        // ds light
-        lightVP = ShaderProgram::createVertexShader();
-        lightFP = ShaderProgram::createFragmentShader();
-        lightSH = ShaderProgramChunk::create();
-        lightVP->setProgram(DSDirLight_vp_glsl);
-        lightFP->setProgram(DSDirLight_fp_glsl);
-        lightFP->addUniformVariable<Int32>("texBufPos",  0);
-        lightFP->addUniformVariable<Int32>("texBufNorm", 1);
-        lightFP->addUniformVariable<Int32>("texBufDiff", 2);
-        lightSH->addShader(lightVP);
-        lightSH->addShader(lightFP);
-        dsStage->editMFLights()->push_back(light);
-        dsStage->editMFLightPrograms()->push_back(lightSH);
-
-        fboTexImg = Image::create();
-        fboTexImg->set(Image::OSG_RGB_PF, fboWidth, fboHeight);
-
-        fboTex = TextureObjChunk::create();
-        fboTex->setImage(fboTexImg);
-        fboTex->setMinFilter(GL_NEAREST);
-        fboTex->setMagFilter(GL_NEAREST);
-        fboTex->setWrapS(GL_CLAMP_TO_EDGE);
-        fboTex->setWrapT(GL_CLAMP_TO_EDGE);
-
-        TextureBufferRefPtr texBuf = TextureBuffer::create();
-        texBuf->setTexture(fboTex);
-
-        //fboDTexImg = Image::create();
-        //fboDTexImg->set(Image::OSG_RGB_PF, fboWidth, fboHeight);
-        ////fboDTexImg->set(GL_DEPTH_STENCIL, fboWidth, fboHeight, 1, 1, 1, 0.0, 0, GL_UNSIGNED_INT_24_8, false);
-        //fboDTexImg->set(GL_DEPTH_COMPONENT, fboWidth, fboHeight, 1, 1, 1, 0.0, 0, GL_UNSIGNED_INT, false);
-
-
-        //fboDTex = TextureObjChunk::create();
-        //fboDTex->setImage(fboDTexImg);
-        //fboDTex->setMinFilter(GL_NEAREST);
-        //fboDTex->setMagFilter(GL_NEAREST);
-        //fboDTex->setWrapS(GL_CLAMP_TO_EDGE);
-        //fboDTex->setWrapT(GL_CLAMP_TO_EDGE);
-        //fboDTex->setExternalFormat(GL_DEPTH_COMPONENT);             //fboDTex->setExternalFormat(GL_DEPTH_STENCIL);
-        //fboDTex->setInternalFormat(GL_DEPTH_COMPONENT24);           //fboDTex->setInternalFormat(GL_DEPTH24_STENCIL8);
-        ////fboDTex->setCompareMode(GL_NONE);
-        ////fboDTex->setCompareFunc(GL_LEQUAL);
-        ////fboDTex->setDepthMode(GL_INTENSITY);
-
-        //TextureBufferRefPtr texDBuf = TextureBuffer::create();
-        //texDBuf->setTexture(fboDTex);
-
-        RenderBufferRefPtr depthBuf = RenderBuffer::create();
-        //depthBuf->setInternalFormat(GL_DEPTH24_STENCIL8);           //depthBuf->setInternalFormat(GL_DEPTH_COMPONENT24);
-        depthBuf->setInternalFormat(GL_DEPTH_COMPONENT24);
-
-        fbo = FrameBufferObject::create();
-        fbo->setColorAttachment(texBuf, 0);
-        //fbo->setDepthAttachment(texDBuf);                           //HERE depthBuf/texDBuf
-        fbo->setDepthAttachment(depthBuf);                           //HERE depthBuf/texDBuf
-
-
-        fbo->editMFDrawBuffers()->clear();
-        fbo->editMFDrawBuffers()->push_back(GL_COLOR_ATTACHMENT0_EXT);
-        //fbo->editMFDrawBuffers()->push_back(GL_DEPTH_ATTACHMENT_EXT); // this is wrong
-        fbo->setWidth (fboWidth );
-        fbo->setHeight(fboHeight);
-        fbo->setPostProcessOnDeactivate(true);
-
-        texBuf ->setReadBack(true);
-        //texDBuf->setReadBack(true);
-
-        ract = RenderAction::create();
-
-        fboView = FBOViewport::create();
-        fboView->setSize(0, 0, 1, 1);
-        fboView->setFrameBufferObject(fbo); // replaces stage!
-        fboView->setCamera(cam);
-        fboView->setBackground(background);
-
-        //fboView->setRoot(lightNode);
-        fboView->setRoot(dsStageN);
+        if (node->getCore()->getType() == *_type) {
+            _result = node;
+            return Action::Quit;
+        }
+        return Action::Continue;
     }
 
-    void initPassiveWindow()
-    {
-        cout << " initPassiveWindow" << endl;
+    OSG::Node* result() { return _result; }
 
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_STENCIL_TEST);
-
-        glutCreateWindow("PolyVR");
-
-        OSG::PassiveWindowRefPtr pwin=OSG::PassiveWindow::create();
-        pwin->init();
-
-        pwin->addPort(fboView);
-        pwin->setSize(fboWidth, fboHeight);
-
-        win = pwin;
-
-        /*
-
-        dpy = XOpenDisplay(NULL);
-        if ( !dpy ) { cout << "  Warning! could not connect to X" << endl; return; }
-        XWinID = DefaultRootWindow(dpy);
-        GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-        XVisualInfo* vi = glXChooseVisual(dpy, 0, att);
-        if ( !vi ) { cout << "  Warning! could not get visual" << endl; return; }
-        glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-        glXMakeCurrent(dpy, XWinID, glc);
-
-        PassiveWindowRecPtr pwin = PassiveWindow::create();
-        pwin->init();
-        pwin->addPort(fboView);
-        pwin->setSize(fboWidth, fboHeight);
-        win = pwin;
-
-        */
-    }
-
-    void initGlut(int argc, char **argv)
-    {
-        glutInit(&argc, argv);
-        //glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_STENCIL | GLUT_DOUBLE);
-        glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
-    }
-
-    void initGlutWindow()
-    {
-        cout << " initGlutWindow" << endl;
-        GLUTWindowRecPtr gwin = GLUTWindow::create();
-        
-        glutInitWindowSize(fboWidth, fboHeight);
-        int winID = glutCreateWindow("PolyVR");
-        gwin->setGlutId(winID);
-
-        gwin->addPort(fboView);
-        gwin->setSize(fboWidth, fboHeight);
-        gwin->init();
-        win = gwin;
-    }
-
-    void renderOnce(string path)
-    {
-        cout << " renderOnce to " << path << endl;
-        if (!win) { cout << "  Warning! window invalid!" << endl; return; }
-
-        win->render(ract);
-
-        //ImageMTRecPtr img = Image::create();
-        //img->set( fboTexImg );
-        //img->write(path.c_str());
-
-        fboTexImg->write(path.c_str());
-    }
+private:
+    OSG::Node*                      _result;
+    std::string                     _str;
+    const OSG::FieldContainerType*  _type;
 };
 
-OsgTestScene2* pt;
-
-int main(int argc, char **argv)
+OSG::Node* find_node(OSG::Node* node, const OSG::FieldContainerType& type)
 {
-    preloadSharedObject("OSGFileIO");
-    preloadSharedObject("OSGImageFileIO");
-    osgInit(argc,argv);
+    using namespace OSG;
+    find_node_helper helper(&type);
+    traverse(node, boost::bind(&find_node_helper::enter_type, &helper, _1));
+    return helper.result();
+}
 
+OSG::NodeCore* find_core(OSG::Node* node, const OSG::FieldContainerType& type)
+{
+    using namespace OSG;
+
+    NodeCore* result = nullptr;
+
+    Node* found = find_node(node, type);
+
+    if (found)
+        result = found->getCore();
+
+    return result;
+}
+
+class manage_material_helper
+{
+public:
+    explicit manage_material_helper(OSG::DescMaterialManager* mMgr, bool update) : _materialManager(mMgr), _update(update) {}
+
+    OSG::Action::ResultE enter(OSG::Node* node)
     {
-        OsgTestScene2 t;
+        using namespace OSG;
 
-        pt = &t;
+        NodeCore* core = node->getCore();
 
-        t.initGlut(argc, argv);
+        Material* mat = nullptr;
 
-        //t.initPassiveWindow();
-        t.initGlutWindow();
+        MaterialGroup* mgrp = dynamic_cast<MaterialGroup*>(core);
+        if (mgrp) {
+            mat = mgrp->getMaterial();
+        } else {
+            MaterialChunkOverrideGroup* mcogrp = dynamic_cast<MaterialChunkOverrideGroup*>(core);
+            if (mcogrp) {
+                mat = mcogrp->getMaterial();
+            } else {
+                Geometry* geom = dynamic_cast<Geometry*>(core);
+                if (geom) {
+                    mat = geom->getMaterial();
+                }
+            }
+        }
 
-        commitChanges();
+        if (mat)
+        {
+            // The following is a little bit over simplified. In reality, the material could by any of 
+            // MultiPassMaterial, PrimeMaterial, VariantMaterial, SwitchMaterial, DescMaterial, ChunkMaterial,...
+            // Here we expect that only simple models are encountered. Otherwise the example would be somewhat
+            // larger.
+            if (_alreadyProcessed.find(mat) == _alreadyProcessed.end()) {
+                _alreadyProcessed.insert(mat);
 
-        t.renderOnce("A.png");
-        t.renderOnce("B.png");
-        t.renderOnce("C.png");
+                DescMaterial* descMat = dynamic_cast<DescMaterial*>(mat);
+                if (descMat)
+                {
+                    if (_update)
+                        update(descMat);
+                    else
+                        manage(descMat);
+                }
+                else
+                {
+                    // any other material layout that finally may lead to a DescMaterial that we have to
+                    // found...
+                }
+            }
+        }
+
+        return Action::Continue;
     }
 
-    OSG::osgExit();
+    void update(OSG::DescMaterial* descMat)
+    {
+        using namespace OSG;
+
+        MaterialDesc* matDesc = descMat->getMaterialDesc();
+        if (matDesc)
+        {
+            //commitChanges();
+        }
+    }
+
+    void manage(OSG::DescMaterial* descMat)
+    {
+        using namespace OSG;
+
+        MaterialDesc* matDesc = descMat->getMaterialDesc();
+        if (matDesc)
+        {
+            MaterialDesc::HashKeyType key = matDesc->getHashValue();
+
+            bool result = _materialManager->addMaterial(key, descMat);
+        }
+    }
+
+private:
+    typedef std::set<OSG::Material*> SetMaterialT;
+
+private:
+    OSG::DescMaterialManagerRefPtr _materialManager;
+    SetMaterialT                   _alreadyProcessed;
+    bool                           _update;
+};
+
+void manageDescMaterials(OSG::DescMaterialManager* mgr, OSG::Node* node)
+{
+    using namespace OSG;
+    manage_material_helper helper(mgr, false);
+    traverse(node, boost::bind(&manage_material_helper::enter, &helper, _1));
+}
+
+void updateDescMaterials(OSG::DescMaterialManager* mgr, OSG::Node* node)
+{
+    using namespace OSG;
+    manage_material_helper helper(mgr, true);
+    traverse(node, boost::bind(&manage_material_helper::enter, &helper, _1));
+}
+
+//
+// The SimpleSceneManager to manage simple applications
+//
+OSG::SimpleSceneManagerRefPtr mgr;
+
+//
+// MaterialManager
+//
+OSG::DescMaterialManagerRefPtr materialManager;
+
+void initShader(OSG::ShaderProgram* shader)
+{
+    if (shader && shader->getShaderType() == GL_FRAGMENT_SHADER)
+    {
+    }
+}
+
+void updateShader(OSG::ShaderProgram* shader)
+{
+    if (shader && shader->getShaderType() == GL_FRAGMENT_SHADER)
+    {
+    }
+}
+
+//
+// forward declaration so we can have the interesting stuff upfront
+//
+int setupGLUT(int *argc, char *argv[]);
+
+//
+// Initialize GLUT & OpenSG and set up the scene
+//
+int main(int argc, char **argv)
+{
+    //
+    // This might be necessary depending on the
+    // used platform to ensure that the corresponding
+    // libraries get loaded.
+    //
+    OSG::preloadSharedObject("OSGFileIO");
+    OSG::preloadSharedObject("OSGImageFileIO");
+    OSG::preloadSharedObject("OSGContribPLY");
+
+    OSG::osgInit(argc,argv);
+    int winid = setupGLUT(&argc, argv);
+
+    // open a new scope, because the pointers below should go out of scope
+    // before entering glutMainLoop.
+    // Otherwise OpenSG will complain about objects being alive after shutdown.
+    {
+        // the connection between GLUT and OpenSG
+        OSG::GLUTWindowRefPtr gwin = OSG::GLUTWindow::create();
+        gwin->setGlutId(winid);
+        gwin->init();
+    
+        // create the SimpleSceneManager helper
+        mgr = OSG::SimpleSceneManager::create();
+        mgr->setWindow(gwin);
+
+        OSG::NodeRefPtr scene(nullptr);
+
+        if(argc < 2)
+        {
+            scene = OSG::SceneFileHandler::the()->read("Data/descmaterial1.osb");
+        }
+        else
+        {
+            scene = OSG::SceneFileHandler::the()->read(argv[1]);
+        }
+
+        if (scene)
+        {
+            OSG::ShaderProgramFunctor   initFunctor = boost::bind(::initShader,   _1);
+            OSG::ShaderProgramFunctor updateFunctor = boost::bind(::updateShader, _1);
+        
+            // create the DescMaterialManager
+            materialManager = OSG::DescMaterialManager::createDefault(initFunctor, "", updateFunctor, "");
+            materialManager->setWindow(gwin);
+
+            OSG::HDR2Stage*             hdr2Stage               = dynamic_cast<OSG::HDR2Stage            *>(find_core(scene, OSG::HDR2Stage             ::getClassType()));
+            OSG::SSAOStage*             ssaoStage               = dynamic_cast<OSG::SSAOStage            *>(find_core(scene, OSG::SSAOStage             ::getClassType()));
+            OSG::MultiLightGroup*       multiLightGroup         = dynamic_cast<OSG::MultiLightGroup      *>(find_core(scene, OSG::MultiLightGroup       ::getClassType()));
+            OSG::MultiLightShadowStage* multiLightShadowStage   = dynamic_cast<OSG::MultiLightShadowStage*>(find_core(scene, OSG::MultiLightShadowStage ::getClassType()));
+            OSG::ClusterShadingStage*   clusterShadingStage     = dynamic_cast<OSG::ClusterShadingStage  *>(find_core(scene, OSG::ClusterShadingStage   ::getClassType()));
+        
+            if (multiLightGroup)
+                mgr->turnHeadlightOff();
+
+            materialManager->setHDR2Stage(hdr2Stage);
+            materialManager->setClusterShadingStage(clusterShadingStage);
+            materialManager->setMultiLightShadowStage(multiLightShadowStage);
+            materialManager->setSSAOStage(ssaoStage);
+            materialManager->setMultiLightGroup(multiLightGroup);
+            materialManager->setLightBindingPnt(1);
+
+            //
+            // The DescMaterialManager does need to know about the DescMaterial objects in the
+            // scene.
+            //
+            manageDescMaterials(materialManager, scene);
+
+            //
+            // Shaders in the scene must possibly be adapted to the platform capabilities.
+            //
+            materialManager->updateProgram();
+
+            OSG::commitChanges();
+
+            mgr->setRoot(scene);
+
+            //
+            // DataSolid model specific:
+            // =========================
+            //  The root node might contain a ContainerCollection attachment with nodes carrying transform cores.
+            //  Any node that has the "__CartesianNode__" name attachment is expected to follow the camera.
+            //
+            OSG::ContainerCollection* cc = dynamic_cast<OSG::ContainerCollection*>(scene->findAttachment(OSG::ContainerCollection::getClassType()));
+            if(cc)
+            {
+                OSG::Node* cameraBeacon = mgr->getCamera()->getBeacon();
+                if (cameraBeacon)
+                {
+                    OSG::Transform* camTrafo = dynamic_cast<OSG::Transform*>(cameraBeacon->getCore());
+                    if (camTrafo)
+                    {
+                        OSG::UInt32 N = cc->getNContainers();
+                        for (OSG::UInt32 idx = 0; idx < N; ++idx)
+                        {
+                            OSG::Node* node = dynamic_cast<OSG::Node*>(cc->getContainers(idx));
+                            if (node && OSG::getName(node) && std::string("__CartesianNode__") == OSG::getName(node))
+                            {
+                                OSG::Transform* trafo = dynamic_cast<OSG::Transform*>(node->getCore());
+                                if (trafo)
+                                {
+                                    node->setCore(camTrafo);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mgr->showAll();
+
+            OSG::commitChanges();
+        }
+    }
+
+    // GLUT main loop
+    glutMainLoop();
 
     return 0;
 }
+
+//
+// GLUT callback functions
+//
+
+//
+// redraw the window
+//
+void display(void)
+{
+    mgr->redraw();
+}
+
+//
+// react to size changes
+//
+void reshape(int w, int h)
+{
+    mgr->resize(w, h);
+    glutPostRedisplay();
+}
+
+//
+// react to mouse button presses
+//
+void mouse(int button, int state, int x, int y)
+{
+    if (state)
+        mgr->mouseButtonRelease(button, x, y);
+    else
+        mgr->mouseButtonPress(button, x, y);
+        
+    glutPostRedisplay();
+}
+
+//
+// react to mouse motions with pressed buttons
+//
+void motion(int x, int y)
+{
+    mgr->mouseMove(x, y);
+    glutPostRedisplay();
+}
+
+//
+// react to keys
+//
+void keyboard(unsigned char k, int x, int y)
+{
+    switch (k)
+    {
+        case 27:    
+        {
+            materialManager = nullptr;
+            mgr = nullptr;
+
+            OSG::osgExit();
+            exit(0);
+        }
+        break;
+    }
+}
+
+//
+// setup the GLUT library which handles the windows for us
+//
+int setupGLUT(int *argc, char *argv[])
+{
+    glutInit(argc, argv);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL | GLUT_DOUBLE);
+    glutInitWindowSize(1000, 800);
+    
+    int winid = glutCreateWindow("OpenSG");
+    
+    glutReshapeFunc(reshape);
+    glutDisplayFunc(display);
+    glutMouseFunc(mouse);
+    glutMotionFunc(motion);
+    glutKeyboardFunc(keyboard);
+
+    // call the redraw function whenever there's nothing else to do
+    glutIdleFunc(display);
+
+    return winid;
+}
+

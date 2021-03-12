@@ -66,7 +66,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING MultiLightShadowStageData : public MultiL
     struct LightAssoc
     {
         LightAssoc()
-            : type              (MultiLight::POINT_LIGHT)
+            : typeOfLight       (MultiLight::POINT_LIGHT)
             , enabled           (false)
             , shadow            (false)
             , shadowParamIdx    (-1)
@@ -75,7 +75,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING MultiLightShadowStageData : public MultiL
             , camera            (NULL) {}
 
         LightAssoc(const LightAssoc& rhs)
-            : type              (rhs.type)
+            : typeOfLight       (rhs.typeOfLight)
             , enabled           (rhs.enabled)
             , shadow            (rhs.shadow)
             , shadowParamIdx    (rhs.shadowParamIdx)
@@ -87,7 +87,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING MultiLightShadowStageData : public MultiL
         {
             if (&rhs != this)
             {
-                type            = rhs.type;
+                typeOfLight     = rhs.typeOfLight;
                 enabled         = rhs.enabled;
                 shadow          = rhs.shadow;
                 shadowParamIdx  = rhs.shadowParamIdx;
@@ -99,14 +99,14 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING MultiLightShadowStageData : public MultiL
             return *this;
         }
 
-        MultiLight::Type  type;
-        bool              enabled;
-        bool              shadow;
-        Int32             shadowParamIdx;
+        MultiLight::TypeOfLight  typeOfLight;
+        bool                     enabled;
+        bool                     shadow;
+        Int32                    shadowParamIdx;
 
-        NodeUnrecPtr      beacon;
-        TransformUnrecPtr transform;
-        CameraUnrecPtr    camera;
+        NodeUnrecPtr             beacon;
+        TransformUnrecPtr        transform;
+        CameraUnrecPtr           camera;
     };
 
   public:

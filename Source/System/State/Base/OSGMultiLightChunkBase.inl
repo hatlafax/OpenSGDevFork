@@ -630,19 +630,19 @@ MFMatrix           ::reference MultiLightChunkBase::editProjectionMatrix(const U
     return _mfProjectionMatrix[index];
 }
 
-//! Get the value of the \a index element the MultiLightChunk::_mfType field.
+//! Get the value of the \a index element the MultiLightChunk::_mfTypeOfLight field.
 inline
-      UInt8  MultiLightChunkBase::getType(const UInt32 index) const
+      UInt8  MultiLightChunkBase::getTypeOfLight(const UInt32 index) const
 {
-    return _mfType[index];
+    return _mfTypeOfLight[index];
 }
 
 inline
-MFUInt8            ::reference MultiLightChunkBase::editType(const UInt32 index)
+MFUInt8            ::reference MultiLightChunkBase::editTypeOfLight(const UInt32 index)
 {
-    editMField(TypeFieldMask, _mfType);
+    editMField(TypeOfLightFieldMask, _mfTypeOfLight);
 
-    return _mfType[index];
+    return _mfTypeOfLight[index];
 }
 
 //! Get the value of the \a index element the MultiLightChunk::_mfEnabled field.
@@ -873,8 +873,8 @@ void MultiLightChunkBase::execSync (      MultiLightChunkBase *pFrom,
                                 uiSyncInfo,
                                 oOffsets);
 
-    if(FieldBits::NoField != (TypeFieldMask & whichField))
-        _mfType.syncWith(pFrom->_mfType,
+    if(FieldBits::NoField != (TypeOfLightFieldMask & whichField))
+        _mfTypeOfLight.syncWith(pFrom->_mfTypeOfLight,
                                 syncMode,
                                 uiSyncInfo,
                                 oOffsets);

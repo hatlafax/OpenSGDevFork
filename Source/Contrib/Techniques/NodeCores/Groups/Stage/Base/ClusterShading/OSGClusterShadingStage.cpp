@@ -2009,7 +2009,7 @@ void ClusterShadingStage::calc_affected_lights(
 
         if (getMultiLightChunk()->getEnabled(i))
         {
-            switch (getMultiLightChunk()->getType(i))
+            switch (getMultiLightChunk()->getTypeOfLight(i))
             {
                 case MultiLight::DIRECTIONAL_LIGHT:
                 {
@@ -2175,7 +2175,7 @@ void ClusterShadingStage::cull_lights(
 
                     if (getMultiLightChunk()->getEnabled(light_index))
                     {
-                        switch (getMultiLightChunk()->getType(light_index))
+                        switch (getMultiLightChunk()->getTypeOfLight(light_index))
                         {
                             case MultiLight::DIRECTIONAL_LIGHT:
                             {

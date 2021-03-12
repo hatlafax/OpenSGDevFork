@@ -620,7 +620,7 @@ or for simple range lights:
     </Field>
 
     <Field
-        name="type"
+        name="typeOfLight"
         type="UInt8"
         cardinality="multi"
         visibility="external"
