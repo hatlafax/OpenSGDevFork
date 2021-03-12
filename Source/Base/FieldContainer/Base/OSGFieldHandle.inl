@@ -422,6 +422,19 @@ void EditSFieldHandle<FieldT>::cloneValues(      GetFieldHandlePtr  ,
 }
 
 template<class FieldT> inline
+bool EditSFieldHandle<FieldT>::cloneValuesEx(    GetFieldHandlePtr  ,
+                                             const TypePtrVector     &,
+                                             const TypePtrVector     &,
+                                             const TypePtrVector     &,
+                                             const TypeIdVector      &,
+                                             const TypeIdVector      &) const
+{
+    FWARNING(("illegal cloneValuesEx called for %s\n", this->getName().c_str()));
+    OSG_ASSERT(false);
+    return true;
+}
+
+template<class FieldT> inline
 FieldT *EditSFieldHandle<FieldT>::getField(void)
 {
     return static_cast<FieldT *>(_pField);
@@ -585,6 +598,19 @@ void EditMFieldHandle<FieldT>::cloneValues(      GetFieldHandlePtr  ,
 {
     FWARNING(("illegal cloneValues called for %s\n", this->getName().c_str()));
     OSG_ASSERT(false);
+}
+
+template<class FieldT> inline
+bool EditMFieldHandle<FieldT>::cloneValuesEx(      GetFieldHandlePtr  ,
+                                             const TypePtrVector     &,
+                                             const TypePtrVector     &,
+                                             const TypePtrVector     &,
+                                             const TypeIdVector      &,
+                                             const TypeIdVector      &) const
+{
+    FWARNING(("illegal cloneValuesEx called for %s\n", this->getName().c_str()));
+    OSG_ASSERT(false);
+    return true;
 }
 
 template<class FieldT> inline

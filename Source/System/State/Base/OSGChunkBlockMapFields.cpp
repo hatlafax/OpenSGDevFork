@@ -478,6 +478,70 @@ void EditSFieldHandle<SFChunkBlockPtrMap>::cloneValues(
     }
 }
 
+bool EditSFieldHandle<SFChunkBlockPtrMap>::cloneValuesEx(
+          GetFieldHandlePtr  pSrc,
+    const TypePtrVector     &shareTypes,
+    const TypePtrVector     &shareDynTypes,
+    const TypePtrVector     &ignoreTypes,
+    const TypeIdVector      &shareGroupIds,
+    const TypeIdVector      &ignoreGroupIds) const
+{
+    SFChunkBlockPtrMap::GetHandlePtr pGetHandle = 
+        boost::dynamic_pointer_cast<
+            SFChunkBlockPtrMap::GetHandle>(pSrc);
+
+    if(pGetHandle == NULL || pGetHandle->isValid() == false)
+        return true;
+
+    const SFChunkBlockPtrMap &pAttMap = **pGetHandle;
+
+    ChunkBlockMap::const_iterator mapIt  = pAttMap.getValue().begin();
+    ChunkBlockMap::const_iterator mapEnd = pAttMap.getValue().end();
+
+    for(; mapIt != mapEnd; ++mapIt)
+    {
+        ChunkBlockUnrecPtr att = mapIt->second;
+        ChunkBlockMapKey   key = mapIt->first;
+
+        if(att != NULL)
+        {
+            const FieldContainerType &attType = att->getType();
+
+            // test if att type should NOT be ignored
+            if(!TypePredicates::typeInGroupIds (ignoreGroupIds.begin(),
+                                                ignoreGroupIds.end(),
+                                                attType                ) &&
+               !TypePredicates::typeDerivedFrom(ignoreTypes.begin(),
+                                                ignoreTypes.end(),
+                                                attType                )   )
+            {
+                // test if att should cloned
+                if(!TypePredicates::typeInGroupIds (shareGroupIds.begin(),
+                                                    shareGroupIds.end(),
+                                                    attType               ) &&
+                   !TypePredicates::typeDerivedFrom(shareTypes.begin(),
+                                                    shareTypes.end(),
+                                                    attType               )   )
+                {
+                    att = dynamic_pointer_cast<ChunkBlock>(
+                        OSG::deepCloneEx(att, shareTypes,
+                                              shareDynTypes,
+                                              ignoreTypes,
+                                              shareGroupIds,
+                                              ignoreGroupIds));
+                }
+            }
+        }
+
+        if(_fAddMethod)
+        {
+            _fAddMethod(att, key);
+        }
+    }
+
+    return true;
+}
+
 
 void GetSFieldHandle<SFChunkBlockPtrMap>::traverse(TraverseCallback oCallback)
 {

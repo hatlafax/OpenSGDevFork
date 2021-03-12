@@ -36,6 +36,8 @@
  *                                                                           *
 \*---------------------------------------------------------------------------*/
 
+#include "OSGTypeBasePredicates.h"
+
 OSG_BEGIN_NAMESPACE
 
 /*---------------------------------------------------------------------------*/
@@ -312,6 +314,19 @@ void EditMFieldHandle<FieldContainerPtrMFieldBase>::cloneValues(
     const TypeIdVector      &ignoreGroupIds) const
 {
     OSG_ASSERT(false);
+}
+
+inline
+bool EditMFieldHandle<FieldContainerPtrMFieldBase>::cloneValuesEx(
+          GetFieldHandlePtr  pSrc,
+    const TypePtrVector     &shareTypes,
+    const TypePtrVector     &shareDynTypes,
+    const TypePtrVector     &ignoreTypes,
+    const TypeIdVector      &shareGroupIds,
+    const TypeIdVector      &ignoreGroupIds) const
+{
+    OSG_ASSERT(false);
+    return true;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -1197,6 +1212,62 @@ void EditFCPtrMFieldHandle<FieldT>::cloneValues(
         FWARNING(("cloneValues illegal source for %s\n", 
                   this->getName().c_str()));
     }
+}
+
+template <class FieldT> inline
+bool EditFCPtrMFieldHandle<FieldT>::cloneValuesEx(
+              GetFieldHandlePtr  pSrc,
+        const TypePtrVector     &shareTypes,
+        const TypePtrVector     &shareDynTypes,
+        const TypePtrVector     &ignoreTypes,
+        const TypeIdVector      &shareGroupIds,
+        const TypeIdVector      &ignoreGroupIds) const
+{
+    typename Self::GetMFHandlePtr pSrcBase = 
+        boost::dynamic_pointer_cast<GetMFHandle>(pSrc);
+
+    FieldContainerUnrecPtr pDst = NULL;
+
+    if(pSrcBase != NULL && pSrcBase->isValid() == true)
+    {
+        const FieldContainerPtrMFieldBase *pSrcField = pSrcBase->getField();
+            
+        for(SizeT i = 0; i < pSrcField->size(); ++i)
+        {
+            StoredPtrType pSrcTyped = 
+                dynamic_cast<StoredPtrType>((*pSrcField)[i]);
+
+            if(pSrcTyped != NULL)
+            {
+                if (TypePredicates::typeDerivedFrom(
+                                shareDynTypes.begin(),
+                                shareDynTypes.end  (), pSrcTyped->getType()))
+                {
+                    return false;
+                }
+
+                pDst = deepCloneEx(pSrcTyped,
+                                   shareTypes,
+                                   shareDynTypes,
+                                   ignoreTypes,
+                                   shareGroupIds,
+                                   ignoreGroupIds);
+            }
+            else
+            {
+                pDst = NULL;
+            }
+            
+            this->add(pDst);
+        }
+    }
+    else
+    {
+        FWARNING(("cloneValuesEx illegal source for %s\n", 
+                  this->getName().c_str()));
+    }
+
+    return true;
 }
 
 /*---------------------------------------------------------------------------*/

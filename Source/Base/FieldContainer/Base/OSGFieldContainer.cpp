@@ -931,6 +931,249 @@ FieldContainerTransitPtr deepClone(
     return fcClone;
 }
 
+/*! Creates a deep copy of \a src, i.e. all fields of \a src are copied, if
+    they contain pointers to other FieldContainers these are cloned as well.
+    The remaining parameters allow the selection of certain types that are
+    either not cloned at all or are shared between \a src and the copy.
+
+    \param[in] src FieldContainer to clone.
+    \param[in] shareTypeNames Names of types that should be shared
+        instead of cloned.
+    \param[in] shareDynTypeNames Names of dynamic object types that should 
+        be shared instead of cloned.
+    \param[in] ignoreTypeNames Names of types that should be ignored.
+    \param[in] shareGroupNames Names of type groups that should be shared
+        instead of cloned.
+    \param[in] shareDynGroupNames Names of dynamic object type groups that
+        should be shared instead of cloned.
+    \param[in] ignoreGroupNames Names of type groups that should be ignored.
+    \return deep copy of \a src.
+
+    \ingroup GrpBaseFieldContainerFuncs
+    \relatesalso FieldContainer
+ */
+
+FieldContainerTransitPtr deepCloneEx(
+          FieldContainer const      *src,
+    const std::vector<std::string>  &shareTypeNames,
+    const std::vector<std::string>  &shareDynTypeNames,
+    const std::vector<std::string>  &ignoreTypeNames,
+    const std::vector<std::string>  &shareGroupNames,
+    const std::vector<std::string>  &ignoreGroupNames)
+{
+    std::vector<const ReflexiveContainerType *> shareTypes;
+    std::vector<const ReflexiveContainerType *> shareDynTypes;
+    std::vector<const ReflexiveContainerType *> ignoreTypes;
+    std::vector<UInt16>                         shareGroupIds;
+    std::vector<UInt16>                         ignoreGroupIds;
+
+    appendTypesVector (shareTypeNames,      shareTypes      );
+    appendTypesVector (shareDynTypeNames,   shareDynTypes   );
+    appendTypesVector (ignoreTypeNames,     ignoreTypes     );
+    appendGroupsVector(shareGroupNames,     shareGroupIds   );
+    appendGroupsVector(ignoreGroupNames,    ignoreGroupIds  );
+
+    return deepCloneEx(src, shareTypes,
+                            shareDynTypes,
+                            ignoreTypes,
+                            shareGroupIds,
+                            ignoreGroupIds);
+}
+
+/*! Creates a deep copy of \a src, i.e. all fields of \a src are copied, if
+    they contain pointers to other FieldContainers these are cloned as well.
+    The remaining parameters allow the selection of certain types that are
+    either not cloned at all or are shared between \a src and the copy.
+
+    \param[in] src FieldContainer to clone.
+    \param[in] shareGroupIds Type groups that should be shared instead
+        of cloned.
+    \param[in] ignoreGroupIds Type groups that should be ignored.
+    \return deep copy of \a src.
+
+    \ingroup GrpBaseFieldContainerFuncs
+    \relatesalso FieldContainer
+ */
+
+FieldContainerTransitPtr deepCloneEx(
+          FieldContainer const      *src,
+    const std::vector<OSG::UInt16>       &shareGroupIds,
+    const std::vector<OSG::UInt16>       &ignoreGroupIds)
+{
+    std::vector<const ReflexiveContainerType *> shareTypes;
+    std::vector<const ReflexiveContainerType *> shareDynTypes;
+    std::vector<const ReflexiveContainerType *> ignoreTypes;
+
+    return deepCloneEx(src, shareTypes,
+                            shareDynTypes,
+                            ignoreTypes,
+                            shareGroupIds, 
+                            ignoreGroupIds);
+}
+
+/*! Creates a deep copy of \a src, i.e. all fields of \a src are copied, if
+    they contain pointers to other FieldContainers these are cloned as well.
+    The remaining parameters allow the selection of certain types that are
+    either not cloned at all or are shared between \a src and the copy.
+
+    \param[in] src FieldContainer to clone.
+    \param[in] shareTypesString Comma separated string of type names that
+        should be shared instead of cloned.
+    \param[in] shareDynTypesString Comma separated string of dynamic object 
+        type names that should be shared instead of cloned.
+    \param[in] ignoreTypesString Comma separated string of type names that
+        should be ignored.
+    \return deep copy of \a src.
+
+    \ingroup GrpBaseFieldContainerFuncs
+    \relatesalso FieldContainer
+ */
+
+FieldContainerTransitPtr deepCloneEx(      
+          OSG::FieldContainer const  *src,
+    const std::string                &shareTypesString,
+    const std::string                &shareDynTypesString,
+    const std::string                &ignoreTypesString)
+{
+    std::vector<const ReflexiveContainerType *> shareTypes;
+    std::vector<const ReflexiveContainerType *> shareDynTypes;
+    std::vector<const ReflexiveContainerType *> ignoreTypes;
+    std::vector<UInt16>                         shareGroupIds;
+    std::vector<UInt16>                         ignoreGroupIds;
+
+    appendTypesString(shareTypesString,     shareTypes);
+    appendTypesString(shareDynTypesString,  shareDynTypes);
+    appendTypesString(ignoreTypesString,    ignoreTypes);
+
+    return deepCloneEx(src, shareTypes,
+                            shareDynTypes,
+                            ignoreTypes,
+                            shareGroupIds,
+                            ignoreGroupIds);
+}
+
+/*! Creates a deep copy of \a src, i.e. all fields of \a src are copied, if
+    they contain pointers to other FieldContainers these are cloned as well.
+    The remaining parameters allow the selection of certain types that are
+    either not cloned at all or are shared between \a src and the copy.
+
+    \param[in] src FieldContainer to clone.
+    \param[in] shareTypes Types that should be shared instead of cloned.
+    \param[in] shareDynTypes dynamic object Types that should be shared instead of cloned.
+    \param[in] ignoreTypes Types that should be ignored.
+    \param[in] shareGroupIds Type groups that should be shared instead
+    \param[in] ignoreGroupIds Type groups that should be ignored.
+    \return deep copy of \a src.
+
+    \ingroup GrpBaseFieldContainerFuncs
+    \relatesalso FieldContainer
+ */
+
+FieldContainerTransitPtr deepCloneEx(
+          OSG::FieldContainer const                        *src,
+    const std::vector<const OSG::ReflexiveContainerType *> &shareTypes,
+    const std::vector<const OSG::ReflexiveContainerType *> &shareDynTypes,
+    const std::vector<const OSG::ReflexiveContainerType *> &ignoreTypes,
+    const std::vector<OSG::UInt16>                         &shareGroupIds,
+    const std::vector<OSG::UInt16>                         &ignoreGroupIds)
+{
+    if(src == NULL)
+        return FieldContainerTransitPtr(NULL);
+
+    const FieldContainerType &fcType  = src->getType();
+    FieldContainerTransitPtr  fcClone = fcType.createContainer();
+
+    UInt32 fCount = osgMin(fcType            .getNumFieldDescs(),
+                           fcClone->getType().getNumFieldDescs() );
+
+    for(UInt32 i = 1; i <= fCount; ++i)
+    {
+        const FieldDescriptionBase *fDesc = fcType.getFieldDesc(i);
+
+        if(fDesc->isInternal())
+            continue;
+
+        GetFieldHandlePtr  srcField = src    ->getField (i);
+        EditFieldHandlePtr dstField = fcClone->editField(i);
+
+        if(dstField == NULL || dstField->isValid() == false ||
+           srcField == NULL || srcField->isValid() == false)
+        {
+            continue;
+        }
+
+        if(srcField->isPointerField() == false)
+        {
+            dstField->copyValues(srcField);
+        }
+        else
+        {
+            // get type info for values stored in field
+            const DataType &contentType = srcField->getType().getContentType();
+
+            // check if it's a "pointer to FC" type (needed, because
+            // AttachmentMap also passes the above isPointerType() check)
+            const PointerType *pointerType =
+                dynamic_cast<const PointerType *>(&contentType);
+
+            // punt, share if it is something that is not "pointer to FC"
+            if(pointerType == NULL)
+            {
+                dstField->shareValues(srcField);
+                continue;
+            }
+
+            // get type info for pointed-to FC type
+            const ReflexiveContainerType *rcType =
+                dynamic_cast<const ReflexiveContainerType *>(
+                    &pointerType->getContentType());
+
+            // punt, share if it is something that is not derived from RC
+            if(rcType == NULL)
+            {
+                dstField->shareValues(srcField);
+                continue;
+            }
+
+            // check if type should be ignored
+            if(!TypePredicates::typeInGroupIds(
+                    ignoreGroupIds.begin(),
+                    ignoreGroupIds.end  (), *rcType) &&
+               !TypePredicates::typeDerivedFrom(
+                    ignoreTypes.begin(),
+                    ignoreTypes.end  (), *rcType)      )
+            {
+                // check if type should by shared
+                if(TypePredicates::typeInGroupIds(
+                        shareGroupIds.begin(),
+                        shareGroupIds.end  (), *rcType) ||
+                   TypePredicates::typeDerivedFrom(
+                        shareTypes.begin(),
+                        shareTypes.end  (), *rcType)      )
+                {
+                    dstField->shareValues(srcField);
+                }
+                else
+                {
+                    bool result = dstField->cloneValuesEx(srcField,
+                                                          shareTypes,
+                                                          shareDynTypes,
+                                                          ignoreTypes,
+                                                          shareGroupIds,
+                                                          ignoreGroupIds);
+
+                    if (result == false)
+                    {
+                        dstField->shareValues(srcField);
+                    }
+                }
+            }
+        }
+    }
+
+    return fcClone;
+}
+
 /*! \}                                                                 */
 /*---------------------------------------------------------------------*/
 

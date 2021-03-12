@@ -231,6 +231,14 @@ class OSG_BASE_DLLMAPPING EditSFieldHandle<FieldContainerPtrSFieldBase> :
         const TypePtrVector     &ignoreTypes    = TypePtrVector(),
         const TypeIdVector      &shareGroupIds  = TypeIdVector (),
         const TypeIdVector      &ignoreGroupIds = TypeIdVector ()) const;
+
+    virtual bool cloneValuesEx(
+              GetFieldHandlePtr  pSrc,
+        const TypePtrVector     &shareTypes       = TypePtrVector(),
+        const TypePtrVector     &shareDynTypes    = TypePtrVector(),
+        const TypePtrVector     &ignoreTypes      = TypePtrVector(),
+        const TypeIdVector      &shareGroupIds    = TypeIdVector (),
+        const TypeIdVector      &ignoreGroupIds   = TypeIdVector ()) const;
         
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -389,6 +397,14 @@ class EditFCPtrSFieldHandle :
         const TypePtrVector     &ignoreTypes    = TypePtrVector(),
         const TypeIdVector      &shareGroupIds  = TypeIdVector (),
         const TypeIdVector      &ignoreGroupIds = TypeIdVector ()) const;
+
+    virtual bool cloneValuesEx(
+              GetFieldHandlePtr  pSrc,
+        const TypePtrVector     &shareTypes       = TypePtrVector(),
+        const TypePtrVector     &shareDynTypes    = TypePtrVector(),
+        const TypePtrVector     &ignoreTypes      = TypePtrVector(),
+        const TypeIdVector      &shareGroupIds    = TypeIdVector (),
+        const TypeIdVector      &ignoreGroupIds   = TypeIdVector ()) const;
     
     /*! \}                                                                 */
     /*==========================  PRIVATE  ================================*/
