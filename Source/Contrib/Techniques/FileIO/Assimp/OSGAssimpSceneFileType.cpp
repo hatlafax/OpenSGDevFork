@@ -1302,83 +1302,89 @@ AssimpSceneFileType::VecIndicesT AssimpSceneFileType::handleMeshes(SceneWriteDat
 
         if (primaryUVIdx)
         {
-            std::size_t uv_idx = *primaryUVIdx;
-
-            switch (uv_idx)
+            if (ai_mesh->mTextureCoords[0])
             {
-                case 0: if (numTexCoords0) geom->getTexCoords ()->getValue(uvw, i); break;
-                case 1: if (numTexCoords1) geom->getTexCoords1()->getValue(uvw, i); break;
-                case 2: if (numTexCoords2) geom->getTexCoords2()->getValue(uvw, i); break;
-                case 3: if (numTexCoords3) geom->getTexCoords3()->getValue(uvw, i); break;
-                case 4: if (numTexCoords4) geom->getTexCoords4()->getValue(uvw, i); break;
-                case 5: if (numTexCoords5) geom->getTexCoords5()->getValue(uvw, i); break;
-                case 6: if (numTexCoords6) geom->getTexCoords6()->getValue(uvw, i); break;
-                case 7: if (numTexCoords7) geom->getTexCoords7()->getValue(uvw, i); break;
-                
-                default:
-                        if (numTexCoords0) geom->getTexCoords()->getValue(uvw, i);  break;
-            }
+                std::size_t uv_idx = *primaryUVIdx;
 
-            uvw = primaryTrafo * uvw;
-            ai_mesh->mTextureCoords[0][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
-            cntTexCoords++;
+                switch (uv_idx)
+                {
+                    case 0: if (numTexCoords0) geom->getTexCoords ()->getValue(uvw, i); break;
+                    case 1: if (numTexCoords1) geom->getTexCoords1()->getValue(uvw, i); break;
+                    case 2: if (numTexCoords2) geom->getTexCoords2()->getValue(uvw, i); break;
+                    case 3: if (numTexCoords3) geom->getTexCoords3()->getValue(uvw, i); break;
+                    case 4: if (numTexCoords4) geom->getTexCoords4()->getValue(uvw, i); break;
+                    case 5: if (numTexCoords5) geom->getTexCoords5()->getValue(uvw, i); break;
+                    case 6: if (numTexCoords6) geom->getTexCoords6()->getValue(uvw, i); break;
+                    case 7: if (numTexCoords7) geom->getTexCoords7()->getValue(uvw, i); break;
+                
+                    default:
+                            if (numTexCoords0) geom->getTexCoords()->getValue(uvw, i);  break;
+                }
+
+                uvw = primaryTrafo * uvw;
+                ai_mesh->mTextureCoords[0][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
+                cntTexCoords++;
+            }
         }
         else
         {
-            if (numTexCoords0 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+            if (ai_mesh->mTextureCoords[cntTexCoords])
             {
-                geom->getTexCoords()->getValue(uvw, i);
-                ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
-                cntTexCoords++;
-            }
+                if (numTexCoords0 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+                {
+                    geom->getTexCoords()->getValue(uvw, i);
+                    ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
+                    cntTexCoords++;
+                }
 
-            if (numTexCoords1 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
-            {
-                geom->getTexCoords1()->getValue(uvw, i);
-                ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
-                cntTexCoords++;
-            }
+                if (numTexCoords1 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+                {
+                    geom->getTexCoords1()->getValue(uvw, i);
+                    ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
+                    cntTexCoords++;
+                }
 
-            if (numTexCoords2 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
-            {
-                geom->getTexCoords2()->getValue(uvw, i);
-                ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
-                cntTexCoords++;
-            }
+                if (numTexCoords2 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+                {
+                    geom->getTexCoords2()->getValue(uvw, i);
+                    ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
+                    cntTexCoords++;
+                }
 
-            if (numTexCoords3 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
-            {
-                geom->getTexCoords3()->getValue(uvw, i);
-                ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
-                cntTexCoords++;
-            }
+                if (numTexCoords3 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+                {
+                    geom->getTexCoords3()->getValue(uvw, i);
+                    ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
+                    cntTexCoords++;
+                }
 
-            if (numTexCoords4 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
-            {
-                geom->getTexCoords4()->getValue(uvw, i);
-                ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
-                cntTexCoords++;
-            }
+                if (numTexCoords4 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+                {
+                    geom->getTexCoords4()->getValue(uvw, i);
+                    ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
+                    cntTexCoords++;
+                }
 
-            if (numTexCoords5 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
-            {
-                geom->getTexCoords5()->getValue(uvw, i);
-                ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
-                cntTexCoords++;
-            }
+                if (numTexCoords5 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+                {
+                    geom->getTexCoords5()->getValue(uvw, i);
+                    ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
+                    cntTexCoords++;
+                }
 
-            if (numTexCoords6 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
-            {
-                geom->getTexCoords6()->getValue(uvw, i);
-                ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
-                cntTexCoords++;
-            }
+                if (numTexCoords6 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+                {
+                    geom->getTexCoords6()->getValue(uvw, i);
+                    ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
+                    cntTexCoords++;
+                }
 
-            if (numTexCoords7 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
-            {
-                geom->getTexCoords7()->getValue(uvw, i);
-                ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
-                cntTexCoords++;
+                if (numTexCoords7 > 0 && cntTexCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+                {
+                    geom->getTexCoords7()->getValue(uvw, i);
+                    ai_mesh->mTextureCoords[cntTexCoords][i] = aiVector3D(uvw[0], uvw[1], uvw[2]);
+                    cntTexCoords++;
+                }
             }
         }
     }
