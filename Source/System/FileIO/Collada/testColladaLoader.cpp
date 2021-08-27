@@ -689,7 +689,7 @@ void keyboard(unsigned char k, int , int )
         {
             currAnim -= 1;
             if(currAnim < 0)
-                currAnim = anims.size() - 1;
+                currAnim = static_cast<OSG::UInt32>(anims.size()) - 1;
 
             std::cout << "Current anim [" << currAnim << "] - ["
                       << anims[currAnim].anim->getTemplate()->getName()

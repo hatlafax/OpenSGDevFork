@@ -67,7 +67,7 @@
 #include "OSGMaterialChunkOverrideGroupBase.h"
 #include "OSGMaterialChunkOverrideGroup.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -445,7 +445,7 @@ EditFieldHandlePtr MaterialChunkOverrideGroupBase::editHandleMaterial       (voi
 
     returnValue->setSetMethod(
         boost::bind(&MaterialChunkOverrideGroup::setMaterial,
-                    static_cast<MaterialChunkOverrideGroup *>(this), _1));
+                    static_cast<MaterialChunkOverrideGroup *>(this), ::boost::placeholders::_1));
 
     editSField(MaterialFieldMask);
 

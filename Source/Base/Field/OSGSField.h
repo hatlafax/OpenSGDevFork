@@ -180,6 +180,23 @@ class SField : public Field
     const SField &operator =(const SField &source);
 
     /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name                 FieldDesc creation                           */
+    /*! \{                                                                 */
+    
+    static FieldDescriptionBase *
+        createFieldDescription   (const Char8                *szFieldname,
+                                        UInt32                uiFieldFlags,
+                                        FieldEditMethod       fEditMethod,
+                                        FieldGetMethod        fGetMethod  );
+
+    static FieldDescriptionBase *
+        createIdxFieldDescription(const Char8                *szFieldname,
+                                        UInt32                uiFieldFlags,
+                                        FieldIndexEditMethod  fEditMethod,
+                                        FieldIndexGetMethod   fGetMethod  );
+    
+    /*! \}                                                                 */
     /*=========================  PROTECTED  ===============================*/
 
   protected:
@@ -203,18 +220,6 @@ class SField : public Field
 #if defined(OSG_TMPL_STATIC_MEMBER_NEEDS_HELPER_FCT)
     const FieldType &fieldTypeExportHelper(void);
 #endif
-
-    static FieldDescriptionBase *
-        createFieldDescription   (const Char8                *szFieldname,
-                                        UInt32                uiFieldFlags,
-                                        FieldEditMethod       fEditMethod,
-                                        FieldGetMethod        fGetMethod  );
-
-    static FieldDescriptionBase *
-        createIdxFieldDescription(const Char8                *szFieldname,
-                                        UInt32                uiFieldFlags,
-                                        FieldIndexEditMethod  fEditMethod,
-                                        FieldIndexGetMethod   fGetMethod  );
 
     /*! \}                                                                 */
     /*==========================  PRIVATE  ================================*/

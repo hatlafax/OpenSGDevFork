@@ -177,17 +177,6 @@ class MemObjPointerSField :
     const Self &operator = (const Self &source);
     
     /*! \}                                                                 */
-    /*=========================  PROTECTED  ===============================*/
-
-  protected:
-
-    /*---------------------------------------------------------------------*/
-    /*! \name Members                                                      */
-    /*! \{                                                                 */
-    
-    static FieldType _fieldType;
-    
-    /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name FieldDesc creation                                           */
     /*! \{                                                                 */
@@ -204,6 +193,17 @@ class MemObjPointerSField :
                                         FieldIndexEditMethod  fEditMethod,
                                         FieldIndexGetMethod   fGetMethod  );
 
+    /*! \}                                                                 */
+    /*=========================  PROTECTED  ===============================*/
+
+  protected:
+
+    /*---------------------------------------------------------------------*/
+    /*! \name Members                                                      */
+    /*! \{                                                                 */
+    
+    static FieldType _fieldType;
+    
     /*! \}                                                                 */
     /*==========================  PRIVATE  ================================*/
 

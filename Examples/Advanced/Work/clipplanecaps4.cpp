@@ -491,7 +491,7 @@ void ClippingSceneManager::updateShader(OSG::ShaderProgram* shader)
         OSG::MFVec4f clipplanes;
         OSG::MFInt32 clipstate;
 
-        for (int i = 0;  i < 8; ++i)
+        for (std::size_t i = 0;  i < 8; ++i)
         {
             if (i < sz)
             {
@@ -1393,8 +1393,8 @@ int doMain(int argc, char **argv)
     // and the clipplane extension
     mgr = ClippingSceneManager::create(simple_mgr);
 
-    OSG::ShaderProgramFunctor   initFunctor = boost::bind(&ClippingSceneManager::initShader, mgr,  _1);
-    OSG::ShaderProgramFunctor updateFunctor = boost::bind(&ClippingSceneManager::updateShader, mgr, _1);
+    OSG::ShaderProgramFunctor   initFunctor = boost::bind(&ClippingSceneManager::initShader, mgr, ::boost::placeholders::_1);
+    OSG::ShaderProgramFunctor updateFunctor = boost::bind(&ClippingSceneManager::updateShader, mgr, ::boost::placeholders::_1);
         
     // create the DescMaterialManager
     materialManager = OSG::DescMaterialManager::createDefault(initFunctor, "", updateFunctor, "");

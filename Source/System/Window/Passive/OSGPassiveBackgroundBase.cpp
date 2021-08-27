@@ -67,7 +67,7 @@
 #include "OSGPassiveBackgroundBase.h"
 #include "OSGPassiveBackground.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -747,7 +747,7 @@ EditFieldHandlePtr PassiveBackgroundBase::editHandleMediator       (void)
 
     returnValue->setSetMethod(
         boost::bind(&PassiveBackground::setMediator,
-                    static_cast<PassiveBackground *>(this), _1));
+                    static_cast<PassiveBackground *>(this), ::boost::placeholders::_1));
 
     editSField(MediatorFieldMask);
 

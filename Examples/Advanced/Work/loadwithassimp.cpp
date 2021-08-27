@@ -1582,8 +1582,8 @@ int main(int argc, char **argv)
         //materialMan->setMaterialFactory(factory);
         //
 
-        OSG::ShaderProgramFunctor   initFunctor = boost::bind(::initShader,   _1);
-        OSG::ShaderProgramFunctor updateFunctor = boost::bind(::updateShader, _1);
+        OSG::ShaderProgramFunctor   initFunctor = boost::bind(::initShader, ::boost::placeholders::_1);
+        OSG::ShaderProgramFunctor updateFunctor = boost::bind(::updateShader, ::boost::placeholders::_1);
 
         materialMan = OSG::DescMaterialManager::createDefault(initFunctor, "", updateFunctor, "");
 

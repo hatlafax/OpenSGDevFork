@@ -376,7 +376,7 @@ const TextVectorGlyph::PolygonOutline &TextVectorGlyph::getLines(UInt32 level) c
             coords[0] = newOutline.coords[coordIndex].x();
             coords[1] = newOutline.coords[coordIndex].y();
             coords[2] = 0.f;
-            gluTessVertex(tess, coords, reinterpret_cast<void*>(coordIndex++));
+            gluTessVertex(tess, coords, reinterpret_cast<void*>(static_cast<UInt64>(coordIndex++)));
         }
 
         // end of contour

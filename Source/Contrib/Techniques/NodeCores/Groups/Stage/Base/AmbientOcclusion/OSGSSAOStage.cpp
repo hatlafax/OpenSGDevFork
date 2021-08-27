@@ -469,7 +469,7 @@ Action::ResultE SSAOStage::renderEnter(Action* action)
 
             RenderPartition::SimpleDrawCallback f;
 
-            f = boost::bind(&SSAOStage::postProcess, this, _1);
+            f = boost::bind(&SSAOStage::postProcess, this, ::boost::placeholders::_1);
 
             pPart->dropFunctor(f);
         }

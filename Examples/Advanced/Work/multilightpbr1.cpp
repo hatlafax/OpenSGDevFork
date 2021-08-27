@@ -652,7 +652,7 @@ void Example::initialize(int argc, char *argv[])
     gwin->init();
 
     // create a callback for AntTweakBar drawing
-    OSG::RenderFunctor functor = boost::bind(&Example::tweakbar, this, _1);
+    OSG::RenderFunctor functor = boost::bind(&Example::tweakbar, this, ::boost::placeholders::_1);
 
     OSG::CallbackAlgorithmRefPtr cbAlgorithm = OSG::CallbackAlgorithm::create();
     cbAlgorithm->setCallback(functor, "");
@@ -3736,7 +3736,7 @@ void Example::SetSkyBgndIndex(int value)
 
         if (_skyBgnd_index < 0)
             _mgr->setBackground(_solidBgnd);
-        else if (_skyBgnd_index < _vecSkyBgnd.size())
+        else if (_skyBgnd_index < static_cast<int>(_vecSkyBgnd.size()))
             _mgr->setBackground(_vecSkyBgnd[_skyBgnd_index].second);
 
         glutPostRedisplay();
@@ -5404,7 +5404,7 @@ void Example::setupTweakBar()
     val.Label = "No SkyBox";
     skyBoxeEnums.push_back(val);
     
-    for (int i = 0; i < _vecSkyBgnd.size(); ++i)
+    for (int i = 0; i < static_cast<int>(_vecSkyBgnd.size()); ++i)
     {
         TwEnumVal val;
         val.Value = i;

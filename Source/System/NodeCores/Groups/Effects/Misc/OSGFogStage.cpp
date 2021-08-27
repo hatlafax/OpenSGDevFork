@@ -562,7 +562,7 @@ Action::ResultE FogStage::renderEnter(Action *action)
                 
             RenderPartition::SimpleDrawCallback f;
                 
-            f = boost::bind(&FogStage::postProcess, this, _1);
+            f = boost::bind(&FogStage::postProcess, this, ::boost::placeholders::_1);
                 
             pPart->dropFunctor(f);
         }

@@ -68,7 +68,7 @@
 #include "OSGSkinningAlgorithmBase.h"
 #include "OSGSkinningAlgorithm.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -474,7 +474,7 @@ EditFieldHandlePtr SkinningAlgorithmBase::editHandleSkeleton       (void)
 
     returnValue->setSetMethod(
         boost::bind(&SkinningAlgorithm::setSkeleton,
-                    static_cast<SkinningAlgorithm *>(this), _1));
+                    static_cast<SkinningAlgorithm *>(this), ::boost::placeholders::_1));
 
     editSField(SkeletonFieldMask);
 

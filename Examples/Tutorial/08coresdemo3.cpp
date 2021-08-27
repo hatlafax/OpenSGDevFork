@@ -170,10 +170,10 @@ OSG::NodeTransitPtr createScenegraph(void)
     // generating a material *********************************
     
     OSG::SimpleMaterialRecPtr mat = OSG::SimpleMaterial::create();
-    mat->setAmbient(OSG::Color3f(0.2,0.2,0.2));
-    mat->setDiffuse(OSG::Color3f(0.6,0.3,0.1));
-    mat->setSpecular(OSG::Color3f(1,1,1));
-    mat->setShininess(0.8);
+    mat->setAmbient (OSG::Color3f(0.2f, 0.2f, 0.2f));
+    mat->setDiffuse (OSG::Color3f(0.6f, 0.3f, 0.1f));
+    mat->setSpecular(OSG::Color3f(1.0f, 1.0f, 1.0f));
+    mat->setShininess(0.8f);
     
     geo->setMaterial(mat);
     
@@ -189,7 +189,7 @@ OSG::NodeTransitPtr createScenegraph(void)
     TransformRecPtr t          = Transform::create();
     Matrix m;
     m.setIdentity();
-    m.setTranslate(Vec3f(0,0,200));
+    m.setTranslate(Vec3f(0.0f, 0.0f, 200.f));
     t->setMatrix(m);
 
     womanTrans->setCore(t);

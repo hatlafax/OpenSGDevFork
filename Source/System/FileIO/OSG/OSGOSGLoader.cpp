@@ -920,7 +920,7 @@ void OSGLoader::addRoute(const Char8  *szOutNodename,
         pSrcNode = resolveFieldPath(szOutNodename, 
                                     boost::bind(&OSGLoader::getReference,
                                                 this,
-                                                _1));
+                                                ::boost::placeholders::_1));
     }
 
     AttachmentContainer *pSrc = dynamic_cast<AttachmentContainer *>(pSrcNode);
@@ -936,7 +936,7 @@ void OSGLoader::addRoute(const Char8  *szOutNodename,
         pDstNode = resolveFieldPath(szInNodename, 
                                     boost::bind(&OSGLoader::getReference,
                                                 this,
-                                                _1));
+                                                ::boost::placeholders::_1));
     }
 
     if(pDstNode == NULL)

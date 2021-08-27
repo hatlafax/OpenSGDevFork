@@ -245,7 +245,7 @@ void keyboard(unsigned char k, int x, int y)
         
         counter c;
         
-        traverse(scene, boost::bind(&counter::enter, &c, _1));
+        traverse(scene, boost::bind(&counter::enter, &c, ::boost::placeholders::_1));
                 
         std::cout << "Number of nodes before splitting: " << c.getCount()
                   << std::endl;
@@ -258,7 +258,7 @@ void keyboard(unsigned char k, int x, int y)
         
         c.reset();
         
-        traverse(scene, boost::bind(&counter::enter, &c, _1));
+        traverse(scene, boost::bind(&counter::enter, &c, ::boost::placeholders::_1));
         
         std::cout << "Number of nodes after splitting: " << c.getCount()
                   << std::endl;

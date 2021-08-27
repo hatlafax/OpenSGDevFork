@@ -443,12 +443,18 @@ FUNCTION(OSG_STORE_PROJECT_DEPENDENCIES)
             # split that into library name and path
 
             IF(TARGET ${LIB})
+                GET_TARGET_PROPERTY(_TTYPE ${LIB} TYPE)
+
+                IF(NOT _TTYPE STREQUAL "INTERFACE_LIBRARY")
                 GET_TARGET_PROPERTY(_LIB_LOCATION ${LIB} IMPORTED_LOCATION)
 
                 OSG_EXTRACT_LIB_AND_LIBDIR("${_LIB_LOCATION}" _LIBS _LIBDIRS)
 
                 LIST(APPEND DEPLIBS    ${_LIBS})
                 LIST(APPEND DEPLIBDIRS ${_LIBDIRS})
+                ELSE()
+                  LIST(APPEND DEPLIBS ${LIB})
+                ENDIF()
             ELSE(TARGET ${LIB})
                 LIST(APPEND DEPLIBS ${LIB})
             ENDIF(TARGET ${LIB})
@@ -1623,7 +1629,7 @@ FUNCTION(OSG_SETUP_TEST_BUILD)
         INCLUDE_DIRECTORIES(${${INCDIR}})
     ENDFOREACH(INCDIR)
 
-    FOREACH(INCDIR ${${PROJECT_NAME}_DEP_SYS_TEST_INCDIR})
+    FOREACH(INCDIR ${${PROJECT_NAME}_DEP_TEST_SYS_INCDIR})
         OSG_MSG("  (test external sys) - include dir ${INCDIR} = ${${INCDIR}}")
         IF(DEFINED ${INCDIR})
           INCLUDE_DIRECTORIES(SYSTEM ${${INCDIR}})

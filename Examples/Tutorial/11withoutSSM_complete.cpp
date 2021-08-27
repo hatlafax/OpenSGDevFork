@@ -93,9 +93,9 @@ OSG::NodeTransitPtr createScenegraph(void)
     dLight->setDirection(OSG::Vec3f(0,1,2));
     
     //color information
-    dLight->setDiffuse(OSG::Color4f(1,1,1,1));
-    dLight->setAmbient(OSG::Color4f(0.2,0.2,0.2,1));
-    dLight->setSpecular(OSG::Color4f(1,1,1,1));
+    dLight->setDiffuse (OSG::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
+    dLight->setAmbient (OSG::Color4f(0.2f, 0.2f, 0.2f, 1.0f));
+    dLight->setSpecular(OSG::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     
     //set the beacon
     dLight->setBeacon(lightBeacon);
@@ -134,12 +134,12 @@ int main(int argc, char **argv)
         
         leftCamera->setBeacon(leftCamBeacon);
         leftCamera->setFov(OSG::osgDegree2Rad(90));
-        leftCamera->setNear(0.1);
+        leftCamera->setNear(0.1f);
         leftCamera->setFar(100);
         
         rightCamera->setBeacon(rightCamBeacon);
         rightCamera->setFov(OSG::osgDegree2Rad(90));
-        rightCamera->setNear(0.1);
+        rightCamera->setNear(0.1f);
         rightCamera->setFar(100);
         
         //next we create the backgrounds
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
             OSG::TextureBackground::create();
 
         rightBkg->setTexture(bkgTex);
-        rightBkg->setColor(OSG::Color4f(0.8, 0.8, 0.8, 1.0));
+        rightBkg->setColor(OSG::Color4f(0.8f, 0.8f, 0.8f, 1.0f));
         
         //now the viewports
         
@@ -190,7 +190,7 @@ int main(int argc, char **argv)
         OSG::ImageForegroundRecPtr imgFrg = OSG::ImageForeground::create();
         //NOTE: the position values are between 0 and 1
         //and are relative to the viewport!
-        imgFrg->addImage(frgImage, OSG::Pnt2f(0.1,0));
+        imgFrg->addImage(frgImage, OSG::Pnt2f(0.1f, 0.0f));
         
         //add the created foreground by appending it to
         //the vieports foreground multifield

@@ -35,8 +35,13 @@ ENDIF(ZLIB_LIBRARY_RELEASE)
 # handle the QUIETLY and REQUIRED arguments and set ZLIB_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB DEFAULT_MSG 
-                                       ZLIB_LIBRARIES_FOUND 
-                                       ZLIB_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB_OpenSG DEFAULT_MSG 
+                                  ZLIB_LIBRARIES_FOUND 
+                                  ZLIB_INCLUDE_DIR)
+IF(ZLIB_OpenSG_FOUND)
+  SET(ZLIB_FOUND TRUE)
+ELSE()
+  SET(ZLIB_FOUND FALSE)
+ENDIF()
 
 MARK_AS_ADVANCED(ZLIB_LIBRARIES_FOUND ZLIB_INCLUDE_DIR)

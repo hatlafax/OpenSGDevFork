@@ -23,12 +23,12 @@ int setupGLUT(int *argc, char *argv[]);
 OSG::NodeTransitPtr createScenegraph(void)
 {
     OSG::SimpleMaterialRecPtr simpleMaterial = OSG::SimpleMaterial::create();
-    simpleMaterial->setDiffuse(OSG::Color3f(1,0,0));
-    simpleMaterial->setAmbient(OSG::Color3f(0.2, 0.2, 0.2));
+    simpleMaterial->setDiffuse(OSG::Color3f(1.0f, 0.0f, 0.0f));
+    simpleMaterial->setAmbient(OSG::Color3f(0.2f, 0.2f, 0.2f));
     simpleMaterial->setTransparency(0.5);
     
     OSG::NodeRecPtr simpleMaterialNode = OSG::Node::create();
-    OSG::NodeRecPtr sphere = OSG::makeSphere(2,6);
+    OSG::NodeRecPtr sphere = OSG::makeSphere(2, 6.f);
     
     OSG::MaterialGroupRecPtr mg = OSG::MaterialGroup::create();
     mg->setMaterial(simpleMaterial);

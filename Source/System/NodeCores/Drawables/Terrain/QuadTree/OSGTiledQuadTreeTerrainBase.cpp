@@ -68,7 +68,7 @@
 #include "OSGTiledQuadTreeTerrainBase.h"
 #include "OSGTiledQuadTreeTerrain.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1253,13 +1253,13 @@ EditFieldHandlePtr TiledQuadTreeTerrainBase::editHandleHeightTiles    (void)
 
     returnValue->setAddMethod(
         boost::bind(&TiledQuadTreeTerrain::pushToHeightTiles,
-                    static_cast<TiledQuadTreeTerrain *>(this), _1));
+                    static_cast<TiledQuadTreeTerrain *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&TiledQuadTreeTerrain::removeFromHeightTiles,
-                    static_cast<TiledQuadTreeTerrain *>(this), _1));
+                    static_cast<TiledQuadTreeTerrain *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&TiledQuadTreeTerrain::removeObjFromHeightTiles,
-                    static_cast<TiledQuadTreeTerrain *>(this), _1));
+                    static_cast<TiledQuadTreeTerrain *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&TiledQuadTreeTerrain::clearHeightTiles,
                     static_cast<TiledQuadTreeTerrain *>(this)));
@@ -1290,13 +1290,13 @@ EditFieldHandlePtr TiledQuadTreeTerrainBase::editHandleHeightTextures (void)
 
     returnValue->setAddMethod(
         boost::bind(&TiledQuadTreeTerrain::pushToHeightTextures,
-                    static_cast<TiledQuadTreeTerrain *>(this), _1));
+                    static_cast<TiledQuadTreeTerrain *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&TiledQuadTreeTerrain::removeFromHeightTextures,
-                    static_cast<TiledQuadTreeTerrain *>(this), _1));
+                    static_cast<TiledQuadTreeTerrain *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&TiledQuadTreeTerrain::removeObjFromHeightTextures,
-                    static_cast<TiledQuadTreeTerrain *>(this), _1));
+                    static_cast<TiledQuadTreeTerrain *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&TiledQuadTreeTerrain::clearHeightTextures,
                     static_cast<TiledQuadTreeTerrain *>(this)));

@@ -14,7 +14,7 @@
 #include "OSGSceneFileHandler.h"
 #include "OSGFieldContainerFactory.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>

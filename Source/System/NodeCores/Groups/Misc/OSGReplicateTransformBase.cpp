@@ -67,7 +67,7 @@
 #include "OSGReplicateTransformBase.h"
 #include "OSGReplicateTransform.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -442,7 +442,7 @@ EditFieldHandlePtr ReplicateTransformBase::editHandleTarget         (void)
 
     returnValue->setSetMethod(
         boost::bind(&ReplicateTransform::setTarget,
-                    static_cast<ReplicateTransform *>(this), _1));
+                    static_cast<ReplicateTransform *>(this), ::boost::placeholders::_1));
 
     editSField(TargetFieldMask);
 

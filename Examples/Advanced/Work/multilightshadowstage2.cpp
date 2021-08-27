@@ -624,7 +624,7 @@ void Example::initialize(int argc, char *argv[])
     gwin->init();
 
     // create a callback for AntTweakBar drawing
-    OSG::RenderFunctor functor = boost::bind(&Example::tweakbar, this, _1);
+    OSG::RenderFunctor functor = boost::bind(&Example::tweakbar, this, ::boost::placeholders::_1);
 
     OSG::CallbackAlgorithmRefPtr cbAlgorithm = OSG::CallbackAlgorithm::create();
     cbAlgorithm->setCallback(functor, "");
@@ -1483,8 +1483,8 @@ void Example::disable_ssao_stage()
 
 void Example::createMaterialManager()
 {
-    OSG::ShaderProgramFunctor   initFunctor = boost::bind(&Example::initShader,   this, _1);
-    OSG::ShaderProgramFunctor updateFunctor = boost::bind(&Example::updateShader, this, _1);
+    OSG::ShaderProgramFunctor   initFunctor = boost::bind(&Example::initShader,   this, ::boost::placeholders::_1);
+    OSG::ShaderProgramFunctor updateFunctor = boost::bind(&Example::updateShader, this, ::boost::placeholders::_1);
 
     _materialManager = OSG::DescMaterialManager::createDefault(initFunctor, "", updateFunctor, "");
     _materialManager->setWindow(_mgr->getWindow());

@@ -66,7 +66,7 @@
 #include "OSGGeoIntegralBufferPropertyBase.h"
 #include "OSGGeoIntegralBufferProperty.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 

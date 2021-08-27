@@ -68,7 +68,7 @@
 #include "OSGCubeMapGeneratorStageDataBase.h"
 #include "OSGCubeMapGeneratorStageData.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -473,7 +473,7 @@ EditFieldHandlePtr CubeMapGeneratorStageDataBase::editHandleCamera         (void
 
     returnValue->setSetMethod(
         boost::bind(&CubeMapGeneratorStageData::setCamera,
-                    static_cast<CubeMapGeneratorStageData *>(this), _1));
+                    static_cast<CubeMapGeneratorStageData *>(this), ::boost::placeholders::_1));
 
     editSField(CameraFieldMask);
 
@@ -501,7 +501,7 @@ EditFieldHandlePtr CubeMapGeneratorStageDataBase::editHandleTexTransform   (void
 
     returnValue->setSetMethod(
         boost::bind(&CubeMapGeneratorStageData::setTexTransform,
-                    static_cast<CubeMapGeneratorStageData *>(this), _1));
+                    static_cast<CubeMapGeneratorStageData *>(this), ::boost::placeholders::_1));
 
     editSField(TexTransformFieldMask);
 

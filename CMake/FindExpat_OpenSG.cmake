@@ -28,8 +28,14 @@ ENDIF(EXPAT_LIBRARY_RELEASE)
 # handle the QUIETLY and REQUIRED arguments and set EXPAT_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(EXPAT DEFAULT_MSG  
-                                  EXPAT_LIBRARIES_FOUND  EXPAT_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Expat_OpenSG DEFAULT_MSG  
+                                  EXPAT_LIBRARIES_FOUND
+                                  EXPAT_INCLUDE_DIR)
+IF(Expat_OpenSG_FOUND)
+  SET(EXPAT_FOUND TRUE)
+ELSE()
+  SET(EXPAT_FOUND FALSE)
+ENDIF()
 
 #IF(TIFF_FOUND)
 #  SET( TIFF_LIBRARIES ${TIFF_LIBRARY} )

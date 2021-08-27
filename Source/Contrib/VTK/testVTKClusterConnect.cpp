@@ -46,7 +46,7 @@
 #include "vtkStructuredGridGeometryFilter.h"
 #include "vtkPointSource.h"
 #include "vtkRungeKutta4.h"
-#include "vtkStreamLine.h"
+#include "vtkStreamTracer.h"
 #include "vtkTubeFilter.h"
 #include "vtkPolyDataNormals.h"
 
@@ -141,17 +141,18 @@ OSG::NodeTransitPtr initVTK(void)
     seeds->SetNumberOfPoints(6);
 
     vtkRungeKutta4 *integ = vtkRungeKutta4::New();
-    vtkStreamLine *streamer = vtkStreamLine::New();
+    vtkStreamTracer*streamer = vtkStreamTracer::New();
     streamer->SetInputConnection(reader->GetOutputPort());
 #if VTK_MAJOR_VERSION >= 6
     streamer->SetSourceData(seeds->GetOutput());
 #else
     streamer->SetSource(seeds->GetOutput());
 #endif
-    streamer->SetMaximumPropagationTime(500);
-    streamer->SetStepLength(0.5);
-    streamer->SetIntegrationStepLength(0.05);
-    streamer->SetIntegrationDirectionToIntegrateBothDirections();
+    streamer->SetMaximumPropagation(500);
+    streamer->SetInitialIntegrationStep(0.5);
+    streamer->SetMinimumIntegrationStep(0.05);
+
+    streamer->SetIntegrationDirectionToBoth();
     streamer->SetIntegrator(integ);
 
     // The tube is wrapped around the generated streamline. By varying the
@@ -724,7 +725,7 @@ void display(void)
         }
     }
     
-    catch(OSG_STDEXCEPTION_NAMESPACE::exception &e)
+    catch(OSG_STDEXCEPTION_NAMESPACE::exception&)
     {
         //printf("error: '%s'\n", e.what());
         printf("ClusterServer was killed!\n");

@@ -67,7 +67,7 @@
 #include "OSGAnimQuaternionChannelBase.h"
 #include "OSGAnimQuaternionChannel.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -492,7 +492,7 @@ EditFieldHandlePtr AnimQuaternionChannelBase::editHandleData           (void)
 
     returnValue->setSetMethod(
         boost::bind(&AnimQuaternionChannel::setData,
-                    static_cast<AnimQuaternionChannel *>(this), _1));
+                    static_cast<AnimQuaternionChannel *>(this), ::boost::placeholders::_1));
 
     editSField(DataFieldMask);
 

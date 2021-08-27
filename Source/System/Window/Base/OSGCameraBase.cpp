@@ -67,7 +67,7 @@
 #include "OSGCameraBase.h"
 #include "OSGCamera.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -424,7 +424,7 @@ EditFieldHandlePtr CameraBase::editHandleBeacon         (void)
 
     returnValue->setSetMethod(
         boost::bind(&Camera::setBeacon,
-                    static_cast<Camera *>(this), _1));
+                    static_cast<Camera *>(this), ::boost::placeholders::_1));
 
     editSField(BeaconFieldMask);
 

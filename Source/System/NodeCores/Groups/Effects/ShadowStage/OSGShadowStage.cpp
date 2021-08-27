@@ -90,7 +90,7 @@
 #endif
 
 #include "OSGRenderAction.h"
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include "OSGTextureBuffer.h"
 
 //--------------------------------------------------------------------
@@ -541,7 +541,7 @@ Action::ResultE ShadowStage::renderEnter(Action *action)
                      boost::bind(&ShadowStage::findTransparent,
                                   this, 
                                   pData,
-                                 _1) );
+                                 ::boost::placeholders::_1) );
         }
 
         //check if excludeNodes are disabled
@@ -750,7 +750,7 @@ void ShadowStage::checkLights(RenderActionBase *action,
                  boost::bind(&ShadowStage::findLight,
                              this, 
                              pData,
-                             _1));
+                             ::boost::placeholders::_1));
     }
     else
     {

@@ -68,7 +68,7 @@
 #include "OSGDescMaterialManagerBase.h"
 #include "OSGDescMaterialManager.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -705,7 +705,7 @@ EditFieldHandlePtr DescMaterialManagerBase::editHandleMaterialFactory(void)
 
     returnValue->setSetMethod(
         boost::bind(&DescMaterialManager::setMaterialFactory,
-                    static_cast<DescMaterialManager *>(this), _1));
+                    static_cast<DescMaterialManager *>(this), ::boost::placeholders::_1));
 
     editSField(MaterialFactoryFieldMask);
 
@@ -733,7 +733,7 @@ EditFieldHandlePtr DescMaterialManagerBase::editHandleMaterialMap    (void)
 
     returnValue->setSetMethod(
         boost::bind(&DescMaterialManager::setMaterialMap,
-                    static_cast<DescMaterialManager *>(this), _1));
+                    static_cast<DescMaterialManager *>(this), ::boost::placeholders::_1));
 
     editSField(MaterialMapFieldMask);
 
@@ -761,7 +761,7 @@ EditFieldHandlePtr DescMaterialManagerBase::editHandleImageMap       (void)
 
     returnValue->setSetMethod(
         boost::bind(&DescMaterialManager::setImageMap,
-                    static_cast<DescMaterialManager *>(this), _1));
+                    static_cast<DescMaterialManager *>(this), ::boost::placeholders::_1));
 
     editSField(ImageMapFieldMask);
 

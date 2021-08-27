@@ -67,7 +67,7 @@
 #include "OSGCubeTextureObjChunkBase.h"
 #include "OSGCubeTextureObjChunk.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -744,7 +744,7 @@ EditFieldHandlePtr CubeTextureObjChunkBase::editHandlePosZImage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CubeTextureObjChunk::setPosZImage,
-                    static_cast<CubeTextureObjChunk *>(this), _1));
+                    static_cast<CubeTextureObjChunk *>(this), ::boost::placeholders::_1));
 
     editSField(PosZImageFieldMask);
 
@@ -772,7 +772,7 @@ EditFieldHandlePtr CubeTextureObjChunkBase::editHandlePosXImage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CubeTextureObjChunk::setPosXImage,
-                    static_cast<CubeTextureObjChunk *>(this), _1));
+                    static_cast<CubeTextureObjChunk *>(this), ::boost::placeholders::_1));
 
     editSField(PosXImageFieldMask);
 
@@ -800,7 +800,7 @@ EditFieldHandlePtr CubeTextureObjChunkBase::editHandleNegXImage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CubeTextureObjChunk::setNegXImage,
-                    static_cast<CubeTextureObjChunk *>(this), _1));
+                    static_cast<CubeTextureObjChunk *>(this), ::boost::placeholders::_1));
 
     editSField(NegXImageFieldMask);
 
@@ -828,7 +828,7 @@ EditFieldHandlePtr CubeTextureObjChunkBase::editHandlePosYImage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CubeTextureObjChunk::setPosYImage,
-                    static_cast<CubeTextureObjChunk *>(this), _1));
+                    static_cast<CubeTextureObjChunk *>(this), ::boost::placeholders::_1));
 
     editSField(PosYImageFieldMask);
 
@@ -856,7 +856,7 @@ EditFieldHandlePtr CubeTextureObjChunkBase::editHandleNegYImage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CubeTextureObjChunk::setNegYImage,
-                    static_cast<CubeTextureObjChunk *>(this), _1));
+                    static_cast<CubeTextureObjChunk *>(this), ::boost::placeholders::_1));
 
     editSField(NegYImageFieldMask);
 

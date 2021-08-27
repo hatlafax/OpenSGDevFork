@@ -87,7 +87,7 @@ OSG::Node* find_node(OSG::Node* node, const OSG::FieldContainerType& type)
 {
     using namespace OSG;
     find_node_helper helper(&type);
-    traverse(node, boost::bind(&find_node_helper::enter_type, &helper, _1));
+    traverse(node, boost::bind(&find_node_helper::enter_type, &helper, ::boost::placeholders::_1));
     return helper.result();
 }
 
@@ -198,14 +198,14 @@ void manageDescMaterials(OSG::DescMaterialManager* mgr, OSG::Node* node)
 {
     using namespace OSG;
     manage_material_helper helper(mgr, false);
-    traverse(node, boost::bind(&manage_material_helper::enter, &helper, _1));
+    traverse(node, boost::bind(&manage_material_helper::enter, &helper, ::boost::placeholders::_1));
 }
 
 void updateDescMaterials(OSG::DescMaterialManager* mgr, OSG::Node* node)
 {
     using namespace OSG;
     manage_material_helper helper(mgr, true);
-    traverse(node, boost::bind(&manage_material_helper::enter, &helper, _1));
+    traverse(node, boost::bind(&manage_material_helper::enter, &helper, ::boost::placeholders::_1));
 }
 
 //
@@ -280,8 +280,8 @@ int main(int argc, char **argv)
 
         if (scene)
         {
-            OSG::ShaderProgramFunctor   initFunctor = boost::bind(::initShader,   _1);
-            OSG::ShaderProgramFunctor updateFunctor = boost::bind(::updateShader, _1);
+            OSG::ShaderProgramFunctor   initFunctor = boost::bind(::initShader, ::boost::placeholders::_1);
+            OSG::ShaderProgramFunctor updateFunctor = boost::bind(::updateShader, ::boost::placeholders::_1);
         
             // create the DescMaterialManager
             materialManager = OSG::DescMaterialManager::createDefault(initFunctor, "", updateFunctor, "");

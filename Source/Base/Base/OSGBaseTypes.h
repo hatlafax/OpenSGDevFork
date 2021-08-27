@@ -64,9 +64,9 @@
 #include <cstdio>
 #include <cmath>
 
-#if defined(OSG_LINUX_TYPES)
+//#if defined(OSG_LINUX_TYPES)
 #    include <inttypes.h>
-#endif
+//#endif
 
 OSG_BEGIN_NAMESPACE
 
@@ -644,7 +644,7 @@ const Real32 TwoPi  = 2.f * Pi;
 /*! \ingroup GrpBaseBaseConstants
  */
 
-const Real64 PiHalf  = 1.570796326794896619231322;
+const Real32 PiHalf  = 1.570796326794896619231322f;
 
 /*! \ingroup GrpBaseBaseConstants
  */
@@ -745,8 +745,8 @@ typedef PointerSize::IPtrSize  IntPointer;
 
 #ifndef PRISize
 # ifdef WIN32
-#  define PRISize "Id"
-#  define PRIUSize "Iu"
+#  define PRISize PRIdPTR
+#  define PRIUSize PRIuPTR
 # else
 #  define PRISize "zd"
 #  define PRIUSize "zu"
@@ -755,7 +755,7 @@ typedef PointerSize::IPtrSize  IntPointer;
 
 #ifndef PRIx64
 # ifdef WIN32
-#  define PRIx64 "llx"
+#  define PRIx64 PRIX64
 # else
 #  define PRIx64 "lx"
 # endif

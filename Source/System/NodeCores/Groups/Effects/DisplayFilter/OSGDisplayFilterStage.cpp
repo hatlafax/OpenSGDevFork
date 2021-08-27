@@ -496,12 +496,12 @@ Action::ResultE DisplayFilterStage::renderEnter(Action *action)
                 if(bDoDraw == true)
                 {
                     f = boost::bind(&DisplayFilterStage::processCalibActive, 
-                                    this, _1);
+                                    this, ::boost::placeholders::_1);
                 }
                 else
                 {
                     f = boost::bind(&DisplayFilterStage::processCalibInactive, 
-                                    this, _1);
+                                    this, ::boost::placeholders::_1);
                 }
 
                 pPart->dropFunctor(f);
@@ -544,7 +544,7 @@ Action::ResultE DisplayFilterStage::renderEnter(Action *action)
                 
             RenderPartition::SimpleDrawCallback f;
                 
-            f = boost::bind(&DisplayFilterStage::postProcess, this, _1);
+            f = boost::bind(&DisplayFilterStage::postProcess, this, ::boost::placeholders::_1);
                 
             pPart->dropFunctor(f);
         }

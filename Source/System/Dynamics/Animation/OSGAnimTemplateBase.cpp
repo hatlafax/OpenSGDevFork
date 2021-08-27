@@ -67,7 +67,7 @@
 #include "OSGAnimTemplateBase.h"
 #include "OSGAnimTemplate.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -506,13 +506,13 @@ EditFieldHandlePtr AnimTemplateBase::editHandleSources        (void)
 
     returnValue->setAddMethod(
         boost::bind(&AnimTemplate::pushToSources,
-                    static_cast<AnimTemplate *>(this), _1));
+                    static_cast<AnimTemplate *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&AnimTemplate::removeFromSources,
-                    static_cast<AnimTemplate *>(this), _1));
+                    static_cast<AnimTemplate *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&AnimTemplate::removeObjFromSources,
-                    static_cast<AnimTemplate *>(this), _1));
+                    static_cast<AnimTemplate *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&AnimTemplate::clearSources,
                     static_cast<AnimTemplate *>(this)));

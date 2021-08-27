@@ -72,7 +72,7 @@
 #include "OSGShadowStageBase.h"
 #include "OSGShadowStage.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -2019,13 +2019,13 @@ EditFieldHandlePtr ShadowStageBase::editHandleLightNodes     (void)
 
     returnValue->setAddMethod(
         boost::bind(&ShadowStage::pushToLightNodes,
-                    static_cast<ShadowStage *>(this), _1));
+                    static_cast<ShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ShadowStage::removeFromLightNodes,
-                    static_cast<ShadowStage *>(this), _1));
+                    static_cast<ShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&ShadowStage::removeObjFromLightNodes,
-                    static_cast<ShadowStage *>(this), _1));
+                    static_cast<ShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ShadowStage::clearLightNodes,
                     static_cast<ShadowStage *>(this)));
@@ -2056,13 +2056,13 @@ EditFieldHandlePtr ShadowStageBase::editHandleExcludeNodes   (void)
 
     returnValue->setAddMethod(
         boost::bind(&ShadowStage::pushToExcludeNodes,
-                    static_cast<ShadowStage *>(this), _1));
+                    static_cast<ShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ShadowStage::removeFromExcludeNodes,
-                    static_cast<ShadowStage *>(this), _1));
+                    static_cast<ShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&ShadowStage::removeObjFromExcludeNodes,
-                    static_cast<ShadowStage *>(this), _1));
+                    static_cast<ShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ShadowStage::clearExcludeNodes,
                     static_cast<ShadowStage *>(this)));

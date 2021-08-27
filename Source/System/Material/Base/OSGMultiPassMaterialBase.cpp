@@ -67,7 +67,7 @@
 #include "OSGMultiPassMaterialBase.h"
 #include "OSGMultiPassMaterial.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -493,13 +493,13 @@ EditFieldHandlePtr MultiPassMaterialBase::editHandleMaterials      (void)
 
     returnValue->setAddMethod(
         boost::bind(&MultiPassMaterial::addMaterial,
-                    static_cast<MultiPassMaterial *>(this), _1));
+                    static_cast<MultiPassMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&MultiPassMaterial::subMaterial,
-                    static_cast<MultiPassMaterial *>(this), _1));
+                    static_cast<MultiPassMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&MultiPassMaterial::subMaterialByObj,
-                    static_cast<MultiPassMaterial *>(this), _1));
+                    static_cast<MultiPassMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&MultiPassMaterial::clearMaterials,
                     static_cast<MultiPassMaterial *>(this)));

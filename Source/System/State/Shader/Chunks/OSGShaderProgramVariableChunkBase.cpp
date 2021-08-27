@@ -68,7 +68,7 @@
 #include "OSGShaderProgramVariableChunkBase.h"
 #include "OSGShaderProgramVariableChunk.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -527,7 +527,7 @@ EditFieldHandlePtr ShaderProgramVariableChunkBase::editHandleVariables      (voi
 
     returnValue->setSetMethod(
         boost::bind(&ShaderProgramVariableChunk::setVariables,
-                    static_cast<ShaderProgramVariableChunk *>(this), _1));
+                    static_cast<ShaderProgramVariableChunk *>(this), ::boost::placeholders::_1));
 
     editSField(VariablesFieldMask);
 

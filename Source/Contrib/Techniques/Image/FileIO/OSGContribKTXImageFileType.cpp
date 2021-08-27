@@ -237,7 +237,7 @@ bool ContribKTXImageFileType::read(      Image        *pImage,
 
                     char* p = static_cast<char*>(Texture.data(Layer, Face, Level));
 
-                    Int32 szLevel = Texture.size(Level);
+                    Int32 szLevel = static_cast<Int32>(Texture.size(Level));
                     sum += szLevel;
 
                     os << "  level        = " << Level << std::endl;

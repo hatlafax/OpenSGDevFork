@@ -66,7 +66,7 @@
 #include "OSGGPUVolRTV2Base.h"
 #include "OSGGPUVolRTV2.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 

@@ -68,7 +68,7 @@
 #include "OSGLightBase.h"
 #include "OSGLight.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -966,7 +966,7 @@ EditFieldHandlePtr LightBase::editHandleBeacon         (void)
 
     returnValue->setSetMethod(
         boost::bind(&Light::setBeacon,
-                    static_cast<Light *>(this), _1));
+                    static_cast<Light *>(this), ::boost::placeholders::_1));
 
     editSField(BeaconFieldMask);
 
@@ -1094,7 +1094,7 @@ EditFieldHandlePtr LightBase::editHandleLightEngine    (void)
 
     returnValue->setSetMethod(
         boost::bind(&Light::setLightEngine,
-                    static_cast<Light *>(this), _1));
+                    static_cast<Light *>(this), ::boost::placeholders::_1));
 
     editSField(LightEngineFieldMask);
 

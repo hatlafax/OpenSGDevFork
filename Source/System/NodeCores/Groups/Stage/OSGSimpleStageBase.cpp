@@ -69,7 +69,7 @@
 #include "OSGSimpleStageBase.h"
 #include "OSGSimpleStage.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -965,7 +965,7 @@ EditFieldHandlePtr SimpleStageBase::editHandleCamera         (void)
 
     returnValue->setSetMethod(
         boost::bind(&SimpleStage::setCamera,
-                    static_cast<SimpleStage *>(this), _1));
+                    static_cast<SimpleStage *>(this), ::boost::placeholders::_1));
 
     editSField(CameraFieldMask);
 
@@ -993,7 +993,7 @@ EditFieldHandlePtr SimpleStageBase::editHandleBackground     (void)
 
     returnValue->setSetMethod(
         boost::bind(&SimpleStage::setBackground,
-                    static_cast<SimpleStage *>(this), _1));
+                    static_cast<SimpleStage *>(this), ::boost::placeholders::_1));
 
     editSField(BackgroundFieldMask);
 
@@ -1021,13 +1021,13 @@ EditFieldHandlePtr SimpleStageBase::editHandleForegrounds    (void)
 
     returnValue->setAddMethod(
         boost::bind(&SimpleStage::pushToForegrounds,
-                    static_cast<SimpleStage *>(this), _1));
+                    static_cast<SimpleStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&SimpleStage::removeFromForegrounds,
-                    static_cast<SimpleStage *>(this), _1));
+                    static_cast<SimpleStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&SimpleStage::removeObjFromForegrounds,
-                    static_cast<SimpleStage *>(this), _1));
+                    static_cast<SimpleStage *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&SimpleStage::clearForegrounds,
                     static_cast<SimpleStage *>(this)));

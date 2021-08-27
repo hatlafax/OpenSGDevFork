@@ -72,7 +72,7 @@
 #include "OSGShaderShadowMapEngineDataBase.h"
 #include "OSGShaderShadowMapEngineData.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -920,13 +920,13 @@ EditFieldHandlePtr ShaderShadowMapEngineDataBase::editHandleRenderTargets  (void
 
     returnValue->setAddMethod(
         boost::bind(&ShaderShadowMapEngineData::pushToRenderTargets,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ShaderShadowMapEngineData::removeFromRenderTargets,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&ShaderShadowMapEngineData::removeObjFromRenderTargets,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ShaderShadowMapEngineData::clearRenderTargets,
                     static_cast<ShaderShadowMapEngineData *>(this)));
@@ -957,13 +957,13 @@ EditFieldHandlePtr ShaderShadowMapEngineDataBase::editHandleShadowTexBuffers(voi
 
     returnValue->setAddMethod(
         boost::bind(&ShaderShadowMapEngineData::pushToShadowTexBuffers,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ShaderShadowMapEngineData::removeFromShadowTexBuffers,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&ShaderShadowMapEngineData::removeObjFromShadowTexBuffers,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ShaderShadowMapEngineData::clearShadowTexBuffers,
                     static_cast<ShaderShadowMapEngineData *>(this)));
@@ -994,7 +994,7 @@ EditFieldHandlePtr ShaderShadowMapEngineDataBase::editHandleShadowTexChunk (void
 
     returnValue->setSetMethod(
         boost::bind(&ShaderShadowMapEngineData::setShadowTexChunk,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(ShadowTexChunkFieldMask);
 
@@ -1022,7 +1022,7 @@ EditFieldHandlePtr ShaderShadowMapEngineDataBase::editHandleShadowTexImage (void
 
     returnValue->setSetMethod(
         boost::bind(&ShaderShadowMapEngineData::setShadowTexImage,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(ShadowTexImageFieldMask);
 
@@ -1050,13 +1050,13 @@ EditFieldHandlePtr ShaderShadowMapEngineDataBase::editHandleLightPassMaterials(v
 
     returnValue->setAddMethod(
         boost::bind(&ShaderShadowMapEngineData::pushToLightPassMaterials,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ShaderShadowMapEngineData::removeFromLightPassMaterials,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&ShaderShadowMapEngineData::removeObjFromLightPassMaterials,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ShaderShadowMapEngineData::clearLightPassMaterials,
                     static_cast<ShaderShadowMapEngineData *>(this)));
@@ -1087,7 +1087,7 @@ EditFieldHandlePtr ShaderShadowMapEngineDataBase::editHandleBackground     (void
 
     returnValue->setSetMethod(
         boost::bind(&ShaderShadowMapEngineData::setBackground,
-                    static_cast<ShaderShadowMapEngineData *>(this), _1));
+                    static_cast<ShaderShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(BackgroundFieldMask);
 

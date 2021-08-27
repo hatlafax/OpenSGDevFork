@@ -786,7 +786,7 @@ void OSBCommonElement::preWriteAttachmentMapField(const UInt32 fieldId)
     sfMapField->traverse(
         boost::bind(&OSBCommonElement::handleAttachmentMapElementPreWrite,
                     this,
-                    _1));
+                    ::boost::placeholders::_1));
 }
 
 /*! Visits a map field (essentially an SF that contains a std::map
@@ -812,7 +812,7 @@ void OSBCommonElement::preWriteMapField(const UInt32 fieldId)
     sfMapField->traverse(
         boost::bind(&OSBCommonElement::handleMapElementPreWrite,
                     this,
-                    _1));
+                    ::boost::placeholders::_1));
 }
 
 /*! Visits the given container \a fc during preWrite and creates elements

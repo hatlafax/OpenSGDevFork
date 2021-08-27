@@ -69,7 +69,7 @@
 #include "OSGFogStageDataBase.h"
 #include "OSGFogStageData.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -680,7 +680,7 @@ EditFieldHandlePtr FogStageDataBase::editHandleFogMaterial    (void)
 
     returnValue->setSetMethod(
         boost::bind(&FogStageData::setFogMaterial,
-                    static_cast<FogStageData *>(this), _1));
+                    static_cast<FogStageData *>(this), ::boost::placeholders::_1));
 
     editSField(FogMaterialFieldMask);
 
@@ -758,7 +758,7 @@ EditFieldHandlePtr FogStageDataBase::editHandleRenderTarget   (void)
 
     returnValue->setSetMethod(
         boost::bind(&FogStageData::setRenderTarget,
-                    static_cast<FogStageData *>(this), _1));
+                    static_cast<FogStageData *>(this), ::boost::placeholders::_1));
 
     editSField(RenderTargetFieldMask);
 
@@ -786,7 +786,7 @@ EditFieldHandlePtr FogStageDataBase::editHandleCamera         (void)
 
     returnValue->setSetMethod(
         boost::bind(&FogStageData::setCamera,
-                    static_cast<FogStageData *>(this), _1));
+                    static_cast<FogStageData *>(this), ::boost::placeholders::_1));
 
     editSField(CameraFieldMask);
 

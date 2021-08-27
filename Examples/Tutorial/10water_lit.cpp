@@ -163,7 +163,7 @@ OSG::NodeTransitPtr createScenegraph(void)
     
     //color information
     pLight->setDiffuse(OSG::Color4f(1,1,1,1));
-    pLight->setAmbient(OSG::Color4f(0.2,0.2,0.2,1));
+    pLight->setAmbient(OSG::Color4f(0.2f,0.2f,0.2f,1));
     pLight->setSpecular(OSG::Color4f(1,1,1,1));
     
     //set the beacon

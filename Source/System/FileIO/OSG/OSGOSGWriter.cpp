@@ -47,7 +47,7 @@
 #include "OSGAttachment.h"
 #include "OSGNameAttachment.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_USING_NAMESPACE
 
@@ -232,7 +232,7 @@ void OSGWriter::visitField(GetFieldHandlePtr hF)
 
     if(sfMap != NULL && sfMap->isValid() == true)
     {
-        sfMap->traverse(boost::bind(&OSGWriter::visitContainer, this, _1));
+        sfMap->traverse(boost::bind(&OSGWriter::visitContainer, this, ::boost::placeholders::_1));
     }
     else
     {

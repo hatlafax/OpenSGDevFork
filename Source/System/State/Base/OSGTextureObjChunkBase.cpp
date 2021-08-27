@@ -77,7 +77,7 @@
 #include "OSGTextureObjChunkBase.h"
 #include "OSGTextureObjChunk.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -2031,7 +2031,7 @@ EditFieldHandlePtr TextureObjChunkBase::editHandleImage          (void)
 
     returnValue->setSetMethod(
         boost::bind(&TextureObjChunk::setImage,
-                    static_cast<TextureObjChunk *>(this), _1));
+                    static_cast<TextureObjChunk *>(this), ::boost::placeholders::_1));
 
     editSField(ImageFieldMask);
 

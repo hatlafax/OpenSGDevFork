@@ -67,7 +67,7 @@
 #include "OSGMultiLightGroupBase.h"
 #include "OSGMultiLightGroup.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -577,7 +577,7 @@ EditFieldHandlePtr MultiLightGroupBase::editHandleMultiLightChunk(void)
 
     returnValue->setSetMethod(
         boost::bind(&MultiLightGroup::setMultiLightChunk,
-                    static_cast<MultiLightGroup *>(this), _1));
+                    static_cast<MultiLightGroup *>(this), ::boost::placeholders::_1));
 
     editSField(MultiLightChunkFieldMask);
 

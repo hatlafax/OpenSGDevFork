@@ -267,10 +267,10 @@ class TemplateFiller:
         for part in varParts:
             if isinstance(context, list):
                 for elem in context:
-                    if elem.has_key(part):
+                    if part in elem:
                         value = elem[part];
                         break;
-            elif context.has_key(part):
+            elif part in context:
                 value = context[part];
             else:
                 value = context;

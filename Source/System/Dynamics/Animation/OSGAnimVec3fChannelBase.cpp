@@ -67,7 +67,7 @@
 #include "OSGAnimVec3fChannelBase.h"
 #include "OSGAnimVec3fChannel.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -493,7 +493,7 @@ EditFieldHandlePtr AnimVec3fChannelBase::editHandleData           (void)
 
     returnValue->setSetMethod(
         boost::bind(&AnimVec3fChannel::setData,
-                    static_cast<AnimVec3fChannel *>(this), _1));
+                    static_cast<AnimVec3fChannel *>(this), ::boost::placeholders::_1));
 
     editSField(DataFieldMask);
 

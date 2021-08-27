@@ -70,7 +70,7 @@
 #include "OSGSSAOStageDataBase.h"
 #include "OSGSSAOStageData.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1378,7 +1378,7 @@ EditFieldHandlePtr SSAOStageDataBase::editHandleScenePassRenderTarget(void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStageData::setScenePassRenderTarget,
-                    static_cast<SSAOStageData *>(this), _1));
+                    static_cast<SSAOStageData *>(this), ::boost::placeholders::_1));
 
     editSField(ScenePassRenderTargetFieldMask);
 
@@ -1406,7 +1406,7 @@ EditFieldHandlePtr SSAOStageDataBase::editHandleScenePassShader(void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStageData::setScenePassShader,
-                    static_cast<SSAOStageData *>(this), _1));
+                    static_cast<SSAOStageData *>(this), ::boost::placeholders::_1));
 
     editSField(ScenePassShaderFieldMask);
 
@@ -1434,7 +1434,7 @@ EditFieldHandlePtr SSAOStageDataBase::editHandleScenePassMaterial(void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStageData::setScenePassMaterial,
-                    static_cast<SSAOStageData *>(this), _1));
+                    static_cast<SSAOStageData *>(this), ::boost::placeholders::_1));
 
     editSField(ScenePassMaterialFieldMask);
 
@@ -1462,7 +1462,7 @@ EditFieldHandlePtr SSAOStageDataBase::editHandleSSAOPassRenderTarget(void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStageData::setSSAOPassRenderTarget,
-                    static_cast<SSAOStageData *>(this), _1));
+                    static_cast<SSAOStageData *>(this), ::boost::placeholders::_1));
 
     editSField(SSAOPassRenderTargetFieldMask);
 
@@ -1490,7 +1490,7 @@ EditFieldHandlePtr SSAOStageDataBase::editHandleSSAOPassShader (void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStageData::setSSAOPassShader,
-                    static_cast<SSAOStageData *>(this), _1));
+                    static_cast<SSAOStageData *>(this), ::boost::placeholders::_1));
 
     editSField(SSAOPassShaderFieldMask);
 
@@ -1518,7 +1518,7 @@ EditFieldHandlePtr SSAOStageDataBase::editHandleSSAOPassMaterial(void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStageData::setSSAOPassMaterial,
-                    static_cast<SSAOStageData *>(this), _1));
+                    static_cast<SSAOStageData *>(this), ::boost::placeholders::_1));
 
     editSField(SSAOPassMaterialFieldMask);
 
@@ -1546,7 +1546,7 @@ EditFieldHandlePtr SSAOStageDataBase::editHandleBlurPassRenderTarget(void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStageData::setBlurPassRenderTarget,
-                    static_cast<SSAOStageData *>(this), _1));
+                    static_cast<SSAOStageData *>(this), ::boost::placeholders::_1));
 
     editSField(BlurPassRenderTargetFieldMask);
 
@@ -1574,7 +1574,7 @@ EditFieldHandlePtr SSAOStageDataBase::editHandleBlurPassShader (void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStageData::setBlurPassShader,
-                    static_cast<SSAOStageData *>(this), _1));
+                    static_cast<SSAOStageData *>(this), ::boost::placeholders::_1));
 
     editSField(BlurPassShaderFieldMask);
 
@@ -1602,7 +1602,7 @@ EditFieldHandlePtr SSAOStageDataBase::editHandleBlurPassMaterial(void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStageData::setBlurPassMaterial,
-                    static_cast<SSAOStageData *>(this), _1));
+                    static_cast<SSAOStageData *>(this), ::boost::placeholders::_1));
 
     editSField(BlurPassMaterialFieldMask);
 
@@ -1630,7 +1630,7 @@ EditFieldHandlePtr SSAOStageDataBase::editHandleSharedMaterialChunk(void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStageData::setSharedMaterialChunk,
-                    static_cast<SSAOStageData *>(this), _1));
+                    static_cast<SSAOStageData *>(this), ::boost::placeholders::_1));
 
     editSField(SharedMaterialChunkFieldMask);
 

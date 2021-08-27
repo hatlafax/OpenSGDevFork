@@ -67,7 +67,7 @@
 #include "OSGCgFXTechniqueBase.h"
 #include "OSGCgFXTechnique.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -534,22 +534,22 @@ EditFieldHandlePtr CgFXTechniqueBase::editHandleRenderPassStates(void)
 
     returnValue->setAddMethod(
         boost::bind(&CgFXTechnique::addPassState,
-                    static_cast<CgFXTechnique *>(this), _1));
+                    static_cast<CgFXTechnique *>(this), ::boost::placeholders::_1));
     returnValue->setInsertMethod(
         boost::bind(&CgFXTechnique::insertPassState,
-                    static_cast<CgFXTechnique *>(this), _1, _2));
+                    static_cast<CgFXTechnique *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
     returnValue->setReplaceMethod(
         boost::bind(&CgFXTechnique::replacePassState,
-                    static_cast<CgFXTechnique *>(this), _1, _2));
+                    static_cast<CgFXTechnique *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
     returnValue->setReplaceObjMethod(
         boost::bind(&CgFXTechnique::replacePassStateByObj,
-                    static_cast<CgFXTechnique *>(this), _1, _2));
+                    static_cast<CgFXTechnique *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
     returnValue->setRemoveMethod(
         boost::bind(&CgFXTechnique::subPassState,
-                    static_cast<CgFXTechnique *>(this), _1));
+                    static_cast<CgFXTechnique *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&CgFXTechnique::subPassStateByObj,
-                    static_cast<CgFXTechnique *>(this), _1));
+                    static_cast<CgFXTechnique *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&CgFXTechnique::clearPassStates,
                     static_cast<CgFXTechnique *>(this)));

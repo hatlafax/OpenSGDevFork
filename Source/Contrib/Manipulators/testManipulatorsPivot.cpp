@@ -1,6 +1,6 @@
 // -*- Mode:C++ -*-
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/noncopyable.hpp>
 #include <cstdlib>
 #include <iostream>
@@ -230,7 +230,7 @@ namespace
             : rootN               (OSG::Node::create()),
               xformTranslationN   (OSG::Node::create()),
               pivotN              (OSG::Node::create()),
-              pivotGeoN           (OSG::makeSphere(2, 0.03)),
+              pivotGeoN           (OSG::makeSphere(2, 0.03f)),
               xformScaleN         (OSG::Node::create()),
               xformRotationN      (OSG::Node::create()),
               pivotInvN           (OSG::Node::create()),
@@ -335,13 +335,13 @@ namespace
         {
             if (!use_changed_functor_) {
                 xformTranslationN->getCore()->
-                    addChangedFunctor(boost::bind(&object_type::changed_cb, this, xformTranslationN, _1, _2, _3),
+                    addChangedFunctor(boost::bind(&object_type::changed_cb, this, xformTranslationN, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3),
                                       "xform_translation_changed_cb");
                 xformRotationN->getCore()->
-                    addChangedFunctor(boost::bind(&object_type::changed_cb, this, xformRotationN,    _1, _2, _3),
+                    addChangedFunctor(boost::bind(&object_type::changed_cb, this, xformRotationN, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3),
                                       "xform_rotation_changed_cb");
                 xformScaleN->getCore()->
-                    addChangedFunctor(boost::bind(&object_type::changed_cb, this, xformScaleN,       _1, _2, _3),
+                    addChangedFunctor(boost::bind(&object_type::changed_cb, this, xformScaleN, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3),
                                       "xform_scale_changed_cb");
             } else {
                 xformTranslationN->getCore()->clearChangedFunctors();

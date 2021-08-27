@@ -45,7 +45,7 @@
 
 #include "OSGAttachment.h"
 
-#include "boost/bind.hpp"
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -75,13 +75,13 @@ class SimpleAttachment : public Attachment
     
     typedef typename StoredFieldType::EditHandle       EditHandle;
     typedef typename StoredFieldType::EditHandlePtr    EditHandlePtr;
-    
-     /*=========================  PROTECTED  ===============================*/
-
-  protected:
 
     typedef Inherited::TypeObject TypeObject;
     typedef TypeObject::InitPhase InitPhase;
+
+     /*=========================  PROTECTED  ===============================*/
+
+  protected:
 
     /*! \nohierarchy */
     struct SFieldValFunctions

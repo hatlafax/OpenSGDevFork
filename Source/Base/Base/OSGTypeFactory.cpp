@@ -319,12 +319,6 @@ void TypeFactoryBase::writeTypeGraph(FILE *pOut)
 
     fprintf(pOut, "digraph OSGTypeGraph\n{\n");
 
-/* CHECK
-    for_each(_vTypeStore.begin(), 
-             _vTypeStore.end(),
-             bind1st(ptr_fun(writeTypeDot), pOut));
- */
-
     fprintf(pOut, "    rankdir=LR;\n");
     fprintf(pOut, "    size=\"120,200\";\n");
     fprintf(pOut, "    page=\"8.2677,11.69\";\n");

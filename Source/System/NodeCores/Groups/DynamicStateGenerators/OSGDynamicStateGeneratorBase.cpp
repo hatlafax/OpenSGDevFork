@@ -67,7 +67,7 @@
 #include "OSGDynamicStateGeneratorBase.h"
 #include "OSGDynamicStateGenerator.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -440,7 +440,7 @@ EditFieldHandlePtr DynamicStateGeneratorBase::editHandleRenderTarget   (void)
 
     returnValue->setSetMethod(
         boost::bind(&DynamicStateGenerator::setRenderTarget,
-                    static_cast<DynamicStateGenerator *>(this), _1));
+                    static_cast<DynamicStateGenerator *>(this), ::boost::placeholders::_1));
 
     editSField(RenderTargetFieldMask);
 

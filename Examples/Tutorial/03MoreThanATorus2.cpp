@@ -36,13 +36,13 @@ OSG::NodeTransitPtr createScenegraph(void)
     OSG::NodeRecPtr houseMain = OSG::makeBox(20,20,20,1,1,1);
     
     // now the roof
-    OSG::NodeRecPtr roof = OSG::makeBox(14.14, 14.14, 20, 1, 1, 1);
+    OSG::NodeRecPtr roof = OSG::makeBox(14.14f, 14.14f, 20.0f, 1, 1, 1);
     
     // we translate the roof to the correct position
     OSG::TransformRecPtr tRoof = OSG::Transform::create();
     m.setIdentity();
     m.setTranslate(0,10,0);
-    m.setRotate(OSG::Quaternion(OSG::Vec3f(0,0,1), 3.14159/4));
+    m.setRotate(OSG::Quaternion(OSG::Vec3f(0.f,0.f,1.f), 3.14159f/4.f));
     
     tRoof->setMatrix(m);
     

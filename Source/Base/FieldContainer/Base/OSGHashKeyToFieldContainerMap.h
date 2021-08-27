@@ -104,7 +104,7 @@ class OSG_BASE_DLLMAPPING HashKeyToFieldContainerMap : public HashKeyToFieldCont
 
   protected:
 
-    class value_compare : public std::binary_function<HashKeyValueUnrecPtr, HashKeyType, bool>
+    class value_compare
     {
     public:
         value_compare() {}

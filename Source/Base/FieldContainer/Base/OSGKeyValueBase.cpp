@@ -67,7 +67,7 @@
 #include "OSGKeyValueBase.h"
 #include "OSGKeyValue.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -510,7 +510,7 @@ EditFieldHandlePtr KeyValueBase::editHandleValue          (void)
 
     returnValue->setSetMethod(
         boost::bind(&KeyValue::setValue,
-                    static_cast<KeyValue *>(this), _1));
+                    static_cast<KeyValue *>(this), ::boost::placeholders::_1));
 
     editSField(ValueFieldMask);
 

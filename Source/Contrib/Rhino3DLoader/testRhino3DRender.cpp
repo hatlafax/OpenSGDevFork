@@ -178,9 +178,9 @@ int doMain(int argc, char **argv)
     // Background
     GradientBackgroundUnrecPtr gbkgnd = GradientBackground::create();
 
-    gbkgnd->addLine( Color3f(.7,.7,1.), 0.0 );
-    gbkgnd->addLine( Color3f(0, 0, 1), 0.5 );
-    gbkgnd->addLine( Color3f(0, 0, .2), 1.0 );
+    gbkgnd->addLine( Color3f(.7f, .7f, 1.f), 0.0f );
+    gbkgnd->addLine( Color3f(0.f, 0.f, 1.f), 0.5f );
+    gbkgnd->addLine( Color3f(0.f, 0.f, .2f), 1.0f );
     
     mgr->getWindow()->getPort(0)->setBackground(gbkgnd);
     

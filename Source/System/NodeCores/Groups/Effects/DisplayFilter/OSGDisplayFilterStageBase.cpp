@@ -72,7 +72,7 @@
 #include "OSGDisplayFilterStageBase.h"
 #include "OSGDisplayFilterStage.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1168,7 +1168,7 @@ EditFieldHandlePtr DisplayFilterStageBase::editHandleCalibrationPatternFilter(vo
 
     returnValue->setSetMethod(
         boost::bind(&DisplayFilterStage::setCalibrationPatternFilter,
-                    static_cast<DisplayFilterStage *>(this), _1));
+                    static_cast<DisplayFilterStage *>(this), ::boost::placeholders::_1));
 
     editSField(CalibrationPatternFilterFieldMask);
 
@@ -1196,7 +1196,7 @@ EditFieldHandlePtr DisplayFilterStageBase::editHandleResolutionFilter(void)
 
     returnValue->setSetMethod(
         boost::bind(&DisplayFilterStage::setResolutionFilter,
-                    static_cast<DisplayFilterStage *>(this), _1));
+                    static_cast<DisplayFilterStage *>(this), ::boost::placeholders::_1));
 
     editSField(ResolutionFilterFieldMask);
 
@@ -1224,7 +1224,7 @@ EditFieldHandlePtr DisplayFilterStageBase::editHandleColorFilter    (void)
 
     returnValue->setSetMethod(
         boost::bind(&DisplayFilterStage::setColorFilter,
-                    static_cast<DisplayFilterStage *>(this), _1));
+                    static_cast<DisplayFilterStage *>(this), ::boost::placeholders::_1));
 
     editSField(ColorFilterFieldMask);
 
@@ -1252,7 +1252,7 @@ EditFieldHandlePtr DisplayFilterStageBase::editHandleDistortionFilter(void)
 
     returnValue->setSetMethod(
         boost::bind(&DisplayFilterStage::setDistortionFilter,
-                    static_cast<DisplayFilterStage *>(this), _1));
+                    static_cast<DisplayFilterStage *>(this), ::boost::placeholders::_1));
 
     editSField(DistortionFilterFieldMask);
 
@@ -1280,13 +1280,13 @@ EditFieldHandlePtr DisplayFilterStageBase::editHandleFilterGroups   (void)
 
     returnValue->setAddMethod(
         boost::bind(&DisplayFilterStage::pushToFilterGroups,
-                    static_cast<DisplayFilterStage *>(this), _1));
+                    static_cast<DisplayFilterStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&DisplayFilterStage::removeFromFilterGroups,
-                    static_cast<DisplayFilterStage *>(this), _1));
+                    static_cast<DisplayFilterStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&DisplayFilterStage::removeObjFromFilterGroups,
-                    static_cast<DisplayFilterStage *>(this), _1));
+                    static_cast<DisplayFilterStage *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&DisplayFilterStage::clearFilterGroups,
                     static_cast<DisplayFilterStage *>(this)));
@@ -1442,13 +1442,13 @@ EditFieldHandlePtr DisplayFilterStageBase::editHandleForegrounds    (void)
 
     returnValue->setAddMethod(
         boost::bind(&DisplayFilterStage::addForeground,
-                    static_cast<DisplayFilterStage *>(this), _1));
+                    static_cast<DisplayFilterStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&DisplayFilterStage::removeFromForegrounds,
-                    static_cast<DisplayFilterStage *>(this), _1));
+                    static_cast<DisplayFilterStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&DisplayFilterStage::removeObjFromForegrounds,
-                    static_cast<DisplayFilterStage *>(this), _1));
+                    static_cast<DisplayFilterStage *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&DisplayFilterStage::clearForegrounds,
                     static_cast<DisplayFilterStage *>(this)));

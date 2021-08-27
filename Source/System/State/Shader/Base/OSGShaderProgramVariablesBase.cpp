@@ -68,7 +68,7 @@
 #include "OSGShaderProgramVariablesBase.h"
 #include "OSGShaderProgramVariables.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -621,10 +621,10 @@ EditFieldHandlePtr ShaderProgramVariablesBase::editHandleVariables      (void)
 
     returnValue->setAddMethod(
         boost::bind(&ShaderProgramVariables::addVariable,
-                    static_cast<ShaderProgramVariables *>(this), _1));
+                    static_cast<ShaderProgramVariables *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ShaderProgramVariables::subVariable,
-                    static_cast<ShaderProgramVariables *>(this), _1));
+                    static_cast<ShaderProgramVariables *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ShaderProgramVariables::clearVariables,
                     static_cast<ShaderProgramVariables *>(this)));
@@ -655,10 +655,10 @@ EditFieldHandlePtr ShaderProgramVariablesBase::editHandleProceduralVariables(voi
 
     returnValue->setAddMethod(
         boost::bind(&ShaderProgramVariables::addProceduralVariable,
-                    static_cast<ShaderProgramVariables *>(this), _1));
+                    static_cast<ShaderProgramVariables *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ShaderProgramVariables::subProceduralVariable,
-                    static_cast<ShaderProgramVariables *>(this), _1));
+                    static_cast<ShaderProgramVariables *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ShaderProgramVariables::clearProceduralVariables,
                     static_cast<ShaderProgramVariables *>(this)));

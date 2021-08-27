@@ -222,7 +222,10 @@ void SamplerObjChunk::onCreate(const SamplerObjChunk *source)
     setGLId(Window::registerGLObject(
                 boost::bind(&SamplerObjChunk::handleGL, 
                             SamplerObjChunkMTUncountedPtr(this), 
-                            _1, _2, _3, _4),
+                            ::boost::placeholders::_1, 
+                            ::boost::placeholders::_2, 
+                            ::boost::placeholders::_3, 
+                            ::boost::placeholders::_4),
                 &SamplerObjChunk::handleDestroyGL));
 }
 

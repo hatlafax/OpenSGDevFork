@@ -53,7 +53,7 @@ void FileContextHandlerMixin<ParentT, ContainerT>::initMethod(
         OSGSceneFileType::the().registerEndNodeCallback(
             ContainerT::getClassType(),
             boost::bind(&PLDOSGSceneItem::dispatch,
-                        PLDOSGSceneItem(), _1, _2)); 
+                        PLDOSGSceneItem(), ::boost::placeholders::_1, ::boost::placeholders::_2));
 #else
         OSGSceneFileType::the().registerEndNodeCallback(
             ContainerT::getClassType(),

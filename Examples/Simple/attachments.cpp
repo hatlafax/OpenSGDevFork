@@ -66,7 +66,7 @@ class NamedNodeFinder
         _name  = name;
         _found = NULL;
         
-        traverse(root, boost::bind(&NamedNodeFinder::checkNode, this, _1));
+        traverse(root, boost::bind(&NamedNodeFinder::checkNode, this, ::boost::placeholders::_1));
         
         return _found;
     }
