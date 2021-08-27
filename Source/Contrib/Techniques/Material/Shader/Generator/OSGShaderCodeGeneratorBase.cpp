@@ -72,7 +72,7 @@
 #include "OSGShaderCodeGeneratorBase.h"
 #include "OSGShaderCodeGenerator.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -791,7 +791,7 @@ EditFieldHandlePtr ShaderCodeGeneratorBase::editHandleCapabilitiesDesc(void)
 
     returnValue->setSetMethod(
         boost::bind(&ShaderCodeGenerator::setCapabilitiesDesc,
-                    static_cast<ShaderCodeGenerator *>(this), _1));
+                    static_cast<ShaderCodeGenerator *>(this), ::boost::placeholders::_1));
 
     editSField(CapabilitiesDescFieldMask);
 
@@ -819,7 +819,7 @@ EditFieldHandlePtr ShaderCodeGeneratorBase::editHandleHDR2Stage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&ShaderCodeGenerator::setHDR2Stage,
-                    static_cast<ShaderCodeGenerator *>(this), _1));
+                    static_cast<ShaderCodeGenerator *>(this), ::boost::placeholders::_1));
 
     editSField(HDR2StageFieldMask);
 
@@ -847,7 +847,7 @@ EditFieldHandlePtr ShaderCodeGeneratorBase::editHandleClusterShadingStage(void)
 
     returnValue->setSetMethod(
         boost::bind(&ShaderCodeGenerator::setClusterShadingStage,
-                    static_cast<ShaderCodeGenerator *>(this), _1));
+                    static_cast<ShaderCodeGenerator *>(this), ::boost::placeholders::_1));
 
     editSField(ClusterShadingStageFieldMask);
 
@@ -875,7 +875,7 @@ EditFieldHandlePtr ShaderCodeGeneratorBase::editHandleMultiLightShadowStage(void
 
     returnValue->setSetMethod(
         boost::bind(&ShaderCodeGenerator::setMultiLightShadowStage,
-                    static_cast<ShaderCodeGenerator *>(this), _1));
+                    static_cast<ShaderCodeGenerator *>(this), ::boost::placeholders::_1));
 
     editSField(MultiLightShadowStageFieldMask);
 
@@ -903,7 +903,7 @@ EditFieldHandlePtr ShaderCodeGeneratorBase::editHandleSSAOStage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&ShaderCodeGenerator::setSSAOStage,
-                    static_cast<ShaderCodeGenerator *>(this), _1));
+                    static_cast<ShaderCodeGenerator *>(this), ::boost::placeholders::_1));
 
     editSField(SSAOStageFieldMask);
 
@@ -931,7 +931,7 @@ EditFieldHandlePtr ShaderCodeGeneratorBase::editHandleMultiLightGroup(void)
 
     returnValue->setSetMethod(
         boost::bind(&ShaderCodeGenerator::setMultiLightGroup,
-                    static_cast<ShaderCodeGenerator *>(this), _1));
+                    static_cast<ShaderCodeGenerator *>(this), ::boost::placeholders::_1));
 
     editSField(MultiLightGroupFieldMask);
 

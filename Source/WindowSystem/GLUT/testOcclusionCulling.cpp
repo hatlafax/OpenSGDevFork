@@ -12,7 +12,7 @@
 #include "OSGStatElemTypes.h"
 #include "OSGStatCollector.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "OSGTextureBaseChunk.h"
 #include "OSGMaterialChunk.h"

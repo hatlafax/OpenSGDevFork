@@ -67,7 +67,7 @@
 #include "OSGMaterialManagerBase.h"
 #include "OSGMaterialManager.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -334,7 +334,7 @@ EditFieldHandlePtr MaterialManagerBase::editHandleWindow         (void)
 
     returnValue->setSetMethod(
         boost::bind(&MaterialManager::setWindow,
-                    static_cast<MaterialManager *>(this), _1));
+                    static_cast<MaterialManager *>(this), ::boost::placeholders::_1));
 
     editSField(WindowFieldMask);
 

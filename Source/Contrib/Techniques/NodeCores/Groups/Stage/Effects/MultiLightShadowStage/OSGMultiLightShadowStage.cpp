@@ -54,7 +54,7 @@
 #include "OSGMultiLightShadowTechniqueSimplest.h"
 
 #include "OSGRenderAction.h"
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include "OSGTextureBuffer.h"
 
 #include "OSGGeometry.h"
@@ -425,7 +425,7 @@ Action::ResultE MultiLightShadowStage::renderEnter(Action *action)
                     boost::bind(&MultiLightShadowStage::findTransparent,
                                 this, 
                                 pData,
-                                _1) );
+                                ::boost::placeholders::_1) );
     }
 
     //
@@ -888,7 +888,7 @@ UInt32 MultiLightShadowStage::addShadowParameter(MultiLightShadowParameter* para
     Inherited::pushToShadowParameter(param);
     
     param->addChangedFunctor(
-            boost::bind(&MultiLightShadowStage::changedShadowParameter, this, _1, _2, _3),
+            boost::bind(&MultiLightShadowStage::changedShadowParameter, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3),
             "");
     
     return static_cast<UInt32>(_mfShadowParameter.size() - 1);
@@ -897,7 +897,7 @@ UInt32 MultiLightShadowStage::addShadowParameter(MultiLightShadowParameter* para
 void MultiLightShadowStage::removeShadowParameter(MultiLightShadowParameter* param)
 {
     param->subChangedFunctor(
-            boost::bind(&MultiLightShadowStage::changedShadowParameter, this, _1, _2, _3));
+            boost::bind(&MultiLightShadowStage::changedShadowParameter, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3));
     
     Inherited::removeObjFromShadowParameter(param);
 }
@@ -907,7 +907,7 @@ void MultiLightShadowStage::removeShadowParameter(const UInt32 index)
     MultiLightShadowParameter* param = _mfShadowParameter[index];
 
     param->subChangedFunctor(
-            boost::bind(&MultiLightShadowStage::changedShadowParameter, this, _1, _2, _3));
+            boost::bind(&MultiLightShadowStage::changedShadowParameter, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3));
 
     this->removeFromShadowParameter(index);
 }
@@ -921,7 +921,7 @@ void MultiLightShadowStage::clearShadowParameters()
     {
         MultiLightShadowParameter* param = *iter;
         param->subChangedFunctor(
-            boost::bind(&MultiLightShadowStage::changedShadowParameter, this, _1, _2, _3));
+            boost::bind(&MultiLightShadowStage::changedShadowParameter, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3));
     }
     
     Inherited::clearShadowParameter();

@@ -192,7 +192,7 @@ int main(int argc, char **argv)
     getAllMaterials(scene, materials);
 
     // add the phong material chunk to every found material
-    for(int i = 0; i < materials.size(); ++i)
+    for(std::size_t i = 0; i < materials.size(); ++i)
     {
         (materials[i])->addChunk(phong_chunk);
     }
@@ -283,7 +283,7 @@ void keyboard(unsigned char k, int x, int y)
         {
             if(phong_active == false)
             {
-                for (int i = 0; i < materials.size(); ++i)
+                for (std::size_t i = 0; i < materials.size(); ++i)
                 {
                     (materials[i])->addChunk(phong_chunk);
                 }
@@ -296,7 +296,7 @@ void keyboard(unsigned char k, int x, int y)
         {
             if(phong_active == true)
             {
-                for (int i = 0; i < materials.size(); ++i)
+                for (std::size_t i = 0; i < materials.size(); ++i)
                 {
                     (materials[i])->subChunk(phong_chunk);
                 }

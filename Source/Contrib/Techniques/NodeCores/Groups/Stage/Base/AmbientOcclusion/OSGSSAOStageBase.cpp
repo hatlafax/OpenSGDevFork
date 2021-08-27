@@ -68,7 +68,7 @@
 #include "OSGSSAOStageBase.h"
 #include "OSGSSAOStage.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1162,7 +1162,7 @@ EditFieldHandlePtr SSAOStageBase::editHandleOffsetKernelChunk(void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStage::setOffsetKernelChunk,
-                    static_cast<SSAOStage *>(this), _1));
+                    static_cast<SSAOStage *>(this), ::boost::placeholders::_1));
 
     editSField(OffsetKernelChunkFieldMask);
 
@@ -1190,7 +1190,7 @@ EditFieldHandlePtr SSAOStageBase::editHandleRotateKernelChunk(void)
 
     returnValue->setSetMethod(
         boost::bind(&SSAOStage::setRotateKernelChunk,
-                    static_cast<SSAOStage *>(this), _1));
+                    static_cast<SSAOStage *>(this), ::boost::placeholders::_1));
 
     editSField(RotateKernelChunkFieldMask);
 

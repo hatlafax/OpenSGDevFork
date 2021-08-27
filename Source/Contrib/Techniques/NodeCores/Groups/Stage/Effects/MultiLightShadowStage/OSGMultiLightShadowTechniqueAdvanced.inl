@@ -115,10 +115,10 @@ bool MultiLightShadowTechniqueAdvanced::ShadowData::equals(const ShadowData& rhs
     if (&rhs == this)
         return true;
 
-    bool result =     nbrOfSplits <=     matLSFromWS.size()
-               && rhs.nbrOfSplits <= rhs.matLSFromWS.size()
-               &&     nbrOfSplits <=     matTSFromWS.size()
-               && rhs.nbrOfSplits <= rhs.matTSFromWS.size()
+    bool result =     nbrOfSplits <= static_cast<Int32>(    matLSFromWS.size())
+               && rhs.nbrOfSplits <= static_cast<Int32>(rhs.matLSFromWS.size())
+               &&     nbrOfSplits <= static_cast<Int32>(    matTSFromWS.size())
+               && rhs.nbrOfSplits <= static_cast<Int32>(rhs.matTSFromWS.size())
                && nbrOfSplits == rhs.nbrOfSplits
                && focused     == rhs.focused
                && lightPosDir.equals(rhs.lightPosDir, tol);

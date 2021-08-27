@@ -67,7 +67,7 @@
 #include "OSGAnimTargetAttachmentBase.h"
 #include "OSGAnimTargetAttachment.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -564,13 +564,13 @@ EditFieldHandlePtr AnimTargetAttachmentBase::editHandleBlenders       (void)
 
     returnValue->setAddMethod(
         boost::bind(&AnimTargetAttachment::pushToBlenders,
-                    static_cast<AnimTargetAttachment *>(this), _1));
+                    static_cast<AnimTargetAttachment *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&AnimTargetAttachment::removeFromBlenders,
-                    static_cast<AnimTargetAttachment *>(this), _1));
+                    static_cast<AnimTargetAttachment *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&AnimTargetAttachment::removeObjFromBlenders,
-                    static_cast<AnimTargetAttachment *>(this), _1));
+                    static_cast<AnimTargetAttachment *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&AnimTargetAttachment::clearBlenders,
                     static_cast<AnimTargetAttachment *>(this)));

@@ -57,7 +57,13 @@ ENDIF(ZLIB_FOUND)
 # handle the QUIETLY and REQUIRED arguments and set PNG_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(PNG DEFAULT_MSG 
-                                  PNG_LIBRARIES_FOUND PNG_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PNG_OpenSG DEFAULT_MSG 
+                                  PNG_LIBRARIES_FOUND
+                                  PNG_INCLUDE_DIR)
+IF(PNG_OpenSG_FOUND)
+  SET(PNG_FOUND TRUE)
+ELSE()
+  SET(PNG_FOUND FALSE)
+ENDIF()
 
 MARK_AS_ADVANCED(PNG_INCLUDE_DIR PNG_LIBRARIES_FOUND)

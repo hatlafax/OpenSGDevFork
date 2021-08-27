@@ -196,7 +196,7 @@ void WebInterface::handleRequests(void)
         _accepted.setDelay(false);
 
         // finish request
-        _accepted.send(_body.str().c_str(), _body.str().length());
+        _accepted.send(_body.str().c_str(), static_cast<int>(_body.str().length()));
 
         // close connection
         _accepted.close();
@@ -213,7 +213,7 @@ void WebInterface::flush(void)
     _accepted.setDelay(false);
 
     // finish request
-    _accepted.send(_body.str().c_str(), _body.str().length());
+    _accepted.send(_body.str().c_str(), static_cast<int>(_body.str().length()));
     _body.str("");
 }
 
@@ -883,7 +883,7 @@ void WebInterface::fcViewHandler(      std::ostream &os,
 
                     if(mfFCPtr != NULL && mfFCPtr->isValid() == true)
                     {
-                        UInt32 mfSize = (*mfFCPtr)->size();
+                        UInt32 mfSize = static_cast<UInt32>((*mfFCPtr)->size());
 
                         for(UInt32 j = 0 ; j < mfSize; ++j)
                         {

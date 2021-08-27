@@ -67,7 +67,7 @@
 #include "OSGTextureGrabForegroundBase.h"
 #include "OSGTextureGrabForeground.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -600,7 +600,7 @@ EditFieldHandlePtr TextureGrabForegroundBase::editHandleTexture        (void)
 
     returnValue->setSetMethod(
         boost::bind(&TextureGrabForeground::setTexture,
-                    static_cast<TextureGrabForeground *>(this), _1));
+                    static_cast<TextureGrabForeground *>(this), ::boost::placeholders::_1));
 
     editSField(TextureFieldMask);
 

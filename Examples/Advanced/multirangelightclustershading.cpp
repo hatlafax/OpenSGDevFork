@@ -5816,7 +5816,7 @@ OSG::Real32 SmoothCubicBezierSpline::t_(OSG::Real32 t, std::size_t idx) const
 
 typedef boost::tuples::tuple<int, int, int> index_t;
 
-struct index_hash_t : public std::unary_function<index_t, std::size_t>
+struct index_hash_t
 {
     std::size_t operator()(const index_t& v) const
     {

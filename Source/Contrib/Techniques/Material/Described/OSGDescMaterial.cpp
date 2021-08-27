@@ -1062,7 +1062,7 @@ void DescMaterial::removeMaterialDescObserver()
     if (matDesc)
     {
         matDesc->subChangedFunctor(
-            boost::bind(&DescMaterial::changedMaterialDesc, this, _1, _2, _3));
+            boost::bind(&DescMaterial::changedMaterialDesc, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3));
     }
 }
 
@@ -1072,10 +1072,10 @@ void DescMaterial::addMaterialDescObserver()
     if (matDesc)
     {
         if (matDesc->hasChangedFunctor(
-            boost::bind(&DescMaterial::changedMaterialDesc, this, _1, _2, _3)) == false)
+            boost::bind(&DescMaterial::changedMaterialDesc, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3)) == false)
         {
             matDesc->addChangedFunctor(
-                boost::bind(&DescMaterial::changedMaterialDesc, this, _1, _2, _3), "");
+                boost::bind(&DescMaterial::changedMaterialDesc, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3), "");
         }
     }
 }
@@ -1103,7 +1103,7 @@ void DescMaterial::removeEnvironmentDescObserver()
     if (envDesc)
     {
         envDesc->subChangedFunctor(
-            boost::bind(&DescMaterial::changedEnvironmentDesc, this, _1, _2, _3));
+            boost::bind(&DescMaterial::changedEnvironmentDesc, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3));
     }
 }
 
@@ -1113,10 +1113,10 @@ void DescMaterial::addEnvironmentDescObserver()
     if (envDesc)
     {
         if (envDesc->hasChangedFunctor(
-            boost::bind(&DescMaterial::changedEnvironmentDesc, this, _1, _2, _3)) == false)
+            boost::bind(&DescMaterial::changedEnvironmentDesc, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3)) == false)
         {
             envDesc->addChangedFunctor(
-                boost::bind(&DescMaterial::changedEnvironmentDesc, this, _1, _2, _3), "");
+                boost::bind(&DescMaterial::changedEnvironmentDesc, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3), "");
         }
     }
 }
@@ -1556,7 +1556,7 @@ void DescMaterial::rebuildState(void)
 
     UInt32 idx = 0;
 
-    for (Int32 i = 0; i < sz; ++i, ++idx)
+    for (std::size_t i = 0; i < sz; ++i, ++idx)
     {
         Int32 texUnit = _textureUnits[idx] >= 0 ? _textureUnits[idx] : texUnitOffset++;
 
@@ -1575,7 +1575,7 @@ void DescMaterial::rebuildState(void)
 
     sz = _textureObjChunksEnv.size();
 
-    for (Int32 i = 0; i < sz; ++i, ++idx)
+    for (std::size_t i = 0; i < sz; ++i, ++idx)
     {
         Int32 texUnit = _textureUnits[idx] >= 0 ? _textureUnits[idx] : texUnitOffset++;
 

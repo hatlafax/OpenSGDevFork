@@ -67,7 +67,7 @@
 #include "OSGCSMSceneParameterBase.h"
 #include "OSGCSMSceneParameter.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -778,7 +778,7 @@ EditFieldHandlePtr CSMSceneParameterBase::editHandleSceneRef       (void)
 
     returnValue->setSetMethod(
         boost::bind(&CSMSceneParameter::setSceneRef,
-                    static_cast<CSMSceneParameter *>(this), _1));
+                    static_cast<CSMSceneParameter *>(this), ::boost::placeholders::_1));
 
     editSField(SceneRefFieldMask);
 

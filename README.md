@@ -1,6 +1,6 @@
 # Introduction
 
-Welcome to the OpenSceneGraph (OpenSG) library development fork by hatlafax. The repository is originally forked from the 
+Welcome to the OpenSceneGraph (OpenSG) library development fork by [DataSolid GmbH Mönchengladbach](https://www.datasolid.com). The repository is originally forked from the 
 official [OpenSG](https://sourceforge.net/p/opensg/code/ci/master/tree/) repository.
 
 # License #

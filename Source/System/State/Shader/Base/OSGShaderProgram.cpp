@@ -48,7 +48,7 @@
 #include "OSGShaderProgram.h"
 #include "OSGGLFuncProtos.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -531,7 +531,10 @@ void ShaderProgram::onCreate(const ShaderProgram *source)
         Window::registerGLObject(
             boost::bind(&ShaderProgram::handleGL, 
                         ShaderProgramMTUncountedPtr(this), 
-                        _1, _2, _3, _4),
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2,
+                        ::boost::placeholders::_3,
+                        ::boost::placeholders::_4),
             &ShaderProgram::handleDestroyGL));
 
     _uiProgId = _pProgIdPool->create();

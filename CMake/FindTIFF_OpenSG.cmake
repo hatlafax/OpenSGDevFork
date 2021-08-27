@@ -30,8 +30,14 @@ ENDIF(TIFF_LIBRARY_RELEASE)
 # handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(TIFF DEFAULT_MSG  
-                                  TIFF_LIBRARIES_FOUND  TIFF_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(TIFF_OpenSG DEFAULT_MSG  
+                                  TIFF_LIBRARIES_FOUND
+                                  TIFF_INCLUDE_DIR)
+IF(TIFF_OpenSG_FOUND)
+  SET(TIFF_FOUND TRUE)
+ELSE()
+  SET(TIFF_FOUND FALSE)
+ENDIF()
 
 #IF(TIFF_FOUND)
 #  SET( TIFF_LIBRARIES ${TIFF_LIBRARY} )

@@ -66,7 +66,7 @@
 #include "OSGShaderVariableIntBase.h"
 #include "OSGShaderVariableInt.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 

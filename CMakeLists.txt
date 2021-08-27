@@ -114,7 +114,9 @@ OSG_OPTION   (OSG_ENABLE_AVX         ""    OFF      )
 OSG_SET_CACHE(OSG_AVX_VARIANT        ""    STRING "")
 OSG_OPTION   (OSG_ENABLE_ABI6        ""    OFF      )
 OSG_OPTION   (OSG_USE_OSG2_NAMESPACE ""    OFF      )
-OSG_OPTION   (OSG_ENABLE_C++11       ""    ON       )
+OSG_OPTION   (OSG_ENABLE_C++11       ""    OFF      )
+OSG_OPTION   (OSG_ENABLE_C++14       ""    OFF      )
+OSG_OPTION   (OSG_ENABLE_C++17       ""    ON       )
 
 OSG_OPTION(OSG_ENABLE_BOOST_C++11_STD_ATOMICS "" OFF)
 
@@ -128,6 +130,8 @@ OSG_OPTION(OSG_ENABLE_WRITE_PYTHON_TO_SOURCE "" OFF)
 
 OSG_OPTION(OSG_ENABLE_CUDA "" OFF)
 OSG_OPTION(OSG_ENABLE_VTK  "" ON )
+
+OSG_SET(PROJECT_FIND_INC_DIR OpenSG)
 
 IF(WIN32)
   OPTION(OSG_ENABLE_WIN_LOCALSTORAGE "" ON)
@@ -713,6 +717,7 @@ IF(NOT OSG_BUILD_DEPENDEND)
       OSG_ADD_OPT(OPENGL_gl_LIBRARY)
       OSG_ADD_OPT(OPENGL_glu_LIBRARY)
     ELSE()
+      SET(OpenGL_GL_PREFERENCE LEGACY)
       FIND_PACKAGE(OpenGL REQUIRED)
 
       OSG_ADD_OPT(OPENGL_gl_LIBRARY)
@@ -1482,9 +1487,9 @@ INSTALL(FILES "${CMAKE_BINARY_DIR}/cmake/FindOpenSG.cmake"
         DESTINATION share/OpenSG/cmake)
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindOpenSG.cmake.in"
         DESTINATION share/OpenSG/cmake)
-INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindCollada.cmake"
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindCollada_OpenSG.cmake"
         DESTINATION share/OpenSG/cmake)
-INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindOpenEXR.cmake"
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindOpenEXR_OpenSG.cmake"
         DESTINATION share/OpenSG/cmake)
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindExpat_OpenSG.cmake"
         DESTINATION share/OpenSG/cmake)
@@ -1499,6 +1504,28 @@ INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindPNG_OpenSG.cmake"
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindTIFF_OpenSG.cmake"
         DESTINATION share/OpenSG/cmake)
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindZLIB_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindAntTweakBar_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindAssimp_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindGDAL_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindGli_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindGlm_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindLibMini_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindNVidiaPerfSDK_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindOpenGLES_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindOpenNurbs_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindQhull_OpenSG.cmake"
+        DESTINATION share/OpenSG/cmake)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/FindVMath_OpenSG.cmake"
         DESTINATION share/OpenSG/cmake)
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/CMake/OSGSetupCompiler.cmake"
         DESTINATION share/OpenSG/cmake)
@@ -1528,6 +1555,7 @@ INSTALL(DIRECTORY "${CMAKE_SOURCE_DIR}/Tools/fcd2code"
         PATTERN "*.pyc" EXCLUDE
         PATTERN ".svn"  EXCLUDE)
 INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/Tools/fcd2code/fcd2code"
+                 "${CMAKE_SOURCE_DIR}/Tools/fcd2code/fcd2code.py"
         DESTINATION bin/fcd2code)
 
 ##################

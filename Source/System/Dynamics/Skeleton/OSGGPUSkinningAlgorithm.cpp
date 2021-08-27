@@ -308,11 +308,11 @@ void GPUSkinningAlgorithm::changed(ConstFieldMaskArg whichField,
     {
         if(_sfSkeleton.getValue()->hasChangedFunctor(boost::bind(
                &GPUSkinningAlgorithm::skeletonChanged,
-               this, _1, _2, _3                            )) == false)
+               this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3)) == false)
         {
             _sfSkeleton.getValue()->addChangedFunctor(boost::bind(
                 &GPUSkinningAlgorithm::skeletonChanged,
-                this, _1, _2, _3                           ),
+                this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3),
                 "GPUSkinningAlgorithm::skeletonChanged");
         }
     }
@@ -357,7 +357,7 @@ GPUSkinningAlgorithm::resolveLinks(void)
     {
         _sfSkeleton.getValue()->subChangedFunctor(boost::bind(
             &GPUSkinningAlgorithm::skeletonChanged,
-            this, _1, _2, _3                       ));
+            this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3));
     }
 
     Inherited::resolveLinks();

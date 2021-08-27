@@ -495,7 +495,7 @@ void addLight(LightEngine::LightTypeE lightType, ShadowTypeE shadowType)
 
     gv->lightInfos.push_back(li);
 
-    setShadow(gv->lightInfos.size() - 1, shadowType);
+    setShadow(static_cast<UInt32>(gv->lightInfos.size() - 1), shadowType);
 
     setColorLights(gv->colorLights);
     
@@ -673,7 +673,7 @@ void updateLightBeacon(OSG::UInt32 lightIdx, OSG::Time t)
     gv->objN->getVolume().getBounds(bbMin, bbMax);
     gv->objN->getVolume().getCenter(bbCenter    );
 
-    UInt32 numLights  = gv->lightInfos.size();
+    UInt32 numLights  = static_cast<UInt32>(gv->lightInfos.size());
     Real32 lightFract = Real32(lightIdx + 1) / Real32(numLights);
 
     Vec3f  bbDiag    = (bbMax - bbMin);
@@ -1099,7 +1099,7 @@ void keyboard(unsigned char k, int , int )
         gv->currentLight -= 1;
         
         if(gv->currentLight < 0)
-            gv->currentLight = gv->lightInfos.size() - 1;
+            gv->currentLight = static_cast<Int32>(gv->lightInfos.size()) - 1;
          
         if(gv->currentLight <  Int32(gv->lightInfos.size()) &&
            gv->currentLight >= 0                              )

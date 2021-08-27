@@ -578,7 +578,7 @@ Action::ResultE FishEyeProjector::renderEnter(Action *action)
                 
             RenderPartition::SimpleDrawCallback f;
                 
-            f = boost::bind(&FishEyeProjector::postProcess, this, _1);
+            f = boost::bind(&FishEyeProjector::postProcess, this, ::boost::placeholders::_1);
                 
             pPart->dropFunctor(f);
         }

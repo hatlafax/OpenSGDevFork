@@ -71,7 +71,7 @@
 #include "OSGViewportBase.h"
 #include "OSGViewport.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -912,7 +912,7 @@ EditFieldHandlePtr ViewportBase::editHandleCamera         (void)
 
     returnValue->setSetMethod(
         boost::bind(&Viewport::setCamera,
-                    static_cast<Viewport *>(this), _1));
+                    static_cast<Viewport *>(this), ::boost::placeholders::_1));
 
     editSField(CameraFieldMask);
 
@@ -940,7 +940,7 @@ EditFieldHandlePtr ViewportBase::editHandleRoot           (void)
 
     returnValue->setSetMethod(
         boost::bind(&Viewport::setRoot,
-                    static_cast<Viewport *>(this), _1));
+                    static_cast<Viewport *>(this), ::boost::placeholders::_1));
 
     editSField(RootFieldMask);
 
@@ -968,7 +968,7 @@ EditFieldHandlePtr ViewportBase::editHandleBackground     (void)
 
     returnValue->setSetMethod(
         boost::bind(&Viewport::setBackground,
-                    static_cast<Viewport *>(this), _1));
+                    static_cast<Viewport *>(this), ::boost::placeholders::_1));
 
     editSField(BackgroundFieldMask);
 
@@ -996,13 +996,13 @@ EditFieldHandlePtr ViewportBase::editHandleForegrounds    (void)
 
     returnValue->setAddMethod(
         boost::bind(&Viewport::addForeground,
-                    static_cast<Viewport *>(this), _1));
+                    static_cast<Viewport *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&Viewport::removeFromForegrounds,
-                    static_cast<Viewport *>(this), _1));
+                    static_cast<Viewport *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&Viewport::removeObjFromForegrounds,
-                    static_cast<Viewport *>(this), _1));
+                    static_cast<Viewport *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&Viewport::clearForegrounds,
                     static_cast<Viewport *>(this)));

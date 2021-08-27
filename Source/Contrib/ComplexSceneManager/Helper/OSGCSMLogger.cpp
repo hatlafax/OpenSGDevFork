@@ -138,9 +138,9 @@ void CSMLogger::postOSGLoading(FileContextAttachment * const pContext)
                 ChangedFunctor logCB = 
                     boost::bind(&CSMLogger::doLog, 
                                 this,
-                                _1, 
-                                _2, 
-                                _3,
+                                ::boost::placeholders::_1,
+                                ::boost::placeholders::_2,
+                                ::boost::placeholders::_3,
                                 pDesc->getFieldId(),
                                 pDesc->getFieldMask());
 

@@ -67,7 +67,7 @@
 #include "OSGSurfaceBase.h"
 #include "OSGSurface.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1458,7 +1458,7 @@ EditFieldHandlePtr SurfaceBase::editHandleControlPoints  (void)
 
     returnValue->setSetMethod(
         boost::bind(&Surface::setControlPoints,
-                    static_cast<Surface *>(this), _1));
+                    static_cast<Surface *>(this), ::boost::placeholders::_1));
 
     editSField(ControlPointsFieldMask);
 
@@ -1686,7 +1686,7 @@ EditFieldHandlePtr SurfaceBase::editHandleTextureControlPoints(void)
 
     returnValue->setSetMethod(
         boost::bind(&Surface::setTextureControlPoints,
-                    static_cast<Surface *>(this), _1));
+                    static_cast<Surface *>(this), ::boost::placeholders::_1));
 
     editSField(TextureControlPointsFieldMask);
 

@@ -118,9 +118,7 @@ class OSG_CLUSTER_DLLMAPPING SortLastWindow : public SortLastWindowBase
         /*! \nohierarchy
          */
 
-        struct MaxXOrder : public std::binary_function<const DrawableInfo &,
-                                                       const DrawableInfo &, 
-                                                             bool          >
+        struct MaxXOrder
         {
             bool operator() (const DrawableInfo &a, const DrawableInfo &b);
         };
@@ -128,9 +126,7 @@ class OSG_CLUSTER_DLLMAPPING SortLastWindow : public SortLastWindowBase
         /*! \nohierarchy
          */
 
-        struct MaxYOrder : public std::binary_function<const DrawableInfo &,
-                                                       const DrawableInfo &, 
-                                                             bool         >
+        struct MaxYOrder
         {
             bool operator() (const DrawableInfo &a, const DrawableInfo &b);
         };
@@ -138,9 +134,7 @@ class OSG_CLUSTER_DLLMAPPING SortLastWindow : public SortLastWindowBase
         /*! \nohierarchy
          */
 
-        struct MaxZOrder : public std::binary_function<const DrawableInfo &,
-                                                       const DrawableInfo &, 
-                                                             bool          >
+        struct MaxZOrder
         {
             bool operator() (const DrawableInfo &a, const DrawableInfo &b);
         };

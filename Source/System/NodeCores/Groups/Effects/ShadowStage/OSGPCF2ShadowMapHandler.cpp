@@ -809,7 +809,7 @@ void PCF2ShadowMapHandler::createShadowFactorMapFBO(RenderAction *a,
 
                     RenderPartition::SimpleDrawCallback cb =
                         boost::bind(&PCF2ShadowMapHandler::doCreateShadowFactorMapFBO,
-                                    this, _1, uiPLightCount);
+                                    this, ::boost::placeholders::_1, uiPLightCount);
 
                     pPart->dropFunctor(cb);
 
@@ -1233,7 +1233,7 @@ void PCF2ShadowMapHandler::createShadowFactorMapFBO(RenderAction *a,
 
                 RenderPartition::SimpleDrawCallback cb =
                     boost::bind(&PCF2ShadowMapHandler::doCreateShadowFactorMapFBO,
-                                this, _1, uiMatCount);
+                                this, ::boost::placeholders::_1, uiMatCount);
 
                 pPart->dropFunctor(cb);
 

@@ -349,7 +349,7 @@ static void writeHiResScreenShot(
     // disable the tile property of tileable viewport backgrounds.
     //
     for (size_t i = 0; i < num_ports; ++i) {
-        Viewport* vp = win->getPort(i);
+        Viewport* vp = win->getPort(static_cast<UInt32>(i));
 
         TileCameraDecoratorUnrecPtr decorator = TileCameraDecorator::create();
 
@@ -419,7 +419,7 @@ static void writeHiResScreenShot(
             // Adapt the tile camera decorator boxes to the current tile
             //
             for (size_t i = 0; i < num_ports; ++i) {
-                Viewport* vp = win->getPort(i);
+                Viewport* vp = win->getPort(static_cast<UInt32>(i));
                 vp->setSize(0, 0, xSize, ySize);
 
                 TileCameraDecorator* decorator = decorators[i].get<0>();
@@ -468,7 +468,7 @@ static void writeHiResScreenShot(
     vp0->removeObjFromForegrounds(grabber);
 
     for (size_t i = 0; i < num_ports; ++i) {
-        Viewport* vp = win->getPort(i);
+        Viewport* vp = win->getPort(static_cast<UInt32>(i));
 
         vp->setCamera(decorators[i].get<0>()->getDecoratee());
         vp->setSize(0, 0, 1, 1);
@@ -572,7 +572,7 @@ static void writeHiResScreenShotFBO(const char* name, UInt32 width, UInt32 heigh
     // disable the tile property of tileable viewport backgrounds.
     //
     for (size_t i = 0; i < num_ports; ++i) {
-        Viewport* vp = win->getPort(i);
+        Viewport* vp = win->getPort(static_cast<UInt32>(i));
 
         TileCameraDecoratorUnrecPtr decorator = TileCameraDecorator::create();
 
@@ -756,7 +756,7 @@ static void writeHiResScreenShotFBO(const char* name, UInt32 width, UInt32 heigh
     for (size_t i = 0; i < num_ports; ++i) {
         win->subPortByObj(decorators[i].get<3>());
 
-        Viewport* vp = win->getPort(i);
+        Viewport* vp = win->getPort(static_cast<UInt32>(i));
         vp->setCamera(decorators[i].get<0>()->getDecoratee());
         vp->setSize(0, 0, 1, 1);
 

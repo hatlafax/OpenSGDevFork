@@ -119,7 +119,7 @@ IF(${OSG_CMAKE_PASS} STREQUAL "OSGCOLLECT")
         "LIST(APPEND ${PROJECT_NAME}_DEP_SYS_INCDIR \"${CMAKE_SOURCE_DIR}/Source/External\")\n\n")
 
     FILE(APPEND ${${PROJECT_NAME}_BUILD_FILE}
-        "LIST(APPEND ${PROJECT_NAME}_DEP_SYS_TEST_INCDIR \"${CMAKE_SOURCE_DIR}/Source/External\")\n\n")
+        "LIST(APPEND ${PROJECT_NAME}_DEP_TEST_SYS_INCDIR \"${CMAKE_SOURCE_DIR}/Source/External\")\n\n")
 
     FILE(APPEND ${${PROJECT_NAME}_BUILD_FILE}
         "LIST(APPEND ${PROJECT_NAME}_HDR
@@ -128,9 +128,10 @@ IF(${OSG_CMAKE_PASS} STREQUAL "OSGCOLLECT")
             \"${CMAKE_SOURCE_DIR}/Source/External/google/sparse_hash_map\"
             \"${CMAKE_SOURCE_DIR}/Source/External/google/sparse_hash_set\"
             \"${CMAKE_SOURCE_DIR}/Source/External/google/sparsetable\"
-            \"${CMAKE_SOURCE_DIR}/Source/External/google/sparsehash/google_config.h\"
+            \"${CMAKE_SOURCE_DIR}/Source/External/google/traits\"
             \"${CMAKE_SOURCE_DIR}/Source/External/google/sparsehash/densehashtable.h\"
-            \"${CMAKE_SOURCE_DIR}/Source/External/google/sparsehash/hash_fun.h\"
+            \"${CMAKE_SOURCE_DIR}/Source/External/google/sparsehash/hashtable-common.h\"
+            \"${CMAKE_SOURCE_DIR}/Source/External/google/sparsehash/libc_allocator_with_realloc.h\"
             \"${CMAKE_SOURCE_DIR}/Source/External/google/sparsehash/sparsehashtable.h\")\n\n")
 
     IF(NOT OSG_ENABLE_SCANPARSE_REGEN)

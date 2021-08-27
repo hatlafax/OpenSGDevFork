@@ -67,7 +67,7 @@
 #include "OSGInlineBase.h"
 #include "OSGInline.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -693,7 +693,7 @@ EditFieldHandlePtr InlineBase::editHandleRoot           (void)
 
     returnValue->setSetMethod(
         boost::bind(&Inline::setRoot,
-                    static_cast<Inline *>(this), _1));
+                    static_cast<Inline *>(this), ::boost::placeholders::_1));
 
     editSField(RootFieldMask);
 

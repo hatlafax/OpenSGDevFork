@@ -477,7 +477,7 @@ NodeTransitPtr AssimpSceneFileType::read(
         std::string importer_name;
 
         int idx = importer.GetPropertyInteger("importerIndex");
-        if (idx >= 0 && idx < importer.GetImporterCount())
+        if (idx >= 0 && idx < static_cast<int>(importer.GetImporterCount()))
         {
             const aiImporterDesc* desc = importer.GetImporterInfo(idx);
             if (desc && desc->mName)
@@ -1135,7 +1135,7 @@ AssimpSceneFileType::VecIndicesT AssimpSceneFileType::handleMeshes(SceneWriteDat
 
         OSG_ASSERT(!rvecMeshIndices.empty());
 
-        unsigned int firstIdx = rvecMeshIndices[0];
+        std::size_t firstIdx = rvecMeshIndices[0];
 
         //
         // If shared geometry does not have identical material we have to build a new aiMesh

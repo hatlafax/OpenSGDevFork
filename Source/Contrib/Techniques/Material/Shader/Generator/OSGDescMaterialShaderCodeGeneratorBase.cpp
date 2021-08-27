@@ -66,7 +66,7 @@
 #include "OSGDescMaterialShaderCodeGeneratorBase.h"
 #include "OSGDescMaterialShaderCodeGenerator.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 

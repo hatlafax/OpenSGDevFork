@@ -89,22 +89,22 @@ void ComputeElementHandlerMixin<ParentT>::setData(
         if(this->hasDestroyedFunctor(
                boost::bind(&ContextDataSlotHandler::clearData,
                            pContext,
-                           _1,
-                           _2,
+                           ::boost::placeholders::_1,
+                           ::boost::placeholders::_2,
                            this->_iDataSlotId)) == false)
         {
             this->addDestroyedFunctor(
                 boost::bind(&ContextDataSlotHandler::clearData,
                             static_cast<ContextDataSlotHandler *>(pContext),
-                            _1,
-                            _2,
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2,
                             this->_iDataSlotId), "");
 
             pContext->addDestroyedFunctorFor(
                 boost::bind(&Self::template clearDestroyedFunctorFor<
                                 ContextDataSlotHandler>,
                             this,
-                            _1),
+                            ::boost::placeholders::_1),
                 this);
         }
     }

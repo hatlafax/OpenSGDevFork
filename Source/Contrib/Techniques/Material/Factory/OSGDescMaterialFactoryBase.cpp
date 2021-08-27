@@ -67,7 +67,7 @@
 #include "OSGDescMaterialFactoryBase.h"
 #include "OSGDescMaterialFactory.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -663,7 +663,7 @@ EditFieldHandlePtr DescMaterialFactoryBase::editHandleEnvironmentDesc(void)
 
     returnValue->setSetMethod(
         boost::bind(&DescMaterialFactory::setEnvironmentDesc,
-                    static_cast<DescMaterialFactory *>(this), _1));
+                    static_cast<DescMaterialFactory *>(this), ::boost::placeholders::_1));
 
     editSField(EnvironmentDescFieldMask);
 

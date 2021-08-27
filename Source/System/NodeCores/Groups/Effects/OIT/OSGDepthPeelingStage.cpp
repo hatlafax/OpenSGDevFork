@@ -440,9 +440,9 @@ DepthPeelingStage::setupPostProcess(RenderAction* a, bool isFinal, bool isPing)
         RenderPartition::SimpleDrawCallback f;
 
         if (!isFinal)
-            f = boost::bind(&DepthPeelingStage::postProcess, this, _1, isPing);
+            f = boost::bind(&DepthPeelingStage::postProcess, this, ::boost::placeholders::_1, isPing);
         else
-            f = boost::bind(&DepthPeelingStage::postProcessFinal, this, _1);
+            f = boost::bind(&DepthPeelingStage::postProcessFinal, this, ::boost::placeholders::_1);
 
         pPart->dropFunctor(f);
     }

@@ -1006,7 +1006,7 @@ OgreMeshReader::readBoneAssignment(VertexElementStore &vertexElements,
         vElem.index     = 0;
         vElem.prop      = boneIdxProp;
 
-        boneIdxVE       = UInt32(vertexElements.size());
+        boneIdxVE       = UInt16(vertexElements.size());
 
         vertexElements.push_back(vElem);
     }
@@ -1024,7 +1024,7 @@ OgreMeshReader::readBoneAssignment(VertexElementStore &vertexElements,
         vElem.index     = 0;
         vElem.prop      = boneWeightProp;
 
-        boneWeightVE    = UInt32(vertexElements.size());
+        boneWeightVE    = UInt16(vertexElements.size());
 
         vertexElements.push_back(vElem);
     }

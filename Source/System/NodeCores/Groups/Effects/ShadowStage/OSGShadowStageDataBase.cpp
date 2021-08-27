@@ -69,7 +69,7 @@
 #include "OSGShadowStageDataBase.h"
 #include "OSGShadowStageData.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -930,7 +930,7 @@ EditFieldHandlePtr ShadowStageDataBase::editHandleToneMappingMaterial(void)
 
     returnValue->setSetMethod(
         boost::bind(&ShadowStageData::setToneMappingMaterial,
-                    static_cast<ShadowStageData *>(this), _1));
+                    static_cast<ShadowStageData *>(this), ::boost::placeholders::_1));
 
     editSField(ToneMappingMaterialFieldMask);
 
@@ -958,7 +958,7 @@ EditFieldHandlePtr ShadowStageDataBase::editHandleBlurRenderTarget(void)
 
     returnValue->setSetMethod(
         boost::bind(&ShadowStageData::setBlurRenderTarget,
-                    static_cast<ShadowStageData *>(this), _1));
+                    static_cast<ShadowStageData *>(this), ::boost::placeholders::_1));
 
     editSField(BlurRenderTargetFieldMask);
 
@@ -986,7 +986,7 @@ EditFieldHandlePtr ShadowStageDataBase::editHandleBlurMaterial   (void)
 
     returnValue->setSetMethod(
         boost::bind(&ShadowStageData::setBlurMaterial,
-                    static_cast<ShadowStageData *>(this), _1));
+                    static_cast<ShadowStageData *>(this), ::boost::placeholders::_1));
 
     editSField(BlurMaterialFieldMask);
 
@@ -1014,7 +1014,7 @@ EditFieldHandlePtr ShadowStageDataBase::editHandleHBlurShader    (void)
 
     returnValue->setSetMethod(
         boost::bind(&ShadowStageData::setHBlurShader,
-                    static_cast<ShadowStageData *>(this), _1));
+                    static_cast<ShadowStageData *>(this), ::boost::placeholders::_1));
 
     editSField(HBlurShaderFieldMask);
 
@@ -1042,7 +1042,7 @@ EditFieldHandlePtr ShadowStageDataBase::editHandleVBlurShader    (void)
 
     returnValue->setSetMethod(
         boost::bind(&ShadowStageData::setVBlurShader,
-                    static_cast<ShadowStageData *>(this), _1));
+                    static_cast<ShadowStageData *>(this), ::boost::placeholders::_1));
 
     editSField(VBlurShaderFieldMask);
 
@@ -1120,7 +1120,7 @@ EditFieldHandlePtr ShadowStageDataBase::editHandleShrinkRenderTarget(void)
 
     returnValue->setSetMethod(
         boost::bind(&ShadowStageData::setShrinkRenderTarget,
-                    static_cast<ShadowStageData *>(this), _1));
+                    static_cast<ShadowStageData *>(this), ::boost::placeholders::_1));
 
     editSField(ShrinkRenderTargetFieldMask);
 
@@ -1148,7 +1148,7 @@ EditFieldHandlePtr ShadowStageDataBase::editHandleShrinkMaterial (void)
 
     returnValue->setSetMethod(
         boost::bind(&ShadowStageData::setShrinkMaterial,
-                    static_cast<ShadowStageData *>(this), _1));
+                    static_cast<ShadowStageData *>(this), ::boost::placeholders::_1));
 
     editSField(ShrinkMaterialFieldMask);
 

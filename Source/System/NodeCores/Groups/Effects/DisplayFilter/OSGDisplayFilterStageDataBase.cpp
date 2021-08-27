@@ -70,7 +70,7 @@
 #include "OSGDisplayFilterStageDataBase.h"
 #include "OSGDisplayFilterStageData.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -799,7 +799,7 @@ EditFieldHandlePtr DisplayFilterStageDataBase::editHandleTarget         (void)
 
     returnValue->setSetMethod(
         boost::bind(&DisplayFilterStageData::setTarget,
-                    static_cast<DisplayFilterStageData *>(this), _1));
+                    static_cast<DisplayFilterStageData *>(this), ::boost::placeholders::_1));
 
     editSField(TargetFieldMask);
 
@@ -827,7 +827,7 @@ EditFieldHandlePtr DisplayFilterStageDataBase::editHandleBaseMaterial   (void)
 
     returnValue->setSetMethod(
         boost::bind(&DisplayFilterStageData::setBaseMaterial,
-                    static_cast<DisplayFilterStageData *>(this), _1));
+                    static_cast<DisplayFilterStageData *>(this), ::boost::placeholders::_1));
 
     editSField(BaseMaterialFieldMask);
 
@@ -855,7 +855,7 @@ EditFieldHandlePtr DisplayFilterStageDataBase::editHandleColorFilterShader(void)
 
     returnValue->setSetMethod(
         boost::bind(&DisplayFilterStageData::setColorFilterShader,
-                    static_cast<DisplayFilterStageData *>(this), _1));
+                    static_cast<DisplayFilterStageData *>(this), ::boost::placeholders::_1));
 
     editSField(ColorFilterShaderFieldMask);
 
@@ -883,7 +883,7 @@ EditFieldHandlePtr DisplayFilterStageDataBase::editHandleColorFilterTexture(void
 
     returnValue->setSetMethod(
         boost::bind(&DisplayFilterStageData::setColorFilterTexture,
-                    static_cast<DisplayFilterStageData *>(this), _1));
+                    static_cast<DisplayFilterStageData *>(this), ::boost::placeholders::_1));
 
     editSField(ColorFilterTextureFieldMask);
 

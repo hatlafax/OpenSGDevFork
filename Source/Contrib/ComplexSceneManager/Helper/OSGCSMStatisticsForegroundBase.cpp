@@ -66,7 +66,7 @@
 #include "OSGCSMStatisticsForegroundBase.h"
 #include "OSGCSMStatisticsForeground.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -488,8 +488,8 @@ FieldContainerTransitPtr CSMStatisticsForegroundBase::shallowCopy(void) const
 CSMStatisticsForegroundBase::CSMStatisticsForegroundBase(void) :
     Inherited(),
     _sfSize                   (UInt32(25)),
-    _sfColor                  (Color4f(0.0, 1.0, 0.0, 0.7)),
-    _sfBgColor                (Color4f(0.0, 0.0, 0.0, 0.0)),
+    _sfColor                  (Color4f(0.0f, 1.0f, 0.0f, 0.7f)),
+    _sfBgColor                (Color4f(0.0f, 0.0f, 0.0f, 0.0f)),
     _mfElements               ()
 {
 }

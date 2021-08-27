@@ -100,6 +100,23 @@ class PointerMFieldCommon : public PointerMFieldBase
     static Int32 const Namespace = NamespaceI;
     
     /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
+    /*! \name FieldDesc creation                                           */
+    /*! \{                                                                 */
+
+    static FieldDescriptionBase *
+        createFieldDescription   (const Char8                *szFieldname,
+                                        UInt32                uiFieldFlags,
+                                        FieldEditMethod       fEditMethod,
+                                        FieldGetMethod        fGetMethod  );
+
+    static FieldDescriptionBase *
+        createIdxFieldDescription(const Char8                *szFieldname,
+                                        UInt32                uiFieldFlags,
+                                        FieldIndexEditMethod  fEditMethod,
+                                        FieldIndexGetMethod   fGetMethod  );
+
+    /*! \}                                                                 */
     /*=========================  PROTECTED  ===============================*/
 
   protected:
@@ -191,23 +208,6 @@ class PointerMFieldCommon : public PointerMFieldBase
     /*! \{                                                                 */
     
     
-    /*! \}                                                                 */
-    /*---------------------------------------------------------------------*/
-    /*! \name FieldDesc creation                                           */
-    /*! \{                                                                 */
-
-    static FieldDescriptionBase *
-        createFieldDescription   (const Char8                *szFieldname,
-                                        UInt32                uiFieldFlags,
-                                        FieldEditMethod       fEditMethod,
-                                        FieldGetMethod        fGetMethod  );
-
-    static FieldDescriptionBase *
-        createIdxFieldDescription(const Char8                *szFieldname,
-                                        UInt32                uiFieldFlags,
-                                        FieldIndexEditMethod  fEditMethod,
-                                        FieldIndexGetMethod   fGetMethod  );
-
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name Binary IO                                                    */

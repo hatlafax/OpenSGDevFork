@@ -18,7 +18,7 @@
 //#include "module/OSGBase_mainheader.h"
 #include <OSGLine.h>
 #include <OSGContainerPtrFuncs.h>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/python.hpp>
 #include "BaseWrappers.h"
 

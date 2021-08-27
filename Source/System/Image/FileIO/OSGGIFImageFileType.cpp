@@ -1135,7 +1135,7 @@ static int nextLWZ(std::istream &is)
     static int      table[2][(1 << MAX_LWZ_BITS)];
     static int      firstcode, oldcode;
     int             code, incode;
-    register int    i;
+    int             i;
 
     while((code = nextCode(is, code_size)) >= 0)
     {

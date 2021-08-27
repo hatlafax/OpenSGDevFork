@@ -43,7 +43,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "OSGConfig.h"
 
@@ -234,9 +234,9 @@ void ConnectorAttachment::removeConnections(      BitVector       bSrcMask,
             ccIt->first->subChangedFunctor(
                 boost::bind(&ConnectorAttachment::targetDestroyed, 
                             this, 
-                            _1, 
-                            _2,
-                            _3));
+                            ::boost::placeholders::_1, 
+                            ::boost::placeholders::_2,
+                            ::boost::placeholders::_3));
         }
 
         ++ccIt;
@@ -274,9 +274,9 @@ bool ConnectorAttachment::unlinkParent(FieldContainer * const pParent,
     pParent->subChangedFunctor(
         boost::bind(&ConnectorAttachment::processChanged, 
                     this, 
-                    _1, 
-                    _2,
-                    _3));
+                    ::boost::placeholders::_1,
+                    ::boost::placeholders::_2,
+                    ::boost::placeholders::_3));
     
     return Inherited::unlinkParent(pParent, parentFieldId);
 }
@@ -290,9 +290,9 @@ void ConnectorAttachment::resolveLinks(void)
         pDst->subChangedFunctor(
             boost::bind(&ConnectorAttachment::targetDestroyed, 
                         this, 
-                        _1, 
-                        _2,
-                        _3));
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2,
+                        ::boost::placeholders::_3));
 
         delete _vConnections[i];
     }
@@ -336,9 +336,9 @@ void addConnector(OSG::AttachmentContainer *pContainer,
         pContainer->addChangedFunctor(
             boost::bind(&ConnectorAttachment::processChanged, 
                         pCA.get(), 
-                        _1, 
-                        _2,
-                        _3),
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2,
+                        ::boost::placeholders::_3),
             "");
 
         pContainer->addAttachment(pCA);
@@ -361,9 +361,9 @@ void addConnector(OSG::AttachmentContainer *pContainer,
         pDst->addChangedFunctor(
             boost::bind(&ConnectorAttachment::targetDestroyed, 
                         pCA.get(), 
-                        _1, 
-                        _2,
-                        _3),
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2,
+                        ::boost::placeholders::_3),
             "");
     }
 

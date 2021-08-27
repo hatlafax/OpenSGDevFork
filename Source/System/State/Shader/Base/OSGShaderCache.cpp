@@ -40,7 +40,7 @@
 #include "OSGShaderCache.h"
 #include "OSGShaderProgramVariableChunk.h"
 
-#include "boost/bind.hpp"
+#include <boost/bind/bind.hpp>
 
 
 OSG_BEGIN_NAMESPACE
@@ -304,7 +304,7 @@ void ShaderCache::clear(void)
 
     _oExeTree.destroy(boost::bind(&ShaderCache::clearShRemoveCallback,
                                    this,
-                                  _1));
+                                  ::boost::placeholders::_1));
 
 #ifdef OSG_SHC_USE_REF
     ShaderVarStore::const_iterator vIt  = _vShaderVarStore.begin();
@@ -320,7 +320,7 @@ void ShaderCache::clear(void)
 
     _oVarTree.destroy(boost::bind(&ShaderCache::clearVaRemoveCallback,
                                    this,
-                                  _1));
+                                  ::boost::placeholders::_1));
 }
 
 void ShaderCache::dump(void)
@@ -390,14 +390,14 @@ void ShaderCache::updateRemoveCallback(ShaderExecutableChunk *pShader)
         if((*fIt)->hasDestroyedFunctor(
                boost::bind(&ShaderCache::removeShaderProgram,
                            this,
-                           _1,
-                           _2)) == false)
+                           ::boost::placeholders::_1,
+                           ::boost::placeholders::_2)) == false)
         {
             (*fIt)->addDestroyedFunctor(
                 boost::bind(&ShaderCache::removeShaderProgram,
                             this,
-                            _1,
-                            _2),
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2),
                 "");
         }
     }
@@ -415,14 +415,14 @@ void ShaderCache::updateRemoveCallback(ShaderExecutableChunk *pShader)
         if((*gIt)->hasDestroyedFunctor(
                boost::bind(&ShaderCache::removeShaderProgram,
                            this,
-                           _1,
-                           _2)) == false)
+                           ::boost::placeholders::_1,
+                           ::boost::placeholders::_2)) == false)
         {
             (*gIt)->addDestroyedFunctor(
                 boost::bind(&ShaderCache::removeShaderProgram,
                             this,
-                            _1,
-                            _2),
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2),
                 "");
         }
     }
@@ -441,14 +441,14 @@ void ShaderCache::updateRemoveCallback(ShaderExecutableChunk *pShader)
         if((*vIt)->hasDestroyedFunctor(
                boost::bind(&ShaderCache::removeShaderProgram,
                            this,
-                           _1,
-                           _2)) == false)
+                           ::boost::placeholders::_1,
+                           ::boost::placeholders::_2)) == false)
         {
             (*vIt)->addDestroyedFunctor(
                 boost::bind(&ShaderCache::removeShaderProgram,
                             this,
-                            _1,
-                            _2),
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2),
                 "");
         }
     }
@@ -472,8 +472,8 @@ void ShaderCache::clearShRemoveCallback(ShaderExecutableChunk *pShader)
         (*fIt)->subDestroyedFunctor(
             boost::bind(&ShaderCache::removeShaderProgram,
                         this,
-                        _1,
-                        _2));
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2));
     }
 
     ShaderExecutableChunk::GeometryShaderIt gIt  = 
@@ -489,8 +489,8 @@ void ShaderCache::clearShRemoveCallback(ShaderExecutableChunk *pShader)
         (*gIt)->subDestroyedFunctor(
             boost::bind(&ShaderCache::removeShaderProgram,
                         this,
-                        _1,
-                        _2));
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2));
     }
 
 
@@ -507,8 +507,8 @@ void ShaderCache::clearShRemoveCallback(ShaderExecutableChunk *pShader)
         (*vIt)->subDestroyedFunctor(
             boost::bind(&ShaderCache::removeShaderProgram,
                         this,
-                        _1,
-                        _2));
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2));
     }
 }
 
@@ -532,14 +532,14 @@ void ShaderCache::updateRemoveCallback(ShaderExecutableVarChunk *pVar)
         if((*vIt)->hasDestroyedFunctor(
                boost::bind(&ShaderCache::removeShaderVar,
                            this,
-                           _1,
-                           _2)) == false)
+                           ::boost::placeholders::_1,
+                           ::boost::placeholders::_2)) == false)
         {
             (*vIt)->addDestroyedFunctor(
                 boost::bind(&ShaderCache::removeShaderVar,
                             this,
-                            _1,
-                            _2),
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2),
                 "");
         }
     }
@@ -563,8 +563,8 @@ void ShaderCache::clearVaRemoveCallback(ShaderExecutableVarChunk *pVar)
         (*vIt)->subDestroyedFunctor(
             boost::bind(&ShaderCache::removeShaderVar,
                         this,
-                        _1,
-                        _2));
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2));
     }
 }
 

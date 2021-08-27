@@ -59,7 +59,7 @@
 #include "vtkStructuredGridGeometryFilter.h"
 #include "vtkPointSource.h"
 #include "vtkRungeKutta4.h"
-#include "vtkStreamLine.h"
+#include "vtkStreamTracer.h"
 #include "vtkTubeFilter.h"
 #include "vtkPolyDataNormals.h"
 
@@ -242,7 +242,7 @@ void prepareSceneGraph(OSG::Node * const node)
             // get num positions
             OSG::GeoVectorProperty *positionsPtr=geo->getPositions();
             if(positionsPtr != NULL)
-                sum_positions += positionsPtr->size();
+                sum_positions += static_cast<OSG::UInt32>(positionsPtr->size());
             // get num triangles
             for(f=geo->beginTriangles() ; f!=geo->endTriangles() ; ++f)
                 ++sum_triangles;
@@ -707,17 +707,18 @@ OSG::NodeTransitPtr initVTK(void)
     seeds->SetNumberOfPoints(6);
 
     vtkRungeKutta4 *integ = vtkRungeKutta4::New();
-    vtkStreamLine *streamer = vtkStreamLine::New();
+    vtkStreamTracer* streamer = vtkStreamTracer::New();
     streamer->SetInputConnection(reader->GetOutputPort());
 #if VTK_MAJOR_VERSION >= 6
     streamer->SetSourceData(seeds->GetOutput());
 #else
     streamer->SetSource(seeds->GetOutput());
 #endif
-    streamer->SetMaximumPropagationTime(500);
-    streamer->SetStepLength(0.5);
-    streamer->SetIntegrationStepLength(0.05);
-    streamer->SetIntegrationDirectionToIntegrateBothDirections();
+    streamer->SetMaximumPropagation(500);
+    streamer->SetInitialIntegrationStep(0.5);
+    streamer->SetMinimumIntegrationStep(0.05);
+
+    streamer->SetIntegrationDirectionToBoth();
     streamer->SetIntegrator(integ);
 
     // The tube is wrapped around the generated streamline. By varying the
@@ -1735,7 +1736,7 @@ int doMain(int argc,char **argv)
     {
         case 'M': 
             multidisplay->setHServers(
-                clusterWindow->getMFServers()->size()/rows);
+                static_cast<OSG::UInt32>(clusterWindow->getMFServers()->size()/rows));
             multidisplay->setVServers(
                 rows);
             break;

@@ -67,7 +67,7 @@
 #include "OSGCallbackAlgorithmForegroundBase.h"
 #include "OSGCallbackAlgorithmForeground.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -446,7 +446,7 @@ EditFieldHandlePtr CallbackAlgorithmForegroundBase::editHandleCallbackAlgorithm(
 
     returnValue->setSetMethod(
         boost::bind(&CallbackAlgorithmForeground::setCallbackAlgorithm,
-                    static_cast<CallbackAlgorithmForeground *>(this), _1));
+                    static_cast<CallbackAlgorithmForeground *>(this), ::boost::placeholders::_1));
 
     editSField(CallbackAlgorithmFieldMask);
 

@@ -69,7 +69,7 @@
 #include "OSGComputeShaderAlgorithmBase.h"
 #include "OSGComputeShaderAlgorithm.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -946,13 +946,13 @@ EditFieldHandlePtr ComputeShaderAlgorithmBase::editHandleTextureImages  (void)
 
     returnValue->setAddMethod(
         boost::bind(&ComputeShaderAlgorithm::pushToTextureImages,
-                    static_cast<ComputeShaderAlgorithm *>(this), _1));
+                    static_cast<ComputeShaderAlgorithm *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ComputeShaderAlgorithm::removeFromTextureImages,
-                    static_cast<ComputeShaderAlgorithm *>(this), _1));
+                    static_cast<ComputeShaderAlgorithm *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&ComputeShaderAlgorithm::removeObjFromTextureImages,
-                    static_cast<ComputeShaderAlgorithm *>(this), _1));
+                    static_cast<ComputeShaderAlgorithm *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ComputeShaderAlgorithm::clearTextureImages,
                     static_cast<ComputeShaderAlgorithm *>(this)));
@@ -983,7 +983,7 @@ EditFieldHandlePtr ComputeShaderAlgorithmBase::editHandleChunkMaterial  (void)
 
     returnValue->setSetMethod(
         boost::bind(&ComputeShaderAlgorithm::setChunkMaterial,
-                    static_cast<ComputeShaderAlgorithm *>(this), _1));
+                    static_cast<ComputeShaderAlgorithm *>(this), ::boost::placeholders::_1));
 
     editSField(ChunkMaterialFieldMask);
 
@@ -1011,7 +1011,7 @@ EditFieldHandlePtr ComputeShaderAlgorithmBase::editHandleComputeShader  (void)
 
     returnValue->setSetMethod(
         boost::bind(&ComputeShaderAlgorithm::setComputeShader,
-                    static_cast<ComputeShaderAlgorithm *>(this), _1));
+                    static_cast<ComputeShaderAlgorithm *>(this), ::boost::placeholders::_1));
 
     editSField(ComputeShaderFieldMask);
 

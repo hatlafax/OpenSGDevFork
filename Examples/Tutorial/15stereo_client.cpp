@@ -91,9 +91,9 @@ OSG::NodeTransitPtr createScenegraph(void)
     dLight->setDirection(OSG::Vec3f(0,1,2));
     
     //color information
-    dLight->setDiffuse (OSG::Color4f(1,   1,   1,   1));
-    dLight->setAmbient (OSG::Color4f(0.2, 0.2, 0.2, 1));
-    dLight->setSpecular(OSG::Color4f(1,   1,   1,   1));
+    dLight->setDiffuse (OSG::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
+    dLight->setAmbient (OSG::Color4f(0.2f, 0.2f, 0.2f, 1.0f));
+    dLight->setSpecular(OSG::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     
     //set the beacon
     dLight->setBeacon(lightBeacon);
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
         
         camera->setBeacon(camBeacon);
         camera->setFov(OSG::osgDegree2Rad(90));
-        camera->setNear(0.1);
+        camera->setNear(0.1f);
         camera->setFar(100);
         
         //next we create the backgrounds
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
             OSG::ShearedStereoCameraDecorator::create();
         cameraDecorator->setLeftEye(true);
         //unit length assume that one unit equals one meter
-        cameraDecorator->setEyeSeparation(0.06);
+        cameraDecorator->setEyeSeparation(0.06f);
         cameraDecorator->setDecoratee(camera);
         cameraDecorator->setZeroParallaxDistance(2);
         
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
         cameraDecorator = OSG::ShearedStereoCameraDecorator::create();
     
         cameraDecorator->setLeftEye(false);
-        cameraDecorator->setEyeSeparation(0.06);
+        cameraDecorator->setEyeSeparation(0.06f);
         cameraDecorator->setDecoratee(camera);
         cameraDecorator->setZeroParallaxDistance(2);
         

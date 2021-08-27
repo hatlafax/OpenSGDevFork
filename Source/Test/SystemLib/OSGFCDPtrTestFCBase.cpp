@@ -68,7 +68,7 @@
 #include "OSGFCDPtrTestFCBase.h"
 #include "OSGFCDPtrTestFC.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -2783,7 +2783,7 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldSFPub_ptr (void)
 
     returnValue->setSetMethod(
         boost::bind(&FCDPtrTestFC::setFieldSFPub_ptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
 
     editSField(FieldSFPub_ptrFieldMask);
 
@@ -2811,7 +2811,7 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldSFPub_weakptr(void)
 
     returnValue->setSetMethod(
         boost::bind(&FCDPtrTestFC::setFieldSFPub_weakptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
 
     editSField(FieldSFPub_weakptrFieldMask);
 
@@ -2839,7 +2839,7 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldSFPub_mpchildptr(void)
 
     returnValue->setSetMethod(
         boost::bind(&FCDPtrTestFC::setFieldSFPub_mpchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
 
     editSField(FieldSFPub_mpchildptrFieldMask);
 
@@ -2867,7 +2867,7 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldSFPro_ptr (void)
 
     returnValue->setSetMethod(
         boost::bind(&FCDPtrTestFC::setFieldSFPro_ptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
 
     editSField(FieldSFPro_ptrFieldMask);
 
@@ -2895,7 +2895,7 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldSFPro_weakptr(void)
 
     returnValue->setSetMethod(
         boost::bind(&FCDPtrTestFC::setFieldSFPro_weakptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
 
     editSField(FieldSFPro_weakptrFieldMask);
 
@@ -2923,7 +2923,7 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldSFPro_mpchildptr(void)
 
     returnValue->setSetMethod(
         boost::bind(&FCDPtrTestFC::setFieldSFPro_mpchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
 
     editSField(FieldSFPro_mpchildptrFieldMask);
 
@@ -2993,13 +2993,13 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldMFPub_ptr (void)
 
     returnValue->setAddMethod(
         boost::bind(&FCDPtrTestFC::pushToFieldMFPub_ptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&FCDPtrTestFC::removeFromFieldMFPub_ptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&FCDPtrTestFC::removeObjFromFieldMFPub_ptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&FCDPtrTestFC::clearFieldMFPub_ptr,
                     static_cast<FCDPtrTestFC *>(this)));
@@ -3030,13 +3030,13 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldMFPub_weakptr(void)
 
     returnValue->setAddMethod(
         boost::bind(&FCDPtrTestFC::pushToFieldMFPub_weakptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&FCDPtrTestFC::removeFromFieldMFPub_weakptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&FCDPtrTestFC::removeObjFromFieldMFPub_weakptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&FCDPtrTestFC::clearFieldMFPub_weakptr,
                     static_cast<FCDPtrTestFC *>(this)));
@@ -3067,13 +3067,13 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldMFPub_mpchildptr(void)
 
     returnValue->setAddMethod(
         boost::bind(&FCDPtrTestFC::pushToFieldMFPub_mpchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&FCDPtrTestFC::removeFromFieldMFPub_mpchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&FCDPtrTestFC::removeObjFromFieldMFPub_mpchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&FCDPtrTestFC::clearFieldMFPub_mpchildptr,
                     static_cast<FCDPtrTestFC *>(this)));
@@ -3104,13 +3104,13 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldMFPro_ptr (void)
 
     returnValue->setAddMethod(
         boost::bind(&FCDPtrTestFC::pushToFieldMFPro_ptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&FCDPtrTestFC::removeFromFieldMFPro_ptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&FCDPtrTestFC::removeObjFromFieldMFPro_ptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&FCDPtrTestFC::clearFieldMFPro_ptr,
                     static_cast<FCDPtrTestFC *>(this)));
@@ -3141,13 +3141,13 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldMFPro_weakptr(void)
 
     returnValue->setAddMethod(
         boost::bind(&FCDPtrTestFC::pushToFieldMFPro_weakptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&FCDPtrTestFC::removeFromFieldMFPro_weakptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&FCDPtrTestFC::removeObjFromFieldMFPro_weakptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&FCDPtrTestFC::clearFieldMFPro_weakptr,
                     static_cast<FCDPtrTestFC *>(this)));
@@ -3178,13 +3178,13 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldMFPro_mpchildptr(void)
 
     returnValue->setAddMethod(
         boost::bind(&FCDPtrTestFC::pushToFieldMFPro_mpchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&FCDPtrTestFC::removeFromFieldMFPro_mpchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&FCDPtrTestFC::removeObjFromFieldMFPro_mpchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&FCDPtrTestFC::clearFieldMFPro_mpchildptr,
                     static_cast<FCDPtrTestFC *>(this)));
@@ -3257,7 +3257,7 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldSFPub_spchildptr(void)
 
     returnValue->setSetMethod(
         boost::bind(&FCDPtrTestFC::setFieldSFPub_spchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
 
     editSField(FieldSFPub_spchildptrFieldMask);
 
@@ -3285,7 +3285,7 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldSFPro_spchildptr(void)
 
     returnValue->setSetMethod(
         boost::bind(&FCDPtrTestFC::setFieldSFPro_spchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
 
     editSField(FieldSFPro_spchildptrFieldMask);
 
@@ -3327,13 +3327,13 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldMFPub_spchildptr(void)
 
     returnValue->setAddMethod(
         boost::bind(&FCDPtrTestFC::pushToFieldMFPub_spchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&FCDPtrTestFC::removeFromFieldMFPub_spchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&FCDPtrTestFC::removeObjFromFieldMFPub_spchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&FCDPtrTestFC::clearFieldMFPub_spchildptr,
                     static_cast<FCDPtrTestFC *>(this)));
@@ -3364,13 +3364,13 @@ EditFieldHandlePtr FCDPtrTestFCBase::editHandleFieldMFPro_spchildptr(void)
 
     returnValue->setAddMethod(
         boost::bind(&FCDPtrTestFC::pushToFieldMFPro_spchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&FCDPtrTestFC::removeFromFieldMFPro_spchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&FCDPtrTestFC::removeObjFromFieldMFPro_spchildptr,
-                    static_cast<FCDPtrTestFC *>(this), _1));
+                    static_cast<FCDPtrTestFC *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&FCDPtrTestFC::clearFieldMFPro_spchildptr,
                     static_cast<FCDPtrTestFC *>(this)));

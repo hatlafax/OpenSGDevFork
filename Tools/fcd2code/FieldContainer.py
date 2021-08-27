@@ -282,13 +282,13 @@ class FieldContainer(FCDElement):
                 field["isLastField"] = False;
 
             # only use type includes once
-            if self.m_usedTypeInclude.has_key(field["TypeInclude"]):
+            if field["TypeInclude"] in self.m_usedTypeInclude:
                 field["needTypeInclude"] = False;
             else:
                 self.m_usedTypeInclude[field["TypeInclude"]] = True;
 
             # only use field includes once
-            if self.m_usedFieldInclude.has_key(field["FieldInclude"]):
+            if field["FieldInclude"] in self.m_usedFieldInclude:
                 field["needFieldInclude"] = False;
             else:
                 self.m_usedFieldInclude[field["FieldInclude"]] = True;

@@ -67,7 +67,7 @@
 #include "OSGCubeTextureChunkBase.h"
 #include "OSGCubeTextureChunk.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -746,7 +746,7 @@ EditFieldHandlePtr CubeTextureChunkBase::editHandlePosZImage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CubeTextureChunk::setPosZImage,
-                    static_cast<CubeTextureChunk *>(this), _1));
+                    static_cast<CubeTextureChunk *>(this), ::boost::placeholders::_1));
 
     editSField(PosZImageFieldMask);
 
@@ -774,7 +774,7 @@ EditFieldHandlePtr CubeTextureChunkBase::editHandlePosXImage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CubeTextureChunk::setPosXImage,
-                    static_cast<CubeTextureChunk *>(this), _1));
+                    static_cast<CubeTextureChunk *>(this), ::boost::placeholders::_1));
 
     editSField(PosXImageFieldMask);
 
@@ -802,7 +802,7 @@ EditFieldHandlePtr CubeTextureChunkBase::editHandleNegXImage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CubeTextureChunk::setNegXImage,
-                    static_cast<CubeTextureChunk *>(this), _1));
+                    static_cast<CubeTextureChunk *>(this), ::boost::placeholders::_1));
 
     editSField(NegXImageFieldMask);
 
@@ -830,7 +830,7 @@ EditFieldHandlePtr CubeTextureChunkBase::editHandlePosYImage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CubeTextureChunk::setPosYImage,
-                    static_cast<CubeTextureChunk *>(this), _1));
+                    static_cast<CubeTextureChunk *>(this), ::boost::placeholders::_1));
 
     editSField(PosYImageFieldMask);
 
@@ -858,7 +858,7 @@ EditFieldHandlePtr CubeTextureChunkBase::editHandleNegYImage      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CubeTextureChunk::setNegYImage,
-                    static_cast<CubeTextureChunk *>(this), _1));
+                    static_cast<CubeTextureChunk *>(this), ::boost::placeholders::_1));
 
     editSField(NegYImageFieldMask);
 

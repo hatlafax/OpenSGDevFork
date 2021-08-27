@@ -68,7 +68,7 @@
 #include "OSGComputeShaderChunkBase.h"
 #include "OSGComputeShaderChunk.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -829,13 +829,13 @@ EditFieldHandlePtr ComputeShaderChunkBase::editHandleComputeShader  (void)
 
     returnValue->setAddMethod(
         boost::bind(&ComputeShaderChunk::addComputeShader,
-                    static_cast<ComputeShaderChunk *>(this), _1));
+                    static_cast<ComputeShaderChunk *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ComputeShaderChunk::subComputeShader,
-                    static_cast<ComputeShaderChunk *>(this), _1));
+                    static_cast<ComputeShaderChunk *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&ComputeShaderChunk::removeObjFromComputeShader,
-                    static_cast<ComputeShaderChunk *>(this), _1));
+                    static_cast<ComputeShaderChunk *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ComputeShaderChunk::clearComputeShaders,
                     static_cast<ComputeShaderChunk *>(this)));
@@ -891,7 +891,7 @@ EditFieldHandlePtr ComputeShaderChunkBase::editHandleVariables      (void)
 
     returnValue->setSetMethod(
         boost::bind(&ComputeShaderChunk::setVariables,
-                    static_cast<ComputeShaderChunk *>(this), _1));
+                    static_cast<ComputeShaderChunk *>(this), ::boost::placeholders::_1));
 
     editSField(VariablesFieldMask);
 

@@ -43,7 +43,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "OSGConfig.h"
 
@@ -298,7 +298,10 @@ void TextureObjChunk::onCreate(const TextureObjChunk *source)
     setGLId(Window::registerGLObject(
                 boost::bind(&TextureObjChunk::handleGL, 
                             TextureObjChunkMTUncountedPtr(this), 
-                            _1, _2, _3, _4),
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2,
+                            ::boost::placeholders::_3,
+                            ::boost::placeholders::_4),
                 &TextureObjChunk::handleDestroyGL));
 }
 

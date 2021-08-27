@@ -67,7 +67,7 @@
 #include "OSGInsertTestTaskBase.h"
 #include "OSGInsertTestTask.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -558,7 +558,7 @@ EditFieldHandlePtr InsertTestTaskBase::editHandleWindow         (void)
 
     returnValue->setSetMethod(
         boost::bind(&InsertTestTask::setWindow,
-                    static_cast<InsertTestTask *>(this), _1));
+                    static_cast<InsertTestTask *>(this), ::boost::placeholders::_1));
 
     editSField(WindowFieldMask);
 

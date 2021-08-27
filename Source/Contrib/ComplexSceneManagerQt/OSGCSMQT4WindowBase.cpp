@@ -66,7 +66,7 @@
 #include "OSGCSMQT4WindowBase.h"
 #include "OSGCSMQT4Window.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 

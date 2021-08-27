@@ -124,7 +124,7 @@ class PointerMFieldIterator :
     typedef typename Inherited::reference               reference;
 #endif
 
-#if defined(WIN32) && _SECURE_SCL == 1 && _MSC_VER < 1600
+#if defined(WIN32) && _ITERATOR_DEBUG_LEVEL == 1 && _MSC_VER < 1600
     typedef typename Inherited::_Checked_iterator_base_type 
                                                    _Checked_iterator_base_type;
 #endif
@@ -754,17 +754,6 @@ class PointerMField :
 #endif
 
     /*! \}                                                                 */
-    /*=========================  PROTECTED  ===============================*/
-
-  protected:
-
-    /*---------------------------------------------------------------------*/
-    /*! \name Members                                                      */
-    /*! \{                                                                 */
-
-    static FieldType _fieldType;
-
-    /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name FieldDesc creation                                           */
     /*! \{                                                                 */
@@ -780,6 +769,17 @@ class PointerMField :
                                         UInt32                uiFieldFlags,
                                         FieldIndexEditMethod  fEditMethod,
                                         FieldIndexGetMethod   fGetMethod  );
+
+    /*! \}                                                                 */
+    /*=========================  PROTECTED  ===============================*/
+
+  protected:
+
+    /*---------------------------------------------------------------------*/
+    /*! \name Members                                                      */
+    /*! \{                                                                 */
+
+    static FieldType _fieldType;
 
     /*! \}                                                                 */
     /*==========================  PRIVATE  ================================*/

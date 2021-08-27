@@ -289,9 +289,7 @@ class OSG_UTIL_DLLMAPPING DotFileGeneratorGraphOp : public GraphOp
     typedef std::vector<      PairInfoT                 > VecEdgesT;
     typedef std::pair  <      const void*,   const void*> PairObjIdsT;
 
-    struct lessPairObjIdsT : public std::binary_function<const PairObjIdsT,
-                                                         const PairObjIdsT,
-                                                         bool              >
+    struct lessPairObjIdsT
     {
         bool operator()(const PairObjIdsT& lhs, const PairObjIdsT& rhs) const
         {

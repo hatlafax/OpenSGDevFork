@@ -68,7 +68,7 @@
 #include "OSGMultiLightShadowStageDataBase.h"
 #include "OSGMultiLightShadowStageData.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -657,7 +657,7 @@ EditFieldHandlePtr MultiLightShadowStageDataBase::editHandleOverrideProgChunk(vo
 
     returnValue->setSetMethod(
         boost::bind(&MultiLightShadowStageData::setOverrideProgChunk,
-                    static_cast<MultiLightShadowStageData *>(this), _1));
+                    static_cast<MultiLightShadowStageData *>(this), ::boost::placeholders::_1));
 
     editSField(OverrideProgChunkFieldMask);
 
@@ -685,7 +685,7 @@ EditFieldHandlePtr MultiLightShadowStageDataBase::editHandleOverrideProgram(void
 
     returnValue->setSetMethod(
         boost::bind(&MultiLightShadowStageData::setOverrideProgram,
-                    static_cast<MultiLightShadowStageData *>(this), _1));
+                    static_cast<MultiLightShadowStageData *>(this), ::boost::placeholders::_1));
 
     editSField(OverrideProgramFieldMask);
 

@@ -67,7 +67,7 @@
 #include "OSGStageBase.h"
 #include "OSGStage.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -497,7 +497,7 @@ EditFieldHandlePtr StageBase::editHandleRenderTarget   (void)
 
     returnValue->setSetMethod(
         boost::bind(&Stage::setRenderTarget,
-                    static_cast<Stage *>(this), _1));
+                    static_cast<Stage *>(this), ::boost::placeholders::_1));
 
     editSField(RenderTargetFieldMask);
 

@@ -43,7 +43,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/unordered_map.hpp>
@@ -272,7 +272,10 @@ void ShaderStorageBufferObjChunk::onCreate(const ShaderStorageBufferObjChunk *so
     setGLId(Window::registerGLObject(
                 boost::bind(&ShaderStorageBufferObjChunk::handleGL, 
                             ShaderStorageBufferObjChunkMTUncountedPtr(this), 
-                            _1, _2, _3, _4),
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2,
+                            ::boost::placeholders::_3,
+                            ::boost::placeholders::_4),
                 &ShaderStorageBufferObjChunk::handleDestroyGL));
 }
 

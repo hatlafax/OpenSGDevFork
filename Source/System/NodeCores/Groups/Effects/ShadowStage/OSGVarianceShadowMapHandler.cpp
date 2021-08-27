@@ -287,7 +287,7 @@ void VarianceShadowMapHandler::createShadowMapsFBO(RenderAction *a,
                     RenderFunctor f = 
                         boost::bind(&VarianceShadowMapHandler::genMipMapCB,
                                     this,
-                                    _1,
+                                    ::boost::placeholders::_1,
                                     i);
 
                     pPart->addPreRenderCallback(f);

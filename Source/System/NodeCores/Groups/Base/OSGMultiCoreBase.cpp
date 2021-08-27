@@ -67,7 +67,7 @@
 #include "OSGMultiCoreBase.h"
 #include "OSGMultiCore.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -596,13 +596,13 @@ EditFieldHandlePtr MultiCoreBase::editHandleCores          (void)
 
     returnValue->setAddMethod(
         boost::bind(&MultiCore::addCore,
-                    static_cast<MultiCore *>(this), _1));
+                    static_cast<MultiCore *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&MultiCore::subCore,
-                    static_cast<MultiCore *>(this), _1));
+                    static_cast<MultiCore *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&MultiCore::subCoreByObj,
-                    static_cast<MultiCore *>(this), _1));
+                    static_cast<MultiCore *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&MultiCore::clearCores,
                     static_cast<MultiCore *>(this)));

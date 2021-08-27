@@ -55,7 +55,7 @@ class OptionHandler:
         """ Setup option parser
         """
         if OptionHandler.m_parser != None:
-            print "WARNING: OptionHandler.setup: Called twice.";
+            print("WARNING: OptionHandler.setup: Called twice.");
             return;
         
         OptionHandler.m_parser = optparse.OptionParser();
@@ -132,7 +132,7 @@ class OptionHandler:
         """ Parse command line arguments.
         """
         if OptionHandler.m_parser == None:
-            print "WARNING: OptionHandler.parse: no parser, run setup first.";
+            print("WARNING: OptionHandler.parse: no parser, run setup first.");
             return;
         
         (options, args) = OptionHandler.m_parser.parse_args(args);

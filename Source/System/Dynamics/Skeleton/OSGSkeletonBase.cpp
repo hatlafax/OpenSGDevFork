@@ -68,7 +68,7 @@
 #include "OSGSkeletonBase.h"
 #include "OSGSkeleton.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1211,13 +1211,13 @@ EditFieldHandlePtr SkeletonBase::editHandleRoots          (void)
 
     returnValue->setAddMethod(
         boost::bind(&Skeleton::pushToRoots,
-                    static_cast<Skeleton *>(this), _1));
+                    static_cast<Skeleton *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&Skeleton::removeFromRoots,
-                    static_cast<Skeleton *>(this), _1));
+                    static_cast<Skeleton *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&Skeleton::removeObjFromRoots,
-                    static_cast<Skeleton *>(this), _1));
+                    static_cast<Skeleton *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&Skeleton::clearRoots,
                     static_cast<Skeleton *>(this)));
@@ -1248,13 +1248,13 @@ EditFieldHandlePtr SkeletonBase::editHandleJoints         (void)
 
     returnValue->setAddMethod(
         boost::bind(&Skeleton::pushToJoints,
-                    static_cast<Skeleton *>(this), _1));
+                    static_cast<Skeleton *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&Skeleton::removeFromJoints,
-                    static_cast<Skeleton *>(this), _1));
+                    static_cast<Skeleton *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&Skeleton::removeObjFromJoints,
-                    static_cast<Skeleton *>(this), _1));
+                    static_cast<Skeleton *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&Skeleton::clearJoints,
                     static_cast<Skeleton *>(this)));
@@ -1285,13 +1285,13 @@ EditFieldHandlePtr SkeletonBase::editHandleParentJoints   (void)
 
     returnValue->setAddMethod(
         boost::bind(&Skeleton::pushToParentJoints,
-                    static_cast<Skeleton *>(this), _1));
+                    static_cast<Skeleton *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&Skeleton::removeFromParentJoints,
-                    static_cast<Skeleton *>(this), _1));
+                    static_cast<Skeleton *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&Skeleton::removeObjFromParentJoints,
-                    static_cast<Skeleton *>(this), _1));
+                    static_cast<Skeleton *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&Skeleton::clearParentJoints,
                     static_cast<Skeleton *>(this)));

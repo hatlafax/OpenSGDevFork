@@ -620,7 +620,7 @@ void TrapezoidalShadowMapEngine::handlePointLightEnter(
                 RenderPartition::SimpleDrawCallback emptyCubeFaceDraw =
                     boost::bind(
                         &TrapezoidalShadowMapEngine::emptyCubeFaceDrawFunc,
-                        this, _1);
+                        this, ::boost::placeholders::_1);
 
                 part->dropFunctor(emptyCubeFaceDraw);
             }

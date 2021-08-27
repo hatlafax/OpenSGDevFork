@@ -90,7 +90,7 @@
 
 #include <cstdlib>
 #include <cstdio>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "OSGConfig.h"
 #include "OSGGL.h"
@@ -313,14 +313,20 @@ void FrameBufferObject::onCreate(const FrameBufferObject *source)
         Window::registerGLObject(
             boost::bind(&FrameBufferObject::handleGL, 
                         FrameBufferObjectMTUncountedPtr(this), 
-                        _1, _2, _3, _4),
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2,
+                        ::boost::placeholders::_3,
+                        ::boost::placeholders::_4),
             &FrameBufferObject::handleDestroyGL));
 
     setMultiSampleGLId(               
         Window::registerGLObject(
             boost::bind(&FrameBufferObject::handleMultiSampleGL, 
                         FrameBufferObjectMTUncountedPtr(this), 
-                        _1, _2, _3, _4),
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2,
+                        ::boost::placeholders::_3,
+                        ::boost::placeholders::_4),
             &FrameBufferObject::handleDestroyGL));
 }
 

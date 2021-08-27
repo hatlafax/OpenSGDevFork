@@ -3819,7 +3819,7 @@ void manageNodePairStore(OSG::Int32 storeIdx)
     if (storeIdx < 0)
         storeIdx = numGeoTypes + storeIdx;
 
-    OSG_ASSERT(0 <= storeIdx && storeIdx < nodePairStore.size());
+    OSG_ASSERT(0 <= storeIdx && storeIdx < static_cast<OSG::Int32>(nodePairStore.size()));
 
     OSG::NodeRefPtr geo1Node = NULL;
     OSG::NodeRefPtr geo2Node = NULL;
@@ -3889,7 +3889,7 @@ void setupScene2(OSG::Int32 storeIdx)
         {
             GeometryStore v;
             find_geom_cores_helper helper(v);
-            traverse(node, boost::bind(&find_geom_cores_helper::enter, &helper, _1));
+            traverse(node, boost::bind(&find_geom_cores_helper::enter, &helper, ::boost::placeholders::_1));
 
             if (!v.empty())
             {
@@ -3902,7 +3902,7 @@ void setupScene2(OSG::Int32 storeIdx)
         {
             GeometryStore v;
             find_geom_cores_helper helper(v);
-            traverse(node, boost::bind(&find_geom_cores_helper::enter, &helper, _1));
+            traverse(node, boost::bind(&find_geom_cores_helper::enter, &helper, ::boost::placeholders::_1));
 
             if (!v.empty())
             {
@@ -4222,8 +4222,8 @@ int main(int argc, char **argv)
 //        OSG::NodeRefPtr loadNode = OSG::SceneFileHandler::the()->read("d:/DescMatTest1.osb");
 //        mgr->setRoot(loadNode);
 
-        OSG::ShaderProgramFunctor   initFunctor = boost::bind(::initShader,   _1);
-        OSG::ShaderProgramFunctor updateFunctor = boost::bind(::updateShader, _1);
+        OSG::ShaderProgramFunctor   initFunctor = boost::bind(::initShader, ::boost::placeholders::_1);
+        OSG::ShaderProgramFunctor updateFunctor = boost::bind(::updateShader, ::boost::placeholders::_1);
         
         // create the DescMaterialManager
         materialManager = OSG::DescMaterialManager::createDefault(initFunctor, "", updateFunctor, "");
@@ -4609,7 +4609,7 @@ void keyboard(unsigned char k, int x, int y)
         case 'm':
         {
             shadingModelIdx++;
-            if (shadingModelIdx >= shadingModels.size())
+            if (shadingModelIdx >= static_cast<OSG::Int32>(shadingModels.size()))
                 shadingModelIdx = 0;
 
             setupMaterial();

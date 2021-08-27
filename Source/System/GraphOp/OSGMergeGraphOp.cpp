@@ -41,7 +41,7 @@
 *                             Includes                                    *
 \***************************************************************************/
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "OSGMergeGraphOp.h"
 #include "OSGDirectionalLight.h"
@@ -223,8 +223,8 @@ void MergeGraphOp::makeExcludeList(Node * node)
         Action::ResultE>(this,&MergeGraphOp::excludeListLeave));
     */
     ::traverse(node, 
-               boost::bind(&MergeGraphOp::excludeListEnter, this, _1    ),
-               boost::bind(&MergeGraphOp::excludeListLeave, this, _1, _2) );
+               boost::bind(&MergeGraphOp::excludeListEnter, this, ::boost::placeholders::_1    ),
+               boost::bind(&MergeGraphOp::excludeListLeave, this, ::boost::placeholders::_1, ::boost::placeholders::_2) );
 }
 
 

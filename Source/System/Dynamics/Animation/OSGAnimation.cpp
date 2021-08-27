@@ -48,7 +48,7 @@
 #include "OSGAnimation.h"
 #include "OSGAnimChannel.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -135,7 +135,7 @@ void Animation::setTimeSensor(AnimTimeSensor *value)
     if(_sfTimeSensor.getValue() != NULL)
     {
         _sfTimeSensor.getValue()->subChangedFunctor(
-            boost::bind(&Animation::timeSensorChanged, this, _1, _2, _3));
+            boost::bind(&Animation::timeSensorChanged, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3));
     }
 
     Inherited::setTimeSensor(value);
@@ -144,7 +144,7 @@ void Animation::setTimeSensor(AnimTimeSensor *value)
     {
         _sfTimeSensor.getValue()->setEnabled       (false               );
         _sfTimeSensor.getValue()->addChangedFunctor(
-            boost::bind(&Animation::timeSensorChanged, this, _1, _2, _3), "");
+            boost::bind(&Animation::timeSensorChanged, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3), "");
     }
 }
 

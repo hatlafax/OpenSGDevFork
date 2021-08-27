@@ -67,7 +67,7 @@
 #include "OSGSortLastWindowBase.h"
 #include "OSGSortLastWindow.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -582,13 +582,13 @@ EditFieldHandlePtr SortLastWindowBase::editHandleGroupNodes     (void)
 
     returnValue->setAddMethod(
         boost::bind(&SortLastWindow::pushToGroupNodes,
-                    static_cast<SortLastWindow *>(this), _1));
+                    static_cast<SortLastWindow *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&SortLastWindow::removeFromGroupNodes,
-                    static_cast<SortLastWindow *>(this), _1));
+                    static_cast<SortLastWindow *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&SortLastWindow::removeObjFromGroupNodes,
-                    static_cast<SortLastWindow *>(this), _1));
+                    static_cast<SortLastWindow *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&SortLastWindow::clearGroupNodes,
                     static_cast<SortLastWindow *>(this)));

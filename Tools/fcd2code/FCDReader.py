@@ -86,7 +86,7 @@ class FCDReader:
         
         self.m_parser.parse(fileName);
         
-        fcdFile     = open(fileName, "r");
+        fcdFile     = open(fileName, "r", encoding='utf-8');
         fcdContents = fcdFile.readlines();
         fcdFile.close();
         

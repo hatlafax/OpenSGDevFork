@@ -67,7 +67,7 @@
 #include "OSGMaterialFactoryBase.h"
 #include "OSGMaterialFactory.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -328,7 +328,7 @@ EditFieldHandlePtr MaterialFactoryBase::editHandleShaderManager  (void)
 
     returnValue->setSetMethod(
         boost::bind(&MaterialFactory::setShaderManager,
-                    static_cast<MaterialFactory *>(this), _1));
+                    static_cast<MaterialFactory *>(this), ::boost::placeholders::_1));
 
     editSField(ShaderManagerFieldMask);
 

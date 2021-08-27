@@ -68,7 +68,7 @@
 #include "OSGSkyBackgroundBase.h"
 #include "OSGSkyBackground.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1725,7 +1725,7 @@ EditFieldHandlePtr SkyBackgroundBase::editHandleBackTexture    (void)
 
     returnValue->setSetMethod(
         boost::bind(&SkyBackground::setBackTexture,
-                    static_cast<SkyBackground *>(this), _1));
+                    static_cast<SkyBackground *>(this), ::boost::placeholders::_1));
 
     editSField(BackTextureFieldMask);
 
@@ -1753,7 +1753,7 @@ EditFieldHandlePtr SkyBackgroundBase::editHandleBottomTexture  (void)
 
     returnValue->setSetMethod(
         boost::bind(&SkyBackground::setBottomTexture,
-                    static_cast<SkyBackground *>(this), _1));
+                    static_cast<SkyBackground *>(this), ::boost::placeholders::_1));
 
     editSField(BottomTextureFieldMask);
 
@@ -1781,7 +1781,7 @@ EditFieldHandlePtr SkyBackgroundBase::editHandleFrontTexture   (void)
 
     returnValue->setSetMethod(
         boost::bind(&SkyBackground::setFrontTexture,
-                    static_cast<SkyBackground *>(this), _1));
+                    static_cast<SkyBackground *>(this), ::boost::placeholders::_1));
 
     editSField(FrontTextureFieldMask);
 
@@ -1809,7 +1809,7 @@ EditFieldHandlePtr SkyBackgroundBase::editHandleLeftTexture    (void)
 
     returnValue->setSetMethod(
         boost::bind(&SkyBackground::setLeftTexture,
-                    static_cast<SkyBackground *>(this), _1));
+                    static_cast<SkyBackground *>(this), ::boost::placeholders::_1));
 
     editSField(LeftTextureFieldMask);
 
@@ -1837,7 +1837,7 @@ EditFieldHandlePtr SkyBackgroundBase::editHandleRightTexture   (void)
 
     returnValue->setSetMethod(
         boost::bind(&SkyBackground::setRightTexture,
-                    static_cast<SkyBackground *>(this), _1));
+                    static_cast<SkyBackground *>(this), ::boost::placeholders::_1));
 
     editSField(RightTextureFieldMask);
 
@@ -1865,7 +1865,7 @@ EditFieldHandlePtr SkyBackgroundBase::editHandleTopTexture     (void)
 
     returnValue->setSetMethod(
         boost::bind(&SkyBackground::setTopTexture,
-                    static_cast<SkyBackground *>(this), _1));
+                    static_cast<SkyBackground *>(this), ::boost::placeholders::_1));
 
     editSField(TopTextureFieldMask);
 
@@ -2068,7 +2068,7 @@ EditFieldHandlePtr SkyBackgroundBase::editHandleBeacon         (void)
 
     returnValue->setSetMethod(
         boost::bind(&SkyBackground::setBeacon,
-                    static_cast<SkyBackground *>(this), _1));
+                    static_cast<SkyBackground *>(this), ::boost::placeholders::_1));
 
     editSField(BeaconFieldMask);
 

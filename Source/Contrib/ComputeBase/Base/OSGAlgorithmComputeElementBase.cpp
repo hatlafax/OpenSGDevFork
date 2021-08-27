@@ -67,7 +67,7 @@
 #include "OSGAlgorithmComputeElementBase.h"
 #include "OSGAlgorithmComputeElement.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -435,7 +435,7 @@ EditFieldHandlePtr AlgorithmComputeElementBase::editHandleAlgorithm      (void)
 
     returnValue->setSetMethod(
         boost::bind(&AlgorithmComputeElement::setAlgorithm,
-                    static_cast<AlgorithmComputeElement *>(this), _1));
+                    static_cast<AlgorithmComputeElement *>(this), ::boost::placeholders::_1));
 
     editSField(AlgorithmFieldMask);
 

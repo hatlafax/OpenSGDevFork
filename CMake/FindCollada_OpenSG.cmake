@@ -129,9 +129,15 @@ ENDIF()
 # handle the QUIETLY and REQUIRED arguments and set COLLADA_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(COLLADA DEFAULT_MSG COLLADA_LIBRARY_RELEASE
-                                                      COLLADA_DAE_INCLUDE_DIR
-                                                      COLLADA_DOM_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Collada_OpenSG DEFAULT_MSG
+                                  COLLADA_LIBRARY_RELEASE
+                                  COLLADA_DAE_INCLUDE_DIR
+                                  COLLADA_DOM_INCLUDE_DIR)
+IF(Collada_OpenSG_FOUND)
+  SET(COLLADA_FOUND TRUE)
+ELSE()
+  SET(COLLADA_FOUND FALSE)
+ENDIF()
 
 # if only the debug or release lib was found, use it for both configurations,
 # except on windows where the runtimes have to match

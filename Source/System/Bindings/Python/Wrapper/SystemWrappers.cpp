@@ -19,7 +19,7 @@
 #include <OSGLine.h>
 #include <OSGContainerPtrFuncs.h>
 #include <OSGViewport.h>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/python.hpp>
 #include "SystemWrappers.h"
 

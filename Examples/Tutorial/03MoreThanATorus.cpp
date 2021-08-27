@@ -33,7 +33,7 @@ OSG::NodeTransitPtr createScenegraph(void)
     OSG::NodeRecPtr houseMain = OSG::makeBox(20,20,20,1,1,1);
     
     // now the roof
-    OSG::NodeRecPtr roof = OSG::makeBox(14.14, 14.14, 20, 1, 1, 1);
+    OSG::NodeRecPtr roof = OSG::makeBox(14.14f, 14.14f, 20, 1, 1, 1);
     
     // and the chimney - we have the top and sides generated
     // but we have no need for the bottom (it is inside the house)

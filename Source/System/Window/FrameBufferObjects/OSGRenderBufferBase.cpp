@@ -67,7 +67,7 @@
 #include "OSGRenderBufferBase.h"
 #include "OSGRenderBuffer.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -764,7 +764,7 @@ EditFieldHandlePtr RenderBufferBase::editHandleImage          (void)
 
     returnValue->setSetMethod(
         boost::bind(&RenderBuffer::setImage,
-                    static_cast<RenderBuffer *>(this), _1));
+                    static_cast<RenderBuffer *>(this), ::boost::placeholders::_1));
 
     editSField(ImageFieldMask);
 

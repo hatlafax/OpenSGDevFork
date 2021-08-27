@@ -80,7 +80,14 @@ ENDIF(CG_LIBRARY_RELEASE AND CG_GL_LIBRARY_RELEASE)
 # handle the QUIETLY and REQUIRED arguments and set CG_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(CG DEFAULT_MSG 
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Cg DEFAULT_MSG 
                                   CG_LIBRARIES_FOUND
                                   CG_INCLUDE_DIR)
+
+IF(Cg_FOUND)
+  SET(CG_FOUND TRUE)
+ELSE()
+  SET(CG_FOUND FALSE)
+ENDIF()
+
 

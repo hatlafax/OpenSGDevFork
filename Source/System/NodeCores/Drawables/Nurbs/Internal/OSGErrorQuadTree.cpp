@@ -64,14 +64,14 @@ static char THIS_FILE[] = __FILE__;
 bool CErrorQuadTree::m_sbNormalApproximation = false;
 
 CErrorQuadTree::CErrorQuadTree() :
-    m_fMaxError   (-1.0    ),
+    m_fMaxError   (-1.0f   ),
 #ifdef OSG_USE_NURBS_PATCH
     m_ptRoot      (NULL    ),
 #else
     m_vvptRoot    (        ),
     m_ptBPRoot    (NULL    ),
 #endif
-    m_fErrorCutoff(DCTP_EPS)
+    m_fErrorCutoff(static_cast<float>(DCTP_EPS))
 {
 }
 

@@ -42,7 +42,7 @@
 #include <sstream>
 #include <fstream>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "OSGConfig.h"
 
@@ -85,13 +85,13 @@ void VisitSubTree::setSubTreeRoot(Node * const value)
     if(_sfSubTreeRoot.getValue() != NULL)
     {
         _sfSubTreeRoot.getValue()->subChangedFunctor(
-            boost::bind(&VisitSubTree::rootChanged, this, _1, _2, _3));
+            boost::bind(&VisitSubTree::rootChanged, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3));
     }
 
     if(value != NULL)
     {
         value->addChangedFunctor(
-            boost::bind(&VisitSubTree::rootChanged, this, _1, _2, _3),
+            boost::bind(&VisitSubTree::rootChanged, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3),
             "");
     }
 
