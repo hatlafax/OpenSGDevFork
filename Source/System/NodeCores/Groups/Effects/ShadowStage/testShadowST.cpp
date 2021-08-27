@@ -140,13 +140,13 @@ int doMain(int argc, char **argv)
     //_light2_trans->editMatrix().setTranslate(75.0, 0.0, 25.0);
     _light2_trans->editMatrix().setTranslate(250.0, -250.0, 300.0);
        
-    _light2_core->setAmbient(0.15,0.15,0.15,1);
-    _light2_core->setDiffuse(0.5,0.5,0.5,1);
-    _light2_core->setSpecular(0.0,0.0,0.0,1);
-    _light2_core->setSpotCutOffDeg(40.0);
-    _light2_core->setSpotDirection(-0.85,0.85,-1.0);
+    _light2_core->setAmbient(0.15f,0.15f,0.15f,1);
+    _light2_core->setDiffuse(0.5f,0.5f,0.5f,1);
+    _light2_core->setSpecular(0.0f,0.0f,0.0f,1);
+    _light2_core->setSpotCutOffDeg(40.0f);
+    _light2_core->setSpotDirection(-0.85f,0.85f,-1.0f);
     _light2_core->setBeacon(light2_beacon);
-    _light2_core->setShadowIntensity(0.7);
+    _light2_core->setShadowIntensity(0.7f);
     _light2_core->setOn(true);
 
     /*
@@ -531,8 +531,8 @@ int doMain(int argc, char **argv)
     _light2_core->setDiffuse(0.8f, 0.8f, 0.8f, 1);
 
     _light1_core->setOn(false);
-    _light1_core->setAmbient(0.3, 0.3, 0.3, 1);
-    _light1_core->setDiffuse(0.8, 0.8, 0.8, 1);
+    _light1_core->setAmbient(0.3f, 0.3f, 0.3f, 1);
+    _light1_core->setDiffuse(0.8f, 0.8f, 0.8f, 1);
 
     gwin->setGlutId(winid);
 #ifdef SHADOW_CHECK

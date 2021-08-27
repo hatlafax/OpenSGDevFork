@@ -404,11 +404,11 @@ void CPUSkinningAlgorithm::changed(ConstFieldMaskArg whichField,
     {
         if(_sfSkeleton.getValue()->hasChangedFunctor(boost::bind(
                &CPUSkinningAlgorithm::skeletonChanged,
-               this, _1, _2                                )) == false)
+               this, ::boost::placeholders::_1, ::boost::placeholders::_2)) == false)
         {
             _sfSkeleton.getValue()->addChangedFunctor(boost::bind(
                 &CPUSkinningAlgorithm::skeletonChanged,
-                this, _1, _2                                ),
+                this, ::boost::placeholders::_1, ::boost::placeholders::_2),
                 "CPUSkinningAlgorithm::skeletonChanged"  );
         }
     }
@@ -810,7 +810,7 @@ void CPUSkinningAlgorithm::renderGeometry(
     }
 
     DrawEnv::DrawFunctor drawFunc  = boost::bind(
-        &CPUSkinningAlgorithm::drawPrimitives, this, skinGeo, data, _1);
+        &CPUSkinningAlgorithm::drawPrimitives, this, skinGeo, data, ::boost::placeholders::_1);
     UInt32               uiNPasses = pPrimeMat->getNPasses();
     
     for(UInt32 uiPass = 0; uiPass < uiNPasses; ++uiPass)
@@ -917,7 +917,7 @@ void CPUSkinningAlgorithm::resolveLinks(void)
     {
         _sfSkeleton.getValue()->subChangedFunctor(boost::bind(
             &CPUSkinningAlgorithm::skeletonChanged,
-            this, _1, _2                           ));
+            this, ::boost::placeholders::_1, ::boost::placeholders::_2));
     }
 
     Inherited::resolveLinks();

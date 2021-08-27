@@ -74,7 +74,7 @@
 #include "OSGSimpleShadowMapEngineDataBase.h"
 #include "OSGSimpleShadowMapEngineData.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -900,7 +900,7 @@ EditFieldHandlePtr SimpleShadowMapEngineDataBase::editHandleCamera         (void
 
     returnValue->setSetMethod(
         boost::bind(&SimpleShadowMapEngineData::setCamera,
-                    static_cast<SimpleShadowMapEngineData *>(this), _1));
+                    static_cast<SimpleShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(CameraFieldMask);
 
@@ -928,7 +928,7 @@ EditFieldHandlePtr SimpleShadowMapEngineDataBase::editHandleRenderTarget   (void
 
     returnValue->setSetMethod(
         boost::bind(&SimpleShadowMapEngineData::setRenderTarget,
-                    static_cast<SimpleShadowMapEngineData *>(this), _1));
+                    static_cast<SimpleShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(RenderTargetFieldMask);
 
@@ -956,7 +956,7 @@ EditFieldHandlePtr SimpleShadowMapEngineDataBase::editHandleTexChunk       (void
 
     returnValue->setSetMethod(
         boost::bind(&SimpleShadowMapEngineData::setTexChunk,
-                    static_cast<SimpleShadowMapEngineData *>(this), _1));
+                    static_cast<SimpleShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(TexChunkFieldMask);
 
@@ -984,7 +984,7 @@ EditFieldHandlePtr SimpleShadowMapEngineDataBase::editHandleTexBuffer      (void
 
     returnValue->setSetMethod(
         boost::bind(&SimpleShadowMapEngineData::setTexBuffer,
-                    static_cast<SimpleShadowMapEngineData *>(this), _1));
+                    static_cast<SimpleShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(TexBufferFieldMask);
 
@@ -1012,7 +1012,7 @@ EditFieldHandlePtr SimpleShadowMapEngineDataBase::editHandleLightChunk     (void
 
     returnValue->setSetMethod(
         boost::bind(&SimpleShadowMapEngineData::setLightChunk,
-                    static_cast<SimpleShadowMapEngineData *>(this), _1));
+                    static_cast<SimpleShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(LightChunkFieldMask);
 
@@ -1040,7 +1040,7 @@ EditFieldHandlePtr SimpleShadowMapEngineDataBase::editHandleBlendChunk     (void
 
     returnValue->setSetMethod(
         boost::bind(&SimpleShadowMapEngineData::setBlendChunk,
-                    static_cast<SimpleShadowMapEngineData *>(this), _1));
+                    static_cast<SimpleShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(BlendChunkFieldMask);
 
@@ -1068,7 +1068,7 @@ EditFieldHandlePtr SimpleShadowMapEngineDataBase::editHandleTexGenChunk    (void
 
     returnValue->setSetMethod(
         boost::bind(&SimpleShadowMapEngineData::setTexGenChunk,
-                    static_cast<SimpleShadowMapEngineData *>(this), _1));
+                    static_cast<SimpleShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(TexGenChunkFieldMask);
 
@@ -1096,7 +1096,7 @@ EditFieldHandlePtr SimpleShadowMapEngineDataBase::editHandlePolyChunk      (void
 
     returnValue->setSetMethod(
         boost::bind(&SimpleShadowMapEngineData::setPolyChunk,
-                    static_cast<SimpleShadowMapEngineData *>(this), _1));
+                    static_cast<SimpleShadowMapEngineData *>(this), ::boost::placeholders::_1));
 
     editSField(PolyChunkFieldMask);
 

@@ -66,7 +66,7 @@
 #include "OSGMultiSwitchBase.h"
 #include "OSGMultiSwitch.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 

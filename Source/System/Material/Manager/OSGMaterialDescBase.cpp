@@ -71,7 +71,7 @@
 #include "OSGMaterialDescBase.h"
 #include "OSGMaterialDesc.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -4101,13 +4101,13 @@ EditFieldHandlePtr MaterialDescBase::editHandleTextureDesc    (void)
 
     returnValue->setAddMethod(
         boost::bind(&MaterialDesc::pushToTextureDesc,
-                    static_cast<MaterialDesc *>(this), _1));
+                    static_cast<MaterialDesc *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&MaterialDesc::removeFromTextureDesc,
-                    static_cast<MaterialDesc *>(this), _1));
+                    static_cast<MaterialDesc *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&MaterialDesc::removeObjFromTextureDesc,
-                    static_cast<MaterialDesc *>(this), _1));
+                    static_cast<MaterialDesc *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&MaterialDesc::clearTextureDesc,
                     static_cast<MaterialDesc *>(this)));

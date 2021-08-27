@@ -52,7 +52,7 @@
 #include "OSGNameAttachment.h"
 #include "OSGStringUtils.h"
 
-#include "boost/bind.hpp"
+#include <boost/bind/bind.hpp>
 
 #include "OSGPointerSField.h"
 
@@ -515,14 +515,14 @@ EditFieldHandlePtr AttachmentContainer::editHandleAttachments(void)
 
     returnValue->setAddMethod(boost::bind(&AttachmentContainer::addAttachment,
                                           this,
-                                          _1,
-                                          _2));
+                                          ::boost::placeholders::_1,
+                                          ::boost::placeholders::_2));
 
     returnValue->setReplaceMethod(
         boost::bind(&AttachmentContainer::replaceAttachmentByObj,
-                                          this,
-                                          _1,
-                                          _2));
+                    this,
+                    ::boost::placeholders::_1,
+                    ::boost::placeholders::_2));
 
     editSField(AttachmentsFieldMask);
 

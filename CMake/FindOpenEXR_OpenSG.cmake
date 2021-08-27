@@ -125,12 +125,17 @@ FIND_LIBRARY(OPENEXR_LIBRARY_ILMTHREAD_DEBUG
 # handle the QUIETLY and REQUIRED arguments and set OPENEXR_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OPENEXR DEFAULT_MSG 
-                                          OPENEXR_LIBRARY_IMF_RELEASE
-                                          OPENEXR_LIBRARY_HALF_RELEASE
-                                          OPENEXR_LIBRARY_IEX_RELEASE
-                                          OPENEXR_LIBRARY_ILMTHREAD_RELEASE
-                                          OPENEXR_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenEXR_OpenSG DEFAULT_MSG 
+                                  OPENEXR_LIBRARY_IMF_RELEASE
+                                  OPENEXR_LIBRARY_HALF_RELEASE
+                                  OPENEXR_LIBRARY_IEX_RELEASE
+                                  OPENEXR_LIBRARY_ILMTHREAD_RELEASE
+                                  OPENEXR_INCLUDE_DIR)
+IF(OpenEXR_OpenSG_FOUND)
+  SET(OPENEXR_FOUND TRUE)
+ELSE()
+  SET(OPENEXR_FOUND FALSE)
+ENDIF()
 
 IF(OPENEXR_INCLUDE_DIR)
     LIST(APPEND OPENEXR_INCLUDE_DIR "${OPENEXR_INCLUDE_DIR}/OpenEXR")

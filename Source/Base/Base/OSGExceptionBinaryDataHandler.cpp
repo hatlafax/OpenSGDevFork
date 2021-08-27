@@ -90,7 +90,7 @@ void ExceptionBinaryDataHandler::put(void const *src, SizeT size)
     {
         if(_zeroCopyThreshold == 1)
         {
-            write(const_cast<MemoryHandle>(data), size);
+            write(const_cast<MemoryHandle>(data), static_cast<UInt32>(size));
         }
         else
         {
@@ -102,8 +102,8 @@ void ExceptionBinaryDataHandler::put(void const *src, SizeT size)
 
             _zeroCopyBuffers.push_back(
                 MemoryBlock(const_cast<MemoryHandle>(data), 
-                            size, 
-                            size));
+                            static_cast<UInt32>(size),
+                            static_cast<UInt32>(size)));
         }
     }
     else
@@ -132,7 +132,7 @@ void ExceptionBinaryDataHandler::put(void const *src, SizeT size)
             // skip to next buffer if current buffer is full
             if(_currentWriteBufferPos == _currentWriteBuffer->getSize())
             {
-                _currentWriteBuffer->setDataSize(_currentWriteBufferPos);
+                _currentWriteBuffer->setDataSize(static_cast<UInt32>(_currentWriteBufferPos));
                 _currentWriteBuffer++;
                 _currentWriteBufferPos = 0;
             }
@@ -178,7 +178,7 @@ void ExceptionBinaryDataHandler::get(void *dst, SizeT size) OSG_THROW (ReadError
         }
 
         // read direct into destination
-        read(data, size);
+        read(data, static_cast<UInt32>(size));
     }
     else
     {
@@ -247,7 +247,7 @@ void ExceptionBinaryDataHandler::flush(void)
     if(_currentWriteBuffer != writeBufEnd())
     {
         // mark rest of buffer as empty
-        _currentWriteBuffer->setDataSize(_currentWriteBufferPos);
+        _currentWriteBuffer->setDataSize(static_cast<UInt32>(_currentWriteBufferPos));
         _currentWriteBuffer++;
 
         while(_currentWriteBuffer != writeBufEnd())
@@ -297,7 +297,7 @@ void ExceptionBinaryDataHandler::readBufAdd(MemoryHandle mem,
                                             SizeT        size,
                                             SizeT        dataSize)
 {
-    MemoryBlock memBlock(mem, size, dataSize);
+    MemoryBlock memBlock(mem, static_cast<UInt32>(size), static_cast<UInt32>(dataSize));
 
     _readBuffers.push_back(memBlock);
 
@@ -318,7 +318,7 @@ void ExceptionBinaryDataHandler::writeBufAdd(MemoryHandle mem,
                                              SizeT        size,
                                              SizeT        dataSize)
 {
-    MemoryBlock memBlock(mem, size, dataSize);
+    MemoryBlock memBlock(mem, static_cast<UInt32>(size), static_cast<UInt32>(dataSize));
 
     _writeBuffers.push_back(memBlock);
 

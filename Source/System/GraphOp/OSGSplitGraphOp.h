@@ -137,8 +137,7 @@ OSG_GEN_MEMOBJPTR(SplitGraphOp);
     \nohierarchy
  */
 
-class OSG_UTIL_DLLMAPPING Pnt3fComparator : 
-    public std::binary_function<int,int,bool> 
+class OSG_UTIL_DLLMAPPING Pnt3fComparator
 {
     const std::vector<Pnt3f> &_vec;
 

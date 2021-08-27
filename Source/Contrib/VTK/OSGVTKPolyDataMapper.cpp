@@ -75,6 +75,7 @@
 #include "vtkProperty.h"
 #include "vtkDataArray.h"
 #include "vtkCellData.h"
+#include "vtkUnsignedCharArray.h"
 #endif
 
 #include <typeinfo>
@@ -297,8 +298,10 @@ bool VTKPolyDataMapper::processPrimitive(
     pColorField ->resize(numIndices);
     
     int prim = 0, vert = 0;
-    vtkIdType i, npts, *pts;
+    vtkIdType i, npts; //, *pts;
 //    int transparentFlag = 0;
+
+    vtkIdType const* pts;
     
     unsigned char *aColor  = NULL;
     vtkReal       *aNormal = NULL;
@@ -312,7 +315,8 @@ bool VTKPolyDataMapper::processPrimitive(
         
         if(colorPerCell == 1) 
         {
-            aColor = colorArray->GetPointer(4 * prim);
+            aColor = 
+                colorArray->GetPointer(4 * prim);
         }
         
         if(normalPerCell == 1) 
@@ -392,7 +396,7 @@ void VTKPolyDataMapper::execute(void)
         return;
 
     pMapper->Update();
-    
+
     if( (_pActor ->            GetMTime() < this->_executeTime) && 
         ( pMapper->            GetMTime() < this->_executeTime) &&
         ( pMapper->GetInput()->GetMTime() < this->_executeTime) &&
@@ -402,7 +406,7 @@ void VTKPolyDataMapper::execute(void)
     }
     else
     {
-        fprintf(stderr, "%ld %ld | %ld %ld %ld\n",
+        fprintf(stderr, "%lld %lld | %lld %lld %lld\n",
                 _executeTime.GetMTime(),
                 _modifiedTime.GetMTime(),
                 _pActor->GetMTime(),

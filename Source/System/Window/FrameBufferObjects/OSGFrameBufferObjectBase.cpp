@@ -67,7 +67,7 @@
 #include "OSGFrameBufferObjectBase.h"
 #include "OSGFrameBufferObject.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1504,13 +1504,13 @@ EditFieldHandlePtr FrameBufferObjectBase::editHandleColorAttachments(void)
 
     returnValue->setAddMethod(
         boost::bind(&FrameBufferObject::pushToColorAttachments,
-                    static_cast<FrameBufferObject *>(this), _1));
+                    static_cast<FrameBufferObject *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&FrameBufferObject::removeFromColorAttachments,
-                    static_cast<FrameBufferObject *>(this), _1));
+                    static_cast<FrameBufferObject *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&FrameBufferObject::removeObjFromColorAttachments,
-                    static_cast<FrameBufferObject *>(this), _1));
+                    static_cast<FrameBufferObject *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&FrameBufferObject::clearColorAttachments,
                     static_cast<FrameBufferObject *>(this)));
@@ -1566,7 +1566,7 @@ EditFieldHandlePtr FrameBufferObjectBase::editHandleDepthAttachment(void)
 
     returnValue->setSetMethod(
         boost::bind(&FrameBufferObject::setDepthAttachment,
-                    static_cast<FrameBufferObject *>(this), _1));
+                    static_cast<FrameBufferObject *>(this), ::boost::placeholders::_1));
 
     editSField(DepthAttachmentFieldMask);
 
@@ -1594,7 +1594,7 @@ EditFieldHandlePtr FrameBufferObjectBase::editHandleStencilAttachment(void)
 
     returnValue->setSetMethod(
         boost::bind(&FrameBufferObject::setStencilAttachment,
-                    static_cast<FrameBufferObject *>(this), _1));
+                    static_cast<FrameBufferObject *>(this), ::boost::placeholders::_1));
 
     editSField(StencilAttachmentFieldMask);
 
@@ -1797,13 +1797,13 @@ EditFieldHandlePtr FrameBufferObjectBase::editHandleMsaaColorAttachments(void)
 
     returnValue->setAddMethod(
         boost::bind(&FrameBufferObject::pushToMsaaColorAttachments,
-                    static_cast<FrameBufferObject *>(this), _1));
+                    static_cast<FrameBufferObject *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&FrameBufferObject::removeFromMsaaColorAttachments,
-                    static_cast<FrameBufferObject *>(this), _1));
+                    static_cast<FrameBufferObject *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&FrameBufferObject::removeObjFromMsaaColorAttachments,
-                    static_cast<FrameBufferObject *>(this), _1));
+                    static_cast<FrameBufferObject *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&FrameBufferObject::clearMsaaColorAttachments,
                     static_cast<FrameBufferObject *>(this)));
@@ -1834,7 +1834,7 @@ EditFieldHandlePtr FrameBufferObjectBase::editHandleMsaaDepthAttachment(void)
 
     returnValue->setSetMethod(
         boost::bind(&FrameBufferObject::setMsaaDepthAttachment,
-                    static_cast<FrameBufferObject *>(this), _1));
+                    static_cast<FrameBufferObject *>(this), ::boost::placeholders::_1));
 
     editSField(MsaaDepthAttachmentFieldMask);
 
@@ -1862,7 +1862,7 @@ EditFieldHandlePtr FrameBufferObjectBase::editHandleMsaaStencilAttachment(void)
 
     returnValue->setSetMethod(
         boost::bind(&FrameBufferObject::setMsaaStencilAttachment,
-                    static_cast<FrameBufferObject *>(this), _1));
+                    static_cast<FrameBufferObject *>(this), ::boost::placeholders::_1));
 
     editSField(MsaaStencilAttachmentFieldMask);
 

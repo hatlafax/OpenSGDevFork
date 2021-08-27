@@ -57,7 +57,7 @@ OSG_ADD_DIRECTORY("Source/WindowSystem/GLUT")
 
 IF(${OSG_CMAKE_PASS} STREQUAL "OSGCOLLECT")
     FILE(APPEND ${${PROJECT_NAME}_BUILD_FILE}
-        "LIST(APPEND ${PROJECT_NAME}_DEP_SYS_TEST_INCDIR \"${CMAKE_SOURCE_DIR}/Source/External\")\n\n")
+        "LIST(APPEND ${PROJECT_NAME}_DEP_TEST_SYS_INCDIR \"${CMAKE_SOURCE_DIR}/Source/External\")\n\n")
 ENDIF()
 
 ##############################################################################

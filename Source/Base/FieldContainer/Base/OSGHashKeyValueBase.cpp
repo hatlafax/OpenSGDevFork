@@ -67,7 +67,7 @@
 #include "OSGHashKeyValueBase.h"
 #include "OSGHashKeyValue.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -510,7 +510,7 @@ EditFieldHandlePtr HashKeyValueBase::editHandleValue          (void)
 
     returnValue->setSetMethod(
         boost::bind(&HashKeyValue::setValue,
-                    static_cast<HashKeyValue *>(this), _1));
+                    static_cast<HashKeyValue *>(this), ::boost::placeholders::_1));
 
     editSField(ValueFieldMask);
 

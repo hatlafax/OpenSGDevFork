@@ -69,7 +69,7 @@
 #include "OSGMultiLightShadowStageBase.h"
 #include "OSGMultiLightShadowStage.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -2130,13 +2130,13 @@ EditFieldHandlePtr MultiLightShadowStageBase::editHandleShadowParameter(void)
 
     returnValue->setAddMethod(
         boost::bind(&MultiLightShadowStage::pushToShadowParameter,
-                    static_cast<MultiLightShadowStage *>(this), _1));
+                    static_cast<MultiLightShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&MultiLightShadowStage::removeFromShadowParameter,
-                    static_cast<MultiLightShadowStage *>(this), _1));
+                    static_cast<MultiLightShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&MultiLightShadowStage::removeObjFromShadowParameter,
-                    static_cast<MultiLightShadowStage *>(this), _1));
+                    static_cast<MultiLightShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&MultiLightShadowStage::clearShadowParameter,
                     static_cast<MultiLightShadowStage *>(this)));
@@ -2367,13 +2367,13 @@ EditFieldHandlePtr MultiLightShadowStageBase::editHandleExcludeNodes   (void)
 
     returnValue->setAddMethod(
         boost::bind(&MultiLightShadowStage::pushToExcludeNodes,
-                    static_cast<MultiLightShadowStage *>(this), _1));
+                    static_cast<MultiLightShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&MultiLightShadowStage::removeFromExcludeNodes,
-                    static_cast<MultiLightShadowStage *>(this), _1));
+                    static_cast<MultiLightShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&MultiLightShadowStage::removeObjFromExcludeNodes,
-                    static_cast<MultiLightShadowStage *>(this), _1));
+                    static_cast<MultiLightShadowStage *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&MultiLightShadowStage::clearExcludeNodes,
                     static_cast<MultiLightShadowStage *>(this)));
@@ -2429,7 +2429,7 @@ EditFieldHandlePtr MultiLightShadowStageBase::editHandleMultiLightChunk(void)
 
     returnValue->setSetMethod(
         boost::bind(&MultiLightShadowStage::setMultiLightChunk,
-                    static_cast<MultiLightShadowStage *>(this), _1));
+                    static_cast<MultiLightShadowStage *>(this), ::boost::placeholders::_1));
 
     editSField(MultiLightChunkFieldMask);
 

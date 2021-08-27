@@ -71,7 +71,7 @@
 #include "OSGClusterShadingStageBase.h"
 #include "OSGClusterShadingStage.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -2979,7 +2979,7 @@ EditFieldHandlePtr ClusterShadingStageBase::editHandleFrustNode      (void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStage::setFrustNode,
-                    static_cast<ClusterShadingStage *>(this), _1));
+                    static_cast<ClusterShadingStage *>(this), ::boost::placeholders::_1));
 
     editSField(FrustNodeFieldMask);
 
@@ -3007,7 +3007,7 @@ EditFieldHandlePtr ClusterShadingStageBase::editHandleFrustAlgoElement(void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStage::setFrustAlgoElement,
-                    static_cast<ClusterShadingStage *>(this), _1));
+                    static_cast<ClusterShadingStage *>(this), ::boost::placeholders::_1));
 
     editSField(FrustAlgoElementFieldMask);
 
@@ -3035,7 +3035,7 @@ EditFieldHandlePtr ClusterShadingStageBase::editHandleFrustCompShaderAlgo(void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStage::setFrustCompShaderAlgo,
-                    static_cast<ClusterShadingStage *>(this), _1));
+                    static_cast<ClusterShadingStage *>(this), ::boost::placeholders::_1));
 
     editSField(FrustCompShaderAlgoFieldMask);
 
@@ -3063,7 +3063,7 @@ EditFieldHandlePtr ClusterShadingStageBase::editHandleCullNode       (void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStage::setCullNode,
-                    static_cast<ClusterShadingStage *>(this), _1));
+                    static_cast<ClusterShadingStage *>(this), ::boost::placeholders::_1));
 
     editSField(CullNodeFieldMask);
 
@@ -3091,7 +3091,7 @@ EditFieldHandlePtr ClusterShadingStageBase::editHandleCullAlgoElement(void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStage::setCullAlgoElement,
-                    static_cast<ClusterShadingStage *>(this), _1));
+                    static_cast<ClusterShadingStage *>(this), ::boost::placeholders::_1));
 
     editSField(CullAlgoElementFieldMask);
 
@@ -3119,7 +3119,7 @@ EditFieldHandlePtr ClusterShadingStageBase::editHandleCullCompShaderAlgo(void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStage::setCullCompShaderAlgo,
-                    static_cast<ClusterShadingStage *>(this), _1));
+                    static_cast<ClusterShadingStage *>(this), ::boost::placeholders::_1));
 
     editSField(CullCompShaderAlgoFieldMask);
 
@@ -3147,7 +3147,7 @@ EditFieldHandlePtr ClusterShadingStageBase::editHandleMultiLightChunk(void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStage::setMultiLightChunk,
-                    static_cast<ClusterShadingStage *>(this), _1));
+                    static_cast<ClusterShadingStage *>(this), ::boost::placeholders::_1));
 
     editSField(MultiLightChunkFieldMask);
 
@@ -3175,7 +3175,7 @@ EditFieldHandlePtr ClusterShadingStageBase::editHandleShaderProgChunk(void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStage::setShaderProgChunk,
-                    static_cast<ClusterShadingStage *>(this), _1));
+                    static_cast<ClusterShadingStage *>(this), ::boost::placeholders::_1));
 
     editSField(ShaderProgChunkFieldMask);
 

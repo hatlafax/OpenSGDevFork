@@ -67,7 +67,7 @@
 #include "OSGImageForegroundBase.h"
 #include "OSGImageForeground.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -603,13 +603,13 @@ EditFieldHandlePtr ImageForegroundBase::editHandleImages         (void)
 
     returnValue->setAddMethod(
         boost::bind(&ImageForeground::pushToImages,
-                    static_cast<ImageForeground *>(this), _1));
+                    static_cast<ImageForeground *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ImageForeground::removeFromImages,
-                    static_cast<ImageForeground *>(this), _1));
+                    static_cast<ImageForeground *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&ImageForeground::removeObjFromImages,
-                    static_cast<ImageForeground *>(this), _1));
+                    static_cast<ImageForeground *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ImageForeground::clearImages,
                     static_cast<ImageForeground *>(this)));

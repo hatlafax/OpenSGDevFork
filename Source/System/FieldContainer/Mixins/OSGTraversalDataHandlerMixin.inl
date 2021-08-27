@@ -77,22 +77,22 @@ void TraversalDataHandlerMixin<ParentT>::setData(
         if(this->hasDestroyedFunctor(
                boost::bind(&DataSlotHandler::clearData,
                            pAction,
-                           _1,
-                           _2,
+                           ::boost::placeholders::_1,
+                           ::boost::placeholders::_2,
                            this->_iDataSlotId)) == false)
         {
             this->addDestroyedFunctor(
                 boost::bind(&DataSlotHandler::clearData,
                             static_cast<DataSlotHandler *>(pAction),
-                            _1,
-                            _2,
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2,
                             this->_iDataSlotId), "");
 
             pAction->addDestroyedFunctorFor(
                 boost::bind(
                     &Self::template clearDestroyedFunctorFor<DataSlotHandler>,
                     this,
-                    _1),
+                    ::boost::placeholders::_1),
                 this);
         }
 
@@ -101,17 +101,17 @@ void TraversalDataHandlerMixin<ParentT>::setData(
             this->addChangedFunctor(
                 boost::bind(&TraversalData::updateData, 
                             pData, 
-                            _1, 
-                            _2,
-                            _3),
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2,
+                            ::boost::placeholders::_3),
                 "");
 
             pData->addChangedFunctor(
                 boost::bind(&Self::dataDestroyed, 
                             this, 
-                            _1, 
-                            _2,
-                            _3),
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2,
+                            ::boost::placeholders::_3),
                 "");
         }
         if(pStoredData != NULL)
@@ -119,16 +119,16 @@ void TraversalDataHandlerMixin<ParentT>::setData(
             this->subChangedFunctor(
                 boost::bind(&TraversalData::updateData, 
                             pStoredData, 
-                            _1, 
-                            _2,
-                            _3));
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2,
+                            ::boost::placeholders::_3));
             
             pStoredData->subChangedFunctor(
                 boost::bind(&Self::dataDestroyed, 
                             this, 
-                            _1, 
-                            _2,
-                            _3));
+                            ::boost::placeholders::_1,
+                            ::boost::placeholders::_2,
+                            ::boost::placeholders::_3));
          }
     }
 }
@@ -177,9 +177,9 @@ void TraversalDataHandlerMixin<ParentT>::dataDestroyed(
         this->subChangedFunctor(
             boost::bind(&TraversalData::updateData, 
                         dynamic_cast<TraversalData *>(pCore), 
-                        _1, 
-                        _2,
-                        _3));
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2,
+                        ::boost::placeholders::_3));
     }
 }
 

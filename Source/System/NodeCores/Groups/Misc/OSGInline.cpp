@@ -39,7 +39,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "OSGConfig.h"
 
@@ -213,7 +213,7 @@ void Inline::postOSGLoading(FileContextAttachment * const pContext)
         if(pFile != NULL)
         {
             pFile->addChangedFunctor(
-                boost::bind(&Inline::rootChanged, this, _1, _2, _3),
+                boost::bind(&Inline::rootChanged, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3),
                 "");
 
             setRoot(pFile);
@@ -235,7 +235,7 @@ void Inline::postOSGLoading(FileContextAttachment * const pContext)
     if(i == _mfUrl.size() && _sfRoot.getValue() != NULL)
     {
         _sfRoot.getValue()->subChangedFunctor(
-            boost::bind(&Inline::rootChanged, this, _1, _2, _3));
+            boost::bind(&Inline::rootChanged, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3));
 
         setRoot(NULL);
     }
@@ -296,7 +296,7 @@ void Inline::resolveLinks(void)
     if(_sfRoot.getValue() != NULL)
     {
         _sfRoot.getValue()->subChangedFunctor(
-            boost::bind(&Inline::rootChanged, this, _1, _2, _3));
+            boost::bind(&Inline::rootChanged, this, ::boost::placeholders::_1, ::boost::placeholders::_2, ::boost::placeholders::_3));
     }
 
     Inherited::resolveLinks();

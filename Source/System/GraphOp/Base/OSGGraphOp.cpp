@@ -42,7 +42,7 @@
 \***************************************************************************/
 
 #include <cstring>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "OSGGraphOp.h"
 #include "OSGNameAttachment.h"
@@ -112,8 +112,8 @@ bool GraphOp::traverse(Node *node)
           Action::ResultE>(this,&GraphOp::traverseLeave));
     */
     res = ::traverse(node, 
-                     boost::bind(&GraphOp::traverseEnter, this, _1    ),
-                     boost::bind(&GraphOp::traverseLeave, this, _1, _2) );
+                     boost::bind(&GraphOp::traverseEnter, this, ::boost::placeholders::_1    ),
+                     boost::bind(&GraphOp::traverseLeave, this, ::boost::placeholders::_1, ::boost::placeholders::_2) );
 
     if (res == Action::Continue) 
         return true;

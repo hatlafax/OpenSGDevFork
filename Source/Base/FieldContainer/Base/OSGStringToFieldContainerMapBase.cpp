@@ -67,7 +67,7 @@
 #include "OSGStringToFieldContainerMapBase.h"
 #include "OSGStringToFieldContainerMap.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -484,13 +484,13 @@ EditFieldHandlePtr StringToFieldContainerMapBase::editHandleValues         (void
 
     returnValue->setAddMethod(
         boost::bind(&StringToFieldContainerMap::pushToValues,
-                    static_cast<StringToFieldContainerMap *>(this), _1));
+                    static_cast<StringToFieldContainerMap *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&StringToFieldContainerMap::removeFromValues,
-                    static_cast<StringToFieldContainerMap *>(this), _1));
+                    static_cast<StringToFieldContainerMap *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&StringToFieldContainerMap::removeObjFromValues,
-                    static_cast<StringToFieldContainerMap *>(this), _1));
+                    static_cast<StringToFieldContainerMap *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&StringToFieldContainerMap::clearValues,
                     static_cast<StringToFieldContainerMap *>(this)));

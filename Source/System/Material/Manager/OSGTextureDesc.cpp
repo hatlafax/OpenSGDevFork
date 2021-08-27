@@ -453,7 +453,7 @@ bool TextureDesc::readImage(ImageStore& images)
 
             for (UInt32 i = POS_X; i <= NEG_Z; ++i)
             {
-                   key[i] = Hash64::hash(&file[0], file.size(), (1 << (0x1F + i)));
+                   key[i] = Hash64::hash(&file[0], file.size(), (1LL << (0x1F + i)));
                 images[i] = dynamic_cast<Image*>(imageMap->find(key[i]));
 
                 if (images[i] == NULL)

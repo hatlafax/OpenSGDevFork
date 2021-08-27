@@ -416,7 +416,7 @@ void ParticleBSPTree::build(Particles *core)
     \nohierarchy
  */
 
-struct ParticleCompare : public std::binary_function<Int32, Int32, bool> 
+struct ParticleCompare
 {
     ParticleCompare(GeoVectorProperty *pos, UInt8 axis) : 
         _pos(pos), 

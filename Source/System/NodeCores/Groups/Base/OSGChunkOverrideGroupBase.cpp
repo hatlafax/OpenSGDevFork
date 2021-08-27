@@ -67,7 +67,7 @@
 #include "OSGChunkOverrideGroupBase.h"
 #include "OSGChunkOverrideGroup.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -507,7 +507,7 @@ EditFieldHandlePtr ChunkOverrideGroupBase::editHandleFallbackChunkBlock(void)
 
     returnValue->setSetMethod(
         boost::bind(&ChunkOverrideGroup::setFallbackChunkBlock,
-                    static_cast<ChunkOverrideGroup *>(this), _1));
+                    static_cast<ChunkOverrideGroup *>(this), ::boost::placeholders::_1));
 
     editSField(FallbackChunkBlockFieldMask);
 

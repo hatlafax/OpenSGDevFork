@@ -67,7 +67,7 @@
 #include "OSGLightChunkBase.h"
 #include "OSGLightChunk.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1247,7 +1247,7 @@ EditFieldHandlePtr LightChunkBase::editHandleBeacon         (void)
 
     returnValue->setSetMethod(
         boost::bind(&LightChunk::setBeacon,
-                    static_cast<LightChunk *>(this), _1));
+                    static_cast<LightChunk *>(this), ::boost::placeholders::_1));
 
     editSField(BeaconFieldMask);
 

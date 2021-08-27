@@ -51,7 +51,7 @@
 #include "OSGShaderVariables.h"
 #include "OSGConceptPropertyChecks.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -380,7 +380,10 @@ void SimpleSHLChunk::onCreate(const SimpleSHLChunk *source)
         Window::registerGLObject(
             boost::bind(&SimpleSHLChunk::handleGL, 
                         SimpleSHLChunkMTUncountedPtr(this), 
-                        _1, _2, _3, _4),
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2,
+                        ::boost::placeholders::_3,
+                        ::boost::placeholders::_4),
             &SimpleSHLChunk::handleDestroyGL));
 
     _uiChunkId = ShaderExecutableChunk::_uiChunkCounter++;

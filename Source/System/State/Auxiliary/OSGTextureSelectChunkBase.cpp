@@ -67,7 +67,7 @@
 #include "OSGTextureSelectChunkBase.h"
 #include "OSGTextureSelectChunk.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -575,13 +575,13 @@ EditFieldHandlePtr TextureSelectChunkBase::editHandleTextures       (void)
 
     returnValue->setAddMethod(
         boost::bind(&TextureSelectChunk::pushToTextures,
-                    static_cast<TextureSelectChunk *>(this), _1));
+                    static_cast<TextureSelectChunk *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&TextureSelectChunk::removeFromTextures,
-                    static_cast<TextureSelectChunk *>(this), _1));
+                    static_cast<TextureSelectChunk *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&TextureSelectChunk::removeObjFromTextures,
-                    static_cast<TextureSelectChunk *>(this), _1));
+                    static_cast<TextureSelectChunk *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&TextureSelectChunk::clearTextures,
                     static_cast<TextureSelectChunk *>(this)));

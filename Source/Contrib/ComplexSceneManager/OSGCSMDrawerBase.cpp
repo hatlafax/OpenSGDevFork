@@ -67,7 +67,7 @@
 #include "OSGCSMDrawerBase.h"
 #include "OSGCSMDrawer.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -634,13 +634,13 @@ EditFieldHandlePtr CSMDrawerBase::editHandleWindows        (void)
 
     returnValue->setAddMethod(
         boost::bind(&CSMDrawer::pushToWindows,
-                    static_cast<CSMDrawer *>(this), _1));
+                    static_cast<CSMDrawer *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&CSMDrawer::removeFromWindows,
-                    static_cast<CSMDrawer *>(this), _1));
+                    static_cast<CSMDrawer *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&CSMDrawer::removeObjFromWindows,
-                    static_cast<CSMDrawer *>(this), _1));
+                    static_cast<CSMDrawer *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&CSMDrawer::clearWindows,
                     static_cast<CSMDrawer *>(this)));

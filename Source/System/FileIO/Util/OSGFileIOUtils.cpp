@@ -1,7 +1,7 @@
 #include "OSGFileIOUtils.h"
 #include "OSGAction.h"
 #include "OSGNameAttachment.h"
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 

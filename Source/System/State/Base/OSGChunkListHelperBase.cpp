@@ -67,7 +67,7 @@
 #include "OSGChunkListHelperBase.h"
 #include "OSGChunkListHelper.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -508,7 +508,7 @@ EditFieldHandlePtr ChunkListHelperBase::editHandleChunk          (void)
 
     returnValue->setSetMethod(
         boost::bind(&ChunkListHelper::setChunk,
-                    static_cast<ChunkListHelper *>(this), _1));
+                    static_cast<ChunkListHelper *>(this), ::boost::placeholders::_1));
 
     editSField(ChunkFieldMask);
 

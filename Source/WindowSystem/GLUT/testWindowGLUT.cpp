@@ -507,7 +507,7 @@ int init(int argc, char **argv)
     // Background
     OSG::SolidBackgroundUnrecPtr bkgnd = OSG::SolidBackground::create();
 
-    bkgnd->setColor(OSG::Color3f(0.1,0.1,0.1));
+    bkgnd->setColor(OSG::Color3f(0.1f,0.1f,0.1f));
     
     // Viewport
 

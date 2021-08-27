@@ -69,7 +69,7 @@
 #include "OSGWindowBase.h"
 #include "OSGWindow.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1333,22 +1333,22 @@ EditFieldHandlePtr WindowBase::editHandlePort           (void)
 
     returnValue->setAddMethod(
         boost::bind(&Window::addPort,
-                    static_cast<Window *>(this), _1));
+                    static_cast<Window *>(this), ::boost::placeholders::_1));
     returnValue->setInsertMethod(
         boost::bind(&Window::insertPort,
-                    static_cast<Window *>(this), _1, _2));
+                    static_cast<Window *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
     returnValue->setReplaceMethod(
         boost::bind(&Window::replacePort,
-                    static_cast<Window *>(this), _1, _2));
+                    static_cast<Window *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
     returnValue->setReplaceObjMethod(
         boost::bind(&Window::replacePortByObj,
-                    static_cast<Window *>(this), _1, _2));
+                    static_cast<Window *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
     returnValue->setRemoveMethod(
         boost::bind(&Window::subPort,
-                    static_cast<Window *>(this), _1));
+                    static_cast<Window *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&Window::subPortByObj,
-                    static_cast<Window *>(this), _1));
+                    static_cast<Window *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&Window::clearPorts,
                     static_cast<Window *>(this)));
@@ -1554,7 +1554,7 @@ EditFieldHandlePtr WindowBase::editHandleRenderOptions  (void)
 
     returnValue->setSetMethod(
         boost::bind(&Window::setRenderOptions,
-                    static_cast<Window *>(this), _1));
+                    static_cast<Window *>(this), ::boost::placeholders::_1));
 
     editSField(RenderOptionsFieldMask);
 

@@ -67,7 +67,7 @@
 #include "OSGStackedTransformBase.h"
 #include "OSGStackedTransform.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -577,22 +577,22 @@ EditFieldHandlePtr StackedTransformBase::editHandleTransformElements(void)
 
     returnValue->setAddMethod(
         boost::bind(&StackedTransform::pushToTransformElements,
-                    static_cast<StackedTransform *>(this), _1));
+                    static_cast<StackedTransform *>(this), ::boost::placeholders::_1));
     returnValue->setInsertMethod(
         boost::bind(&StackedTransform::insertIntoTransformElements,
-                    static_cast<StackedTransform *>(this), _1, _2));
+                    static_cast<StackedTransform *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
     returnValue->setReplaceMethod(
         boost::bind(&StackedTransform::replaceInTransformElements,
-                    static_cast<StackedTransform *>(this), _1, _2));
+                    static_cast<StackedTransform *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
     returnValue->setReplaceObjMethod(
         boost::bind(&StackedTransform::replaceObjInTransformElements,
-                    static_cast<StackedTransform *>(this), _1, _2));
+                    static_cast<StackedTransform *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
     returnValue->setRemoveMethod(
         boost::bind(&StackedTransform::removeFromTransformElements,
-                    static_cast<StackedTransform *>(this), _1));
+                    static_cast<StackedTransform *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&StackedTransform::removeObjFromTransformElements,
-                    static_cast<StackedTransform *>(this), _1));
+                    static_cast<StackedTransform *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&StackedTransform::clearTransformElements,
                     static_cast<StackedTransform *>(this)));

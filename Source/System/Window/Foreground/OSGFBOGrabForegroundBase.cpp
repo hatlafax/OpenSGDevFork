@@ -67,7 +67,7 @@
 #include "OSGFBOGrabForegroundBase.h"
 #include "OSGFBOGrabForeground.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -492,7 +492,7 @@ EditFieldHandlePtr FBOGrabForegroundBase::editHandleFrameBufferObject(void)
 
     returnValue->setSetMethod(
         boost::bind(&FBOGrabForeground::setFrameBufferObject,
-                    static_cast<FBOGrabForeground *>(this), _1));
+                    static_cast<FBOGrabForeground *>(this), ::boost::placeholders::_1));
 
     editSField(FrameBufferObjectFieldMask);
 

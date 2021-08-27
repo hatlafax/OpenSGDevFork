@@ -68,7 +68,7 @@
 #include "OSGDeferredShadingStageBase.h"
 #include "OSGDeferredShadingStage.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -923,7 +923,7 @@ EditFieldHandlePtr DeferredShadingStageBase::editHandleGBufferProgram (void)
 
     returnValue->setSetMethod(
         boost::bind(&DeferredShadingStage::setGBufferProgram,
-                    static_cast<DeferredShadingStage *>(this), _1));
+                    static_cast<DeferredShadingStage *>(this), ::boost::placeholders::_1));
 
     editSField(GBufferProgramFieldMask);
 
@@ -951,7 +951,7 @@ EditFieldHandlePtr DeferredShadingStageBase::editHandleAmbientProgram (void)
 
     returnValue->setSetMethod(
         boost::bind(&DeferredShadingStage::setAmbientProgram,
-                    static_cast<DeferredShadingStage *>(this), _1));
+                    static_cast<DeferredShadingStage *>(this), ::boost::placeholders::_1));
 
     editSField(AmbientProgramFieldMask);
 
@@ -979,13 +979,13 @@ EditFieldHandlePtr DeferredShadingStageBase::editHandleLightPrograms  (void)
 
     returnValue->setAddMethod(
         boost::bind(&DeferredShadingStage::pushToLightPrograms,
-                    static_cast<DeferredShadingStage *>(this), _1));
+                    static_cast<DeferredShadingStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&DeferredShadingStage::removeFromLightPrograms,
-                    static_cast<DeferredShadingStage *>(this), _1));
+                    static_cast<DeferredShadingStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&DeferredShadingStage::removeObjFromLightPrograms,
-                    static_cast<DeferredShadingStage *>(this), _1));
+                    static_cast<DeferredShadingStage *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&DeferredShadingStage::clearLightPrograms,
                     static_cast<DeferredShadingStage *>(this)));
@@ -1016,13 +1016,13 @@ EditFieldHandlePtr DeferredShadingStageBase::editHandleLights         (void)
 
     returnValue->setAddMethod(
         boost::bind(&DeferredShadingStage::pushToLights,
-                    static_cast<DeferredShadingStage *>(this), _1));
+                    static_cast<DeferredShadingStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&DeferredShadingStage::removeFromLights,
-                    static_cast<DeferredShadingStage *>(this), _1));
+                    static_cast<DeferredShadingStage *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&DeferredShadingStage::removeObjFromLights,
-                    static_cast<DeferredShadingStage *>(this), _1));
+                    static_cast<DeferredShadingStage *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&DeferredShadingStage::clearLights,
                     static_cast<DeferredShadingStage *>(this)));

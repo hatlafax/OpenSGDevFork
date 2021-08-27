@@ -67,7 +67,7 @@
 #include "OSGHashKeyToFieldContainerMapBase.h"
 #include "OSGHashKeyToFieldContainerMap.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -484,13 +484,13 @@ EditFieldHandlePtr HashKeyToFieldContainerMapBase::editHandleValues         (voi
 
     returnValue->setAddMethod(
         boost::bind(&HashKeyToFieldContainerMap::pushToValues,
-                    static_cast<HashKeyToFieldContainerMap *>(this), _1));
+                    static_cast<HashKeyToFieldContainerMap *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&HashKeyToFieldContainerMap::removeFromValues,
-                    static_cast<HashKeyToFieldContainerMap *>(this), _1));
+                    static_cast<HashKeyToFieldContainerMap *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&HashKeyToFieldContainerMap::removeObjFromValues,
-                    static_cast<HashKeyToFieldContainerMap *>(this), _1));
+                    static_cast<HashKeyToFieldContainerMap *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&HashKeyToFieldContainerMap::clearValues,
                     static_cast<HashKeyToFieldContainerMap *>(this)));

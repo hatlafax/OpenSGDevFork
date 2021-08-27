@@ -71,7 +71,7 @@
 #include "OSGTexGenChunkBase.h"
 #include "OSGTexGenChunk.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1417,7 +1417,7 @@ EditFieldHandlePtr TexGenChunkBase::editHandleSBeacon        (void)
 
     returnValue->setSetMethod(
         boost::bind(&TexGenChunk::setSBeacon,
-                    static_cast<TexGenChunk *>(this), _1));
+                    static_cast<TexGenChunk *>(this), ::boost::placeholders::_1));
 
     editSField(SBeaconFieldMask);
 
@@ -1445,7 +1445,7 @@ EditFieldHandlePtr TexGenChunkBase::editHandleTBeacon        (void)
 
     returnValue->setSetMethod(
         boost::bind(&TexGenChunk::setTBeacon,
-                    static_cast<TexGenChunk *>(this), _1));
+                    static_cast<TexGenChunk *>(this), ::boost::placeholders::_1));
 
     editSField(TBeaconFieldMask);
 
@@ -1473,7 +1473,7 @@ EditFieldHandlePtr TexGenChunkBase::editHandleRBeacon        (void)
 
     returnValue->setSetMethod(
         boost::bind(&TexGenChunk::setRBeacon,
-                    static_cast<TexGenChunk *>(this), _1));
+                    static_cast<TexGenChunk *>(this), ::boost::placeholders::_1));
 
     editSField(RBeaconFieldMask);
 
@@ -1501,7 +1501,7 @@ EditFieldHandlePtr TexGenChunkBase::editHandleQBeacon        (void)
 
     returnValue->setSetMethod(
         boost::bind(&TexGenChunk::setQBeacon,
-                    static_cast<TexGenChunk *>(this), _1));
+                    static_cast<TexGenChunk *>(this), ::boost::placeholders::_1));
 
     editSField(QBeaconFieldMask);
 

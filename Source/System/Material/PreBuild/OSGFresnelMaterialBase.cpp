@@ -61,14 +61,14 @@
 #include "OSGConfig.h"
 
 
-#include "OSGGL.h"                      // ColorMaterial default header
+#include <OSGGL.h>                        // ColorMaterial default header
 
 #include "OSGImage.h"                   // Image Class
 
 #include "OSGFresnelMaterialBase.h"
 #include "OSGFresnelMaterial.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1292,7 +1292,7 @@ EditFieldHandlePtr FresnelMaterialBase::editHandleImage          (void)
 
     returnValue->setSetMethod(
         boost::bind(&FresnelMaterial::setImage,
-                    static_cast<FresnelMaterial *>(this), _1));
+                    static_cast<FresnelMaterial *>(this), ::boost::placeholders::_1));
 
     editSField(ImageFieldMask);
 

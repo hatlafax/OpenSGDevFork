@@ -34,7 +34,7 @@
 #include <OpenSG/OSGSceneFileHandler.h>
 #endif
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 // The SimpleSceneManager to manage simple applications
 OSG::SimpleSceneManagerRefPtr mgr;
@@ -71,7 +71,7 @@ class NamedNodeFinder
         _found = NULL;
 
         OSG::TraverseEnterFunctor enter =
-            boost::bind(&NamedNodeFinder::checkNode, this, _1);
+            boost::bind(&NamedNodeFinder::checkNode, this, ::boost::placeholders::_1);
         OSG::traverse(root, enter);
 
         return _found;

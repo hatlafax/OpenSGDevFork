@@ -67,7 +67,7 @@
 #include "OSGKDTreeIntersectProxyAttachmentBase.h"
 #include "OSGKDTreeIntersectProxyAttachment.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -597,7 +597,7 @@ EditFieldHandlePtr KDTreeIntersectProxyAttachmentBase::editHandleGeometry       
 
     returnValue->setSetMethod(
         boost::bind(&KDTreeIntersectProxyAttachment::setGeometry,
-                    static_cast<KDTreeIntersectProxyAttachment *>(this), _1));
+                    static_cast<KDTreeIntersectProxyAttachment *>(this), ::boost::placeholders::_1));
 
     editSField(GeometryFieldMask);
 

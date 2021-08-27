@@ -67,7 +67,7 @@
 #include "OSGShaderProgramManagerBase.h"
 #include "OSGShaderProgramManager.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -548,7 +548,7 @@ EditFieldHandlePtr ShaderProgramManagerBase::editHandleProgramMap     (void)
 
     returnValue->setSetMethod(
         boost::bind(&ShaderProgramManager::setProgramMap,
-                    static_cast<ShaderProgramManager *>(this), _1));
+                    static_cast<ShaderProgramManager *>(this), ::boost::placeholders::_1));
 
     editSField(ProgramMapFieldMask);
 

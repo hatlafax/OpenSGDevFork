@@ -69,7 +69,7 @@
 #include "OSGCgFXMaterialBase.h"
 #include "OSGCgFXMaterial.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1301,7 +1301,7 @@ EditFieldHandlePtr CgFXMaterialBase::editHandleVariables      (void)
 
     returnValue->setSetMethod(
         boost::bind(&CgFXMaterial::setVariables,
-                    static_cast<CgFXMaterial *>(this), _1));
+                    static_cast<CgFXMaterial *>(this), ::boost::placeholders::_1));
 
     editSField(VariablesFieldMask);
 
@@ -1379,13 +1379,13 @@ EditFieldHandlePtr CgFXMaterialBase::editHandleTechniques     (void)
 
     returnValue->setAddMethod(
         boost::bind(&CgFXMaterial::pushToTechniques,
-                    static_cast<CgFXMaterial *>(this), _1));
+                    static_cast<CgFXMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&CgFXMaterial::removeFromTechniques,
-                    static_cast<CgFXMaterial *>(this), _1));
+                    static_cast<CgFXMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&CgFXMaterial::removeObjFromTechniques,
-                    static_cast<CgFXMaterial *>(this), _1));
+                    static_cast<CgFXMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&CgFXMaterial::clearTechniques,
                     static_cast<CgFXMaterial *>(this)));
@@ -1416,13 +1416,13 @@ EditFieldHandlePtr CgFXMaterialBase::editHandleTextures       (void)
 
     returnValue->setAddMethod(
         boost::bind(&CgFXMaterial::pushToTextures,
-                    static_cast<CgFXMaterial *>(this), _1));
+                    static_cast<CgFXMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&CgFXMaterial::removeFromTextures,
-                    static_cast<CgFXMaterial *>(this), _1));
+                    static_cast<CgFXMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&CgFXMaterial::removeObjFromTextures,
-                    static_cast<CgFXMaterial *>(this), _1));
+                    static_cast<CgFXMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&CgFXMaterial::clearTextures,
                     static_cast<CgFXMaterial *>(this)));

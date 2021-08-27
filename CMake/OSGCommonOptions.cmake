@@ -20,7 +20,7 @@ MACRO(OSG_COMMON_OPTIONS)
   SET   (OSG_AVX_VARIANT  ""    CACHE STRING "")
   OPTION(OSG_ENABLE_FMA   ""    OFF            )
   OPTION(OSG_ENABLE_ABI6  ""    OFF            )
-  OPTION(OSG_ENABLE_C++11 ""    ON             )
+  OPTION(OSG_ENABLE_C++17 ""    ON             )
 
 ENDMACRO()
 

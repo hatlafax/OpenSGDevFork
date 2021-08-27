@@ -125,9 +125,7 @@ class OSG_DYNAMICS_DLLMAPPING FrameHandler : public FrameHandlerBase
     /*! \nohierarchy
      */
 
-    struct FrameTaskLess : public std::binary_function<FrameTaskInterface *, 
-                                                       FrameTaskInterface *,
-                                                       bool                 >
+    struct FrameTaskLess
     {
         inline bool operator() (FrameTaskInterface *lhs,
                                 FrameTaskInterface *rhs);

@@ -67,7 +67,7 @@
 #include "OSGMultiLightChunkBase.h"
 #include "OSGMultiLightChunk.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -4320,13 +4320,13 @@ EditFieldHandlePtr MultiLightChunkBase::editHandleBeacon         (void)
 
     returnValue->setAddMethod(
         boost::bind(&MultiLightChunk::pushToBeacon,
-                    static_cast<MultiLightChunk *>(this), _1));
+                    static_cast<MultiLightChunk *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&MultiLightChunk::removeFromBeacon,
-                    static_cast<MultiLightChunk *>(this), _1));
+                    static_cast<MultiLightChunk *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&MultiLightChunk::removeObjFromBeacon,
-                    static_cast<MultiLightChunk *>(this), _1));
+                    static_cast<MultiLightChunk *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&MultiLightChunk::clearBeacon,
                     static_cast<MultiLightChunk *>(this)));

@@ -53,7 +53,7 @@
 #include "OSGIntersectAction.h"
 #include "OSGIntersectProxyAttachment.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_USING_NAMESPACE
 
@@ -241,8 +241,8 @@ IntersectAction::IntersectAction(void) :
     if(_defaultLeaveFunctors)
         _leaveFunctors = *_defaultLeaveFunctors;
 
-    _nodeEnterCB = boost::bind(&IntersectAction::onEnterNode, this, _1, _2);
-    _nodeLeaveCB = boost::bind(&IntersectAction::onLeaveNode, this, _1, _2);
+    _nodeEnterCB = boost::bind(&IntersectAction::onEnterNode, this, ::boost::placeholders::_1, ::boost::placeholders::_2);
+    _nodeLeaveCB = boost::bind(&IntersectAction::onLeaveNode, this, ::boost::placeholders::_1, ::boost::placeholders::_2);
 }
 
 
@@ -265,8 +265,8 @@ IntersectAction::IntersectAction(const IntersectAction& source) :
     _statistics     (source._statistics     ),
     _resetStatistics(source._resetStatistics)
 {
-    _nodeEnterCB = boost::bind(&IntersectAction::onEnterNode, this, _1, _2);
-    _nodeLeaveCB = boost::bind(&IntersectAction::onLeaveNode, this, _1, _2);
+    _nodeEnterCB = boost::bind(&IntersectAction::onEnterNode, this, ::boost::placeholders::_1, ::boost::placeholders::_2);
+    _nodeLeaveCB = boost::bind(&IntersectAction::onLeaveNode, this, ::boost::placeholders::_1, ::boost::placeholders::_2);
 }
 
 

@@ -44,7 +44,7 @@
 
 #include "OSGOSGAnyFields.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "OSGWindow.h"
 #include "OSGTraversalValidator.h"

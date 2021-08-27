@@ -69,7 +69,7 @@
 #include "OSGShaderManagerBase.h"
 #include "OSGShaderManager.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -625,7 +625,7 @@ EditFieldHandlePtr ShaderManagerBase::editHandleProgramChunkMap(void)
 
     returnValue->setSetMethod(
         boost::bind(&ShaderManager::setProgramChunkMap,
-                    static_cast<ShaderManager *>(this), _1));
+                    static_cast<ShaderManager *>(this), ::boost::placeholders::_1));
 
     editSField(ProgramChunkMapFieldMask);
 
@@ -653,7 +653,7 @@ EditFieldHandlePtr ShaderManagerBase::editHandleCodeGenerator  (void)
 
     returnValue->setSetMethod(
         boost::bind(&ShaderManager::setCodeGenerator,
-                    static_cast<ShaderManager *>(this), _1));
+                    static_cast<ShaderManager *>(this), ::boost::placeholders::_1));
 
     editSField(CodeGeneratorFieldMask);
 
@@ -681,7 +681,7 @@ EditFieldHandlePtr ShaderManagerBase::editHandleProgramManager (void)
 
     returnValue->setSetMethod(
         boost::bind(&ShaderManager::setProgramManager,
-                    static_cast<ShaderManager *>(this), _1));
+                    static_cast<ShaderManager *>(this), ::boost::placeholders::_1));
 
     editSField(ProgramManagerFieldMask);
 

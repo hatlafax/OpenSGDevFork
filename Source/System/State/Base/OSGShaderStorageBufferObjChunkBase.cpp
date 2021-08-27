@@ -66,7 +66,7 @@
 #include "OSGShaderStorageBufferObjChunkBase.h"
 #include "OSGShaderStorageBufferObjChunk.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 

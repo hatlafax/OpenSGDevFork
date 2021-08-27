@@ -44,7 +44,7 @@
 #endif
 
 // boost::bind - to allow member functions as traversal functors
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 // a separate transformation for every object
 OSG::TransformRefPtr cyltrans, tortrans;
@@ -327,8 +327,8 @@ int main(int argc, char **argv)
         SLOG << OSG::endLog 
                 << "Variant 4: use an object to hold state for indentation" 
                 << OSG::endLog;
-        traverse(scene, boost::bind(&travstate::enter, &t, _1    ),
-                        boost::bind(&travstate::leave, &t, _1, _2) );
+        traverse(scene, boost::bind(&travstate::enter, &t, ::boost::placeholders::_1    ),
+                        boost::bind(&travstate::leave, &t, ::boost::placeholders::_1, ::boost::placeholders::_2) );
         
         SLOG << OSG::endLog 
              << "Variant 5: don't descend into transforms" << OSG::endLog;

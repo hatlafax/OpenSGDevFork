@@ -43,7 +43,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "OSGConfig.h"
 
@@ -174,7 +174,10 @@ void ShaderExecutableChunk::onCreate(const ShaderExecutableChunk *source)
         Window::registerGLObject(
             boost::bind(&ShaderExecutableChunk::handleGL, 
                         ShaderExecutableChunkMTUncountedPtr(this), 
-                        _1, _2, _3, _4),
+                        ::boost::placeholders::_1,
+                        ::boost::placeholders::_2,
+                        ::boost::placeholders::_3,
+                        ::boost::placeholders::_4),
             &ShaderExecutableChunk::handleDestroyGL));
 
     _uiChunkId = _uiChunkCounter++;

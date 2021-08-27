@@ -41,16 +41,7 @@
 
 #include "OSGBaseTypes.h"
 
-#if !defined(WIN32)
-#include <boost/version.hpp>
-
-#if BOOST_VERSION < 103900
-#include <boost/detail/sp_counted_base.hpp>
-#else
-#include <boost/smart_ptr/detail/sp_counted_base.hpp>
-#endif
-
-#else
+#if defined(WIN32)
 #pragma intrinsic( _InterlockedExchangeAdd )
 #pragma intrinsic( _InterlockedIncrement )
 #pragma intrinsic( _InterlockedDecrement )
@@ -69,7 +60,12 @@ inline
 RefCountStore osgAtomicExchangeAndAdd(RefCountStore *pValue, 
                                       RefCountStore  rcDelta)
 {
-    return boost::detail::atomic_exchange_and_add(pValue, rcDelta);
+//    return boost::detail::atomic_exchange_and_add(pValue, rcDelta);
+#if defined(__clang__) || (__GNUC__ >= 4 && __GNUC_MINOR__ >=2)
+    return __sync_fetch_and_add(pValue, rcDelta);
+#else
+# error unsupported platform/compiler
+#endif
 }
 
 /*! \ingroup GrpBaseBaseAtomicFn
@@ -78,7 +74,15 @@ RefCountStore osgAtomicExchangeAndAdd(RefCountStore *pValue,
 inline 
 void osgAtomicIncrement(RefCountStore *pValue)
 {
-    boost::detail::atomic_increment(pValue);
+//    boost::detail::atomic_increment(pValue);
+    __asm__
+    (
+        "lock\n\t"
+        "incl %0":
+        "=m"( *pValue ): // output (%0)
+        "m"( *pValue ): // input (%1)
+        "cc" // clobbers
+    );
 }
 
 /*! \ingroup GrpBaseBaseAtomicFn
@@ -103,10 +107,12 @@ void osgAtomicDecrement(RefCountStore *pValue)
 inline
 void osgSpinLock(UInt32 *pLock, UInt32 uiMask)
 {
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2
+#if defined(__clang__) || (__GNUC__ >= 4 && __GNUC_MINOR__ >=2)
     for(UInt32 tmpVal = __sync_fetch_and_or(pLock, uiMask); 
         (tmpVal & uiMask) != 0x0000; 
         tmpVal = __sync_fetch_and_or(pLock, uiMask)) ;
+#else
+# error unsupported platform/compiler
 #endif
 }
 
@@ -116,8 +122,10 @@ void osgSpinLock(UInt32 *pLock, UInt32 uiMask)
 inline
 void osgSpinLockRelease(UInt32 *pLock, UInt32 uiInvMask)
 {
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2
+#if defined(__clang__) || (__GNUC__ >= 4 && __GNUC_MINOR__ >=2)
     __sync_and_and_fetch(pLock, uiInvMask);
+#else
+# error unsupported platform/compiler
 #endif
 }
 

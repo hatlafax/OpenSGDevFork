@@ -268,7 +268,7 @@ Action::ResultE HDRStage::renderEnter(Action *action)
                 
             RenderPartition::SimpleDrawCallback f;
                 
-            f = boost::bind(&HDRStage::postProcess, this, _1);
+            f = boost::bind(&HDRStage::postProcess, this, ::boost::placeholders::_1);
                 
             pPart->dropFunctor(f);
         }

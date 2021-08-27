@@ -74,7 +74,7 @@ OSG::TimeStamp getTimeStamp(void)
 /*  NOTE: Not reliable on multi-core processors
 #elif defined(__linux) && (defined(__i386) || defined(__x86_64))
 
-    register uint64_t result;
+    uint64_t result;
     //asm volatile ("rdtsc" : "=A"(result));
     // same thing as rdtsc... inject the bytes for the opcode.
     asm volatile (".byte 0x0f, 0x31" : "=A" (result)); 

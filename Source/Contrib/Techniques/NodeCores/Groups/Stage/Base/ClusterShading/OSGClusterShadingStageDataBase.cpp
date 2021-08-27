@@ -72,7 +72,7 @@
 #include "OSGClusterShadingStageDataBase.h"
 #include "OSGClusterShadingStageData.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1691,7 +1691,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleFrustDispDatUBOChunk(v
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setFrustDispDatUBOChunk,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(FrustDispDatUBOChunkFieldMask);
 
@@ -1719,7 +1719,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleCullDispDatUBOChunk(vo
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setCullDispDatUBOChunk,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(CullDispDatUBOChunkFieldMask);
 
@@ -1747,7 +1747,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleCullClusterDatUBOChunk
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setCullClusterDatUBOChunk,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(CullClusterDatUBOChunkFieldMask);
 
@@ -1775,7 +1775,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleCullLightIndexCounterS
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setCullLightIndexCounterSSBOChunk,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(CullLightIndexCounterSSBOChunkFieldMask);
 
@@ -1803,7 +1803,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleFrustumsSSBOChunk(void
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setFrustumsSSBOChunk,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(FrustumsSSBOChunkFieldMask);
 
@@ -1831,7 +1831,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleAffectedLightIndexList
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setAffectedLightIndexListSSBOChunk,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(AffectedLightIndexListSSBOChunkFieldMask);
 
@@ -1859,7 +1859,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleLightIndexListSSBOChun
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setLightIndexListSSBOChunk,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(LightIndexListSSBOChunkFieldMask);
 
@@ -1887,7 +1887,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleFrustChunkMat  (void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setFrustChunkMat,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(FrustChunkMatFieldMask);
 
@@ -1915,7 +1915,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleCullChunkMat   (void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setCullChunkMat,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(CullChunkMatFieldMask);
 
@@ -1943,7 +1943,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleLightGridImage (void)
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setLightGridImage,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(LightGridImageFieldMask);
 
@@ -1971,7 +1971,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleLightGridTexObjChunk(v
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setLightGridTexObjChunk,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(LightGridTexObjChunkFieldMask);
 
@@ -1999,7 +1999,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleLightGridTexImgChunkCS
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setLightGridTexImgChunkCS,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(LightGridTexImgChunkCSFieldMask);
 
@@ -2027,7 +2027,7 @@ EditFieldHandlePtr ClusterShadingStageDataBase::editHandleLightGridTexImgChunkFS
 
     returnValue->setSetMethod(
         boost::bind(&ClusterShadingStageData::setLightGridTexImgChunkFS,
-                    static_cast<ClusterShadingStageData *>(this), _1));
+                    static_cast<ClusterShadingStageData *>(this), ::boost::placeholders::_1));
 
     editSField(LightGridTexImgChunkFSFieldMask);
 

@@ -35,6 +35,8 @@
 #include "OSGCoredNodePtr.h"
 #include "OSGSceneFileHandler.h"
 
+#pragma warning( push )
+#pragma warning( disable : 4305 )
 
 OSG::SimpleSceneManagerRefPtr  g_mgr   = NULL;
 OSG::NodeRefPtr                g_scene = NULL;
@@ -653,3 +655,5 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
+#pragma warning( pop )

@@ -298,7 +298,7 @@ EditFieldHandlePtr MapCacheHandlerMixin<Desc>::editHandleMapCache(void)
 
     returnValue->setAddMethod(
         boost::bind(&Self::addElement,
-                    static_cast<Self *>(this), _1, _2));
+                    static_cast<Self *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
 
     this->editSField(MapCacheFieldMask);
 

@@ -217,8 +217,8 @@ void TraversalValidationHandlerMixin<ParentT>::clearDestroyedFunctorFor(
 {
     this->subDestroyedFunctor(boost::bind(&DataSlotHandlerT::clearData,
                                             pHandler,
-                                           _1,
-                                           _2,
+                                          ::boost::placeholders::_1,
+                                          ::boost::placeholders::_2,
                                            _iDataSlotId));
 }
 

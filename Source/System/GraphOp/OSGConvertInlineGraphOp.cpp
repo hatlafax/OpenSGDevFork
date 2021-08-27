@@ -45,7 +45,7 @@
 
 #include <set>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 /*! \class OSG::ConvertInlineGraphOp
     \ingroup GrpSystemNodeCoresDrawablesGeometry

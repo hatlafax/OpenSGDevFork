@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     
         // Create a blue background
         OSG::SolidBackgroundRecPtr bg = OSG::SolidBackground::create();
-        bg->setColor(OSG::Color3f(0.1, 0.1, 0.5));
+        bg->setColor(OSG::Color3f(0.1f, 0.1f, 0.5f));
         gwin->getPort(0)->setBackground(bg);
     
         mgr->showAll();

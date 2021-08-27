@@ -75,7 +75,7 @@
 #include "OSGTextureDescBase.h"
 #include "OSGTextureDesc.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -2863,13 +2863,13 @@ EditFieldHandlePtr TextureDescBase::editHandleTexImage       (void)
 
     returnValue->setAddMethod(
         boost::bind(&TextureDesc::pushToTexImage,
-                    static_cast<TextureDesc *>(this), _1));
+                    static_cast<TextureDesc *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&TextureDesc::removeFromTexImage,
-                    static_cast<TextureDesc *>(this), _1));
+                    static_cast<TextureDesc *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&TextureDesc::removeObjFromTexImage,
-                    static_cast<TextureDesc *>(this), _1));
+                    static_cast<TextureDesc *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&TextureDesc::clearTexImage,
                     static_cast<TextureDesc *>(this)));
@@ -2900,7 +2900,7 @@ EditFieldHandlePtr TextureDescBase::editHandleImageMap       (void)
 
     returnValue->setSetMethod(
         boost::bind(&TextureDesc::setImageMap,
-                    static_cast<TextureDesc *>(this), _1));
+                    static_cast<TextureDesc *>(this), ::boost::placeholders::_1));
 
     editSField(ImageMapFieldMask);
 

@@ -157,8 +157,7 @@ class OSG_CLUSTER_DLLMAPPING PipelineComposer : public PipelineComposerBase
     /*! \nohierarchy
      */
 
-    struct GroupInfoOrder : public std::binary_function<
-        const GroupInfo*,const GroupInfo*, bool>
+    struct GroupInfoOrder
     {
         bool operator() (const GroupInfo *a, const GroupInfo *b);
     };

@@ -67,7 +67,7 @@
 #include "OSGGeoInstancerBase.h"
 #include "OSGGeoInstancer.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -560,7 +560,7 @@ EditFieldHandlePtr GeoInstancerBase::editHandleBaseGeometry   (void)
 
     returnValue->setSetMethod(
         boost::bind(&GeoInstancer::setBaseGeometry,
-                    static_cast<GeoInstancer *>(this), _1));
+                    static_cast<GeoInstancer *>(this), ::boost::placeholders::_1));
 
     editSField(BaseGeometryFieldMask);
 

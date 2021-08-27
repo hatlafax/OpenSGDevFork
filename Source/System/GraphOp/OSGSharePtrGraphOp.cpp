@@ -223,8 +223,7 @@ void SharePtrGraphOp::setIncludes(const std::string &includes)
     {
         nextComma = std::find(curPos, includes.end(), ',');
         // strip leading spaces
-        curPos = std::find_if(curPos, nextComma,
-                              std::not1(std::ptr_fun(isspace)));
+        curPos = std::find_if(curPos, nextComma, [](int c) { return !std::isspace(c); });
 
         std::string typeName(curPos, nextComma);
 
@@ -260,8 +259,7 @@ void SharePtrGraphOp::setExcludes(const std::string &excludes)
     {
         nextComma = std::find(curPos, excludes.end(), ',');
         // strip leading spaces
-        curPos = std::find_if(curPos, nextComma,
-                              std::not1(std::ptr_fun(isspace)));
+        curPos = std::find_if(curPos, nextComma, [](int c) { return !std::isspace(c); });
 
         std::string typeName(curPos, nextComma);
 

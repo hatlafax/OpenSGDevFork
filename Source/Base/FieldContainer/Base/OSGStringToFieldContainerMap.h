@@ -101,7 +101,7 @@ class OSG_BASE_DLLMAPPING StringToFieldContainerMap : public StringToFieldContai
 
   protected:
 
-    class value_compare : public std::binary_function<KeyValueUnrecPtr, std::string, bool>
+    class value_compare
     {
     public:
         value_compare() {}

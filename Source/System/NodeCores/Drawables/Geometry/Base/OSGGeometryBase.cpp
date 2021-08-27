@@ -68,7 +68,7 @@
 #include "OSGGeometryBase.h"
 #include "OSGGeometry.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1393,7 +1393,7 @@ EditFieldHandlePtr GeometryBase::editHandleTypes          (void)
 
     returnValue->setSetMethod(
         boost::bind(&Geometry::setTypes,
-                    static_cast<Geometry *>(this), _1));
+                    static_cast<Geometry *>(this), ::boost::placeholders::_1));
 
     editSField(TypesFieldMask);
 
@@ -1421,7 +1421,7 @@ EditFieldHandlePtr GeometryBase::editHandleLengths        (void)
 
     returnValue->setSetMethod(
         boost::bind(&Geometry::setLengths,
-                    static_cast<Geometry *>(this), _1));
+                    static_cast<Geometry *>(this), ::boost::placeholders::_1));
 
     editSField(LengthsFieldMask);
 
@@ -1449,13 +1449,13 @@ EditFieldHandlePtr GeometryBase::editHandleProperties     (void)
 
     returnValue->setAddMethod(
         boost::bind(&Geometry::pushToProperties,
-                    static_cast<Geometry *>(this), _1));
+                    static_cast<Geometry *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&Geometry::removeFromProperties,
-                    static_cast<Geometry *>(this), _1));
+                    static_cast<Geometry *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&Geometry::removeObjFromProperties,
-                    static_cast<Geometry *>(this), _1));
+                    static_cast<Geometry *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&Geometry::clearProperties,
                     static_cast<Geometry *>(this)));
@@ -1486,13 +1486,13 @@ EditFieldHandlePtr GeometryBase::editHandlePropIndices    (void)
 
     returnValue->setAddMethod(
         boost::bind(&Geometry::pushToPropIndices,
-                    static_cast<Geometry *>(this), _1));
+                    static_cast<Geometry *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&Geometry::removeFromPropIndices,
-                    static_cast<Geometry *>(this), _1));
+                    static_cast<Geometry *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&Geometry::removeObjFromPropIndices,
-                    static_cast<Geometry *>(this), _1));
+                    static_cast<Geometry *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&Geometry::clearPropIndices,
                     static_cast<Geometry *>(this)));

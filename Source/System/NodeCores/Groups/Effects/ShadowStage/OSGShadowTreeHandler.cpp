@@ -629,7 +629,7 @@ void ShadowTreeHandler::setupDrawCombineMap2(Action  *pAction)
         
         RenderPartition::SimpleDrawCallback f;
         
-        f = boost::bind(&ShadowTreeHandler::doDrawCombineMap2, this, _1);
+        f = boost::bind(&ShadowTreeHandler::doDrawCombineMap2, this, ::boost::placeholders::_1);
         
         pPart->dropFunctor(f);
     }
@@ -732,7 +732,7 @@ void ShadowTreeHandler::setupDrawCombineMap1(Action  *pAction)
         
         RenderPartition::SimpleDrawCallback f;
         
-        f = boost::bind(&ShadowTreeHandler::doDrawCombineMap1, this, _1);
+        f = boost::bind(&ShadowTreeHandler::doDrawCombineMap1, this, ::boost::placeholders::_1);
         
         pPart->dropFunctor(f);
     }

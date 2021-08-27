@@ -50,7 +50,7 @@
 #include "OSGDynFieldContainerInterface.h"
 #include "OSGConceptPropertyChecks.h"
 
-#include "boost/bind.hpp"
+#include <boost/bind/bind.hpp>
 
 #define OSG_FIELD_CONTAINER_ABSTR_TMPL_DECL                                   \
     OSG_RC_TYPE_FUNCTIONS_DECL;                                               \

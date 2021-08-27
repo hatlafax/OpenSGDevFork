@@ -67,7 +67,7 @@
 #include "OSGChunkMaterialBase.h"
 #include "OSGChunkMaterial.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -505,16 +505,16 @@ EditFieldHandlePtr ChunkMaterialBase::editHandleChunks         (void)
 
     returnValue->setAddMethod(
         boost::bind(&ChunkMaterial::pushToChunks,
-                    static_cast<ChunkMaterial *>(this), _1));
+                    static_cast<ChunkMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setReplaceMethod(
         boost::bind(&ChunkMaterial::replaceChunk,
-                    static_cast<ChunkMaterial *>(this), _1, _2));
+                    static_cast<ChunkMaterial *>(this), ::boost::placeholders::_1, ::boost::placeholders::_2));
     returnValue->setRemoveMethod(
         boost::bind(&ChunkMaterial::removeFromChunks,
-                    static_cast<ChunkMaterial *>(this), _1));
+                    static_cast<ChunkMaterial *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&ChunkMaterial::removeFromChunksByObj,
-                    static_cast<ChunkMaterial *>(this), _1));
+                    static_cast<ChunkMaterial *>(this), ::boost::placeholders::_1));
 
     editMField(ChunksFieldMask, _mfChunks);
 

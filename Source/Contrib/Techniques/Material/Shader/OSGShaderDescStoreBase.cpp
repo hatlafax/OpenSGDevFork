@@ -67,7 +67,7 @@
 #include "OSGShaderDescStoreBase.h"
 #include "OSGShaderDescStore.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -485,13 +485,13 @@ EditFieldHandlePtr ShaderDescStoreBase::editHandleStore          (void)
 
     returnValue->setAddMethod(
         boost::bind(&ShaderDescStore::pushToStore,
-                    static_cast<ShaderDescStore *>(this), _1));
+                    static_cast<ShaderDescStore *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&ShaderDescStore::removeFromStore,
-                    static_cast<ShaderDescStore *>(this), _1));
+                    static_cast<ShaderDescStore *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&ShaderDescStore::removeObjFromStore,
-                    static_cast<ShaderDescStore *>(this), _1));
+                    static_cast<ShaderDescStore *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&ShaderDescStore::clearStore,
                     static_cast<ShaderDescStore *>(this)));

@@ -71,7 +71,7 @@
 #include "OSGCSMViewportBase.h"
 #include "OSGCSMViewport.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 
@@ -1176,7 +1176,7 @@ EditFieldHandlePtr CSMViewportBase::editHandleRoot           (void)
 
     returnValue->setSetMethod(
         boost::bind(&CSMViewport::setRoot,
-                    static_cast<CSMViewport *>(this), _1));
+                    static_cast<CSMViewport *>(this), ::boost::placeholders::_1));
 
     editSField(RootFieldMask);
 
@@ -1204,7 +1204,7 @@ EditFieldHandlePtr CSMViewportBase::editHandleCamera         (void)
 
     returnValue->setSetMethod(
         boost::bind(&CSMViewport::setCamera,
-                    static_cast<CSMViewport *>(this), _1));
+                    static_cast<CSMViewport *>(this), ::boost::placeholders::_1));
 
     editSField(CameraFieldMask);
 
@@ -1232,7 +1232,7 @@ EditFieldHandlePtr CSMViewportBase::editHandleBackground     (void)
 
     returnValue->setSetMethod(
         boost::bind(&CSMViewport::setBackground,
-                    static_cast<CSMViewport *>(this), _1));
+                    static_cast<CSMViewport *>(this), ::boost::placeholders::_1));
 
     editSField(BackgroundFieldMask);
 
@@ -1260,13 +1260,13 @@ EditFieldHandlePtr CSMViewportBase::editHandleForegrounds    (void)
 
     returnValue->setAddMethod(
         boost::bind(&CSMViewport::pushToForegrounds,
-                    static_cast<CSMViewport *>(this), _1));
+                    static_cast<CSMViewport *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveMethod(
         boost::bind(&CSMViewport::removeFromForegrounds,
-                    static_cast<CSMViewport *>(this), _1));
+                    static_cast<CSMViewport *>(this), ::boost::placeholders::_1));
     returnValue->setRemoveObjMethod(
         boost::bind(&CSMViewport::removeObjFromForegrounds,
-                    static_cast<CSMViewport *>(this), _1));
+                    static_cast<CSMViewport *>(this), ::boost::placeholders::_1));
     returnValue->setClearMethod(
         boost::bind(&CSMViewport::clearForegrounds,
                     static_cast<CSMViewport *>(this)));
@@ -1372,7 +1372,7 @@ EditFieldHandlePtr CSMViewportBase::editHandleRenderOptions  (void)
 
     returnValue->setSetMethod(
         boost::bind(&CSMViewport::setRenderOptions,
-                    static_cast<CSMViewport *>(this), _1));
+                    static_cast<CSMViewport *>(this), ::boost::placeholders::_1));
 
     editSField(RenderOptionsFieldMask);
 

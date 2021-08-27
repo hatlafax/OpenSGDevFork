@@ -66,7 +66,7 @@
 #include "OSGComputeCallbackAlgorithmBase.h"
 #include "OSGComputeCallbackAlgorithm.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 OSG_BEGIN_NAMESPACE
 

@@ -247,7 +247,7 @@ ObjectCollector::operator()(OSG::Node *root)
     g->skinGeos .clear();
     g->materials.clear();
 
-    OSG::traverse(root, boost::bind(&ObjectCollector::enterFunc, this, _1));
+    OSG::traverse(root, boost::bind(&ObjectCollector::enterFunc, this, ::boost::placeholders::_1));
 }
 
 OSG::Action::ResultE
