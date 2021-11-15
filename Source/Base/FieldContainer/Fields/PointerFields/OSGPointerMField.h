@@ -124,11 +124,6 @@ class PointerMFieldIterator :
     typedef typename Inherited::reference               reference;
 #endif
 
-#if defined(WIN32) && _ITERATOR_DEBUG_LEVEL == 1 && _MSC_VER < 1600
-    typedef typename Inherited::_Checked_iterator_base_type 
-                                                   _Checked_iterator_base_type;
-#endif
-
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name Constructors                                                 */
