@@ -3,3 +3,4 @@
 CMakeCacheInitial.txt
 Support/CMakeCacheInitial.txt
 Bindings/Python/module
+Tools/fcd2code/__pycache__

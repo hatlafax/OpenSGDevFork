@@ -1072,33 +1072,4 @@
 #define OSG_DOUBLEMAGICROUNDEPS (.5-1.4e-11)
 #define OSG_DOUBLEMAGIC         double(6755399441055744.0)
 
-#if defined(WIN32)
-
-//
-// OSG_DISABLE_MICROSOFT_SECURE_CXXX
-//          -D _CRT_SECURE_NO_DEPRECATE
-//          -D _CRT_SECURE_NO_WARNINGS
-//          -D _CRT_NONSTDC_NO_DEPRECATE
-//          -D _ITERATOR_DEBUG_LEVEL = 0
-//          -D _SCL_SECURE_NO_WARNINGS
-//          -D _SCL_SECURE_NO_DEPRECATE
-//
-# if defined(OSG_DISABLE_MICROSOFT_SECURE_CXXX)
-#  if !defined(_ITERATOR_DEBUG_LEVEL) || _ITERATOR_DEBUG_LEVEL != 0
-#    error "mixed up compiler settings, OpenSG libs with OSG_DISABLE_MICROSOFT_SECURE_CXXX on, but _ITERATOR_DEBUG_LEVEL not set or not equal 0"
-#  endif
-# endif //OSG_DISABLE_MICROSOFT_SECURE_CXXX
-
-//
-// OSG_DISABLE_MS_ITERATOR_DEBUGGING
-//          -D _HAS_ITERATOR_DEBUGGING = 0
-//
-# if defined(OSG_DISABLE_MS_ITERATOR_DEBUGGING)
-#  if !defined(_HAS_ITERATOR_DEBUGGING) || _HAS_ITERATOR_DEBUGGING != 0
-#   error "mixed up compiler settings, OpenSG libs with OSG_DISABLE_MS_ITERATOR_DEBUGGING on, but _HAS_ITERATOR_DEBUGGING not set or not equal 0"
-#  endif
-# endif // OSG_DISABLE_MS_ITERATOR_DEBUGGING
-
-#endif // WIN32
-
 #endif /* _OSGCONFIG_H_ */

@@ -5459,19 +5459,19 @@ void DescMaterial::getFragmentProgramMaterialAlbedo(std::stringstream& ost) cons
             break;
         case IS_COLOR_DATA:
             ost
-            << endl << "vec3 getMaterialAlbedo()"
+            << endl << "vec4 getMaterialAlbedo()"
             << endl << "{"
-            << endl << "    return descMaterial.albedo;"
+            << endl << "    return vec4(descMaterial.albedo, 1.0);"
             << endl << "}"
             << endl << ""
             ;
             break;
         case IS_SINGLE_DATA:
             ost
-            << endl << "vec3 getMaterialAlbedo()"
+            << endl << "vec4 getMaterialAlbedo()"
             << endl << "{"
             << endl << "    SingleTexData data = descMaterial.albedo;"
-            << endl << "    vec3 value = EvaluateTexture(data).rgb;"
+            << endl << "    vec4 value = EvaluateTexture(data);"
             << endl << "    return clamp(value, 0.0, 1.0);"
             << endl << "}"
             << endl << ""
@@ -5479,10 +5479,10 @@ void DescMaterial::getFragmentProgramMaterialAlbedo(std::stringstream& ost) cons
             break;
         case IS_STACK_DATA:
             ost
-            << endl << "vec3 getMaterialAlbedo()"
+            << endl << "vec4 getMaterialAlbedo()"
             << endl << "{"
             << endl << "    StackTexData data = descMaterial.albedo;"
-            << endl << "    vec3 value = EvaluateTexture(data).rgb;"
+            << endl << "    vec4 value = EvaluateTexture(data);"
             << endl << "    return clamp(value, 0.0, 1.0);"
             << endl << "}"
             << endl << ""
@@ -5727,29 +5727,29 @@ void DescMaterial::getFragmentProgramMaterialOpacity(std::stringstream& ost) con
             break;
         case IS_COLOR_DATA:
             ost
-            << endl << "float getMaterialOpacity()"
+            << endl << "float getMaterialOpacity(in float opacity)"
             << endl << "{"
-            << endl << "    return descMaterial.opacity.r;"
+            << endl << "    return opacity * descMaterial.opacity.r;"
             << endl << "}"
             << endl << ""
             ;
             break;
         case IS_SINGLE_DATA:
             ost
-            << endl << "float getMaterialOpacity()"
+            << endl << "float getMaterialOpacity(in float opacity)"
             << endl << "{"
             << endl << "    SingleTexData data = descMaterial.opacity;"
-            << endl << "    return EvaluateTexture(data).r;"
+            << endl << "    return opacity * EvaluateTexture(data).r;"
             << endl << "}"
             << endl << ""
             ;
             break;
         case IS_STACK_DATA:
             ost
-            << endl << "float getMaterialOpacity()"
+            << endl << "float getMaterialOpacity(in float opacity)"
             << endl << "{"
             << endl << "    StackTexData data = descMaterial.opacity;"
-            << endl << "    return EvaluateTexture(data).r;"
+            << endl << "    return opacity * EvaluateTexture(data).r;"
             << endl << "}"
             << endl << ""
             ;
@@ -6602,8 +6602,9 @@ void DescMaterial::getFragmentProgramMaterialInitialization(std::stringstream& o
     }
 
     ost
+    << endl << "    vec4 albedo                = getMaterialAlbedo();"
     << endl << "    material.emissive          = getMaterialEmissive();"
-    << endl << "    material.albedo            = getMaterialAlbedo();"
+    << endl << "    material.albedo            = albedo.rgb;"
     ;
 
     if (hasSpecularGlossinessTexture())
@@ -6825,7 +6826,7 @@ void DescMaterial::getFragmentProgramMaterialInitialization(std::stringstream& o
 
     ost
     << endl << ""
-    << endl << "    material.opacity           = getMaterialOpacity();"
+    << endl << "    material.opacity           = getMaterialOpacity(albedo.a);"
     ;
 
     if (matDesc->getOpacityMode()==MaterialDesc::MASK_OPACITY_MODE)
