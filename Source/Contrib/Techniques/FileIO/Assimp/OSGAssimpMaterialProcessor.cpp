@@ -327,25 +327,6 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
         // not supported
     }
 
-    if (mat->Get(AI_MATKEY_TWOSIDED, bool_value) == AI_SUCCESS)
-    {
-        if (bool_value || _options.getForceTwosided() || osgAbs(1.f - matDesc->getOpacity()) > Eps)
-        {
-            matDesc->setCullFace(GL_NONE);
-        }
-        else
-        {
-            matDesc->setCullFace(GL_BACK);
-        }
-    }
-    else
-    {
-        if (_options.getForceTwosided())
-        {
-            matDesc->setCullFace(GL_NONE);
-        }
-    }
-
     UInt32 model = MaterialDesc::NO_SHADING_MODEL;
     bool   flat  = false;
 
@@ -486,6 +467,38 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
         matDesc->setUnlitMode(bool_value);
     }
 
+    //
+    // Default culling of back faces.
+    //
+    matDesc->setCullFace(GL_BACK);
+
+    if (mat->Get(AI_MATKEY_TWOSIDED, bool_value) == AI_SUCCESS)
+    {
+        if (bool_value || _options.getForceTwosided() || osgAbs(1.f - matDesc->getOpacity()) > Eps)
+        {
+            matDesc->setCullFace(GL_NONE);
+        }
+        else
+        {
+            matDesc->setCullFace(GL_BACK);
+        }
+    }
+    else
+    {
+        if (_options.getForceTwosided())
+        {
+            matDesc->setCullFace(GL_NONE);
+        }
+        else if (osgAbs(1.f - matDesc->getOpacity()) > Eps)
+        {
+            //
+            // Transparent objects should not cull faces, but unfortunately this
+            // does not work currently goodl with our engine because of missing
+            //
+            //matDesc->setCullFace(GL_NONE);
+        }
+    }
+
     _hasORMTexture = checkORMTextureSupport(mat);
 
     std::vector<aiTextureType> types; 
@@ -518,6 +531,72 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
     for (std::size_t i = 0; i < types.size(); ++i)
     {
         process(scene, mat, types[i], matDesc);
+    }
+
+    //
+    // Postprocess:
+    //      We check if we have any opacity texture that does match the same
+    //      resources as the albedo texture. In that case we assume that the
+    //      albedo texture is a RGBA texture (better if we would test that)
+    //      and omit the opacity texture at all.
+    //
+
+    MFUnrecTextureDescPtr* pMFTexDescPtr = matDesc->editMFTextureDesc();
+    if (pMFTexDescPtr != NULL)
+    {
+        MFUnrecTextureDescPtr::iterator iter, end;
+
+        // First find albedo texture: if we find more than one we stop the postprocess.
+
+        iter = pMFTexDescPtr->begin();
+        end  = pMFTexDescPtr->end  ();
+
+        MFUnrecTextureDescPtr::iterator iterOpacity;
+
+        TextureDesc* texDescAlbedo  = nullptr;
+        TextureDesc* texDescOpacity = nullptr;
+
+        bool proceed = true;
+
+        for (; iter != end; ++iter)
+        {
+            TextureDesc* texDesc = *iter;
+            if (texDesc->getTextureType() == TextureDesc::ALBEDO_TEXTURE)
+            {
+                if (texDescAlbedo)
+                    proceed = false;
+                else
+                    texDescAlbedo = texDesc;
+            }
+
+            if (texDesc->getTextureType() == TextureDesc::OPACITY_TEXTURE)
+            {
+                if (texDescOpacity)
+                    proceed = false;
+                else {
+                    texDescOpacity = texDesc;
+                    iterOpacity = iter;
+                }
+            }
+        }
+
+        if (proceed && texDescAlbedo && texDescOpacity)
+        {
+            if (texDescAlbedo->getTexImage() == texDescOpacity->getTexImage() && 
+                texDescAlbedo->getFilename() == texDescOpacity->getFilename())
+            {
+                UInt32 flags = texDescAlbedo->getTextureFlags();
+                flags &= ~TextureDesc::IGNORE_ALPHA_FLAG;
+                flags |=  TextureDesc::USE_ALPHA_FLAG;
+                texDescAlbedo->setTextureFlags(flags);
+
+                matDesc->setOpacityMode(MaterialDesc::BLEND_OPACITY_MODE);
+                matDesc->setCullFace(GL_NONE);
+
+                pMFTexDescPtr->erase(iterOpacity);
+
+            }
+        }
     }
 
     return true;
@@ -658,7 +737,7 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
         unsigned int uvindex = 0;
         ai_real blend = 0.f;
         aiTextureOp op = aiTextureOp_Multiply;
-        aiTextureMapMode mapmode[3];
+        aiTextureMapMode mapmode[3] = {aiTextureMapMode_Wrap, aiTextureMapMode_Wrap, aiTextureMapMode_Wrap};
         unsigned int flags = 0;
         aiUVTransform transform;
         aiVector3D axis;
