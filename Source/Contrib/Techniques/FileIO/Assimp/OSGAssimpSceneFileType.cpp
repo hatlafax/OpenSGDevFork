@@ -461,8 +461,6 @@ NodeTransitPtr AssimpSceneFileType::read(
                                                           | aiComponent_CAMERAS 
                                                           | aiComponent_ANIMATIONS);
 
-        importer.SetPropertyFloat(AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, options.getGlobalScaleOnImport());
-
         //
         // Assimp does expect an utf8 filename.
         //
@@ -474,7 +472,21 @@ NodeTransitPtr AssimpSceneFileType::read(
 
         UInt32 flags = options.getPostProcessingFlags();
         
+        float globalScaleFactor = options.getGlobalScaleOnImport();
+        if (globalScaleFactor != 1.f)
+        {
+            importer.SetPropertyFloat(AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, globalScaleFactor);
+            flags |= AssimpOptions::GlobalScale;
+        }
+
         const aiScene* scene = importer.ReadFile(utf8_file, flags);
+
+        if (!scene)
+        {
+            importer.SetProgressHandler(NULL);
+            rootPtr = makeCoredNode<Group>();
+            return NodeTransitPtr(rootPtr);
+        }
 
         std::string importer_name;
 

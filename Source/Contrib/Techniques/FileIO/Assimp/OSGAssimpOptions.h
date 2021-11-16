@@ -654,8 +654,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpOptions
 
             DefaultPostProcessingOptions = 
                 TargetRealtime_MaxOptimized |
-                RemoveComponent             |
-                GlobalScale,
+                RemoveComponent,
         };
 
         enum Examine
