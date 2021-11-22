@@ -120,6 +120,336 @@ void TextureDesc::dump(      UInt32    ,
                        const BitVector ) const
 {
     SLOG << "Dump TextureDesc NI" << std::endl;
+
+    std::string spc = "    ";
+
+    if (isCubeMap())
+    {
+        SLOG << spc << "Filename[POS_X]      = " << getFilename(POS_X) << std::endl;
+        SLOG << spc << "Filename[POS_Y]      = " << getFilename(POS_Y) << std::endl;
+        SLOG << spc << "Filename[POS_Z]      = " << getFilename(POS_Z) << std::endl;
+        SLOG << spc << "Filename[NEG_X]      = " << getFilename(NEG_X) << std::endl;
+        SLOG << spc << "Filename[NEG_Y]      = " << getFilename(NEG_Y) << std::endl;
+        SLOG << spc << "Filename[NEG_Z]      = " << getFilename(NEG_Z) << std::endl;
+        SLOG << spc << "hasTexImage          = " << hasTexImage() << std::endl;
+    }
+    else
+    {
+        SLOG << spc << "Filename             = " << getFilename() << std::endl;
+        SLOG << spc << "hasTexImage          = " << hasTexImage() << std::endl;
+    }
+
+    SLOG << spc << "isEnvironmentMap     = " << isEnvironmentMap() << std::endl;
+    SLOG << spc << "isEquirectangularMap = " << isEquirectangularMap() << std::endl;
+    SLOG << spc << "isCubeMap            = " << isCubeMap() << std::endl;
+
+    SLOG << spc << "Matrix               = " << getMatrix() << std::endl;
+
+    SLOG << spc << "TextureTypeName      = " << getTextureTypeName() << std::endl;
+    SLOG << spc << "hasSwizzle           = " << hasSwizzle() << std::endl;
+    SLOG << spc << "isInverted           = " << isInverted() << std::endl;
+    SLOG << spc << "ignoreAlpha          = " << ((getTextureFlags() & INVERT_FLAG) != 0) << std::endl;
+    SLOG << spc << "isNormalDirectX      = " << ((getTextureFlags() & NORMAL_DIRECTX_FLAG) != 0) << std::endl;
+
+    std::string texture_type = "NONE_TEXTURE";
+    switch (getTextureType())
+    {
+        case NONE_TEXTURE:              texture_type = "NONE_TEXTURE";              break;
+        case UNKNOWN_TEXTURE:           texture_type = "UNKNOWN_TEXTURE";           break;
+        case ALBEDO_TEXTURE:            texture_type = "ALBEDO_TEXTURE";            break;
+        case SPECULAR_TEXTURE:          texture_type = "SPECULAR_TEXTURE";          break;
+        case EMISSIVE_TEXTURE:          texture_type = "EMISSIVE_TEXTURE";          break;
+        case SHININESS_TEXTURE:         texture_type = "SHININESS_TEXTURE";         break;
+        case OPACITY_TEXTURE:           texture_type = "OPACITY_TEXTURE";           break;
+        case NORMALS_TEXTURE:           texture_type = "NORMALS_TEXTURE";           break;
+        case HEIGHT_TEXTURE:            texture_type = "HEIGHT_TEXTURE";            break;
+        case DISPLACEMENT_TEXTURE:      texture_type = "DISPLACEMENT_TEXTURE";      break;
+        case REFLECTION_TEXTURE:        texture_type = "REFLECTION_TEXTURE";        break;
+        case REFRACTION_TEXTURE:        texture_type = "REFRACTION_TEXTURE";        break;
+        case ANISOTROPY_U_TEXTURE:      texture_type = "ANISOTROPY_U_TEXTURE";      break;
+        case ANISOTROPY_V_TEXTURE:      texture_type = "ANISOTROPY_V_TEXTURE";      break;
+        case ANISOTROPY_UV_TEXTURE:     texture_type = "ANISOTROPY_UV_TEXTURE";     break;
+        case AMBIENT_OCCLUSION_TEXTURE: texture_type = "AMBIENT_OCCLUSION_TEXTURE"; break;
+        case ROUGH_TEXTURE:             texture_type = "ROUGH_TEXTURE";             break;
+        case METAL_TEXTURE:             texture_type = "METAL_TEXTURE";             break;
+        case ROUGH_METAL_TEXTURE:       texture_type = "ROUGH_METAL_TEXTURE";       break;
+        case OCCL_ROUGH_METAL_TEXTURE:  texture_type = "OCCL_ROUGH_METAL_TEXTURE";  break;
+        case IRRADIANCE_TEXTURE:        texture_type = "IRRADIANCE_TEXTURE";        break;
+        case PRE_FILTER_TEXTURE:        texture_type = "PRE_FILTER_TEXTURE";        break;
+        case BRDF_LUT_TEXTURE:          texture_type = "BRDF_LUT_TEXTURE";          break;
+        case STANDARD_MATERIAL_TEXTURE: texture_type = "STANDARD_MATERIAL_TEXTURE"; break;
+    }
+    SLOG << spc << "TextureType          = " << texture_type << std::endl;
+
+    SLOG << spc << "Swizzle              = " << getSwizzle() << std::endl;
+    SLOG << spc << "IsSRGBTexture        = " << getIsSRGBTexture() << std::endl;
+    SLOG << spc << "TexUnit              = " << getTexUnit() << std::endl;
+    SLOG << spc << "UVChannel            = " << getUVChannel() << std::endl;
+
+    std::string mapping_mode = "UV_MAPPING";
+    switch (getMappingMode())
+    {
+        case UV_MAPPING:        mapping_mode = "UV_MAPPING";        break;
+        case SPHERE_MAPPING:    mapping_mode = "SPHERE_MAPPING";    break;
+        case CYLINDER_MAPPING:  mapping_mode = "CYLINDER_MAPPING";  break;
+        case BOX_MAPPING:       mapping_mode = "BOX_MAPPING";       break;
+        case PLANE_MAPPING:     mapping_mode = "PLANE_MAPPING";     break;
+        case OTHER_MAPPING:     mapping_mode = "OTHER_MAPPING";     break;
+    }
+    SLOG << spc << "MappingMode          = " << mapping_mode << std::endl;
+
+    SLOG << spc << "MapAxis              = " << getMapAxis() << std::endl;
+
+    std::string environment_map_type = "OTHER_MAP";
+    switch (getEnvironmentMapType())
+    {
+        case OTHER_MAP:                 environment_map_type = "OTHER_MAP";                 break;
+        case EQUIRECTANGULAR_MAP:       environment_map_type = "EQUIRECTANGULAR_MAP";       break;
+        case CUBE_MAP:                  environment_map_type = "CUBE_MAP";                  break;
+        case VERTICAL_CROSS_CUBE_MAP:   environment_map_type = "VERTICAL_CROSS_CUBE_MAP";   break;
+        case HORIZONTAL_CROSS_CUBE_MAP: environment_map_type = "HORIZONTAL_CROSS_CUBE_MAP"; break;
+        case VERTICAL_STRIP_CUBE_MAP:   environment_map_type = "VERTICAL_STRIP_CUBE_MAP";   break;
+        case HORIZONTAL_STRIP_CUBE_MAP: environment_map_type = "HORIZONTAL_STRIP_CUBE_MAP"; break;
+    }
+    SLOG << spc << "EnvironmentMapType   = " << environment_map_type << std::endl;
+
+    SLOG << spc << "BlendFactor          = " << getBlendFactor() << std::endl;
+
+    std::string operation = "MULTIPLY_OPERATION";
+    switch (getOperation())
+    {
+        case MULTIPLY_OPERATION:    operation = "MULTIPLY_OPERATION";   break;
+        case ADD_OPERATION:         operation = "ADD_OPERATION";        break;
+        case SUBTRACT_OPERATION:    operation = "SUBTRACT_OPERATION";   break;
+        case DIVIDE_OPERATION:      operation = "DIVIDE_OPERATION";     break;
+        case SMOOTHADD_OPERATION:   operation = "SMOOTHADD_OPERATION";  break;
+        case SIGNEDADD_OPERATION:   operation = "SIGNEDADD_OPERATION";  break;
+        case REPLACE_OPERATION:     operation = "REPLACE_OPERATION";    break;
+        case DECAL_OPERATION:       operation = "DECAL_OPERATION";      break;
+        case BLEND_OPERATION:       operation = "BLEND_OPERATION";      break;
+    }
+    SLOG << spc << "Operation            = " << operation << std::endl;
+
+    std::string wrap_s = "GL_REPEAT";
+    switch (getWrapS())
+    {
+        case GL_REPEAT:          wrap_s = "GL_REPEAT";          break;
+        case GL_CLAMP_TO_EDGE:   wrap_s = "GL_CLAMP_TO_EDGE";   break;
+        case GL_CLAMP_TO_BORDER: wrap_s = "GL_CLAMP_TO_BORDER"; break;
+        case GL_MIRRORED_REPEAT: wrap_s = "GL_MIRRORED_REPEAT"; break;
+    }
+    SLOG << spc << "WrapS                = " << wrap_s << std::endl;
+
+    std::string wrap_t = "GL_REPEAT";
+    switch (getWrapT())
+    {
+        case GL_REPEAT:          wrap_t = "GL_REPEAT";          break;
+        case GL_CLAMP_TO_EDGE:   wrap_t = "GL_CLAMP_TO_EDGE";   break;
+        case GL_CLAMP_TO_BORDER: wrap_t = "GL_CLAMP_TO_BORDER"; break;
+        case GL_MIRRORED_REPEAT: wrap_t = "GL_MIRRORED_REPEAT"; break;
+    }
+    SLOG << spc << "WrapT                = " << wrap_t << std::endl;
+
+    std::string wrap_r = "GL_REPEAT";
+    switch (getWrapR())
+    {
+        case GL_REPEAT:          wrap_r = "GL_REPEAT";          break;
+        case GL_CLAMP_TO_EDGE:   wrap_r = "GL_CLAMP_TO_EDGE";   break;
+        case GL_CLAMP_TO_BORDER: wrap_r = "GL_CLAMP_TO_BORDER"; break;
+        case GL_MIRRORED_REPEAT: wrap_r = "GL_MIRRORED_REPEAT"; break;
+    }
+    SLOG << spc << "WrapR                = " << wrap_r << std::endl;
+
+    std::string min_filter = "GL_NEAREST";
+    switch (getMinFilter())
+    {
+        case GL_NEAREST:                min_filter = "GL_NEAREST";                break;
+        case GL_LINEAR:                 min_filter = "GL_LINEAR";                 break;
+        case GL_NEAREST_MIPMAP_NEAREST: min_filter = "GL_NEAREST_MIPMAP_NEAREST"; break;
+        case GL_LINEAR_MIPMAP_NEAREST:  min_filter = "GL_LINEAR_MIPMAP_NEAREST";  break;
+        case GL_NEAREST_MIPMAP_LINEAR:  min_filter = "GL_NEAREST_MIPMAP_LINEAR";  break;
+        case GL_LINEAR_MIPMAP_LINEAR:   min_filter = "GL_LINEAR_MIPMAP_LINEAR";   break;
+    }
+    SLOG << spc << "MinFilter            = " << min_filter << std::endl;
+
+    std::string mag_filter = "GL_NEAREST";
+    switch (getMinFilter())
+    {
+        case GL_NEAREST: mag_filter = "GL_NEAREST"; break;
+        case GL_LINEAR:  mag_filter = "GL_LINEAR";  break;
+    }
+    SLOG << spc << "MagFilter            = " << mag_filter << std::endl;
+
+    std::string internal_format = "GL_NONE";
+    switch (getInternalFormat())
+    {
+        case GL_DEPTH_COMPONENT:                    internal_format = "GL_DEPTH_COMPONENT"; break;
+        case GL_DEPTH_STENCIL:                      internal_format = "GL_DEPTH_STENCIL"; break;
+        case GL_RED:                                internal_format = "GL_RED"; break;
+        case GL_RG:                                 internal_format = "GL_RG"; break;
+        case GL_RGB:                                internal_format = "GL_RGB"; break;
+        case GL_RGBA:                               internal_format = "GL_RGBA"; break;
+        case GL_R8:                                 internal_format = "GL_R8"; break;
+        case GL_R8_SNORM:                           internal_format = "GL_R8_SNORM"; break;
+        case GL_R16:                                internal_format = "GL_R16"; break;
+        case GL_R16_SNORM:                          internal_format = "GL_R16_SNORM"; break;
+        case GL_RG8:                                internal_format = "GL_RG8"; break;
+        case GL_RG8_SNORM:                          internal_format = "GL_RG8_SNORM"; break;
+        case GL_RG16:                               internal_format = "GL_RG16"; break;
+        case GL_RG16_SNORM:                         internal_format = "GL_RG16_SNORM"; break;
+        case GL_R3_G3_B2:                           internal_format = "GL_R3_G3_B2"; break;
+        case GL_RGB4:                               internal_format = "GL_RGB4"; break;
+        case GL_RGB5:                               internal_format = "GL_RGB5"; break;
+        case GL_RGB8:                               internal_format = "GL_RGB8"; break;
+        case GL_RGB8_SNORM:                         internal_format = "GL_RGB8_SNORM"; break;
+        case GL_RGB10:                              internal_format = "GL_RGB10"; break;
+        case GL_RGB12:                              internal_format = "GL_RGB12"; break;
+        case GL_RGB16_SNORM:                        internal_format = "GL_RGB16_SNORM"; break;
+        case GL_RGBA2:                              internal_format = "GL_RGBA2"; break;
+        case GL_RGBA4:                              internal_format = "GL_RGBA4"; break;
+        case GL_RGB5_A1:                            internal_format = "GL_RGB5_A1"; break;
+        case GL_RGBA8:                              internal_format = "GL_RGBA8"; break;
+        case GL_RGBA8_SNORM:                        internal_format = "GL_RGBA8_SNORM"; break;
+        case GL_RGB10_A2:                           internal_format = "GL_RGB10_A2"; break;
+        case GL_RGB10_A2UI:                         internal_format = "GL_RGB10_A2UI"; break;
+        case GL_RGBA12:                             internal_format = "GL_RGBA12"; break;
+        case GL_RGBA16:                             internal_format = "GL_RGBA16"; break;
+        case GL_SRGB8:                              internal_format = "GL_SRGB8"; break;
+        case GL_SRGB8_ALPHA8:                       internal_format = "GL_SRGB8_ALPHA8"; break;
+        case GL_R16F:                               internal_format = "GL_R16F"; break;
+        case GL_RG16F:                              internal_format = "GL_RG16F"; break;
+        case GL_RGB16F:                             internal_format = "GL_RGB16F"; break;
+        case GL_RGBA16F:                            internal_format = "GL_RGBA16F"; break;
+        case GL_R32F:                               internal_format = "GL_R32F"; break;
+        case GL_RG32F:                              internal_format = "GL_RG32F"; break;
+        case GL_RGB32F:                             internal_format = "GL_RGB32F"; break;
+        case GL_RGBA32F:                            internal_format = "GL_RGBA32F"; break;
+        case GL_R11F_G11F_B10F:                     internal_format = "GL_R11F_G11F_B10F"; break;
+        case GL_RGB9_E5:                            internal_format = "GL_RGB9_E5"; break;
+        case GL_R8I:                                internal_format = "GL_R8I"; break;
+        case GL_R8UI:                               internal_format = "GL_R8UI"; break;
+        case GL_R16I:                               internal_format = "GL_R16I"; break;
+        case GL_R16UI:                              internal_format = "GL_R16UI"; break;
+        case GL_R32I:                               internal_format = "GL_R32I"; break;
+        case GL_R32UI:                              internal_format = "GL_R32UI"; break;
+        case GL_RG8I:                               internal_format = "GL_RG8I"; break;
+        case GL_RG8UI:                              internal_format = "GL_RG8UI"; break;
+        case GL_RG16I:                              internal_format = "GL_RG16I"; break;
+        case GL_RG16UI:                             internal_format = "GL_RG16UI"; break;
+        case GL_RG32I:                              internal_format = "GL_RG32I"; break;
+        case GL_RG32UI:                             internal_format = "GL_RG32UI"; break;
+        case GL_RGB8I:                              internal_format = "GL_RGB8I"; break;
+        case GL_RGB8UI:                             internal_format = "GL_RGB8UI"; break;
+        case GL_RGB16I:                             internal_format = "GL_RGB16I"; break;
+        case GL_RGB16UI:                            internal_format = "GL_RGB16UI"; break;
+        case GL_RGB32I:                             internal_format = "GL_RGB32I"; break;
+        case GL_RGB32UI:                            internal_format = "GL_RGB32UI"; break;
+        case GL_RGBA8I:                             internal_format = "GL_RGBA8I"; break;
+        case GL_RGBA8UI:                            internal_format = "GL_RGBA8UI"; break;
+        case GL_RGBA16I:                            internal_format = "GL_RGBA16I"; break;
+        case GL_RGBA16UI:                           internal_format = "GL_RGBA16UI"; break;
+        case GL_RGBA32I:                            internal_format = "GL_RGBA32I"; break;
+        case GL_RGBA32UI:                           internal_format = "GL_RGBA32UI"; break;
+        case GL_COMPRESSED_RED:                     internal_format = "GL_COMPRESSED_RED"; break;
+        case GL_COMPRESSED_RG:                      internal_format = "GL_COMPRESSED_RG"; break;
+        case GL_COMPRESSED_RGB:                     internal_format = "GL_COMPRESSED_RGB"; break;
+        case GL_COMPRESSED_RGBA:                    internal_format = "GL_COMPRESSED_RGBA"; break;
+        case GL_COMPRESSED_SRGB:                    internal_format = "GL_COMPRESSED_SRGB"; break;
+        case GL_COMPRESSED_SRGB_ALPHA:              internal_format = "GL_COMPRESSED_SRGB_ALPHA"; break;
+        case GL_COMPRESSED_RED_RGTC1:               internal_format = "GL_COMPRESSED_RED_RGTC1"; break;
+        case GL_COMPRESSED_SIGNED_RED_RGTC1:        internal_format = "GL_COMPRESSED_SIGNED_RED_RGTC1"; break;
+        case GL_COMPRESSED_RG_RGTC2:                internal_format = "GL_COMPRESSED_RG_RGTC2"; break;
+        case GL_COMPRESSED_SIGNED_RG_RGTC2:         internal_format = "GL_COMPRESSED_SIGNED_RG_RGTC2"; break;
+        case GL_COMPRESSED_RGBA_BPTC_UNORM:         internal_format = "GL_COMPRESSED_RGBA_BPTC_UNORM"; break;
+        case GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM:   internal_format = "GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM"; break;
+        case GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT:   internal_format = "GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT"; break;
+        case GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT: internal_format = "GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT"; break;
+    }
+    SLOG << spc << "InternalFormat       = " << internal_format << std::endl;
+
+    std::string external_format = "GL_NONE";
+    switch (getExternalFormat())
+    {
+        case GL_RED:             external_format = "GL_RED"; break;
+        case GL_RG:              external_format = "GL_RG"; break;
+        case GL_RGB:             external_format = "GL_RGB"; break;
+        case GL_BGR:             external_format = "GL_BGR"; break;
+        case GL_RGBA:            external_format = "GL_RGBA"; break;
+        case GL_BGRA:            external_format = "GL_BGRA"; break;
+        case GL_RED_INTEGER:     external_format = "GL_RED_INTEGER"; break;
+        case GL_RG_INTEGER:      external_format = "GL_RG_INTEGER"; break;
+        case GL_RGB_INTEGER:     external_format = "GL_RGB_INTEGER"; break;
+        case GL_BGR_INTEGER:     external_format = "GL_BGR_INTEGER"; break;
+        case GL_RGBA_INTEGER:    external_format = "GL_RGBA_INTEGER"; break;
+        case GL_BGRA_INTEGER:    external_format = "GL_BGRA_INTEGER"; break;
+        case GL_STENCIL_INDEX:   external_format = "GL_STENCIL_INDEX"; break;
+        case GL_DEPTH_COMPONENT: external_format = "GL_DEPTH_COMPONENT"; break;
+        case GL_DEPTH_STENCIL:   external_format = "GL_DEPTH_STENCIL"; break;
+    }
+    SLOG << spc << "ExternalFormat       = " << external_format << std::endl;
+
+    SLOG << spc << "Anisotropy           = " << getAnisotropy() << std::endl;
+
+    std::string mirror_flags = "UNKNOWN";
+    switch (getMirrorFlags())
+    {
+        case 0:                                 mirror_flags = "0"; break;
+        case MIRROR_HORIZONTAL_DIRECTION:       mirror_flags = "MIRROR_HORIZONTAL_DIRECTION"; break;
+        case MIRROR_VERTICAL_DIRECTION:         mirror_flags = "MIRROR_VERTICAL_DIRECTION"; break;
+        case MIRROR_DEPTH_DIRECTION:            mirror_flags = "MIRROR_DEPTH_DIRECTION"; break;
+        case MIRROR_HORIZONTAL_DIRECTION_POS_X: mirror_flags = "MIRROR_HORIZONTAL_DIRECTION_POS_X"; break;
+        case MIRROR_HORIZONTAL_DIRECTION_POS_Y: mirror_flags = "MIRROR_HORIZONTAL_DIRECTION_POS_Y"; break;
+        case MIRROR_HORIZONTAL_DIRECTION_POS_Z: mirror_flags = "MIRROR_HORIZONTAL_DIRECTION_POS_Z"; break;
+        case MIRROR_HORIZONTAL_DIRECTION_NEG_X: mirror_flags = "MIRROR_HORIZONTAL_DIRECTION_NEG_X"; break;
+        case MIRROR_HORIZONTAL_DIRECTION_NEG_Y: mirror_flags = "MIRROR_HORIZONTAL_DIRECTION_NEG_Y"; break;
+        case MIRROR_HORIZONTAL_DIRECTION_NEG_Z: mirror_flags = "MIRROR_HORIZONTAL_DIRECTION_NEG_Z"; break;
+        case MIRROR_VERTICAL_DIRECTION_POS_X:   mirror_flags = "MIRROR_VERTICAL_DIRECTION_POS_X"; break;
+        case MIRROR_VERTICAL_DIRECTION_POS_Y:   mirror_flags = "MIRROR_VERTICAL_DIRECTION_POS_Y"; break;
+        case MIRROR_VERTICAL_DIRECTION_POS_Z:   mirror_flags = "MIRROR_VERTICAL_DIRECTION_POS_Z"; break;
+        case MIRROR_VERTICAL_DIRECTION_NEG_X:   mirror_flags = "MIRROR_VERTICAL_DIRECTION_NEG_X"; break;
+        case MIRROR_VERTICAL_DIRECTION_NEG_Y:   mirror_flags = "MIRROR_VERTICAL_DIRECTION_NEG_Y"; break;
+        case MIRROR_VERTICAL_DIRECTION_NEG_Z:   mirror_flags = "MIRROR_VERTICAL_DIRECTION_NEG_Z"; break;
+        case CUBEMAP_DEFAULT_MIRROR_FLAGS:      mirror_flags = "CUBEMAP_DEFAULT_MIRROR_FLAGS"; break;
+
+    }
+    SLOG << spc << "MirrorFlags          = " << mirror_flags << std::endl;
+
+    SLOG << spc << "Scale                = " << getScale() << std::endl;
+
+    SLOG << spc << "Translate            = " << getTranslate() << std::endl;
+
+    SLOG << spc << "Rotate               = " << getRotate() << std::endl;
+
+    SLOG << spc << "HasUVTransform       = " << getHasUVTransform() << std::endl;
+
+    SLOG << spc << "BorderColor          = " << getBorderColor() << std::endl;
+
+    if (isCubeMap())
+    {
+        if (hasTexImage())
+        {
+            for (int side = POS_X; side <= NEG_Z; ++side)
+            {
+                Image* image = getTexImage(static_cast<CubeMapSide>(side));
+                if (image)
+                {
+                    image->dump();
+                }
+            }
+            
+        }
+    }
+    else
+    {
+        if (hasTexImage())
+        {
+            Image* image = getTexImage();
+            if (image)
+            {
+                image->dump();
+            }
+        }
+    }
 }
 
 /*---------------------------- Interface ----------------------------------*/
@@ -453,7 +783,7 @@ bool TextureDesc::readImage(ImageStore& images)
 
             for (UInt32 i = POS_X; i <= NEG_Z; ++i)
             {
-                   key[i] = Hash64::hash(&file[0], file.size(), (1LL << (0x1F + i)));
+                   key[i] = Hash64::hash(&file[0], file.size(), (1 << (0x1F + i)));
                 images[i] = dynamic_cast<Image*>(imageMap->find(key[i]));
 
                 if (images[i] == NULL)

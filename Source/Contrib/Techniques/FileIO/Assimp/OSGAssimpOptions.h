@@ -733,64 +733,72 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpOptions
 
     void parseOptions(const OptionSet &optSet);
 
-    UInt32              getPostProcessingFlags  (void                    ) const;
-    void                setPostProcessingFlags  (UInt32             value);
+    UInt32              getPostProcessingFlags   (void                    ) const;
+    void                setPostProcessingFlags   (UInt32             value);
 
-    UInt32              getPreProcessingFlags   (void                    ) const;
-    void                setPreProcessingFlags   (UInt32             value);
+    UInt32              getPreProcessingFlags    (void                    ) const;
+    void                setPreProcessingFlags    (UInt32             value);
 
-    UInt32              getExamineFlags         (void                    ) const;
-    bool                hasExamineFlag          (Examine            flag ) const;
-    void                setExamineFlags         (UInt32             value);
+    UInt32              getExamineFlags          (void                    ) const;
+    bool                hasExamineFlag           (Examine            flag ) const;
+    void                setExamineFlags          (UInt32             value);
 
-    const std::string&  getExamineFilename      (void                    ) const;
-    void                setExamineFilename      (const std::string& value);
+    const std::string&  getExamineFilename       (void                    ) const;
+    void                setExamineFilename       (const std::string& value);
 
-    bool                getExamine              (void                    ) const;
-    void                setExamine              (bool               value);
+    bool                getExamine               (void                    ) const;
+    void                setExamine               (bool               value);
 
-    bool                getExitOnExamination    (void                    ) const;
-    void                setExitOnExamination    (bool               value);
+    bool                getExitOnExamination     (void                    ) const;
+    void                setExitOnExamination     (bool               value);
 
-    bool                getInvertHeight         (void                    ) const;
-    void                setInvertHeight         (bool               value);
+    bool                getInvertHeight          (void                    ) const;
+    void                setInvertHeight          (bool               value);
 
-    bool                getInvertDisplacement   (void                    ) const;
-    void                setInvertDisplacement   (bool               value);
+    bool                getInvertDisplacement    (void                    ) const;
+    void                setInvertDisplacement    (bool               value);
 
-    bool                getForceTwosided        (void                    ) const;
-    void                setForceTwosided        (bool               value);
+    bool                getForceTwosided         (void                    ) const;
+    void                setForceTwosided         (bool               value);
 
-    bool                getForceTexCoord0       (void                    ) const;
-    void                setForceTexCoord0       (bool               value);
+    bool                getForceTexCoord0        (void                    ) const;
+    void                setForceTexCoord0        (bool               value);
 
-    bool                getTransformUVCoords    (void                    ) const;
-    void                setTransformUVCoords    (bool               value);
+    bool                getTransformUVCoords     (void                    ) const;
+    void                setTransformUVCoords     (bool               value);
 
-    bool                getWriteMtyOnObjExport  (void                    ) const;
-    void                setWriteMtyOnObjExport  (bool               value);
+    bool                getWriteMtyOnObjExport   (void                    ) const;
+    void                setWriteMtyOnObjExport   (bool               value);
 
-    bool                getTransformZToYOnExport(void                    ) const;
-    void                setTransformZToYOnExport(bool               value);
+    bool                getTransformZToYOnExport (void                    ) const;
+    void                setTransformZToYOnExport (bool               value);
 
-    bool                getTransformYToZOnImport(void                    ) const;
-    void                setTransformYToZOnImport(bool               value);
+    bool                getTransformYToZOnImport (void                    ) const;
+    void                setTransformYToZOnImport (bool               value);
 
-    Real32              getGlobalScaleOnImport  (void                    ) const;
-    void                setGlobalScaleOnImport  (Real32             value);
+    Real32              getGlobalScaleOnImport   (void                    ) const;
+    void                setGlobalScaleOnImport   (Real32             value);
 
-    UInt32              getShadingModel         (void                    ) const;
-    void                setShadingModel         (UInt32             value);
+    UInt32              getShadingModel          (void                    ) const;
+    void                setShadingModel          (UInt32             value);
 
-    const std::string&  getWriteFormatIdentifier(void                    ) const;
-    void                setWriteFormatIdentifier(const std::string& value);
+    const std::string&  getWriteFormatIdentifier (void                    ) const;
+    void                setWriteFormatIdentifier (const std::string& value);
 
-    const std::string&  getTextureSubDirectory  (void                    ) const;
-    void                setTextureSubDirectory  (const std::string& value);
+    const std::string&  getTextureSubDirectory   (void                    ) const;
+    void                setTextureSubDirectory   (const std::string& value);
+
+    bool                getLogMaterialDescOnWrite(void                   ) const;
+    void                setLogMaterialDescOnWrite(bool               value);
+
+    bool                getLogMaterialDescOnRead (void                    ) const;
+    void                setLogMaterialDescOnRead (bool               value);
 
     /*! \}                                                                 */
     /*=========================  PROTECTED  ===============================*/
   protected:
+
+    static bool         getEnvBoolOption         (const Char8* option);
 
     UInt32      _postProcessingFlags;
     UInt32      _preProcessingFlags;
@@ -811,6 +819,9 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpOptions
     UInt32      _shadingModel;
     std::string _writeFormatIdentifier;
     std::string _textureSubDirectory;
+
+    bool        _logMaterialDescOnWrite;
+    bool        _logMaterialDescOnRead;
 };
 
 OSG_END_NAMESPACE

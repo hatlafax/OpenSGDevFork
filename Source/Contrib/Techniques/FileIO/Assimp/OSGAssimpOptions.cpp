@@ -66,46 +66,50 @@ Char8* AssimpOptions::format_3mf      = "3mf";      // "3mf"      The 3MF-File-F
 Char8* AssimpOptions::format_assjson  = "assjson";  // "json"     Assimp JSON Document
 
 AssimpOptions::AssimpOptions(void)
-: _postProcessingFlags  (DefaultPostProcessingOptions)
-, _preProcessingFlags   (0)
-, _examineFlags         (0xFFFF)
-, _examineFilename      ()
-, _examine              (false)
-, _exitOnExamination    (false)
-, _invertHeight         (false)
-, _invertDisplacement   (true)
-, _forceTwosided        (false)
-, _forceTexCoord0       (false)
-, _transformUVCoords    (false)
-, _writeMtyOnObjExport  (false)
-, _globalScaleOnImport  (1.f)
-, _shadingModel         (0)
-, _writeFormatIdentifier()
-, _textureSubDirectory  ("textures")
-, _transformZToYOnExport(false)
-, _transformYToZOnImport(false)
+: _postProcessingFlags   (DefaultPostProcessingOptions)
+, _preProcessingFlags    (0)
+, _examineFlags          (0xFFFF)
+, _examineFilename       ()
+, _examine               (false)
+, _exitOnExamination     (false)
+, _invertHeight          (false)
+, _invertDisplacement    (true)
+, _forceTwosided         (false)
+, _forceTexCoord0        (false)
+, _transformUVCoords     (false)
+, _writeMtyOnObjExport   (false)
+, _globalScaleOnImport   (1.f)
+, _shadingModel          (0)
+, _writeFormatIdentifier ()
+, _textureSubDirectory   ("textures")
+, _transformZToYOnExport (false)
+, _transformYToZOnImport (false)
+, _logMaterialDescOnWrite(getEnvBoolOption("OSG_LOG_ASSIMP_MATERIAL_ON_WRITE"))
+, _logMaterialDescOnRead (getEnvBoolOption("OSG_LOG_ASSIMP_MATERIAL_ON_READ"))
 {
 }
 
 AssimpOptions::AssimpOptions(const OptionSet &optSet)
-: _postProcessingFlags  (DefaultPostProcessingOptions)
-, _preProcessingFlags   (0)
-, _examineFlags         (0xFFFF)
-, _examineFilename      ()
-, _examine              (false)
-, _exitOnExamination    (false)
-, _invertHeight         (false)
-, _invertDisplacement   (true)
-, _forceTwosided        (false)
-, _forceTexCoord0       (false)
-, _transformUVCoords    (false)
-, _writeMtyOnObjExport  (false)
-, _globalScaleOnImport  (1.f)
-, _shadingModel         (0)
-, _writeFormatIdentifier()
-, _textureSubDirectory  ("textures")
-, _transformZToYOnExport(false)
-, _transformYToZOnImport(false)
+: _postProcessingFlags   (DefaultPostProcessingOptions)
+, _preProcessingFlags    (0)
+, _examineFlags          (0xFFFF)
+, _examineFilename       ()
+, _examine               (false)
+, _exitOnExamination     (false)
+, _invertHeight          (false)
+, _invertDisplacement    (true)
+, _forceTwosided         (false)
+, _forceTexCoord0        (false)
+, _transformUVCoords     (false)
+, _writeMtyOnObjExport   (false)
+, _globalScaleOnImport   (1.f)
+, _shadingModel          (0)
+, _writeFormatIdentifier ()
+, _textureSubDirectory   ("textures")
+, _transformZToYOnExport (false)
+, _transformYToZOnImport (false)
+, _logMaterialDescOnWrite(getEnvBoolOption("OSG_LOG_ASSIMP_MATERIAL_ON_WRITE"))
+, _logMaterialDescOnRead (getEnvBoolOption("OSG_LOG_ASSIMP_MATERIAL_ON_READ"))
 {
     parseOptions(optSet);
 }
@@ -171,6 +175,12 @@ void AssimpOptions::parseOptions(const OptionSet &optSet)
 
     IOFileTypeBase::getOptionAs<std::string>(
         optSet, "textureSubDirectory", _textureSubDirectory);
+
+    IOFileTypeBase::getOptionAs<bool>(
+        optSet, "logMaterialDescOnWrite", _logMaterialDescOnWrite);
+
+    IOFileTypeBase::getOptionAs<bool>(
+        optSet, "logMaterialDescOnRead", _logMaterialDescOnRead);
 }
 
 UInt32 AssimpOptions::getPostProcessingFlags(void) const
@@ -359,6 +369,38 @@ const std::string& AssimpOptions::getTextureSubDirectory(void) const
 void AssimpOptions::setTextureSubDirectory(const std::string& value)
 {
     _textureSubDirectory = value;
+}
+
+bool AssimpOptions::getLogMaterialDescOnWrite(void) const
+{
+    return _logMaterialDescOnWrite;
+}
+
+void AssimpOptions::setLogMaterialDescOnWrite(bool value)
+{
+    _logMaterialDescOnRead = value;
+}
+
+bool AssimpOptions::getLogMaterialDescOnRead(void) const
+{
+    return _logMaterialDescOnRead;
+}
+
+void AssimpOptions::setLogMaterialDescOnRead(bool value)
+{
+    _logMaterialDescOnRead = value;
+}
+
+bool AssimpOptions::getEnvBoolOption(const Char8* option)
+{
+    Char8 *szEnvVal = getenv(option);
+
+    if(szEnvVal != NULL)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 OSG_END_NAMESPACE

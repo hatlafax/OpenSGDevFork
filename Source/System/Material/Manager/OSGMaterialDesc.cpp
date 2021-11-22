@@ -133,7 +133,153 @@ void MaterialDesc::changed(ConstFieldMaskArg whichField,
 void MaterialDesc::dump(      UInt32    ,
                          const BitVector ) const
 {
+    std::string spc = "    ";
+
     SLOG << "Dump MaterialDesc NI" << std::endl;
+
+    SLOG << spc << "Name                         = " << getName() << std::endl;
+
+    SLOG << spc << "SRGBColorMode                = " << getSRGBColorMode() << std::endl;
+    SLOG << spc << "ShadowOnlyMode               = " << getShadowOnlyMode() << std::endl;
+    SLOG << spc << "PbrSpecularMode              = " << getPbrSpecularMode() << std::endl;
+    SLOG << spc << "PbrClearCoatMode             = " << getPbrClearCoatMode() << std::endl;
+    SLOG << spc << "PbrSheenColorMode            = " << getPbrSheenColorMode() << std::endl;
+    SLOG << spc << "PbrAnisotropyMode            = " << getPbrAnisotropyMode() << std::endl;
+    SLOG << spc << "UnlitMode                    = " << getUnlitMode() << std::endl;
+    SLOG << spc << "HasNormalsMode               = " << getHasNormalsMode() << std::endl;
+    SLOG << spc << "HasTangentsAndBitangentsMode = " << getHasTangentsAndBitangentsMode() << std::endl;
+    SLOG << spc << "FlatShadingMode              = " << getFlatShadingMode() << std::endl;
+    SLOG << spc << "OffsetPointMode              = " << getOffsetPointMode() << std::endl;
+    SLOG << spc << "OffsetLineMode               = " << getOffsetLineMode() << std::endl;
+    SLOG << spc << "OffsetFillMode               = " << getOffsetFillMode() << std::endl;
+    SLOG << spc << "XORMode                      = " << getXORMode() << std::endl;
+    SLOG << spc << "NoDepthTestMode              = " << getNoDepthTestMode() << std::endl;
+
+    SLOG << spc << "RefractiveIndex              = " << getRefractiveIndex() << std::endl;
+    SLOG << spc << "Shininess                    = " << getShininess() << std::endl;
+
+    SLOG << spc << "DescHash                     = " << getDescHash() << std::endl;
+    SLOG << spc << "NumUVChannels                = " << getNumUVChannels() << std::endl;
+
+    for (UInt32 idx = 0; idx < _mfUVDimension.size32(); ++idx)
+    {
+        SLOG << spc << "UVDimension[" << idx << "]" << "         = " << static_cast<unsigned int>(getUVDimension(idx)) << std::endl;
+    }
+
+    SLOG << spc << "NumColorChannels             = " << getNumColorChannels() << std::endl;
+
+    std::string shading_model = "NO_SHADING_MODEL";
+    switch (getShadingModel())
+    {
+        case NO_SHADING_MODEL:            shading_model = "NO_SHADING_MODEL";            break;
+        case GOURAUD_SHADING_MODEL:       shading_model = "GOURAUD_SHADING_MODEL";       break;
+        case PHONG_SHADING_MODEL:         shading_model = "PHONG_SHADING_MODEL";         break;
+        case BLINN_PHONG_SHADING_MODEL:   shading_model = "BLINN_PHONG_SHADING_MODEL";   break;
+        case COOK_TORRANCE_SHADING_MODEL: shading_model = "COOK_TORRANCE_SHADING_MODEL"; break;
+        case OREN_NAYAR_SHADING_MODEL:    shading_model = "OREN_NAYAR_SHADING_MODEL";    break;
+        case TOON_SHADING_MODEL:          shading_model = "TOON_SHADING_MODEL";          break;
+        case GOOCH_SHADING_MODEL:         shading_model = "GOOCH_SHADING_MODEL";         break;
+    }
+    SLOG << spc << "ShadingModel                 = " << shading_model << std::endl;
+
+
+    std::string override_shading_model = "NO_SHADING_MODEL";
+    switch (getOverrideShadingModel())
+    {
+        case NO_SHADING_MODEL:            override_shading_model = "NO_SHADING_MODEL";            break;
+        case GOURAUD_SHADING_MODEL:       override_shading_model = "GOURAUD_SHADING_MODEL";       break;
+        case PHONG_SHADING_MODEL:         override_shading_model = "PHONG_SHADING_MODEL";         break;
+        case BLINN_PHONG_SHADING_MODEL:   override_shading_model = "BLINN_PHONG_SHADING_MODEL";   break;
+        case COOK_TORRANCE_SHADING_MODEL: override_shading_model = "COOK_TORRANCE_SHADING_MODEL"; break;
+        case OREN_NAYAR_SHADING_MODEL:    override_shading_model = "OREN_NAYAR_SHADING_MODEL";    break;
+        case TOON_SHADING_MODEL:          override_shading_model = "TOON_SHADING_MODEL";          break;
+        case GOOCH_SHADING_MODEL:         override_shading_model = "GOOCH_SHADING_MODEL";         break;
+    }
+    SLOG << spc << "OverrideShadingModel         = " << override_shading_model << std::endl;
+
+    std::string blend_mode = "DEFAULT_BLEND_MODE";
+    switch (getBlendMode())
+    {
+        case DEFAULT_BLEND_MODE:        blend_mode = "DEFAULT_BLEND_MODE";        break;
+        case ADDITIVE_BLEND_MODE:       blend_mode = "ADDITIVE_BLEND_MODE";       break;
+        case MULTIPLICATIVE_BLEND_MODE: blend_mode = "MULTIPLICATIVE_BLEND_MODE"; break;
+        case INTERPOLATION_BLEND_MODE:  blend_mode = "INTERPOLATION_BLEND_MODE";  break;
+    }
+    SLOG << spc << "BlendMode                    = " << blend_mode << std::endl;
+
+    SLOG << spc << "Emissive                     = " << getEmissive() << std::endl;
+    SLOG << spc << "Albedo                       = " << getAlbedo() << std::endl;
+    SLOG << spc << "Specular                     = " << getSpecular() << std::endl;
+    SLOG << spc << "Transparent                  = " << getTransparent() << std::endl;
+    SLOG << spc << "Reflective                   = " << getReflective() << std::endl;
+    
+    SLOG << spc << "SpecularStrength             = " << getSpecularStrength() << std::endl;
+    SLOG << spc << "EmissiveStrength             = " << getEmissiveStrength() << std::endl;
+    SLOG << spc << "Opacity                      = " << getOpacity() << std::endl;
+    SLOG << spc << "OpacityCutOff                = " << getOpacityCutOff() << std::endl;
+
+    std::string opacity_mode = "NO_OPACITY_MODE";
+    switch (getOpacityMode())
+    {
+        case NO_OPACITY_MODE:     opacity_mode = "NO_OPACITY_MODE";     break;
+        case OPAQUE_OPACITY_MODE: opacity_mode = "OPAQUE_OPACITY_MODE"; break;
+        case MASK_OPACITY_MODE:   opacity_mode = "MASK_OPACITY_MODE";   break;
+        case BLEND_OPACITY_MODE:  opacity_mode = "BLEND_OPACITY_MODE";  break;
+    }
+    SLOG << spc << "OpacityMode                  = " << opacity_mode << std::endl;
+
+    SLOG << spc << "Reflectivity                 = " << getReflectivity() << std::endl;
+    SLOG << spc << "Reflectance                  = " << getReflectance() << std::endl;
+    SLOG << spc << "BumpScaling                  = " << getBumpScaling() << std::endl;
+    SLOG << spc << "Anisotropy                   = " << getAnisotropy() << std::endl;
+    SLOG << spc << "Roughness                    = " << getRoughness() << std::endl;
+    SLOG << spc << "Metalness                    = " << getMetalness() << std::endl;
+    SLOG << spc << "ClearCoatStrength            = " << getClearCoatStrength() << std::endl;
+    SLOG << spc << "ClearCoatRoughness           = " << getClearCoatRoughness() << std::endl;
+    
+    SLOG << spc << "SheenColor                   = " << getSheenColor() << std::endl;
+    SLOG << spc << "SubSurfaceColor              = " << getSubSurfaceColor() << std::endl;
+    SLOG << spc << "ToonLevels                   = " << getToonLevels() << std::endl;
+    SLOG << spc << "GoochCool                    = " << getGoochCool() << std::endl;
+    SLOG << spc << "GoochWarm                    = " << getGoochWarm() << std::endl;
+    SLOG << spc << "GoochMixin                   = " << getGoochMixin() << std::endl;
+    SLOG << spc << "GoochCoolMixin               = " << getGoochCoolMixin() << std::endl;
+    SLOG << spc << "GoochWarmMixin               = " << getGoochWarmMixin() << std::endl;
+
+    SLOG << spc << "CullFace                     = " << getCullFace() << std::endl;
+    SLOG << spc << "FrontFace                    = " << getFrontFace() << std::endl;
+
+    std::string front_mode = "UNKNOWN";
+    switch (getFrontMode())
+    {
+        case GL_POINT: front_mode = "GL_POINT"; break;
+        case GL_LINE:  front_mode = "GL_LINE";  break;
+        case GL_FILL:  front_mode = "GL_FILL";  break;
+    }
+    SLOG << spc << "FrontMode                    = " << front_mode << std::endl;
+
+    std::string back_mode = "UNKNOWN";
+    switch (getBackMode())
+    {
+        case GL_POINT: back_mode = "GL_POINT"; break;
+        case GL_LINE:  back_mode = "GL_LINE";  break;
+        case GL_FILL:  back_mode = "GL_FILL";  break;
+    }
+    SLOG << spc << "BackMode                     = " << back_mode << std::endl;
+
+    SLOG << spc << "OffsetFactor                 = " << getOffsetFactor() << std::endl;
+    SLOG << spc << "OffsetBias                   = " << getOffsetBias() << std::endl;
+
+    MFUnrecTextureDescPtr::const_iterator iter, end;
+
+    iter = _mfTextureDesc.begin();
+    end  = _mfTextureDesc.end  ();
+
+    for (; iter != end; ++iter)
+    {
+        TextureDesc* texDesc = *iter;
+        texDesc->dump();
+    }
 }
 
 MaterialDesc::HashKeyType MaterialDesc::getHashValue()
