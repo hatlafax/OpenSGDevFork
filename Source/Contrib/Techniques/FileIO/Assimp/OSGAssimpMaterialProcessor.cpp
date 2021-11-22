@@ -245,6 +245,11 @@ bool AssimpMaterialProcessor::process(const aiScene* scene)
 
                     _materialMap.insert(MaterialMap::value_type(i, descMat));
                 }
+
+                if (_options.getLogMaterialDescOnRead())
+                {
+                    matDesc->dump();
+                }
             }
         }
     }
@@ -292,6 +297,10 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
 
     if (aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &color) == AI_SUCCESS)
     {
+        //OSG::Color3f randCol;
+        //randCol.setRandom();
+        //matDesc->setAlbedo(randCol);
+
         matDesc->setAlbedo(OSG::Vec3f(color.r, color.g, color.b));
         matDesc->setOpacity(color.a);
     }
@@ -864,7 +873,6 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
             {
                 textureFlags |= TextureDesc::IGNORE_ALPHA_FLAG;
             }
-
 
             if (mat->Get(AI_MATKEY_UVTRANSFORM(type, index), transform) == AI_SUCCESS)
             {

@@ -2123,6 +2123,11 @@ void AssimpSceneFileType::handleDescMaterial(SceneWriteData& data, const DescMat
 {
     MaterialDesc* matDesc = descMat->getMaterialDesc();
 
+    if (data.options.getLogMaterialDescOnWrite())
+    {
+        matDesc->dump();
+    }
+
     prepareDescMaterialTex(data, descMat);
 
     Details::MaterialParameters params;
