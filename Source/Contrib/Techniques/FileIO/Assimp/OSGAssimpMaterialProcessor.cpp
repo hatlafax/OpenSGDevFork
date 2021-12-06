@@ -847,7 +847,8 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
                 mapAxis = Vec3f(axis.x, axis.y, axis.z);
             }
 
-            UInt32 textureFlags = 0;
+            UInt32 textureFlags = TextureDesc::IGNORE_ALPHA_FLAG;
+
             if (flags & aiTextureFlags_Invert)
             {
                 textureFlags |= TextureDesc::INVERT_FLAG;
@@ -867,11 +868,13 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
 
             if (flags & aiTextureFlags_UseAlpha)
             {
-                textureFlags |= TextureDesc::USE_ALPHA_FLAG;
+                textureFlags |=  TextureDesc::USE_ALPHA_FLAG;
+                textureFlags &= ~TextureDesc::IGNORE_ALPHA_FLAG;
             }
             if (flags & aiTextureFlags_IgnoreAlpha)
             {
-                textureFlags |= TextureDesc::IGNORE_ALPHA_FLAG;
+                textureFlags &= ~TextureDesc::USE_ALPHA_FLAG;
+                textureFlags |=  TextureDesc::IGNORE_ALPHA_FLAG;
             }
 
             if (mat->Get(AI_MATKEY_UVTRANSFORM(type, index), transform) == AI_SUCCESS)
