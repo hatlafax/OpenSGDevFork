@@ -238,6 +238,8 @@ class OSG_SYSTEM_DLLMAPPING TextureDesc : public TextureDescBase
 
     bool                isInverted          () const;
 
+    bool                equals              (const TextureDesc& rhs) const;
+
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                      Sync                                    */

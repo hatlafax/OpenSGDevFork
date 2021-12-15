@@ -1110,4 +1110,57 @@ TextureDesc::SwizzleIndicesT TextureDesc::getSwizzleIndices() const
     return indices;
 }
 
+bool TextureDesc::equals(const TextureDesc& rhs) const
+{
+    if (isCubeMap() != rhs.isCubeMap())
+        return false;
+
+    if (isCubeMap())
+    {
+        for (int idx = POS_X; idx <= NEG_Z; ++idx)
+        {
+            CubeMapSide side = static_cast<CubeMapSide>(idx);
+            if (   getFilename(side) != rhs.getFilename(side)
+                || getTexImage(side) != rhs.getTexImage(side) ) return false;
+        }
+    }
+    else
+    {
+        if (   getFilename() != rhs.getFilename()
+            || getTexImage() != rhs.getTexImage() ) return false;
+    }
+
+    if (   getTextureType       () != rhs.getTextureType       ()
+        || getSwizzle           () != rhs.getSwizzle           ()
+        || getIsSRGBTexture     () != rhs.getIsSRGBTexture     ()
+        || getTexUnit           () != rhs.getTexUnit           ()
+        || getUVChannel         () != rhs.getUVChannel         ()
+        || getMappingMode       () != rhs.getMappingMode       ()
+        || getMapAxis           () != rhs.getMapAxis           ()
+        || getEnvironmentMapType() != rhs.getEnvironmentMapType()
+        || getBlendFactor       () != rhs.getBlendFactor       ()
+        || getOperation         () != rhs.getOperation         ()
+        || getWrapS             () != rhs.getWrapS             ()
+        || getWrapT             () != rhs.getWrapT             ()
+        || getWrapR             () != rhs.getWrapR             ()
+        || getTextureFlags      () != rhs.getTextureFlags      ()
+        || getMinFilter         () != rhs.getMinFilter         ()
+        || getMagFilter         () != rhs.getMagFilter         ()
+        || getInternalFormat    () != rhs.getInternalFormat    ()
+        || getExternalFormat    () != rhs.getExternalFormat    ()
+        || getAnisotropy        () != rhs.getAnisotropy        ()
+        || getMirrorFlags       () != rhs.getMirrorFlags       ()
+        || getHasUVTransform    () != rhs.getHasUVTransform    ()
+        || getBorderColor       () != rhs.getBorderColor       () ) return false;
+
+    if (getHasUVTransform())
+    {
+        if (   getScale    () != rhs.getScale    ()
+            || getTranslate() != rhs.getTranslate()
+            || getRotate   () != rhs.getRotate   () ) return false;
+    }
+
+    return true;
+}
+
 OSG_END_NAMESPACE
