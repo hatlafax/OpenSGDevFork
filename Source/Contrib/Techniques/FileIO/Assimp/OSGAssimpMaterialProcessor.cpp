@@ -446,6 +446,7 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
     if (aiGetMaterialString(mat, AI_MATKEY_GLTF_ALPHAMODE, &string_value) == AI_SUCCESS)
     {
         std::string mode = string_value.C_Str();
+
         if (mode == "OPAQUE")
             matDesc->setOpacityMode(MaterialDesc::OPAQUE_OPACITY_MODE);
         else if (mode == "MASK")
@@ -739,6 +740,9 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
 
     std::set<std::string> loaded_textures;
 
+    typedef std::multimap<std::string, TextureDesc*> MapTexturesT;
+    MapTexturesT mapTextures;
+
     for(unsigned int index = 0; index < cnt; index++)
     {
         aiString path;
@@ -760,7 +764,7 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
             texDesc->setImageMap(_sfImageMap.getValue());
 
             _filename.clear();
-
+            
             const aiTexture* texture = scene->GetEmbeddedTexture(path.C_Str());
 
             if (texture)
@@ -783,6 +787,26 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
 
                 loaded_textures.insert(_filename);
             }
+
+#if 0
+            Image* img = texDesc->getTexImage();
+
+            bool hasOpaqueTexture = true;
+            if (img)
+            {
+                if (img->hasAlphaChannel())
+                {
+                    std::stringstream ss;
+                    ss << "d:\\_xxx\\tmp\\Textures\\" << matDesc->getName() << "_" << textureType << "_" << index << ".png" << std::flush;
+                    img->write(ss.str().c_str());
+
+                    ImageUnrecPtr test_img = Image::create();
+                    test_img->read(ss.str().c_str());
+                    bool tesT_hasOpaqueTexture = test_img->calcIsAlphaBinary();
+                }
+                hasOpaqueTexture = img->calcIsAlphaBinary();
+            }
+#endif
 
             UInt32 mappingMode = TextureDesc::UV_MAPPING;
             switch(mapping)
@@ -812,7 +836,6 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
                 blend = 1.f;
                 texOp = TextureDesc::REPLACE_OPERATION;
             }
-
             
 
             GLenum wrapS = GL_REPEAT, wrapT = GL_REPEAT, wrapR = GL_REPEAT;
@@ -847,7 +870,7 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
                 mapAxis = Vec3f(axis.x, axis.y, axis.z);
             }
 
-            UInt32 textureFlags = TextureDesc::IGNORE_ALPHA_FLAG;
+            UInt32 textureFlags = 0;
 
             if (flags & aiTextureFlags_Invert)
             {
@@ -875,6 +898,34 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
             {
                 textureFlags &= ~TextureDesc::USE_ALPHA_FLAG;
                 textureFlags |=  TextureDesc::IGNORE_ALPHA_FLAG;
+            }
+
+            //
+            // In case that no alpha flag was provided, we do additional guessing
+            // for Diffuse textures.
+            //
+            if ( !(flags & aiTextureFlags_UseAlpha) && !(flags & aiTextureFlags_IgnoreAlpha) )
+            {
+                bool ignore_alpha = true;
+
+                if (type == aiTextureType_DIFFUSE && texDesc->getTexImage())
+                {
+                    if (texDesc->getTexImage()->hasAlphaChannel())
+                    {
+                        ignore_alpha = false;
+                    }
+                }
+
+                if (ignore_alpha)
+                {
+                    textureFlags &= ~TextureDesc::USE_ALPHA_FLAG;
+                    textureFlags |= TextureDesc::IGNORE_ALPHA_FLAG;
+                }
+                else
+                {
+                    textureFlags |=  TextureDesc::USE_ALPHA_FLAG;
+                    textureFlags &= ~TextureDesc::IGNORE_ALPHA_FLAG;
+                }
             }
 
             if (mat->Get(AI_MATKEY_UVTRANSFORM(type, index), transform) == AI_SUCCESS)
@@ -933,9 +984,34 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
             texDesc->setMapAxis      (mapAxis      );
             texDesc->setTextureFlags (textureFlags );
 
-            matDesc->addTexture      (texDesc      );
+            //
+            // Check existing textures of current textureType => avoid double entries
+            //
+            std::string texName = path.C_Str();
 
-            texDesc->setImageMap     (NULL);
+            std::pair<MapTexturesT::iterator, 
+                      MapTexturesT::iterator> rng = mapTextures.equal_range(texName);
+
+            bool found = false;
+
+            for (; rng.first != rng.second; ++rng.first)
+            {
+                TextureDesc* t = rng.first->second;
+                                
+                if (texDesc->equals(*t))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                mapTextures.insert(MapTexturesT::value_type(texName, texDesc));
+                matDesc->addTexture(texDesc);
+            }
+
+            texDesc->setImageMap    (NULL);
         }
     }
 }
