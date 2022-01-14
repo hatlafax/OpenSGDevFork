@@ -210,6 +210,9 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING DescMaterial : public DescMaterialBase
         PreFilterTextures                    = 1 << TextureDesc::PRE_FILTER_TEXTURE,
         BrdfLutTextures                      = 1 << TextureDesc::BRDF_LUT_TEXTURE,
         StandardMaterialTextures             = 1 << TextureDesc::STANDARD_MATERIAL_TEXTURE,
+        //SheenTextures                        = 1 << TextureDesc::SHEEN_TEXTURE,
+        //ClearcoatTextures                    = 1 << TextureDesc::CLEARCOAT_TEXTURE,
+        //TransmissionTextures                 = 1 << TextureDesc::TRANSMISSION_TEXTURE,
     };
 
     //
@@ -291,6 +294,9 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING DescMaterial : public DescMaterialBase
         BrdfMaterialMember                   = 1 << 22,
         ToonScaleMaterialMember              = 1 << 24,
         AmbientOcclusionMaterialMember       = 1 << 25,
+        //SheenMaterialMember                  = 1 << 26,
+        //ClearcoatMaterialMember              = 1 << 27,
+        //TransmissionMaterialMember           = 1 << 28,
 
         AllMaterialMemberDetails             = 0xFFFFFFFF
     };
@@ -626,6 +632,10 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING DescMaterial : public DescMaterialBase
     void getFragmentProgramMaterialPreFilterColor       (std::stringstream& ost) const;
     void getFragmentProgramMaterialBrdf                 (std::stringstream& ost) const;
     void getFragmentProgramMaterialStandardMaterial     (std::stringstream& ost) const;
+    //void getFragmentProgramMaterialSheen                (std::stringstream& ost) const;
+    //void getFragmentProgramMaterialClearCoat            (std::stringstream& ost) const;
+    //void getFragmentProgramMaterialTransmission         (std::stringstream& ost) const;
+
     void getFragmentProgramMaterialF0                   (std::stringstream& ost) const;
 
     void getFragmentProgramMaterialInitialization       (std::stringstream& ost) const;

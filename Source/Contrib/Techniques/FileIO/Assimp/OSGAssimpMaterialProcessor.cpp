@@ -62,7 +62,7 @@
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
 #include <assimp/material.h>
-#include <assimp/pbrmaterial.h>
+#include <assimp/GltfMaterial.h>
 #include <assimp/anim.h>
 #include <assimp/metadata.h>
 #include <assimp/vector3.h>
@@ -305,7 +305,7 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
         matDesc->setOpacity(color.a);
     }
 
-    if (aiGetMaterialColor(mat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, &color) == AI_SUCCESS)
+    if (aiGetMaterialColor(mat, AI_MATKEY_BASE_COLOR, &color) == AI_SUCCESS)
     {
         matDesc->setAlbedo(OSG::Vec3f(color.r, color.g, color.b));
         matDesc->setOpacity(color.a);
@@ -353,6 +353,8 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
             case aiShadingMode_CookTorrance:    model = MaterialDesc::COOK_TORRANCE_SHADING_MODEL;        break;
             case aiShadingMode_NoShading:       model = MaterialDesc::NO_SHADING_MODEL;                   break;
             case aiShadingMode_Fresnel:         model = MaterialDesc::BLINN_PHONG_SHADING_MODEL;          break;
+          //case aiShadingMode_Unlit:           model = MaterialDesc::NO_SHADING_MODEL;                   break; // alias to aiShadingMode_NoShading
+            case aiShadingMode_PBR_BRDF:        model = MaterialDesc::COOK_TORRANCE_SHADING_MODEL;        break;
         }
     }
 
@@ -433,12 +435,12 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
         matDesc->setRefractiveIndex(float_value);
     }
 
-    if (aiGetMaterialFloat(mat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, &float_value) == AI_SUCCESS)
+    if (aiGetMaterialFloat(mat, AI_MATKEY_METALLIC_FACTOR, &float_value) == AI_SUCCESS)
     {
         matDesc->setMetalness(float_value);
     }
 
-    if (aiGetMaterialFloat(mat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, &float_value) == AI_SUCCESS)
+    if (aiGetMaterialFloat(mat, AI_MATKEY_ROUGHNESS_FACTOR, &float_value) == AI_SUCCESS)
     {
         matDesc->setRoughness(float_value);
     }
@@ -462,18 +464,20 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
         matDesc->setOpacityCutOff(float_value);
     }
 
-    if (mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS, bool_value) == AI_SUCCESS)
-    {
-        matDesc->setPbrSpecularMode(bool_value);
-    }
+    //if (mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS, bool_value) == AI_SUCCESS)
+    //{
+    //    matDesc->setPbrSpecularMode(bool_value);
+    //}
 
-    if (aiGetMaterialFloat(mat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, &float_value) == AI_SUCCESS)
+    if (aiGetMaterialFloat(mat, AI_MATKEY_GLOSSINESS_FACTOR, &float_value) == AI_SUCCESS)
     {
+        matDesc->setPbrSpecularMode(true);
         matDesc->setRoughness(1.f - float_value);
     }
 
-    if (mat->Get(AI_MATKEY_GLTF_UNLIT, bool_value) == AI_SUCCESS)
+    if (aiGetMaterialInteger(mat, AI_MATKEY_SHADING_MODEL, &int_value) == AI_SUCCESS)
     {
+        bool_value = (int_value == aiShadingMode_Unlit);
         matDesc->setUnlitMode(bool_value);
     }
 
@@ -537,6 +541,10 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
         types.push_back(aiTextureType_AMBIENT_OCCLUSION);
 
     types.push_back(aiTextureType_UNKNOWN);
+
+    //types.push_back(aiTextureType_SHEEN);
+    //types.push_back(aiTextureType_CLEARCOAT);
+    //types.push_back(aiTextureType_TRANSMISSION);
 
     for (std::size_t i = 0; i < types.size(); ++i)
     {
@@ -723,7 +731,7 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
         case aiTextureType_UNKNOWN:
             {
                 float float_value;
-                if (aiGetMaterialFloat(mat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, &float_value) == AI_SUCCESS)
+                if (aiGetMaterialFloat(mat, AI_MATKEY_METALLIC_FACTOR, &float_value) == AI_SUCCESS)
                 {
                     if (_hasORMTexture)
                         textureType   = TextureDesc::OCCL_ROUGH_METAL_TEXTURE;
@@ -734,6 +742,27 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
                 }
             }
             break;
+        //case aiTextureType_SHEEN:
+        //{
+        //    textureType = TextureDesc::SHEEN_TEXTURE;
+        //    isSRGBTexture = true;
+        //}
+        //break;
+
+        //case aiTextureType_CLEARCOAT:
+        //{
+        //    textureType = TextureDesc::CLEARCOAT_TEXTURE;
+        //    isSRGBTexture = true;
+        //}
+        //break;
+
+        //case aiTextureType_TRANSMISSION:
+        //{
+        //    textureType = TextureDesc::TRANSMISSION_TEXTURE;
+        //    isSRGBTexture = true;
+        //}
+        //break;
+
     }
 
     unsigned int cnt = mat->GetTextureCount(type);
@@ -760,6 +789,33 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
             if (path.length == 0)
                 continue;
 
+            //
+            // Check existing textures of current textureType => avoid double entries
+            //
+            std::string texName = path.C_Str();
+
+            std::pair<MapTexturesT::iterator,
+                MapTexturesT::iterator> rng = mapTextures.equal_range(texName);
+
+            bool found = false;
+
+            for (; rng.first != rng.second; ++rng.first)
+            {
+                TextureDesc* t = rng.first->second;
+
+                if (t->getTextureType() == textureType)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+                continue;
+
+            //
+            // Setup the texture description
+            //
             TextureDescUnrecPtr texDesc = TextureDesc::createLocal();
             texDesc->setImageMap(_sfImageMap.getValue());
 
@@ -787,26 +843,6 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
 
                 loaded_textures.insert(_filename);
             }
-
-#if 0
-            Image* img = texDesc->getTexImage();
-
-            bool hasOpaqueTexture = true;
-            if (img)
-            {
-                if (img->hasAlphaChannel())
-                {
-                    std::stringstream ss;
-                    ss << "d:\\_xxx\\tmp\\Textures\\" << matDesc->getName() << "_" << textureType << "_" << index << ".png" << std::flush;
-                    img->write(ss.str().c_str());
-
-                    ImageUnrecPtr test_img = Image::create();
-                    test_img->read(ss.str().c_str());
-                    bool tesT_hasOpaqueTexture = test_img->calcIsAlphaBinary();
-                }
-                hasOpaqueTexture = img->calcIsAlphaBinary();
-            }
-#endif
 
             UInt32 mappingMode = TextureDesc::UV_MAPPING;
             switch(mapping)
@@ -870,64 +906,6 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
                 mapAxis = Vec3f(axis.x, axis.y, axis.z);
             }
 
-            UInt32 textureFlags = 0;
-
-            if (flags & aiTextureFlags_Invert)
-            {
-                textureFlags |= TextureDesc::INVERT_FLAG;
-            }
-
-            if (invert)
-            {
-                if (textureFlags & TextureDesc::INVERT_FLAG)
-                {
-                    textureFlags &= ~TextureDesc::INVERT_FLAG;
-                }
-                else
-                {
-                    textureFlags |= TextureDesc::INVERT_FLAG;
-                }
-            }
-
-            if (flags & aiTextureFlags_UseAlpha)
-            {
-                textureFlags |=  TextureDesc::USE_ALPHA_FLAG;
-                textureFlags &= ~TextureDesc::IGNORE_ALPHA_FLAG;
-            }
-            if (flags & aiTextureFlags_IgnoreAlpha)
-            {
-                textureFlags &= ~TextureDesc::USE_ALPHA_FLAG;
-                textureFlags |=  TextureDesc::IGNORE_ALPHA_FLAG;
-            }
-
-            //
-            // In case that no alpha flag was provided, we do additional guessing
-            // for Diffuse textures.
-            //
-            if ( !(flags & aiTextureFlags_UseAlpha) && !(flags & aiTextureFlags_IgnoreAlpha) )
-            {
-                bool ignore_alpha = true;
-
-                if (type == aiTextureType_DIFFUSE && texDesc->getTexImage())
-                {
-                    if (texDesc->getTexImage()->hasAlphaChannel())
-                    {
-                        ignore_alpha = false;
-                    }
-                }
-
-                if (ignore_alpha)
-                {
-                    textureFlags &= ~TextureDesc::USE_ALPHA_FLAG;
-                    textureFlags |= TextureDesc::IGNORE_ALPHA_FLAG;
-                }
-                else
-                {
-                    textureFlags |=  TextureDesc::USE_ALPHA_FLAG;
-                    textureFlags &= ~TextureDesc::IGNORE_ALPHA_FLAG;
-                }
-            }
-
             if (mat->Get(AI_MATKEY_UVTRANSFORM(type, index), transform) == AI_SUCCESS)
             {
                 //
@@ -970,7 +948,7 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
 
             adaptTextureImageFile();
 
-            texDesc->setTextureType  (textureType  );
+            texDesc->setTextureType  (textureType);
             texDesc->setIsSRGBTexture(isSRGBTexture);
             texDesc->setSwizzle      (swizzle      );
             texDesc->setFilename     (_filename    );
@@ -982,35 +960,94 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
             texDesc->setWrapT        (wrapT        );
             texDesc->setWrapR        (wrapR        );
             texDesc->setMapAxis      (mapAxis      );
-            texDesc->setTextureFlags (textureFlags );
 
+            mapTextures.insert(MapTexturesT::value_type(texName, texDesc));
+            matDesc->addTexture(texDesc);
+
+#if 0
             //
-            // Check existing textures of current textureType => avoid double entries
+            // Actual image loading happens in the addTexture(texDesc) call!
             //
-            std::string texName = path.C_Str();
+            Image* img = texDesc->getTexImage();
 
-            std::pair<MapTexturesT::iterator, 
-                      MapTexturesT::iterator> rng = mapTextures.equal_range(texName);
-
-            bool found = false;
-
-            for (; rng.first != rng.second; ++rng.first)
+            bool hasOpaqueTexture = true;
+            if (img)
             {
-                TextureDesc* t = rng.first->second;
-                                
-                if (texDesc->equals(*t))
+                if (img->hasAlphaChannel())
                 {
-                    found = true;
-                    break;
+                    std::stringstream ss;
+                    ss << "d:\\_xxx\\tmp\\Textures\\" << matDesc->getName() << "_" << textureType << "_" << index << ".png" << std::flush;
+                    img->write(ss.str().c_str());
+
+                    ImageUnrecPtr test_img = Image::create();
+                    test_img->read(ss.str().c_str());
+                    bool tesT_hasOpaqueTexture = test_img->calcIsAlphaBinary();
+                }
+                hasOpaqueTexture = img->calcIsAlphaBinary();
+
+                int nop = 0;
+            }
+#endif
+
+            UInt32 textureFlags = 0;
+
+            if (flags & aiTextureFlags_Invert)
+            {
+                textureFlags |= TextureDesc::INVERT_FLAG;
+            }
+
+            if (invert)
+            {
+                if (textureFlags & TextureDesc::INVERT_FLAG)
+                {
+                    textureFlags &= ~TextureDesc::INVERT_FLAG;
+                }
+                else
+                {
+                    textureFlags |= TextureDesc::INVERT_FLAG;
                 }
             }
 
-            if (!found)
+            if (flags & aiTextureFlags_UseAlpha)
             {
-                mapTextures.insert(MapTexturesT::value_type(texName, texDesc));
-                matDesc->addTexture(texDesc);
+                textureFlags |= TextureDesc::USE_ALPHA_FLAG;
+                textureFlags &= ~TextureDesc::IGNORE_ALPHA_FLAG;
+            }
+            if (flags & aiTextureFlags_IgnoreAlpha)
+            {
+                textureFlags &= ~TextureDesc::USE_ALPHA_FLAG;
+                textureFlags |= TextureDesc::IGNORE_ALPHA_FLAG;
             }
 
+            //
+            // In case that no alpha flag was provided, we do additional guessing
+            // for Diffuse textures.
+            //
+            if (!(flags & aiTextureFlags_UseAlpha) && !(flags & aiTextureFlags_IgnoreAlpha))
+            {
+                bool ignore_alpha = true;
+
+                if ((type == aiTextureType_DIFFUSE || type == aiTextureType_SPECULAR) && texDesc->getTexImage())
+                {
+                    if (texDesc->getTexImage()->hasAlphaChannel())
+                    {
+                        ignore_alpha = false;
+                    }
+                }
+
+                if (ignore_alpha)
+                {
+                    textureFlags &= ~TextureDesc::USE_ALPHA_FLAG;
+                    textureFlags |= TextureDesc::IGNORE_ALPHA_FLAG;
+                }
+                else
+                {
+                    textureFlags |= TextureDesc::USE_ALPHA_FLAG;
+                    textureFlags &= ~TextureDesc::IGNORE_ALPHA_FLAG;
+                }
+            }
+
+            texDesc->setTextureFlags(textureFlags);
             texDesc->setImageMap    (NULL);
         }
     }
@@ -1167,12 +1204,16 @@ bool AssimpMaterialProcessor::checkORMTextureSupport(const aiMaterial* mat) cons
     if (_importer == "glTF2 Importer")
     {
         // ORM only for roghness/metalness workflow
-        bool bool_value;
-        if (mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS, bool_value) == AI_SUCCESS && bool_value == true)
+        float float_value;
+        if (aiGetMaterialFloat(mat, AI_MATKEY_GLOSSINESS_FACTOR, &float_value) == AI_SUCCESS)
             return false;
 
-        float float_value;
-        if (aiGetMaterialFloat(mat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, &float_value) == AI_SUCCESS)
+        //bool bool_value;
+        //if (mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS, bool_value) == AI_SUCCESS && bool_value == true)
+        //    return false;
+
+        
+        if (aiGetMaterialFloat(mat, AI_MATKEY_METALLIC_FACTOR, &float_value) == AI_SUCCESS)
         {
             aiTextureType type = aiTextureType_LIGHTMAP;
 
