@@ -95,6 +95,10 @@ class OSG_SYSTEM_DLLMAPPING TextureDesc : public TextureDescBase
         PRE_FILTER_TEXTURE,
         BRDF_LUT_TEXTURE,
         STANDARD_MATERIAL_TEXTURE,
+        //SHEEN_TEXTURE,
+        //CLEARCOAT_TEXTURE,
+        //TRANSMISSION_TEXTURE,
+
         MAX_NUM_TEXTURE_TYPES
     };
 

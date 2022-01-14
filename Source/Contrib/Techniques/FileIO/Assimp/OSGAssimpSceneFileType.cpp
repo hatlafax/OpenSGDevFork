@@ -84,9 +84,9 @@
 #include <assimp/color4.h>
 #include <assimp/importerdesc.h>
 #include <assimp/material.h>
+#include <assimp/GltfMaterial.h>
 #include <assimp/mesh.h>
 #include <assimp/metadata.h>
-#include <assimp/pbrmaterial.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/vector3.h>
@@ -1672,10 +1672,10 @@ void AssimpSceneFileType::prepareNonTexMaterialParamsGLTF2(SceneWriteData& data,
                 break;
         }
 
-        if (params.ai_model != aiShadingMode_CookTorrance)
+        if (params.ai_model != aiShadingMode_PBR_BRDF)
         {
             params.ai_pbr_specular = true;
-            params.ai_model        = aiShadingMode_CookTorrance;
+            params.ai_model        = aiShadingMode_PBR_BRDF;
         }
 
         //
@@ -1745,28 +1745,29 @@ void AssimpSceneFileType::handleNonTexMaterialParamsGLTF2(SceneWriteData& data, 
 {
     if (data.formatId == AssimpOptions::format_gltf2 || data.formatId == AssimpOptions::format_glb2)
     {
-        ai_mat->AddProperty(&params.ai_diffuse,        1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR);
+        ai_mat->RemoveProperty(AI_MATKEY_COLOR_AMBIENT);
+
+        ai_mat->AddProperty(&params.ai_diffuse,        1, AI_MATKEY_BASE_COLOR);
 
         if (params.ai_pbr_specular)
         {
             if (data.vecCorrectFactor[aiTextureType_DIFFUSE_ROUGHNESS]) params.ai_gloss_factor = 1.f;
 
-            ai_mat->AddProperty(&params.ai_pbr_specular, 1, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS);
-            ai_mat->AddProperty(&params.ai_gloss_factor, 1, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR);
+            ai_mat->AddProperty(&params.ai_gloss_factor, 1, AI_MATKEY_GLOSSINESS_FACTOR);
         }
         else
         {
             if (data.vecCorrectFactor[aiTextureType_DIFFUSE_ROUGHNESS]) params.ai_roughness = 1.f;
             if (data.vecCorrectFactor[aiTextureType_METALNESS        ]) params.ai_metalness = 1.f;
 
-            ai_mat->AddProperty(&params.ai_roughness,    1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR);
-            ai_mat->AddProperty(&params.ai_metalness,    1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR);
+            ai_mat->AddProperty(&params.ai_roughness,    1, AI_MATKEY_ROUGHNESS_FACTOR);
+            ai_mat->AddProperty(&params.ai_metalness,    1, AI_MATKEY_METALLIC_FACTOR);
+
+            ai_mat->RemoveProperty(AI_MATKEY_COLOR_SPECULAR);
         }
         
         ai_mat->AddProperty(&params.ai_alpha_mode,        AI_MATKEY_GLTF_ALPHAMODE);
         ai_mat->AddProperty(&params.ai_alpha_cutoff,   1, AI_MATKEY_GLTF_ALPHACUTOFF);
-
-        ai_mat->AddProperty(&params.ai_unlit,          1, AI_MATKEY_GLTF_UNLIT);
     }
 }
 
@@ -1836,6 +1837,7 @@ void AssimpSceneFileType::handleNonTexMaterialParamsOBJ(SceneWriteData& data, De
                         os << space4 << "shader_model" << space << MaterialDesc::BLINN_PHONG_SHADING_MODEL << std::endl;
                     }
                     break;
+                case aiShadingMode_PBR_BRDF:
                 case aiShadingMode_CookTorrance:
                     {
                         if (params.ai_pbr_specular)
@@ -1975,7 +1977,7 @@ void AssimpSceneFileType::handleTexMaterialTextureParamsGLTF2(SceneWriteData& da
         ai_mat->AddProperty(&params.ai_min_filter,   1, _AI_MATKEY_GLTF_MAPPINGFILTER_MIN_BASE, params.ai_type, params.ai_number);
         ai_mat->AddProperty(&params.ai_mag_filter,   1, _AI_MATKEY_GLTF_MAPPINGFILTER_MAG_BASE, params.ai_type, params.ai_number);
 
-        ai_mat->AddProperty(&params.ai_uv_index, 1, _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE, params.ai_type, params.ai_number);
+        ai_mat->AddProperty(&params.ai_uv_index,     1, _AI_MATKEY_UVWSRC_BASE,                 params.ai_type, params.ai_number);
 
         if (params.ai_mapping_mode_u == aiTextureMapMode_Decal) params.ai_mapping_mode_u = aiTextureMapMode_Clamp;
         if (params.ai_mapping_mode_v == aiTextureMapMode_Decal) params.ai_mapping_mode_v = aiTextureMapMode_Clamp;
@@ -2180,7 +2182,7 @@ void AssimpSceneFileType::handleDescMaterial(SceneWriteData& data, const DescMat
         case MaterialDesc::BLINN_PHONG_SHADING_MODEL:   params.ai_model = aiShadingMode_Blinn;        break;
         case MaterialDesc::TOON_SHADING_MODEL:          params.ai_model = aiShadingMode_Toon;         break;
         case MaterialDesc::OREN_NAYAR_SHADING_MODEL:    params.ai_model = aiShadingMode_OrenNayar;    break;
-        case MaterialDesc::COOK_TORRANCE_SHADING_MODEL: params.ai_model = aiShadingMode_CookTorrance; break;
+        case MaterialDesc::COOK_TORRANCE_SHADING_MODEL: params.ai_model = aiShadingMode_PBR_BRDF;     break;
         case MaterialDesc::NO_SHADING_MODEL:            params.ai_model = aiShadingMode_NoShading;    break;
         default:
             params.ai_model = aiShadingMode_Blinn;
@@ -3315,7 +3317,7 @@ void AssimpSceneFileType::setPrimaryMaterialData(SceneWriteData& data, unsigned 
                         int uv_index = 0;
                         ai_mat->AddProperty(&uv_index, 1, AI_MATKEY_UVWSRC(type, index));
                         if (data.formatId == AssimpOptions::format_gltf2 || data.formatId == AssimpOptions::format_glb2)
-                            ai_mat->AddProperty(&uv_index, 1, AI_MATKEY_GLTF_TEXTURE_TEXCOORD(type, index));
+                            ai_mat->AddProperty(&uv_index, 1, AI_MATKEY_UVWSRC(type, index));
 
                         if (clear_trafo)
                         {

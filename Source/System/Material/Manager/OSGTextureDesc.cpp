@@ -178,6 +178,9 @@ void TextureDesc::dump(      UInt32    ,
         case PRE_FILTER_TEXTURE:        texture_type = "PRE_FILTER_TEXTURE";        break;
         case BRDF_LUT_TEXTURE:          texture_type = "BRDF_LUT_TEXTURE";          break;
         case STANDARD_MATERIAL_TEXTURE: texture_type = "STANDARD_MATERIAL_TEXTURE"; break;
+        //case SHEEN_TEXTURE:             texture_type = "SHEEN_TEXTURE";             break;
+        //case CLEARCOAT_TEXTURE:         texture_type = "CLEARCOAT_TEXTURE";         break;
+        //case TRANSMISSION_TEXTURE:      texture_type = "TRANSMISSION_TEXTURE";      break;
     }
     SLOG << spc << "TextureType          = " << texture_type << std::endl;
 
@@ -1082,6 +1085,9 @@ const Char8* TextureDesc::getTextureTypeName() const
         case PRE_FILTER_TEXTURE:                return "PRE_FILTER_TEXTURE";
         case BRDF_LUT_TEXTURE:                  return "BRDF_LUT_TEXTURE";
         case STANDARD_MATERIAL_TEXTURE:         return "STANDARD_MATERIAL_TEXTURE";
+        //case SHEEN_TEXTURE:                     return "SHEEN_TEXTURE";
+        //case CLEARCOAT_TEXTURE:                 return "CLEARCOAT_TEXTURE";
+        //case TRANSMISSION_TEXTURE:              return "TRANSMISSION_TEXTURE";
         default:                                return "foreign texture type";
     }
 }

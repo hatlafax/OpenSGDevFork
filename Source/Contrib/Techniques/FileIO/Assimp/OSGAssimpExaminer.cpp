@@ -48,7 +48,7 @@
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
 #include <assimp/material.h>
-#include <assimp/pbrmaterial.h>
+#include <assimp/GltfMaterial.h>
 #include <assimp/anim.h>
 #include <assimp/metadata.h>
 #include <assimp/vector3.h>
@@ -824,8 +824,10 @@ void AssimpExaminer::doExamine(const aiMaterial* mat, std::ofstream& os)
             case aiShadingMode_OrenNayar:       model = "aiShadingMode_OrenNayar";      break;
             case aiShadingMode_Minnaert:        model = "aiShadingMode_Minnaert";       break;
             case aiShadingMode_CookTorrance:    model = "aiShadingMode_CookTorrance";   break;
-            case aiShadingMode_NoShading:       model = "aiShadingMode_NoShading";      break;
+            case aiShadingMode_NoShading:       model = "aiShadingMode_NoShading";      break;  // alias aiShadingMode_Unlit
             case aiShadingMode_Fresnel:         model = "aiShadingMode_Fresnel";        break;
+          //case aiShadingMode_Unlit:           model = "aiShadingMode_Unlit";          break; // alias aiShadingMode_NoShading
+            case aiShadingMode_PBR_BRDF:        model = "aiShadingMode_PBR_BRDF";          break;
         }
         os << spc << "shading model     = " << model << std::endl;
     }
@@ -914,7 +916,7 @@ void AssimpExaminer::doExamine(const aiMaterial* mat, std::ofstream& os)
         os << spc << "refractivity      = not available" << std::endl;
     }
 
-    if (aiGetMaterialColor(mat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, &color) == AI_SUCCESS)
+    if (aiGetMaterialColor(mat, AI_MATKEY_BASE_COLOR, &color) == AI_SUCCESS)
     {
         os << spc << "base color factor = (" << color.r << ", " << color.g << ", " << color.b << ", " << color.a << ")" << std::endl;
     }
@@ -923,7 +925,7 @@ void AssimpExaminer::doExamine(const aiMaterial* mat, std::ofstream& os)
         os << spc << "base color factor = not available" << std::endl;
     }
 
-    if (aiGetMaterialFloat(mat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, &float_value) == AI_SUCCESS)
+    if (aiGetMaterialFloat(mat, AI_MATKEY_METALLIC_FACTOR, &float_value) == AI_SUCCESS)
     {
         os << spc << "metallic factor   = " << float_value << std::endl;
     }
@@ -932,7 +934,7 @@ void AssimpExaminer::doExamine(const aiMaterial* mat, std::ofstream& os)
         os << spc << "metallic factor   = not available" << std::endl;
     }
 
-    if (aiGetMaterialFloat(mat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, &float_value) == AI_SUCCESS)
+    if (aiGetMaterialFloat(mat, AI_MATKEY_ROUGHNESS_FACTOR, &float_value) == AI_SUCCESS)
     {
         os << spc << "roughness factor  = " << float_value << std::endl;
     }
@@ -960,27 +962,20 @@ void AssimpExaminer::doExamine(const aiMaterial* mat, std::ofstream& os)
         os << spc << "alpha cutoff      = not available" << std::endl;
     }
 
-    if (aiGetMaterialInteger(mat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS, &bool_value) == AI_SUCCESS)
+    if (aiGetMaterialFloat(mat, AI_MATKEY_GLOSSINESS_FACTOR, &float_value) == AI_SUCCESS)
     {
-        os << spc << "glossiness        = " << (bool_value ? "true" : "false") << std::endl;
-    }
-    else
-    {
-        os << spc << "glossiness        = not available" << std::endl;
-    }
-
-    if (aiGetMaterialFloat(mat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, &float_value) == AI_SUCCESS)
-    {
+        os << spc << "glossiness        = " << "true"      << std::endl;
         os << spc << "glossiness factor = " << float_value << std::endl;
     }
     else
     {
+        os << spc << "glossiness        = false"         << std::endl;
         os << spc << "glossiness factor = not available" << std::endl;
     }
 
-    if (aiGetMaterialInteger(mat, AI_MATKEY_GLTF_UNLIT, &bool_value) == AI_SUCCESS)
+    if (aiGetMaterialInteger(mat, AI_MATKEY_SHADING_MODEL, &int_value) == AI_SUCCESS)
     {
-        os << spc << "unlit             = " << (bool_value ? "true" : "false") << std::endl;
+        os << spc << "unlit             = " << (int_value == aiShadingMode_Unlit) << std::endl;
     }
     else
     {
@@ -1035,9 +1030,9 @@ void AssimpExaminer::doExamine(const aiMaterial*  mat, aiTextureType type, std::
         case aiTextureType_DIFFUSE:
             {
                 aiColor4D color;
-                if (aiGetMaterialColor(mat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, &color) == AI_SUCCESS)
+                if (aiGetMaterialColor(mat, AI_MATKEY_BASE_COLOR, &color) == AI_SUCCESS)
                 {
-                    name = "aiTextureType_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR";
+                    name = "aiTextureType_BASE_COLOR";
                 }
                 else
                 {
@@ -1058,9 +1053,9 @@ void AssimpExaminer::doExamine(const aiMaterial*  mat, aiTextureType type, std::
         case aiTextureType_UNKNOWN:
             {
                 float float_value;
-                if (aiGetMaterialFloat(mat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, &float_value) == AI_SUCCESS)
+                if (aiGetMaterialFloat(mat, AI_MATKEY_METALLIC_FACTOR, &float_value) == AI_SUCCESS)
                 {
-                    name = "aiTextureType_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS";
+                    name = "aiTextureType_METALLICROUGHNESS";
                 }
                 else
                 {

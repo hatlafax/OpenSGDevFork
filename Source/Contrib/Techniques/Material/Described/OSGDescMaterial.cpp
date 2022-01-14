@@ -471,6 +471,15 @@ UInt32 DescMaterial::DescriptionInfo::getTexMapDetails(const TextureDescStore& t
             case TextureDesc::STANDARD_MATERIAL_TEXTURE:
                 result |= StandardMaterialTextures;
                 break;
+            //case TextureDesc::SHEEN_TEXTURE:
+            //    result |= SheenTextures;
+            //    break;
+            //case TextureDesc::CLEARCOAT_TEXTURE:
+            //    result |= ClearcoatTextures;
+            //    break;
+            //case TextureDesc::TRANSMISSION_TEXTURE:
+            //    result |= TransmissionTextures;
+            //    break;
         }
     }
 
@@ -687,6 +696,21 @@ UInt32 DescMaterial::DescriptionInfo::getMatMemDetails() const
         {
             result |= BrdfMaterialMember;
         }
+
+        //if (hasTexMapDetail(SheenTextures))
+        //{
+        //    result |= SheenMaterialMember;
+        //}
+
+        //if (hasTexMapDetail(ClearcoatTextures))
+        //{
+        //    result |= ClearcoatMaterialMember;
+        //}
+
+        //if (hasTexMapDetail(TransmissionTextures))
+        //{
+        //    result |= TransmissionMaterialMember;
+        //}
     }
 
     if (shadingModel == MaterialDesc::OREN_NAYAR_SHADING_MODEL)
@@ -853,6 +877,10 @@ void DescMaterial::initMethod(InitPhase ePhase)
         _textureSupported[TextureDesc::PRE_FILTER_TEXTURE                   ] = true;
         _textureSupported[TextureDesc::BRDF_LUT_TEXTURE                     ] = true;
         _textureSupported[TextureDesc::STANDARD_MATERIAL_TEXTURE            ] = true;
+        //_textureSupported[TextureDesc::SHEEN_TEXTURE                        ] = false;  // ToDo
+        //_textureSupported[TextureDesc::CLEARCOAT_TEXTURE                    ] = false;  // ToDo
+        //_textureSupported[TextureDesc::TRANSMISSION_TEXTURE                 ] = false;  // ToDo
+
         _textureMaxCounts.resize(TextureDesc::MAX_NUM_TEXTURE_TYPES);
 
         _textureMaxCounts[TextureDesc::NONE_TEXTURE                         ] = 0;
@@ -879,6 +907,9 @@ void DescMaterial::initMethod(InitPhase ePhase)
         _textureMaxCounts[TextureDesc::PRE_FILTER_TEXTURE                   ] = 1;
         _textureMaxCounts[TextureDesc::BRDF_LUT_TEXTURE                     ] = 1;
         _textureMaxCounts[TextureDesc::STANDARD_MATERIAL_TEXTURE            ] = 4;
+        //_textureMaxCounts[TextureDesc::SHEEN_TEXTURE                        ] = 1;
+        //_textureMaxCounts[TextureDesc::CLEARCOAT_TEXTURE                    ] = 1;
+        //_textureMaxCounts[TextureDesc::TRANSMISSION_TEXTURE                 ] = 1;
 
         _hasFragBlockColorEntry.resize(TextureDesc::MAX_NUM_TEXTURE_TYPES);
 
@@ -906,6 +937,9 @@ void DescMaterial::initMethod(InitPhase ePhase)
         _hasFragBlockColorEntry[TextureDesc::PRE_FILTER_TEXTURE             ] = false;
         _hasFragBlockColorEntry[TextureDesc::BRDF_LUT_TEXTURE               ] = false;
         _hasFragBlockColorEntry[TextureDesc::STANDARD_MATERIAL_TEXTURE      ] = true;
+        //_hasFragBlockColorEntry[TextureDesc::SHEEN_TEXTURE                  ] = true;
+        //_hasFragBlockColorEntry[TextureDesc::CLEARCOAT_TEXTURE              ] = true;
+        //_hasFragBlockColorEntry[TextureDesc::TRANSMISSION_TEXTURE           ] = true;
 
         _textureIsEnvMap.resize(TextureDesc::MAX_NUM_TEXTURE_TYPES);
 
@@ -933,6 +967,9 @@ void DescMaterial::initMethod(InitPhase ePhase)
         _textureIsEnvMap[TextureDesc::PRE_FILTER_TEXTURE                    ] = true;
         _textureIsEnvMap[TextureDesc::BRDF_LUT_TEXTURE                      ] = false;
         _textureIsEnvMap[TextureDesc::STANDARD_MATERIAL_TEXTURE             ] = false;
+        //_textureIsEnvMap[TextureDesc::SHEEN_TEXTURE                         ] = false;
+        //_textureIsEnvMap[TextureDesc::CLEARCOAT_TEXTURE                     ] = false;
+        //_textureIsEnvMap[TextureDesc::TRANSMISSION_TEXTURE                  ] = false;
     }
 }
 
@@ -2219,6 +2256,9 @@ void DescMaterial::addShaderUniformVariables()
     //    TexData preFilterColor;
     //    TexData brdf;
     //    TexData standard;
+    //    TexData sheen;
+    //    TexData clearcoat;
+    //    TexData transmission;
     //    TexData metalRoughDispOcc;
     //    TexData metalRoughDisp;
     //    TexData roughDispOcc;
@@ -2274,6 +2314,10 @@ void DescMaterial::addShaderUniformVariables()
             case TextureDesc::PRE_FILTER_TEXTURE:               name += "preFilterColor";            break;
             case TextureDesc::BRDF_LUT_TEXTURE:                 name += "brdf";                      break;
             case TextureDesc::STANDARD_MATERIAL_TEXTURE:        name += "standard";                  break;
+
+            //case TextureDesc::SHEEN_TEXTURE:                    name += "sheen";                     break;
+            //case TextureDesc::CLEARCOAT_TEXTURE:                name += "clearcoat";                 break;
+            //case TextureDesc::TRANSMISSION_TEXTURE:             name += "transmission";              break;
         }
 
         switch (evalFragtProgTexType(texType))
@@ -2520,6 +2564,9 @@ void DescMaterial::updateShaderUniformVariables(MaterialDesc* matDesc)
     //    TexData preFilterColor;
     //    TexData brdf;
     //    TexData standard;
+    //    TexData sheen;
+    //    TexData clearcoat;
+    //    TexData transmission;
     //    TexData metalRoughDispOcc;
     //    TexData metalRoughDisp;
     //    TexData roughDispOcc;
@@ -2575,30 +2622,34 @@ void DescMaterial::updateShaderUniformVariables(MaterialDesc* matDesc)
 
         switch (texType)
         {
-            case TextureDesc::NONE_TEXTURE:                     name  = "";                          break;
-            case TextureDesc::UNKNOWN_TEXTURE:                  name  = "";                          break;
-            case TextureDesc::ALBEDO_TEXTURE:                   name += "albedo";                    break;
-            case TextureDesc::SPECULAR_TEXTURE:                 name += "specular";                  break;
-            case TextureDesc::EMISSIVE_TEXTURE:                 name += "emissive";                  break;
-            case TextureDesc::SHININESS_TEXTURE:                name += "shininess";                 break;
-            case TextureDesc::OPACITY_TEXTURE:                  name += "opacity";                   break;
-            case TextureDesc::NORMALS_TEXTURE:                  name += "normal";                    break;
-            case TextureDesc::HEIGHT_TEXTURE:                   name += "height";                    break;
-            case TextureDesc::DISPLACEMENT_TEXTURE:             name += "displacement";              break;
-            case TextureDesc::REFLECTION_TEXTURE:               name += "reflection";                break;
-            case TextureDesc::REFRACTION_TEXTURE:               name += "refraction";                break;
-            case TextureDesc::ANISOTROPY_U_TEXTURE:             name += "anisotropyU";               break;
-            case TextureDesc::ANISOTROPY_V_TEXTURE:             name += "anisotropyV";               break;
-            case TextureDesc::ANISOTROPY_UV_TEXTURE:            name += "anisotropyUV";              break;
-            case TextureDesc::AMBIENT_OCCLUSION_TEXTURE:        name += "ambientOcclusion";          break;
-            case TextureDesc::ROUGH_TEXTURE:                    name += "roughness";                 break;
-            case TextureDesc::METAL_TEXTURE:                    name += "metalness";                 break;
-            case TextureDesc::ROUGH_METAL_TEXTURE:              name += "roughMetal";                break;
-            case TextureDesc::OCCL_ROUGH_METAL_TEXTURE:         name += "occlRoughMetal";            break;
-            case TextureDesc::IRRADIANCE_TEXTURE:               name += "irradiance";                break;
-            case TextureDesc::PRE_FILTER_TEXTURE:               name += "preFilterColor";            break;
-            case TextureDesc::BRDF_LUT_TEXTURE:                 name += "brdf";                      break;
-            case TextureDesc::STANDARD_MATERIAL_TEXTURE:        name += "standard";                  break;
+            case TextureDesc::NONE_TEXTURE:                     name  = "";                         break;
+            case TextureDesc::UNKNOWN_TEXTURE:                  name  = "";                         break;
+            case TextureDesc::ALBEDO_TEXTURE:                   name += "albedo";                   break;
+            case TextureDesc::SPECULAR_TEXTURE:                 name += "specular";                 break;
+            case TextureDesc::EMISSIVE_TEXTURE:                 name += "emissive";                 break;
+            case TextureDesc::SHININESS_TEXTURE:                name += "shininess";                break;
+            case TextureDesc::OPACITY_TEXTURE:                  name += "opacity";                  break;
+            case TextureDesc::NORMALS_TEXTURE:                  name += "normal";                   break;
+            case TextureDesc::HEIGHT_TEXTURE:                   name += "height";                   break;
+            case TextureDesc::DISPLACEMENT_TEXTURE:             name += "displacement";             break;
+            case TextureDesc::REFLECTION_TEXTURE:               name += "reflection";               break;
+            case TextureDesc::REFRACTION_TEXTURE:               name += "refraction";               break;
+            case TextureDesc::ANISOTROPY_U_TEXTURE:             name += "anisotropyU";              break;
+            case TextureDesc::ANISOTROPY_V_TEXTURE:             name += "anisotropyV";              break;
+            case TextureDesc::ANISOTROPY_UV_TEXTURE:            name += "anisotropyUV";             break;
+            case TextureDesc::AMBIENT_OCCLUSION_TEXTURE:        name += "ambientOcclusion";         break;
+            case TextureDesc::ROUGH_TEXTURE:                    name += "roughness";                break;
+            case TextureDesc::METAL_TEXTURE:                    name += "metalness";                break;
+            case TextureDesc::ROUGH_METAL_TEXTURE:              name += "roughMetal";               break;
+            case TextureDesc::OCCL_ROUGH_METAL_TEXTURE:         name += "occlRoughMetal";           break;
+            case TextureDesc::IRRADIANCE_TEXTURE:               name += "irradiance";               break;
+            case TextureDesc::PRE_FILTER_TEXTURE:               name += "preFilterColor";           break;
+            case TextureDesc::BRDF_LUT_TEXTURE:                 name += "brdf";                     break;
+            case TextureDesc::STANDARD_MATERIAL_TEXTURE:        name += "standard";                 break;
+
+            //case TextureDesc::SHEEN_TEXTURE:                    name += "sheen";                    break; // ToDo
+            //case TextureDesc::CLEARCOAT_TEXTURE:                name += "clearcoat";                break;
+            //case TextureDesc::TRANSMISSION_TEXTURE:             name += "transmission";             break;
         }
 
         Color3f baseColor = getBaseColor(matDesc, texType);
@@ -2942,6 +2993,9 @@ std::size_t DescMaterial::calcFragBufferSize(
     //    TexData preFilterColor;
     //    TexData brdf;
     //    TexData standard;
+    //    TexData sheen;
+    //    TexData clearcoat;
+    //    TexData transmission;
     //    TexData metalRoughDispOcc;
     //    TexData metalRoughDisp;
     //    TexData roughDispOcc;
@@ -3148,6 +3202,9 @@ void DescMaterial::fillFragBuffer(
     //    TexData preFilterColor;
     //    TexData brdf;
     //    TexData standard;
+    //    TexData sheen;
+    //    TexData clearcoat;
+    //    TexData transmission;
     //    TexData metalRoughDispOcc;
     //    TexData metalRoughDisp;
     //    TexData roughDispOcc;
@@ -3548,6 +3605,28 @@ Color3f DescMaterial::getBaseColor(MaterialDesc* matDesc, UInt32 texType) const
             break;
         case TextureDesc::STANDARD_MATERIAL_TEXTURE:
             break;
+
+        //case TextureDesc::SHEEN_TEXTURE:
+        //    color = matDesc->getSheen();
+        //    if (matDesc->getSRGBColorMode())
+        //    {
+        //        color = sRGBToLinear(color);
+        //    }
+        //    break;
+        //case TextureDesc::CLEARCOAT_TEXTURE:
+        //    color = matDesc->getClearcoat();
+        //    if (matDesc->getSRGBColorMode())
+        //    {
+        //        color = sRGBToLinear(color);
+        //    }
+        //    break;
+        //case TextureDesc::TRANSMISSION_TEXTURE:
+        //    color = matDesc->getTransmission();
+        //    if (matDesc->getSRGBColorMode())
+        //    {
+        //        color = sRGBToLinear(color);
+        //    }
+        //    break;
     }
     
     return color;
@@ -3637,6 +3716,11 @@ bool DescMaterial::hasFragBlockEntry(UInt32 texType, UInt32 texMapDetails) const
                 return true;
             }
             return false;
+
+        //case TextureDesc::SHEEN_TEXTURE:
+        //case TextureDesc::CLEARCOAT_TEXTURE:
+        //case TextureDesc::TRANSMISSION_TEXTURE:
+        //    return true;
     }
     return false;
 }
@@ -4357,6 +4441,10 @@ void DescMaterial::getFragmentProgramMatUniformBlock(std::stringstream& ost) con
     getFragmentProgramMatBlockEntry(ost, spc, TextureDesc::BRDF_LUT_TEXTURE,                "brdf");
     getFragmentProgramMatBlockEntry(ost, spc, TextureDesc::STANDARD_MATERIAL_TEXTURE,       "standard");
 
+    //getFragmentProgramMatBlockEntry(ost, spc, TextureDesc::SHEEN_TEXTURE,                   "sheen");
+    //getFragmentProgramMatBlockEntry(ost, spc, TextureDesc::CLEARCOAT_TEXTURE,               "clearcoat");
+    //getFragmentProgramMatBlockEntry(ost, spc, TextureDesc::TRANSMISSION_TEXTURE,            "transmission");
+
     if (isFallbackShader2())
     {
         ost
@@ -4442,6 +4530,11 @@ void DescMaterial::getFragmentProgramMaterialStruct(std::stringstream& ost) cons
     if (hasMaterialMember(PreFilterColorMaterialMember  )) ost << endl << "    vec3  preFilterColor;"             ;
     if (hasMaterialMember(BrdfMaterialMember            )) ost << endl << "    vec2  brdf;"                       ;
     if (hasMaterialMember(ToonScaleMaterialMember       )) ost << endl << "    float toonScale;"                  ;
+
+    //if (hasMaterialMember(SheenMaterialMember           )) ost << endl << "    vec3  sheen;"                      ;
+    //if (hasMaterialMember(ClearcoatMaterialMember       )) ost << endl << "    vec3  clearcoat;"                  ;
+    //if (hasMaterialMember(TransmissionMaterialMember    )) ost << endl << "    vec3  transmission;"               ;
+
     ost
     << endl << "};"
     << endl << ""
@@ -5408,6 +5501,9 @@ void DescMaterial::getFragmentProgramMaterialEvaluation(std::stringstream& ost) 
     getFragmentProgramMaterialSpecular          (ost);
     getFragmentProgramMaterialEmissive          (ost);
     getFragmentProgramMaterialStandardMaterial  (ost);
+    //getFragmentProgramMaterialSheen             (ost);
+    //getFragmentProgramMaterialClearcoat         (ost);
+    //getFragmentProgramMaterialTransmission      (ost);
     getFragmentProgramMaterialShininess         (ost);
     getFragmentProgramMaterialOpacity           (ost);
     getFragmentProgramMaterialNormal            (ost);
@@ -5673,6 +5769,114 @@ void DescMaterial::getFragmentProgramMaterialStandardMaterial(std::stringstream&
             break;
     }
 }
+
+//void DescMaterial::getFragmentProgramMaterialSheen(std::stringstream& ost) const
+//{
+//    using namespace std;
+//
+//    switch (evalFragtProgTexType(TextureDesc::SHEEN_TEXTURE))
+//    {
+//    case DISCARD:
+//        break;
+//    case IS_COLOR_DATA:
+//        ost
+//            << endl << "vec3 getMaterialSheen()"
+//            << endl << "{"
+//            << endl << "    return descMaterial.sheen;"
+//            << endl << "}"
+//            << endl << ""
+//            ;
+//        break;
+//    case IS_SINGLE_DATA:
+//        ost
+//            << endl << "vec3 getMaterialSheen()"
+//            << endl << "{"
+//            << endl << "    SingleTexData data = descMaterial.sheen;"
+//            << endl << "    return EvaluateTexture(data).rgb;"
+//            << endl << "}"
+//            << endl << ""
+//            ;
+//        break;
+//    case IS_STACK_DATA:
+//        OSG_ASSERT(false);
+//        break;
+//    case IS_ENV_DATA:
+//        OSG_ASSERT(false);
+//        break;
+//    }
+//}
+//
+//void DescMaterial::getFragmentProgramMaterialClearcoat(std::stringstream& ost) const
+//{
+//    using namespace std;
+//
+//    switch (evalFragtProgTexType(TextureDesc::CLEARCOAT_TEXTURE))
+//    {
+//    case DISCARD:
+//        break;
+//    case IS_COLOR_DATA:
+//        ost
+//            << endl << "vec3 getMaterialClearcoat()"
+//            << endl << "{"
+//            << endl << "    return descMaterial.clearcoat;"
+//            << endl << "}"
+//            << endl << ""
+//            ;
+//        break;
+//    case IS_SINGLE_DATA:
+//        ost
+//            << endl << "vec3 getMaterialClearcoat()"
+//            << endl << "{"
+//            << endl << "    SingleTexData data = descMaterial.clearcoat;"
+//            << endl << "    return EvaluateTexture(data).rgb;"
+//            << endl << "}"
+//            << endl << ""
+//            ;
+//        break;
+//    case IS_STACK_DATA:
+//        OSG_ASSERT(false);
+//        break;
+//    case IS_ENV_DATA:
+//        OSG_ASSERT(false);
+//        break;
+//    }
+//}
+//
+//void DescMaterial::getFragmentProgramMaterialTransmission(std::stringstream& ost) const
+//{
+//    using namespace std;
+//
+//    switch (evalFragtProgTexType(TextureDesc::TRANSMISSION_TEXTURE))
+//    {
+//    case DISCARD:
+//        break;
+//    case IS_COLOR_DATA:
+//        ost
+//            << endl << "vec3 getMaterialTransmission()"
+//            << endl << "{"
+//            << endl << "    return descMaterial.transmission;"
+//            << endl << "}"
+//            << endl << ""
+//            ;
+//        break;
+//    case IS_SINGLE_DATA:
+//        ost
+//            << endl << "vec3 getMaterialTransmission()"
+//            << endl << "{"
+//            << endl << "    SingleTexData data = descMaterial.transmission;"
+//            << endl << "    return EvaluateTexture(data).rgb;"
+//            << endl << "}"
+//            << endl << ""
+//            ;
+//        break;
+//    case IS_STACK_DATA:
+//        OSG_ASSERT(false);
+//        break;
+//    case IS_ENV_DATA:
+//        OSG_ASSERT(false);
+//        break;
+//    }
+//}
 
 void DescMaterial::getFragmentProgramMaterialShininess(std::stringstream& ost) const
 {
