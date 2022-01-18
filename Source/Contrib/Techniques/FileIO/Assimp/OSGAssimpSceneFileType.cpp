@@ -1951,14 +1951,14 @@ void AssimpSceneFileType::handleTexMaterialTextureParams(SceneWriteData& data, D
 {
     if (data.vecCorrectFactor[params.ai_type]) params.ai_blend_factor = 1.f;
 
-    ai_mat->AddProperty(&params.ai_filename,          _AI_MATKEY_TEXTURE_BASE,       params.ai_type, params.ai_number);
-    ai_mat->AddProperty(&params.ai_blend_factor,   1, _AI_MATKEY_TEXBLEND_BASE,      params.ai_type, params.ai_number);
-    ai_mat->AddProperty(&params.ai_mapping,        1, _AI_MATKEY_MAPPING_BASE,       params.ai_type, params.ai_number);
-    ai_mat->AddProperty(&params.ai_uv_index,       1, _AI_MATKEY_UVWSRC_BASE,        params.ai_type, params.ai_number);
-    ai_mat->AddProperty(&params.ai_operation,      1, _AI_MATKEY_TEXOP_BASE,         params.ai_type, params.ai_number);
-    ai_mat->AddProperty(&params.ai_mapping_mode_u, 1, _AI_MATKEY_MAPPINGMODE_U_BASE, params.ai_type, params.ai_number);
-    ai_mat->AddProperty(&params.ai_mapping_mode_v, 1, _AI_MATKEY_MAPPINGMODE_V_BASE, params.ai_type, params.ai_number);
-    ai_mat->AddProperty(&params.ai_texture_flags,  1, _AI_MATKEY_TEXFLAGS_BASE,      params.ai_type, params.ai_number);
+    ai_mat->AddProperty(&params.ai_filename,               _AI_MATKEY_TEXTURE_BASE,       params.ai_type, params.ai_number);
+    ai_mat->AddProperty(&params.ai_blend_factor,        1, _AI_MATKEY_TEXBLEND_BASE,      params.ai_type, params.ai_number);
+    ai_mat->AddProperty((const int*)&params.ai_mapping, 1, _AI_MATKEY_MAPPING_BASE,       params.ai_type, params.ai_number);  // cast to avoid *.assbin import validation error.
+    ai_mat->AddProperty(&params.ai_uv_index,            1, _AI_MATKEY_UVWSRC_BASE,        params.ai_type, params.ai_number);
+    ai_mat->AddProperty(&params.ai_operation,           1, _AI_MATKEY_TEXOP_BASE,         params.ai_type, params.ai_number);
+    ai_mat->AddProperty(&params.ai_mapping_mode_u,      1, _AI_MATKEY_MAPPINGMODE_U_BASE, params.ai_type, params.ai_number);
+    ai_mat->AddProperty(&params.ai_mapping_mode_v,      1, _AI_MATKEY_MAPPINGMODE_V_BASE, params.ai_type, params.ai_number);
+    ai_mat->AddProperty(&params.ai_texture_flags,       1, _AI_MATKEY_TEXFLAGS_BASE,      params.ai_type, params.ai_number);
 
     if (!params.ai_map_axis.Equal(aiVector3D(0.f,0.f,0.f)))
         ai_mat->AddProperty(&params.ai_map_axis,       1, _AI_MATKEY_TEXMAP_AXIS_BASE,   params.ai_type, params.ai_number);
