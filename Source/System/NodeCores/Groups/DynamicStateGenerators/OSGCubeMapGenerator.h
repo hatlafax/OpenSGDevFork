@@ -88,6 +88,15 @@ class OSG_GROUP_DLLMAPPING CubeMapGenerator : public CubeMapGeneratorBase
         UseParentsVolumeCenter = 0x0004
     };
 
+    enum CubeMapImageType
+    {
+        INDIVIDUAL = 0,
+        VERTICAL_CROSS_CUBE_MAP,
+        HORIZONTAL_CROSS_CUBE_MAP,
+        VERTICAL_STRIP_CUBE_MAP,
+        HORIZONTAL_STRIP_CUBE_MAP
+    };
+
     /*---------------------------------------------------------------------*/
     /*! \name                     Output                                   */
     /*! \{                                                                 */
@@ -104,6 +113,8 @@ class OSG_GROUP_DLLMAPPING CubeMapGenerator : public CubeMapGeneratorBase
 
     UInt16 getWidth (void);
     UInt16 getHeight(void);
+
+    void    setRequestImage();
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -128,6 +139,7 @@ class OSG_GROUP_DLLMAPPING CubeMapGenerator : public CubeMapGeneratorBase
   protected:
 
     // Variables should all be in CubeMapGeneratorBase.
+    bool requestImage;
 
     /*---------------------------------------------------------------------*/
     /*! \name                  Constructors                                */
@@ -150,6 +162,8 @@ class OSG_GROUP_DLLMAPPING CubeMapGenerator : public CubeMapGeneratorBase
 
     Action::ResultE renderEnter(Action *action);
     Action::ResultE renderLeave(Action *action);
+
+    void    createCubeMapImage(FrameBufferObject* renderTarget);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/

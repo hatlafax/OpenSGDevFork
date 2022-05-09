@@ -224,6 +224,81 @@ void CubeMapGeneratorBase::setSetupMode(const UInt32 value)
 
     _sfSetupMode.setValue(value);
 }
+//! Get the value of the CubeMapGenerator::_sfName field.
+
+inline
+std::string &CubeMapGeneratorBase::editName(void)
+{
+    editSField(NameFieldMask);
+
+    return _sfName.getValue();
+}
+
+//! Get the value of the CubeMapGenerator::_sfName field.
+inline
+const std::string &CubeMapGeneratorBase::getName(void) const
+{
+    return _sfName.getValue();
+}
+
+//! Set the value of the CubeMapGenerator::_sfName field.
+inline
+void CubeMapGeneratorBase::setName(const std::string &value)
+{
+    editSField(NameFieldMask);
+
+    _sfName.setValue(value);
+}
+//! Get the value of the CubeMapGenerator::_sfImageType field.
+
+inline
+UInt32 &CubeMapGeneratorBase::editImageType(void)
+{
+    editSField(ImageTypeFieldMask);
+
+    return _sfImageType.getValue();
+}
+
+//! Get the value of the CubeMapGenerator::_sfImageType field.
+inline
+      UInt32  CubeMapGeneratorBase::getImageType(void) const
+{
+    return _sfImageType.getValue();
+}
+
+//! Set the value of the CubeMapGenerator::_sfImageType field.
+inline
+void CubeMapGeneratorBase::setImageType(const UInt32 value)
+{
+    editSField(ImageTypeFieldMask);
+
+    _sfImageType.setValue(value);
+}
+//! Get the value of the CubeMapGenerator::_sfStoreImage field.
+
+inline
+bool &CubeMapGeneratorBase::editStoreImage(void)
+{
+    editSField(StoreImageFieldMask);
+
+    return _sfStoreImage.getValue();
+}
+
+//! Get the value of the CubeMapGenerator::_sfStoreImage field.
+inline
+      bool  CubeMapGeneratorBase::getStoreImage(void) const
+{
+    return _sfStoreImage.getValue();
+}
+
+//! Set the value of the CubeMapGenerator::_sfStoreImage field.
+inline
+void CubeMapGeneratorBase::setStoreImage(const bool value)
+{
+    editSField(StoreImageFieldMask);
+
+    _sfStoreImage.setValue(value);
+}
 
 
 
@@ -275,6 +350,15 @@ void CubeMapGeneratorBase::execSync (      CubeMapGeneratorBase *pFrom,
 
     if(FieldBits::NoField != (CameraFieldMask & whichField))
         _sfCamera.syncWith(pFrom->_sfCamera);
+
+    if(FieldBits::NoField != (NameFieldMask & whichField))
+        _sfName.syncWith(pFrom->_sfName);
+
+    if(FieldBits::NoField != (ImageTypeFieldMask & whichField))
+        _sfImageType.syncWith(pFrom->_sfImageType);
+
+    if(FieldBits::NoField != (StoreImageFieldMask & whichField))
+        _sfStoreImage.syncWith(pFrom->_sfStoreImage);
 }
 #endif
 

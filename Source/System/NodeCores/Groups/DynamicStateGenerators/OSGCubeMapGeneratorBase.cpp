@@ -134,6 +134,18 @@ OSG_BEGIN_NAMESPACE
     
 */
 
+/*! \var std::string     CubeMapGeneratorBase::_sfName
+    Image file path.
+*/
+
+/*! \var UInt32          CubeMapGeneratorBase::_sfImageType
+    The type of image to store: INDIVIDUAL, VERTICAL_CROSS_CUBE_MAP, HORIZONTAL_CROSS_CUBE_MAP, VERTICAL_STRIP_CUBE_MAP, HORIZONTAL_STRIP_CUBE_MAP
+*/
+
+/*! \var bool            CubeMapGeneratorBase::_sfStoreImage
+    Only if this flag is set to true, image saving happens. Nevertheless a request has to be stated expicitely by interface requestImage.
+*/
+
 
 /***************************************************************************\
  *                      FieldType/FieldTrait Instantiation                 *
@@ -301,6 +313,42 @@ void CubeMapGeneratorBase::classDescInserter(TypeObject &oType)
         static_cast<FieldGetMethodSig >(&CubeMapGenerator::getHandleCamera));
 
     oType.addInitialDesc(pDesc);
+
+    pDesc = new SFString::Description(
+        SFString::getClassType(),
+        "name",
+        "Image file path.\n",
+        NameFieldId, NameFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&CubeMapGenerator::editHandleName),
+        static_cast<FieldGetMethodSig >(&CubeMapGenerator::getHandleName));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFUInt32::Description(
+        SFUInt32::getClassType(),
+        "imageType",
+        "The type of image to store: INDIVIDUAL, VERTICAL_CROSS_CUBE_MAP, HORIZONTAL_CROSS_CUBE_MAP, VERTICAL_STRIP_CUBE_MAP, HORIZONTAL_STRIP_CUBE_MAP\n",
+        ImageTypeFieldId, ImageTypeFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&CubeMapGenerator::editHandleImageType),
+        static_cast<FieldGetMethodSig >(&CubeMapGenerator::getHandleImageType));
+
+    oType.addInitialDesc(pDesc);
+
+    pDesc = new SFBool::Description(
+        SFBool::getClassType(),
+        "storeImage",
+        "Only if this flag is set to true, image saving happens. Nevertheless a request has to be stated expicitely by interface requestImage.\n",
+        StoreImageFieldId, StoreImageFieldMask,
+        false,
+        (Field::SFDefaultFlags | Field::FStdAccess),
+        static_cast<FieldEditMethodSig>(&CubeMapGenerator::editHandleStoreImage),
+        static_cast<FieldGetMethodSig >(&CubeMapGenerator::getHandleStoreImage));
+
+    oType.addInitialDesc(pDesc);
 }
 
 
@@ -440,6 +488,36 @@ CubeMapGeneratorBase::TypeObject CubeMapGeneratorBase::_type(
     "\t access=\"public\"\n"
     "\t >\n"
     "  </Field>\n"
+    "  <Field\n"
+    "\t name=\"name\"\n"
+    "\t type=\"std::string\"\n"
+    "\t cardinality=\"single\"\n"
+    "\t visibility=\"external\"\n"
+    "\t access=\"public\"\n"
+    "\t >\n"
+    "\tImage file path.\n"
+    "  </Field>\n"
+    "  <Field\n"
+    "\t name=\"imageType\"\n"
+    "\t type=\"UInt32\"\n"
+    "\t cardinality=\"single\"\n"
+    "\t visibility=\"external\"\n"
+    "\t defaultValue=\"0\"\n"
+    "\t access=\"public\"\n"
+    "\t >\n"
+    "        The type of image to store: INDIVIDUAL, VERTICAL_CROSS_CUBE_MAP, HORIZONTAL_CROSS_CUBE_MAP, VERTICAL_STRIP_CUBE_MAP, HORIZONTAL_STRIP_CUBE_MAP\n"
+    "  </Field>\n"
+    "  <Field\n"
+    "\t name=\"storeImage\"\n"
+    "\t type=\"bool\"\n"
+    "\t cardinality=\"single\"\n"
+    "\t visibility=\"external\"\n"
+    "\t defaultValue=\"false\"\n"
+    "\t access=\"public\"\n"
+    "\t >\n"
+    "        Only if this flag is set to true, image saving happens. Nevertheless a request has to be stated expicitely by interface requestImage.\n"
+    "  </Field>\n"
+    "\n"
     "</FieldContainer>\n",
     ""
     );
@@ -699,6 +777,45 @@ void CubeMapGeneratorBase::setCamera(Camera * const value)
 }
 
 
+SFString *CubeMapGeneratorBase::editSFName(void)
+{
+    editSField(NameFieldMask);
+
+    return &_sfName;
+}
+
+const SFString *CubeMapGeneratorBase::getSFName(void) const
+{
+    return &_sfName;
+}
+
+
+SFUInt32 *CubeMapGeneratorBase::editSFImageType(void)
+{
+    editSField(ImageTypeFieldMask);
+
+    return &_sfImageType;
+}
+
+const SFUInt32 *CubeMapGeneratorBase::getSFImageType(void) const
+{
+    return &_sfImageType;
+}
+
+
+SFBool *CubeMapGeneratorBase::editSFStoreImage(void)
+{
+    editSField(StoreImageFieldMask);
+
+    return &_sfStoreImage;
+}
+
+const SFBool *CubeMapGeneratorBase::getSFStoreImage(void) const
+{
+    return &_sfStoreImage;
+}
+
+
 
 
 void CubeMapGeneratorBase::pushToExclude(Node * const value)
@@ -810,6 +927,18 @@ SizeT CubeMapGeneratorBase::getBinSize(ConstFieldMaskArg whichField)
     {
         returnValue += _sfCamera.getBinSize();
     }
+    if(FieldBits::NoField != (NameFieldMask & whichField))
+    {
+        returnValue += _sfName.getBinSize();
+    }
+    if(FieldBits::NoField != (ImageTypeFieldMask & whichField))
+    {
+        returnValue += _sfImageType.getBinSize();
+    }
+    if(FieldBits::NoField != (StoreImageFieldMask & whichField))
+    {
+        returnValue += _sfStoreImage.getBinSize();
+    }
 
     return returnValue;
 }
@@ -866,6 +995,18 @@ void CubeMapGeneratorBase::copyToBin(BinaryDataHandler &pMem,
     if(FieldBits::NoField != (CameraFieldMask & whichField))
     {
         _sfCamera.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (NameFieldMask & whichField))
+    {
+        _sfName.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (ImageTypeFieldMask & whichField))
+    {
+        _sfImageType.copyToBin(pMem);
+    }
+    if(FieldBits::NoField != (StoreImageFieldMask & whichField))
+    {
+        _sfStoreImage.copyToBin(pMem);
     }
 }
 
@@ -933,6 +1074,21 @@ void CubeMapGeneratorBase::copyFromBin(BinaryDataHandler &pMem,
     {
         editSField(CameraFieldMask);
         _sfCamera.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (NameFieldMask & whichField))
+    {
+        editSField(NameFieldMask);
+        _sfName.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (ImageTypeFieldMask & whichField))
+    {
+        editSField(ImageTypeFieldMask);
+        _sfImageType.copyFromBin(pMem);
+    }
+    if(FieldBits::NoField != (StoreImageFieldMask & whichField))
+    {
+        editSField(StoreImageFieldMask);
+        _sfStoreImage.copyFromBin(pMem);
     }
 }
 
@@ -1070,7 +1226,10 @@ CubeMapGeneratorBase::CubeMapGeneratorBase(void) :
     _sfTexUnit                (UInt32(0)),
     _sfSetupMode              (UInt32(CubeMapGenerator::SetupAll)),
     _sfBackground             (NULL),
-    _sfCamera                 (NULL)
+    _sfCamera                 (NULL),
+    _sfName                   (),
+    _sfImageType              (UInt32(0)),
+    _sfStoreImage             (bool(false))
 {
 }
 
@@ -1087,7 +1246,10 @@ CubeMapGeneratorBase::CubeMapGeneratorBase(const CubeMapGeneratorBase &source) :
     _sfTexUnit                (source._sfTexUnit                ),
     _sfSetupMode              (source._sfSetupMode              ),
     _sfBackground             (NULL),
-    _sfCamera                 (NULL)
+    _sfCamera                 (NULL),
+    _sfName                   (source._sfName                   ),
+    _sfImageType              (source._sfImageType              ),
+    _sfStoreImage             (source._sfStoreImage             )
 {
 }
 
@@ -1453,6 +1615,81 @@ EditFieldHandlePtr CubeMapGeneratorBase::editHandleCamera         (void)
                     static_cast<CubeMapGenerator *>(this), ::boost::placeholders::_1));
 
     editSField(CameraFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr CubeMapGeneratorBase::getHandleName            (void) const
+{
+    SFString::GetHandlePtr returnValue(
+        new  SFString::GetHandle(
+             &_sfName,
+             this->getType().getFieldDesc(NameFieldId),
+             const_cast<CubeMapGeneratorBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr CubeMapGeneratorBase::editHandleName           (void)
+{
+    SFString::EditHandlePtr returnValue(
+        new  SFString::EditHandle(
+             &_sfName,
+             this->getType().getFieldDesc(NameFieldId),
+             this));
+
+
+    editSField(NameFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr CubeMapGeneratorBase::getHandleImageType       (void) const
+{
+    SFUInt32::GetHandlePtr returnValue(
+        new  SFUInt32::GetHandle(
+             &_sfImageType,
+             this->getType().getFieldDesc(ImageTypeFieldId),
+             const_cast<CubeMapGeneratorBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr CubeMapGeneratorBase::editHandleImageType      (void)
+{
+    SFUInt32::EditHandlePtr returnValue(
+        new  SFUInt32::EditHandle(
+             &_sfImageType,
+             this->getType().getFieldDesc(ImageTypeFieldId),
+             this));
+
+
+    editSField(ImageTypeFieldMask);
+
+    return returnValue;
+}
+
+GetFieldHandlePtr CubeMapGeneratorBase::getHandleStoreImage      (void) const
+{
+    SFBool::GetHandlePtr returnValue(
+        new  SFBool::GetHandle(
+             &_sfStoreImage,
+             this->getType().getFieldDesc(StoreImageFieldId),
+             const_cast<CubeMapGeneratorBase *>(this)));
+
+    return returnValue;
+}
+
+EditFieldHandlePtr CubeMapGeneratorBase::editHandleStoreImage     (void)
+{
+    SFBool::EditHandlePtr returnValue(
+        new  SFBool::EditHandle(
+             &_sfStoreImage,
+             this->getType().getFieldDesc(StoreImageFieldId),
+             this));
+
+
+    editSField(StoreImageFieldMask);
 
     return returnValue;
 }

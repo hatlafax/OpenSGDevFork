@@ -3435,6 +3435,132 @@ bool Image::subImage(Int32  offX,
     return retCode;
 }
 
+/*! Crop a sub image of the given bounding box from this image at a specific
+  position into the destination image.
+
+    Int32  srcOffX      : the starting x-position of the sub image to copy from this image.
+    Int32  srcOffY      : the starting y-position of the sub image to copy from this image.
+    Int32  srcOffZ      : the starting z-position of the sub image to copy from this image.
+    Int32  srcRectW     : the width of the sub image to copy from this image.
+    Int32  srcRectH     : the height of the sub image to copy from this image.
+    Int32  srcRectD     : the depth of the sub image to copy from this image.
+    Int32  dstOffX      : the destination x-position of the sub image in the destination image.
+    Int32  dstOffY      : the destination y-position of the sub image in the destination image.
+    Int32  dstOffZ      : the destination z-position of the sub image in the destination image.
+    Int32  destW        : The width of the destination image.
+    Int32  destH        : The height of the destination image.
+    Int32  destD        : The depth of the destination image.
+    Image *destination  : The destination image. It is created and returned by this function.
+ */
+
+ImageTransitPtr Image::placeSubImage(
+    Int32  srcOffX,
+    Int32  srcOffY,
+    Int32  srcOffZ,
+    Int32  srcRectW,
+    Int32  srcRectH,
+    Int32  srcRectD,
+    Int32  dstOffX,
+    Int32  dstOffY,
+    Int32  dstOffZ,
+    Int32  destW,
+    Int32  destH,
+    Int32  destD,
+    Image* destination)
+{
+    ImageUnrecPtr destImage(destination);
+    bool          retCode   = true;
+
+    if (hasCompressedData())
+    {
+        FFATAL (("Invalid Image::placeSubImage for compressed image\n"));
+        return ImageTransitPtr(NULL);
+    }
+
+    if(destination == NULL)
+    {
+        destW = OSG::osgMax(destW, dstOffX + srcRectW);
+        destH = OSG::osgMax(destH, dstOffY + srcRectH);
+        destD = OSG::osgMax(destD, dstOffZ + srcRectD);
+
+        destImage = Image::create();
+
+        destImage->set(PixelFormat(getPixelFormat()),
+                       destW,
+                       destH,
+                       destD,
+                       1,
+                       1,
+                       0.0,
+                       0,
+                       getDataType());
+    }
+
+    if (getBpp() != destImage->getBpp())
+    {
+        FFATAL (("Invalid Image::placeSubImage for compressed image\n"));
+        return ImageTransitPtr(NULL);
+    }
+
+    const UChar8  *src =            getData ();
+          UChar8 *dest = destImage->editData();
+
+    if(destination == NULL)
+    {
+        // ensure destination data is zero
+        memset(dest, 0, destImage->getSize());
+    }
+
+    // determine the area to actually copy
+    UInt32 srcXMin = srcOffX, dstXMin = dstOffX;
+    UInt32 srcYMin = srcOffY, dstYMin = dstOffY;
+    UInt32 srcZMin = srcOffZ, dstZMin = dstOffZ;
+
+    Int32 srcWidth  = getWidth (), dstWidth  = destImage->getWidth ();
+    Int32 srcHeight = getHeight(), dstHeight = destImage->getHeight();
+    Int32 srcDepth  = getDepth (), dstDepth  = destImage->getDepth ();
+
+    Int32 bpp = getBpp();
+
+    UInt32 srcXMax = osgMin(srcWidth,  srcOffX + srcRectW), dstXMax = osgMin(dstWidth,  dstOffX + srcRectW);
+    UInt32 srcYMax = osgMin(srcHeight, srcOffY + srcRectH), dstYMax = osgMin(dstHeight, dstOffY + srcRectH);
+    UInt32 srcZMax = osgMin(srcDepth,  srcOffZ + srcRectD), dstZMax = osgMin(dstDepth,  dstOffZ + srcRectD);
+
+    FDEBUG(("Image::placeSubImage (%d %d %d) - (%d %d %d) - (%d %d %d) - (%d %d %d) - destPtr %p\n",
+            srcOffX, srcOffY, srcOffZ, srcRectW, srcRectH, srcRectD, dstOffX, dstOffY, dstOffZ, dstWidth, dstHeight, dstDepth, dest));
+
+    //
+    // fill the destination buffer with the subdata
+    //
+    for(UInt32 srcZ = srcZMin, dstZ = dstZMin; 
+        srcZ < srcZMax; // || dstZ < dstZMax; 
+        srcZ++, dstZ++)
+    {
+        for(UInt32 srcY = srcYMin, dstY = dstYMin; 
+            srcY < srcXMax; // || dstY < dstXMax; 
+            srcY++, dstY++)
+        {
+            for(UInt32 srcX = srcXMin, dstX = dstXMin; 
+                srcX < srcXMax; // || dstX < dstXMax; 
+                srcX++, dstX++)
+            {
+                for(Int32 i = 0; i < bpp; i++)
+                {
+                    UInt32 srcIdx = ((srcZ * srcHeight + srcY) * srcWidth + srcX) * bpp + i;
+                    UInt32 dstIdx = ((dstZ * dstHeight + dstY) * dstWidth + dstX) * bpp + i;
+
+                    dest[dstIdx] = src[srcIdx];
+
+                    srcIdx++;
+                    dstIdx++;
+                }
+            }
+        }
+    }
+
+    return ImageTransitPtr(destImage);
+}
+
 /*! Crop a slice.
   The method can operate on the object or stores the result in
   the optional destination Image.

@@ -122,4 +122,34 @@
 	 access="public"
 	 >
   </Field>
+  <Field
+	 name="name"
+	 type="std::string"
+	 cardinality="single"
+	 visibility="external"
+	 access="public"
+	 >
+	Image file path.
+  </Field>
+  <Field
+	 name="imageType"
+	 type="UInt32"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="0"
+	 access="public"
+	 >
+        The type of image to store: INDIVIDUAL, VERTICAL_CROSS_CUBE_MAP, HORIZONTAL_CROSS_CUBE_MAP, VERTICAL_STRIP_CUBE_MAP, HORIZONTAL_STRIP_CUBE_MAP
+  </Field>
+  <Field
+	 name="storeImage"
+	 type="bool"
+	 cardinality="single"
+	 visibility="external"
+	 defaultValue="false"
+	 access="public"
+	 >
+        Only if this flag is set to true, image saving happens. Nevertheless a request has to be stated expicitely by interface requestImage.
+  </Field>
+
 </FieldContainer>

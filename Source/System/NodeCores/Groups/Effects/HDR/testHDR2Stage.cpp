@@ -578,6 +578,30 @@ int doMain (int argc, char **argv)
                                512           );
     pCubeGen->setTexUnit      (3);
 
+    OSG::UInt32 type;
+    //type = OSG::CubeMapGenerator::INDIVIDUAL;
+    //type = OSG::CubeMapGenerator::VERTICAL_STRIP_CUBE_MAP;
+    //type = OSG::CubeMapGenerator::HORIZONTAL_STRIP_CUBE_MAP;
+    type = OSG::CubeMapGenerator::VERTICAL_CROSS_CUBE_MAP;
+    //type = OSG::CubeMapGenerator::HORIZONTAL_CROSS_CUBE_MAP;
+
+    std::string filename;
+
+    switch (type)
+    {
+        case OSG::CubeMapGenerator::INDIVIDUAL:                 filename = R"(d:\_xxx\test\tmp\individual.tiff)";            break;
+        case OSG::CubeMapGenerator::VERTICAL_STRIP_CUBE_MAP:    filename = R"(d:\_xxx\test\tmp\vertical_strip_cube.tiff)";   break;
+        case OSG::CubeMapGenerator::HORIZONTAL_STRIP_CUBE_MAP:  filename = R"(d:\_xxx\test\tmp\horizontal_strip_cube.tiff)"; break;
+        case OSG::CubeMapGenerator::VERTICAL_CROSS_CUBE_MAP:    filename = R"(d:\_xxx\test\tmp\vertical_cross_cube.tiff)";   break;
+        case OSG::CubeMapGenerator::HORIZONTAL_CROSS_CUBE_MAP:  filename = R"(d:\_xxx\test\tmp\horizontal_cross_cube.tiff)"; break;
+    }
+
+    pCubeGen->setName(filename);
+    pCubeGen->setStoreImage(true);
+    pCubeGen->setImageType(type);
+    
+    pCubeGen->setRequestImage();
+
     OSG::NodeUnrecPtr pAnimRoot = setupAnim();
 
             scene_trans = OSG::Transform::create();
@@ -614,7 +638,7 @@ int doMain (int argc, char **argv)
     OSG::SkyBackgroundUnrecPtr bkgnd = OSG::SkyBackground::create();
     {
         OSG::ImageUnrecPtr pBackImg = 
-            OSG::ImageFileHandler::the()->read("data/grace_cross.chdr");
+            OSG::ImageFileHandler::the()->read("data/Cubemaps/grace_cross.chdr");
 
         OSG::TextureObjChunkUnrecPtr pBackTex = OSG::TextureObjChunk::create();
 
@@ -630,6 +654,114 @@ int doMain (int argc, char **argv)
         bkgnd->setTopTexture   (pBackTex);
         bkgnd->setBottomTexture(pBackTex);
     }
+
+    //OSG::SkyBackgroundUnrecPtr bkgnd = OSG::SkyBackground::create();
+    //{
+    //    OSG::ImageUnrecPtr pBackImg   = OSG::ImageFileHandler::the()->read("data/Cubemaps/axis/-z.png");
+    //    OSG::ImageUnrecPtr pFrontImg  = OSG::ImageFileHandler::the()->read("data/Cubemaps/axis/+z.png");
+    //    OSG::ImageUnrecPtr pLeftImg   = OSG::ImageFileHandler::the()->read("data/Cubemaps/axis/-x.png");
+    //    OSG::ImageUnrecPtr pRightImg  = OSG::ImageFileHandler::the()->read("data/Cubemaps/axis/+x.png");
+    //    OSG::ImageUnrecPtr pTopImg    = OSG::ImageFileHandler::the()->read("data/Cubemaps/axis/+y.png");
+    //    OSG::ImageUnrecPtr pBottomImg = OSG::ImageFileHandler::the()->read("data/Cubemaps/axis/-y.png");
+
+    //    OSG::TextureObjChunkUnrecPtr pBackTex   = OSG::TextureObjChunk::create();
+    //    OSG::TextureObjChunkUnrecPtr pFrontTex  = OSG::TextureObjChunk::create();
+    //    OSG::TextureObjChunkUnrecPtr pLeftTex   = OSG::TextureObjChunk::create();
+    //    OSG::TextureObjChunkUnrecPtr pRightTex  = OSG::TextureObjChunk::create();
+    //    OSG::TextureObjChunkUnrecPtr pTopTex    = OSG::TextureObjChunk::create();
+    //    OSG::TextureObjChunkUnrecPtr pBottomTex = OSG::TextureObjChunk::create();
+
+    //    pBackTex->setImage         (pBackImg        );
+    //    pBackTex->setInternalFormat(GL_RGB32F_ARB   );
+    //    pBackTex->setWrapS         (GL_CLAMP_TO_EDGE);
+    //    pBackTex->setWrapT         (GL_CLAMP_TO_EDGE);
+
+    //    pFrontTex->setImage         (pFrontImg       );
+    //    pFrontTex->setInternalFormat(GL_RGB32F_ARB   );
+    //    pFrontTex->setWrapS         (GL_CLAMP_TO_EDGE);
+    //    pFrontTex->setWrapT         (GL_CLAMP_TO_EDGE);
+
+    //    pLeftTex->setImage         (pLeftImg        );
+    //    pLeftTex->setInternalFormat(GL_RGB32F_ARB   );
+    //    pLeftTex->setWrapS         (GL_CLAMP_TO_EDGE);
+    //    pLeftTex->setWrapT         (GL_CLAMP_TO_EDGE);
+
+    //    pRightTex->setImage         (pRightImg        );
+    //    pRightTex->setInternalFormat(GL_RGB32F_ARB   );
+    //    pRightTex->setWrapS         (GL_CLAMP_TO_EDGE);
+    //    pRightTex->setWrapT         (GL_CLAMP_TO_EDGE);
+
+    //    pTopTex->setImage         (pTopImg        );
+    //    pTopTex->setInternalFormat(GL_RGB32F_ARB   );
+    //    pTopTex->setWrapS         (GL_CLAMP_TO_EDGE);
+    //    pTopTex->setWrapT         (GL_CLAMP_TO_EDGE);
+
+    //    pBottomTex->setImage         (pBottomImg        );
+    //    pBottomTex->setInternalFormat(GL_RGB32F_ARB   );
+    //    pBottomTex->setWrapS         (GL_CLAMP_TO_EDGE);
+    //    pBottomTex->setWrapT         (GL_CLAMP_TO_EDGE);
+
+    //    bkgnd->setBackTexture  (pBackTex);
+    //    bkgnd->setFrontTexture (pFrontTex);
+    //    bkgnd->setLeftTexture  (pLeftTex);
+    //    bkgnd->setRightTexture (pRightTex);
+    //    bkgnd->setTopTexture   (pTopTex);
+    //    bkgnd->setBottomTexture(pBottomTex);
+    //}
+
+    //OSG::SkyBackgroundUnrecPtr bkgnd = OSG::SkyBackground::create();
+    //{
+    //    OSG::ImageUnrecPtr pBackImg   = OSG::ImageFileHandler::the()->read("data/Cubemaps/mountain/-z.jpg");
+    //    OSG::ImageUnrecPtr pFrontImg  = OSG::ImageFileHandler::the()->read("data/Cubemaps/mountain/+z.jpg");
+    //    OSG::ImageUnrecPtr pLeftImg   = OSG::ImageFileHandler::the()->read("data/Cubemaps/mountain/-x.jpg");
+    //    OSG::ImageUnrecPtr pRightImg  = OSG::ImageFileHandler::the()->read("data/Cubemaps/mountain/+x.jpg");
+    //    OSG::ImageUnrecPtr pTopImg    = OSG::ImageFileHandler::the()->read("data/Cubemaps/mountain/+y.jpg");
+    //    OSG::ImageUnrecPtr pBottomImg = OSG::ImageFileHandler::the()->read("data/Cubemaps/mountain/-y.jpg");
+
+    //    OSG::TextureObjChunkUnrecPtr pBackTex   = OSG::TextureObjChunk::create();
+    //    OSG::TextureObjChunkUnrecPtr pFrontTex  = OSG::TextureObjChunk::create();
+    //    OSG::TextureObjChunkUnrecPtr pLeftTex   = OSG::TextureObjChunk::create();
+    //    OSG::TextureObjChunkUnrecPtr pRightTex  = OSG::TextureObjChunk::create();
+    //    OSG::TextureObjChunkUnrecPtr pTopTex    = OSG::TextureObjChunk::create();
+    //    OSG::TextureObjChunkUnrecPtr pBottomTex = OSG::TextureObjChunk::create();
+
+    //    pBackTex->setImage          (pBackImg        );
+    //    pBackTex->setInternalFormat (GL_RGB32F_ARB   );
+    //    pBackTex->setWrapS          (GL_CLAMP_TO_EDGE);
+    //    pBackTex->setWrapT          (GL_CLAMP_TO_EDGE);
+
+    //    pFrontTex->setImage         (pFrontImg       );
+    //    pFrontTex->setInternalFormat(GL_RGB32F_ARB   );
+    //    pFrontTex->setWrapS         (GL_CLAMP_TO_EDGE);
+    //    pFrontTex->setWrapT         (GL_CLAMP_TO_EDGE);
+
+    //    pLeftTex->setImage          (pLeftImg        );
+    //    pLeftTex->setInternalFormat (GL_RGB32F_ARB   );
+    //    pLeftTex->setWrapS          (GL_CLAMP_TO_EDGE);
+    //    pLeftTex->setWrapT          (GL_CLAMP_TO_EDGE);
+
+    //    pRightTex->setImage          (pRightImg        );
+    //    pRightTex->setInternalFormat (GL_RGB32F_ARB   );
+    //    pRightTex->setWrapS          (GL_CLAMP_TO_EDGE);
+    //    pRightTex->setWrapT          (GL_CLAMP_TO_EDGE);
+
+    //    pTopTex->setImage            (pTopImg        );
+    //    pTopTex->setInternalFormat   (GL_RGB32F_ARB   );
+    //    pTopTex->setWrapS            (GL_CLAMP_TO_EDGE);
+    //    pTopTex->setWrapT            (GL_CLAMP_TO_EDGE);
+
+    //    pBottomTex->setImage         (pBottomImg        );
+    //    pBottomTex->setInternalFormat(GL_RGB32F_ARB   );
+    //    pBottomTex->setWrapS         (GL_CLAMP_TO_EDGE);
+    //    pBottomTex->setWrapT         (GL_CLAMP_TO_EDGE);
+
+    //    bkgnd->setBackTexture  (pBackTex  );
+    //    bkgnd->setFrontTexture (pFrontTex );
+    //    bkgnd->setLeftTexture  (pLeftTex  );
+    //    bkgnd->setRightTexture (pRightTex );
+    //    bkgnd->setTopTexture   (pTopTex   );
+    //    bkgnd->setBottomTexture(pBottomTex);
+    //}
 
     // Viewport
     vp = OSG::Viewport::create();

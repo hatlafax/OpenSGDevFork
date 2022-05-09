@@ -367,6 +367,24 @@ class OSG_SYSTEM_DLLMAPPING Image : public ImageBase
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
+    /*! \name                      SubImage                                */
+    /*! \{                                                                 */
+
+    ImageTransitPtr placeSubImage(Int32   srcOffX,
+                                  Int32   srcOffY,
+                                  Int32   srcOffZ,
+                                  Int32   srcRectW,
+                                  Int32   srcRectH,
+                                  Int32   srcRectD,
+                                  Int32   dstOffX,
+                                  Int32   dstOffY,
+                                  Int32   dstOffZ,
+                                  Int32   destW,
+                                  Int32   destH,
+                                  Int32   destD,
+                                  Image*  destination = NULL);
+    /*! \}                                                                 */
+    /*---------------------------------------------------------------------*/
     /*! \name                      Slice                                   */
     /*! \{                                                                 */
 

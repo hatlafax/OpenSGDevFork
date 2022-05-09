@@ -58,4 +58,10 @@ UInt16 CubeMapGenerator::getHeight(void)
     return _sfTextureSize.getValue()[1];
 }
 
+inline
+void CubeMapGenerator::setRequestImage()
+{
+    requestImage = true;
+}
+
 OSG_END_NAMESPACE

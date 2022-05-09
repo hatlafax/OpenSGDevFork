@@ -112,7 +112,10 @@ class OSG_GROUP_DLLMAPPING CubeMapGeneratorBase : public DynamicStateGenerator
         SetupModeFieldId = TexUnitFieldId + 1,
         BackgroundFieldId = SetupModeFieldId + 1,
         CameraFieldId = BackgroundFieldId + 1,
-        NextFieldId = CameraFieldId + 1
+        NameFieldId = CameraFieldId + 1,
+        ImageTypeFieldId = NameFieldId + 1,
+        StoreImageFieldId = ImageTypeFieldId + 1,
+        NextFieldId = StoreImageFieldId + 1
     };
 
     static const OSG::BitVector RootFieldMask =
@@ -139,6 +142,12 @@ class OSG_GROUP_DLLMAPPING CubeMapGeneratorBase : public DynamicStateGenerator
         (TypeTraits<BitVector>::One << BackgroundFieldId);
     static const OSG::BitVector CameraFieldMask =
         (TypeTraits<BitVector>::One << CameraFieldId);
+    static const OSG::BitVector NameFieldMask =
+        (TypeTraits<BitVector>::One << NameFieldId);
+    static const OSG::BitVector ImageTypeFieldMask =
+        (TypeTraits<BitVector>::One << ImageTypeFieldId);
+    static const OSG::BitVector StoreImageFieldMask =
+        (TypeTraits<BitVector>::One << StoreImageFieldId);
     static const OSG::BitVector NextFieldMask =
         (TypeTraits<BitVector>::One << NextFieldId);
         
@@ -154,6 +163,9 @@ class OSG_GROUP_DLLMAPPING CubeMapGeneratorBase : public DynamicStateGenerator
     typedef SFUInt32          SFSetupModeType;
     typedef SFUnrecBackgroundPtr SFBackgroundType;
     typedef SFUnrecCameraPtr  SFCameraType;
+    typedef SFString          SFNameType;
+    typedef SFUInt32          SFImageTypeType;
+    typedef SFBool            SFStoreImageType;
 
     /*---------------------------------------------------------------------*/
     /*! \name                    Class Get                                 */
@@ -209,6 +221,15 @@ class OSG_GROUP_DLLMAPPING CubeMapGeneratorBase : public DynamicStateGenerator
             const SFUnrecCameraPtr    *getSFCamera         (void) const;
                   SFUnrecCameraPtr    *editSFCamera         (void);
 
+                  SFString            *editSFName           (void);
+            const SFString            *getSFName            (void) const;
+
+                  SFUInt32            *editSFImageType      (void);
+            const SFUInt32            *getSFImageType       (void) const;
+
+                  SFBool              *editSFStoreImage     (void);
+            const SFBool              *getSFStoreImage      (void) const;
+
 
                   Node * getRoot           (void) const;
 
@@ -240,6 +261,15 @@ class OSG_GROUP_DLLMAPPING CubeMapGeneratorBase : public DynamicStateGenerator
 
                   Camera * getCamera         (void) const;
 
+                  std::string         &editName           (void);
+            const std::string         &getName            (void) const;
+
+                  UInt32              &editImageType      (void);
+                  UInt32               getImageType       (void) const;
+
+                  bool                &editStoreImage     (void);
+                  bool                 getStoreImage      (void) const;
+
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
     /*! \name                    Field Set                                 */
@@ -256,6 +286,9 @@ class OSG_GROUP_DLLMAPPING CubeMapGeneratorBase : public DynamicStateGenerator
             void setSetupMode      (const UInt32 value);
             void setBackground     (Background * const value);
             void setCamera         (Camera * const value);
+            void setName           (const std::string &value);
+            void setImageType      (const UInt32 value);
+            void setStoreImage     (const bool value);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -338,6 +371,9 @@ class OSG_GROUP_DLLMAPPING CubeMapGeneratorBase : public DynamicStateGenerator
     SFUInt32          _sfSetupMode;
     SFUnrecBackgroundPtr _sfBackground;
     SFUnrecCameraPtr  _sfCamera;
+    SFString          _sfName;
+    SFUInt32          _sfImageType;
+    SFBool            _sfStoreImage;
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
@@ -390,6 +426,12 @@ class OSG_GROUP_DLLMAPPING CubeMapGeneratorBase : public DynamicStateGenerator
      EditFieldHandlePtr editHandleBackground     (void);
      GetFieldHandlePtr  getHandleCamera          (void) const;
      EditFieldHandlePtr editHandleCamera         (void);
+     GetFieldHandlePtr  getHandleName            (void) const;
+     EditFieldHandlePtr editHandleName           (void);
+     GetFieldHandlePtr  getHandleImageType       (void) const;
+     EditFieldHandlePtr editHandleImageType      (void);
+     GetFieldHandlePtr  getHandleStoreImage      (void) const;
+     EditFieldHandlePtr editHandleStoreImage     (void);
 
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
