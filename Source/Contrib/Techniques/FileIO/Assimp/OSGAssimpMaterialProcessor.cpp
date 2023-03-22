@@ -87,6 +87,7 @@ AssimpMaterialProcessor::AssimpMaterialProcessor(
 , _options(options)
 , _importer(importer)
 , _hasORMTexture(false)
+, _mapCheckTextures()
 {
     HashKeyToFieldContainerMapUnrecPtr imageMap = HashKeyToFieldContainerMap::createLocal();
     _sfImageMap.setValue(imageMap);
@@ -546,10 +547,21 @@ bool AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
     //types.push_back(aiTextureType_CLEARCOAT);
     //types.push_back(aiTextureType_TRANSMISSION);
 
+    //
+    // temporary map that tracks already loaded textureDesc
+    // in order to avoid double texture entries.
+    //
+    _mapCheckTextures.clear();
+
     for (std::size_t i = 0; i < types.size(); ++i)
     {
         process(scene, mat, types[i], matDesc);
     }
+
+    //
+    // not used anymore
+    // 
+    _mapCheckTextures.clear();
 
     //
     // Postprocess:
@@ -769,9 +781,6 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
 
     std::set<std::string> loaded_textures;
 
-    typedef std::multimap<std::string, TextureDesc*> MapTexturesT;
-    MapTexturesT mapTextures;
-
     for(unsigned int index = 0; index < cnt; index++)
     {
         aiString path;
@@ -795,7 +804,7 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
             std::string texName = path.C_Str();
 
             std::pair<MapTexturesT::iterator,
-                MapTexturesT::iterator> rng = mapTextures.equal_range(texName);
+                MapTexturesT::iterator> rng = _mapCheckTextures.equal_range(texName);
 
             bool found = false;
 
@@ -961,7 +970,7 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
             texDesc->setWrapR        (wrapR        );
             texDesc->setMapAxis      (mapAxis      );
 
-            mapTextures.insert(MapTexturesT::value_type(texName, texDesc));
+            _mapCheckTextures.insert(MapTexturesT::value_type(texName, texDesc));
             matDesc->addTexture(texDesc);
 
 #if 0
@@ -1027,7 +1036,9 @@ void AssimpMaterialProcessor::process(const aiScene* scene, const aiMaterial* ma
             {
                 bool ignore_alpha = true;
 
-                if ((type == aiTextureType_DIFFUSE || type == aiTextureType_SPECULAR) && texDesc->getTexImage())
+                if (    (type == aiTextureType_DIFFUSE 
+                      || type == aiTextureType_SPECULAR
+                      || type == aiTextureType_BASE_COLOR) && texDesc->getTexImage())
                 {
                     if (texDesc->getTexImage()->hasAlphaChannel())
                     {
@@ -1068,7 +1079,7 @@ ImageTransitPtr AssimpMaterialProcessor::process(const aiTexture* texture)
         {
             std::string tmpFile = "OpenSGTempImageFile";
             tmpFile = tmpFile + "." + hint;
-
+            
             std::ofstream file(tmpFile.c_str(), std::ios::binary);
             file.write(reinterpret_cast<const char*>(texture->pcData), texture->mWidth);
             file.close();

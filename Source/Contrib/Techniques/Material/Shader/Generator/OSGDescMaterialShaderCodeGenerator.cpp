@@ -2246,6 +2246,10 @@ void DescMaterialShaderCodeGenerator::getMainFuncProgram(
     else
     {
         ost
+//#define OPACITY_SRGB_INTERPRETATION
+#ifdef OPACITY_SRGB_INTERPRETATION
+                << endl << "  material.opacity = OSGSRGBToLinear(material.opacity);"
+#endif
                 << endl << "    vFragColor = vec4(color, material.opacity);"
                 << endl << "}"
                 << endl << ""

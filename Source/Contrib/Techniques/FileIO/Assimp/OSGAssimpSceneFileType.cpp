@@ -471,13 +471,15 @@ NodeTransitPtr AssimpSceneFileType::read(
 #endif
 
         UInt32 flags = options.getPostProcessingFlags();
-        
+
         float globalScaleFactor = options.getGlobalScaleOnImport();
         if (globalScaleFactor != 1.f)
         {
             importer.SetPropertyFloat(AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, globalScaleFactor);
             flags |= AssimpOptions::GlobalScale;
         }
+
+        importer.SetPropertyBool(AI_CONFIG_PP_FID_IGNORE_TEXTURECOORDS, true);
 
         const aiScene* scene = importer.ReadFile(utf8_file, flags);
 
@@ -1694,6 +1696,12 @@ void AssimpSceneFileType::prepareNonTexMaterialParamsGLTF2(SceneWriteData& data,
             params.ai_sub_surface[i] = SRGBToLinear(params.ai_sub_surface[i]);
             params.ai_sheen_color[i] = SRGBToLinear(params.ai_sheen_color[i]);
         }
+
+        //
+        // Opacity is handled by the baseColorFactor's fourth component that is
+        // transpored by the params.ai_diffuse value.
+        //
+        params.ai_opacity = 1.0;
     }
 }
 
@@ -2202,7 +2210,9 @@ void AssimpSceneFileType::handleDescMaterial(SceneWriteData& data, const DescMat
     Color3f subSurface  = matDesc->getSubSurfaceColor (); if (linear) for (int i = 0; i < 3; ++i) subSurface [i] = LinearToSRGB(subSurface [i]);
     Color3f sheenColor  = matDesc->getSheenColor      (); if (linear) for (int i = 0; i < 3; ++i) sheenColor [i] = LinearToSRGB(sheenColor [i]);
 
-    params.ai_diffuse     = aiColor4D(albedo     [0], albedo     [1], albedo     [2], matDesc->getOpacity());
+    Real32 opacity = matDesc->getOpacity();
+
+    params.ai_diffuse     = aiColor4D(albedo     [0], albedo     [1], albedo     [2], opacity);
     params.ai_specular    = aiColor3D(specular   [0], specular   [1], specular   [2]);
     params.ai_emissive    = aiColor3D(emissive   [0], emissive   [1], emissive   [2]);
     params.ai_ambient     = aiColor3D(ambient    [0], ambient    [1], ambient    [2]);
@@ -2221,7 +2231,7 @@ void AssimpSceneFileType::handleDescMaterial(SceneWriteData& data, const DescMat
         case MaterialDesc::ADDITIVE_BLEND_MODE: params.ai_blend_func = aiBlendMode_Additive; break;
     }
 
-    params.ai_opacity             = matDesc->getOpacity();
+    params.ai_opacity             = opacity;
     params.ai_bump_scale          = matDesc->getBumpScaling();
     params.ai_shininess           = matDesc->getShininess();
     params.ai_shininess_strength  = matDesc->getSpecularStrength();

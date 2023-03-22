@@ -55,6 +55,8 @@
 
 #include <boost/bind/bind.hpp>
 
+//#define OSG_LOG_INTERSECTION_FLOW
+
 OSG_USING_NAMESPACE
 
 
@@ -216,6 +218,12 @@ void IntersectAction::setResetStatistics(bool value)
 /** \brief Constructor
  */
 
+#ifdef OSG_LOG_INTERSECTION_FLOW
+static int counter_enter = 0;
+static int counter_leave = 0;
+static int counter_ = 0;
+#endif
+
 IntersectAction::IntersectAction(void) :
      Inherited      (     ),
     _line           (     ),
@@ -277,6 +285,10 @@ IntersectAction::ObjTransitPtr IntersectAction::create(void)
 {
     ObjTransitPtr act(NULL);
     
+#ifdef OSG_LOG_INTERSECTION_FLOW
+    SLOG << std::endl << "IntersectAction::create" << std::endl;
+#endif
+
     if(_prototype)
     {
         act = new IntersectAction(*_prototype);
@@ -365,7 +377,23 @@ void IntersectAction::setHit(      Real32  t,
                                    Int32   lineIndex)
 {
     if(t < 0 || t > _hitT || t > _maxdist)
+    {
+#ifdef OSG_LOG_INTERSECTION_FLOW
+        SLOG << "IntersectAction::setHit reject" 
+        << " t = " << t 
+        << " _hitT = " << _hitT
+        << std::endl;
+#endif
         return;
+    } 
+
+#ifdef OSG_LOG_INTERSECTION_FLOW
+    SLOG << "IntersectAction::setHit accept" 
+        << " t = " << t 
+        << " _hitT_curr = " << _hitT
+        << " _hitT_new  = " << t
+        << std::endl;
+#endif
 
     _hitT        = t;
     _hitObject   = obj;
@@ -378,6 +406,14 @@ void IntersectAction::setHit(      Real32  t,
 
 void IntersectAction::scale(Real32 s)
 {
+#ifdef OSG_LOG_INTERSECTION_FLOW
+    SLOG << "IntersectAction::scale" 
+        << " s = " << s
+        << " _hitT_old = " << _hitT
+        << " _hitT_new <- _hitT*s = " << _hitT*s
+        << std::endl;
+#endif
+
     _hitT    *= s;
     _maxdist *= s;
 }
@@ -394,6 +430,18 @@ Action::ResultE IntersectAction::start(void)
     _hit         = false;
     _hitPath.clear();
     _path.clear();
+
+#ifdef OSG_LOG_INTERSECTION_FLOW
+    SLOG << "IntersectAction::start _path.clear()"
+         << " counter_enter = " << counter_enter
+         << " counter_leave = " << counter_leave
+         << " counter_ = " << counter_
+         <<  std::endl;
+
+    counter_enter = 0;
+    counter_leave = 0;
+    counter_ = 0;
+#endif
 
     // reserve some memory for a scene depth of 20
     // TODO: is this a sensible number?
@@ -474,6 +522,19 @@ Action::ResultE IntersectAction::onEnterNode(Node* node, Action* action)
 
     ResultE result = Continue;
 
+#ifdef OSG_LOG_INTERSECTION_FLOW
+    counter_enter++;
+    counter_++;
+
+    SLOG << "IntersectAction::onEnterNode " 
+         << " node = " << node 
+         << " core = " << node->getCore() << ", "
+         << node->getCore()->getType().getName()
+         << " counter_enter = " << counter_enter
+         << " counter_ = " << counter_
+         << std::endl;
+#endif
+
     _path.push_back(node);
 
     _statistics->getElem(statNNodes)->inc();
@@ -494,6 +555,19 @@ Action::ResultE IntersectAction::onLeaveNode(Node* node, Action* action)
     OSG_ASSERT(this == action && node == _actNode);
 
     ResultE result = Continue;
+
+#ifdef OSG_LOG_INTERSECTION_FLOW
+    counter_leave++;
+    counter_--;
+
+    SLOG << "IntersectAction::onLeaveNode " 
+         << " node = " << node 
+         << " core = " << node->getCore() << ", "
+         << node->getCore()->getType().getName()
+         << " counter_leave = " << counter_leave
+         << " counter_ = " << counter_
+         << std::endl;
+#endif
 
     _path.pop_back();
 

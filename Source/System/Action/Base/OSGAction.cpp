@@ -337,7 +337,10 @@ Action::ResultE Action::recurse(Node * const node)
     if(result != Continue)
     {
         if(result == Skip)
-            return Continue;
+            result = Continue;
+
+        if(_nodeLeaveCB != NULL)
+            _nodeLeaveCB(node, this);
 
         return result;
     }
@@ -350,7 +353,10 @@ Action::ResultE Action::recurse(Node * const node)
     if(result != Continue)
     {
         if(result == Skip)
-            return Continue;
+            result = Continue;
+
+        if(_nodeLeaveCB != NULL)
+            _nodeLeaveCB(node, this);
 
         return result;
     }
@@ -394,7 +400,7 @@ Action::ResultE Action::recurse(Node * const node)
         _nodeLeaveCB(node, this);
 
     if(result == Skip)
-        return Continue;
+        result = Continue;
 
     return result;
 }
