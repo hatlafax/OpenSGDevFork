@@ -717,10 +717,12 @@ OSG_SYSTEM_DLLMAPPING std::string getSRGBConversionDeclSnippet()
 
     stringstream ost;
 
-    ost     << "vec3 OSGSRGBToLinear(in vec3 v);"
-    << endl << "vec4 OSGSRGBToLinear(in vec4 v);"
-    << endl << "vec3 OSGLinearToSRGB(in vec3 v);"
-    << endl << "vec4 OSGLinearToSRGB(in vec4 v);"
+    ost     << "float OSGSRGBToLinear(in float v);"
+    << endl << "vec3  OSGSRGBToLinear(in vec3  v);"
+    << endl << "vec4  OSGSRGBToLinear(in vec4  v);"
+    << endl << "float OSGLinearToSRGB(in float v);"
+    << endl << "vec3  OSGLinearToSRGB(in vec3  v);"
+    << endl << "vec4  OSGLinearToSRGB(in vec4  v);"
     ;
 
     return ost.str();
@@ -734,7 +736,12 @@ OSG_SYSTEM_DLLMAPPING std::string getSRGBConversionSnippet(bool sRGBApprox)
 
     if (sRGBApprox)
     {
-        ost     << "vec3 OSGSRGBToLinear(in vec3 v)"
+        ost     << "float OSGSRGBToLinear(in float v)"
+        << endl << "{"
+        << endl << "    return pow(v, 2.2);"
+        << endl << "}"
+        << endl << ""
+        << endl << "vec3 OSGSRGBToLinear(in vec3 v)"
         << endl << "{"
         << endl << "    return pow(v, vec3(2.2));"
         << endl << "}"
@@ -742,6 +749,11 @@ OSG_SYSTEM_DLLMAPPING std::string getSRGBConversionSnippet(bool sRGBApprox)
         << endl << "vec4 OSGSRGBToLinear(in vec4 v)"
         << endl << "{"
         << endl << "    return vec4(OSGSRGBToLinear(v.rgb), v.a);"
+        << endl << "}"
+        << endl << ""
+        << endl << "float OSGLinearToSRGB(in float v)"
+        << endl << "{"
+        << endl << "    return pow(v, 1.0/2.2);"
         << endl << "}"
         << endl << ""
         << endl << "vec3 OSGLinearToSRGB(in vec3 v)"
@@ -757,7 +769,13 @@ OSG_SYSTEM_DLLMAPPING std::string getSRGBConversionSnippet(bool sRGBApprox)
     }
     else
     {
-        ost     << "vec3 OSGSRGBToLinear(in vec3 v)"
+        ost     << "float OSGSRGBToLinear(in float v)"
+        << endl << "{"
+        << endl << "    float t = step(0.04045, v);"
+        << endl << "    return mix(v / 12.92, pow((v + 0.055)/1.055, 2.4), t);"
+        << endl << "}"
+        << endl << ""
+        << endl << "vec3 OSGSRGBToLinear(in vec3 v)"
         << endl << "{"
         << endl << "    vec3 t = step(vec3(0.04045), v.rgb);"
         << endl << "    return mix(v.rgb / 12.92, pow((v.rgb + vec3(0.055))/1.055, vec3(2.4)), t);"
@@ -768,9 +786,15 @@ OSG_SYSTEM_DLLMAPPING std::string getSRGBConversionSnippet(bool sRGBApprox)
         << endl << "    return vec4(OSGSRGBToLinear(v.rgb), v.a);"
         << endl << "}"
         << endl << ""
+        << endl << "float OSGLinearToSRGB(in float v)"
+        << endl << "{"
+        << endl << "    float t = step(0.00313067, v);"
+        << endl << "    return mix(v * 12.92, 1.055 * pow(v, 1.0/2.4) - 0.055, t);"
+        << endl << "}"
+        << endl << ""
         << endl << "vec3 OSGLinearToSRGB(in vec3 v)"
         << endl << "{"
-        << endl << "    vec3 t = step(vec3(0.00313067),v.rgb);"
+        << endl << "    vec3 t = step(vec3(0.00313067), v.rgb);"
         << endl << "    return mix(v.rgb * 12.92, 1.055 * pow(v.rgb, vec3(1.0/2.4)) - 0.055, t);"
         << endl << "}"
         << endl << ""

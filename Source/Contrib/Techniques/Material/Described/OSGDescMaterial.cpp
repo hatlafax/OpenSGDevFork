@@ -255,6 +255,7 @@ void DescMaterial::DescriptionInfo::initTextureDescs(CapabilitiesDesc* capabilit
     TextureCountStore texturCounts(TextureDesc::MAX_NUM_TEXTURE_TYPES, 0);
 
     const MFUnrecTextureDescPtr* pMFTexDescPtr = matDesc->getMFTextureDesc();
+
     if (pMFTexDescPtr != NULL)
     {
         MFUnrecTextureDescPtr::const_iterator iter, end;
@@ -1438,31 +1439,46 @@ void DescMaterial::rebuildState(void)
             case MaterialDesc::DEFAULT_BLEND_MODE:
                 if (transparent)
                 {
-                    _blendChunk->setSrcFactor (GL_SRC_ALPHA);
-                    _blendChunk->setDestFactor(GL_ONE_MINUS_SRC_ALPHA);
+                    _blendChunk->setSrcFactor      (GL_SRC_ALPHA);
+                    _blendChunk->setDestFactor     (GL_ONE_MINUS_SRC_ALPHA);
+                    //_blendChunk->setAlphaSrcFactor (GL_ONE);
+                    //_blendChunk->setAlphaDestFactor(GL_ONE_MINUS_SRC_ALPHA);
+                    //_blendChunk->setEquation       (GL_FUNC_ADD);
                     doBlend = true;
                 }
                 break;
             case MaterialDesc::ADDITIVE_BLEND_MODE:
-                _blendChunk->setSrcFactor (GL_ONE);
-                _blendChunk->setDestFactor(GL_ONE);
+                _blendChunk->setSrcFactor       (GL_ONE);
+                _blendChunk->setDestFactor      (GL_ONE);
+                //_blendChunk->setAlphaSrcFactor  (OSG_GL_UNUSED);
+                //_blendChunk->setAlphaDestFactor (OSG_GL_UNUSED);
+                //_blendChunk->setEquation        (GL_FUNC_ADD);
                 doBlend = true;
                 break;
             case MaterialDesc::MULTIPLICATIVE_BLEND_MODE:
-                _blendChunk->setSrcFactor (GL_DST_COLOR);
-                _blendChunk->setDestFactor(GL_ZERO);
+                _blendChunk->setSrcFactor       (GL_DST_COLOR);
+                _blendChunk->setDestFactor      (GL_ZERO);
+                //_blendChunk->setAlphaSrcFactor  (OSG_GL_UNUSED);
+                //_blendChunk->setAlphaDestFactor (OSG_GL_UNUSED);
+                //_blendChunk->setEquation        (GL_FUNC_ADD);
                 doBlend = true;
                 break;
             case MaterialDesc::INTERPOLATION_BLEND_MODE:
-                _blendChunk->setSrcFactor (GL_SRC_ALPHA);
-                _blendChunk->setDestFactor(GL_ONE_MINUS_SRC_ALPHA);
+                _blendChunk->setSrcFactor       (GL_SRC_ALPHA);
+                _blendChunk->setDestFactor      (GL_ONE_MINUS_SRC_ALPHA);
+                //_blendChunk->setAlphaSrcFactor  (OSG_GL_UNUSED);
+                //_blendChunk->setAlphaDestFactor (OSG_GL_UNUSED);
+                //_blendChunk->setEquation        (GL_FUNC_ADD);
                 doBlend = true;
                 break;
             default:
                 if (transparent)
                 {
-                    _blendChunk->setSrcFactor (GL_SRC_ALPHA);
-                    _blendChunk->setDestFactor(GL_ONE_MINUS_SRC_ALPHA);
+                    _blendChunk->setSrcFactor      (GL_SRC_ALPHA);
+                    _blendChunk->setDestFactor     (GL_ONE_MINUS_SRC_ALPHA);
+                    //_blendChunk->setAlphaSrcFactor (GL_ONE);
+                    //_blendChunk->setAlphaDestFactor(GL_ONE_MINUS_SRC_ALPHA);
+                    //_blendChunk->setEquation       (GL_FUNC_ADD);
                     doBlend = true;
                 }
 
@@ -5176,6 +5192,11 @@ void DescMaterial::getFragmentProgramTextureEvaluation(std::stringstream& ost) c
         << endl << ""
         << endl << "    if (isSRGB)"
         << endl << "        Cs = OSGSRGBToLinear(Cs);"
+        //<< endl << "    Cs = OSGSRGBToLinear(Cs);"
+        //
+        // Bru: Hack, only temporarily until a correct solution is found!
+        //
+        << endl << "    Cs.a = OSGSRGBToLinear(Cs.a);"
         << endl << ""
         ;
         if (isFallbackShader2() && !hasBitOpsSupport())

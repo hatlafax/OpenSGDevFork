@@ -761,6 +761,9 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpOptions
     bool                getForceTwosided         (void                    ) const;
     void                setForceTwosided         (bool               value);
 
+    bool                getForceOpacityCorrection(void                    ) const;
+    void                setForceOpacityCorrection(bool               value);
+
     bool                getForceTexCoord0        (void                    ) const;
     void                setForceTexCoord0        (bool               value);
 
@@ -809,6 +812,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpOptions
     bool        _invertHeight;
     bool        _invertDisplacement;
     bool        _forceTwosided;
+    bool        _forceOpacityCorrection;
     bool        _transformZToYOnExport;
     bool        _transformYToZOnImport;
     bool        _forceTexCoord0;

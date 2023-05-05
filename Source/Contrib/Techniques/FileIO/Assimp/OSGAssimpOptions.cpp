@@ -75,6 +75,7 @@ AssimpOptions::AssimpOptions(void)
 , _invertHeight          (false)
 , _invertDisplacement    (true)
 , _forceTwosided         (false)
+, _forceOpacityCorrection(true)
 , _forceTexCoord0        (false)
 , _transformUVCoords     (false)
 , _writeMtyOnObjExport   (false)
@@ -99,6 +100,7 @@ AssimpOptions::AssimpOptions(const OptionSet &optSet)
 , _invertHeight          (false)
 , _invertDisplacement    (true)
 , _forceTwosided         (false)
+, _forceOpacityCorrection(true)
 , _forceTexCoord0        (false)
 , _transformUVCoords     (false)
 , _writeMtyOnObjExport   (false)
@@ -148,6 +150,9 @@ void AssimpOptions::parseOptions(const OptionSet &optSet)
 
     IOFileTypeBase::getOptionAs<bool>(
         optSet, "forceTwosided", _forceTwosided);
+
+    IOFileTypeBase::getOptionAs<bool>(
+        optSet, "forceOpacityCorrection", _forceOpacityCorrection);
 
     IOFileTypeBase::getOptionAs<bool>(
         optSet, "transformZToYOnExport", _transformZToYOnExport);
@@ -279,6 +284,16 @@ bool AssimpOptions::getForceTwosided(void) const
 void AssimpOptions::setForceTwosided(bool value)
 {
     _forceTwosided = value;
+}
+
+bool AssimpOptions::getForceOpacityCorrection(void) const
+{
+    return _forceOpacityCorrection;
+}
+
+void AssimpOptions::setForceOpacityCorrection(bool value)
+{
+    _forceOpacityCorrection = value;
 }
 
 bool AssimpOptions::getForceTexCoord0(void) const

@@ -479,6 +479,8 @@ NodeTransitPtr AssimpSceneFileType::read(
             flags |= AssimpOptions::GlobalScale;
         }
 
+        importer.SetPropertyBool(AI_CONFIG_PP_FID_IGNORE_TEXTURECOORDS, true);
+
         const aiScene* scene = importer.ReadFile(utf8_file, flags);
 
         if (!scene)
@@ -1694,6 +1696,12 @@ void AssimpSceneFileType::prepareNonTexMaterialParamsGLTF2(SceneWriteData& data,
             params.ai_sub_surface[i] = SRGBToLinear(params.ai_sub_surface[i]);
             params.ai_sheen_color[i] = SRGBToLinear(params.ai_sheen_color[i]);
         }
+
+        //
+        // Opacity is handled by the baseColorFactor's fourth component that is
+        // transpored by the params.ai_diffuse value.
+        //
+        params.ai_opacity = 1.0;
     }
 }
 
@@ -2202,7 +2210,9 @@ void AssimpSceneFileType::handleDescMaterial(SceneWriteData& data, const DescMat
     Color3f subSurface  = matDesc->getSubSurfaceColor (); if (linear) for (int i = 0; i < 3; ++i) subSurface [i] = LinearToSRGB(subSurface [i]);
     Color3f sheenColor  = matDesc->getSheenColor      (); if (linear) for (int i = 0; i < 3; ++i) sheenColor [i] = LinearToSRGB(sheenColor [i]);
 
-    params.ai_diffuse     = aiColor4D(albedo     [0], albedo     [1], albedo     [2], matDesc->getOpacity());
+    Real32 opacity = matDesc->getOpacity();
+
+    params.ai_diffuse     = aiColor4D(albedo     [0], albedo     [1], albedo     [2], opacity);
     params.ai_specular    = aiColor3D(specular   [0], specular   [1], specular   [2]);
     params.ai_emissive    = aiColor3D(emissive   [0], emissive   [1], emissive   [2]);
     params.ai_ambient     = aiColor3D(ambient    [0], ambient    [1], ambient    [2]);
@@ -2221,7 +2231,7 @@ void AssimpSceneFileType::handleDescMaterial(SceneWriteData& data, const DescMat
         case MaterialDesc::ADDITIVE_BLEND_MODE: params.ai_blend_func = aiBlendMode_Additive; break;
     }
 
-    params.ai_opacity             = matDesc->getOpacity();
+    params.ai_opacity             = opacity;
     params.ai_bump_scale          = matDesc->getBumpScaling();
     params.ai_shininess           = matDesc->getShininess();
     params.ai_shininess_strength  = matDesc->getSpecularStrength();
@@ -2241,7 +2251,7 @@ void AssimpSceneFileType::handleDescMaterial(SceneWriteData& data, const DescMat
         case GL_BACK: params.ai_twosided = false; break;
     }
 
-    if (data.options.getForceTwosided() || osgAbs(1.f - matDesc->getOpacity()) > Eps)
+    if (data.options.getForceTwosided() || osgAbs(1.f - opacity) > Eps)
     {
         params.ai_twosided = true;
     }
@@ -2253,12 +2263,20 @@ void AssimpSceneFileType::handleDescMaterial(SceneWriteData& data, const DescMat
     {
         case MaterialDesc::NO_OPACITY_MODE:
         case MaterialDesc::OPAQUE_OPACITY_MODE:
-            params.ai_alpha_mode.Set("OPAQUE");
+            if (data.options.getForceOpacityCorrection() && osgAbs(1.f - opacity) > Eps)
+            {
+                params.ai_alpha_mode_enum = MaterialDesc::BLEND_OPACITY_MODE;
+                params.ai_alpha_mode.Set("BLEND");
+            }
+            else
+            {
+                params.ai_alpha_mode.Set("OPAQUE");
+            }
             break;
         case MaterialDesc::MASK_OPACITY_MODE:
             params.ai_alpha_mode.Set("MASK");
             break;
-        case MaterialDesc::BLEND_OPACITY_MODE :
+        case MaterialDesc::BLEND_OPACITY_MODE:
             params.ai_alpha_mode.Set("BLEND");
             break;
     }

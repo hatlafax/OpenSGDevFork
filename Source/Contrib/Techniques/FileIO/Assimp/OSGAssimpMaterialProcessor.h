@@ -66,6 +66,7 @@ enum aiTextureType;
 OSG_BEGIN_NAMESPACE
 
 class MaterialDesc;
+class TextureDesc;
 
 class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpMaterialProcessor
 {
@@ -162,6 +163,8 @@ private:
     typedef std::map<MaterialIndex, MeshInfo> MeshInfoMap;
     typedef SFUnrecHashKeyToFieldContainerMapPtr SFImageMapType;
 
+    typedef std::multimap<std::string, TextureDesc*> MapTexturesT;
+
     /*! \}                                                                 */
     /*---------------------------------------------------------------------*/
 
@@ -175,6 +178,7 @@ private:
     AssimpOptions   _options;
     std::string     _importer;
     bool            _hasORMTexture;
+    MapTexturesT    _mapCheckTextures;
 };
 
 OSG_END_NAMESPACE
