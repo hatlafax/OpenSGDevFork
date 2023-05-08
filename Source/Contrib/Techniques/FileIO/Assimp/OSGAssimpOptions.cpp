@@ -76,6 +76,7 @@ AssimpOptions::AssimpOptions(void)
 , _invertDisplacement    (true)
 , _forceTwosided         (false)
 , _forceOpacityCorrection(true)
+, _noSpecGlossGLTFExport (false)
 , _forceTexCoord0        (false)
 , _transformUVCoords     (false)
 , _writeMtyOnObjExport   (false)
@@ -101,6 +102,7 @@ AssimpOptions::AssimpOptions(const OptionSet &optSet)
 , _invertDisplacement    (true)
 , _forceTwosided         (false)
 , _forceOpacityCorrection(true)
+, _noSpecGlossGLTFExport (false)
 , _forceTexCoord0        (false)
 , _transformUVCoords     (false)
 , _writeMtyOnObjExport   (false)
@@ -153,6 +155,9 @@ void AssimpOptions::parseOptions(const OptionSet &optSet)
 
     IOFileTypeBase::getOptionAs<bool>(
         optSet, "forceOpacityCorrection", _forceOpacityCorrection);
+
+    IOFileTypeBase::getOptionAs<bool>(
+        optSet, "noSpecGlossGLTFExport", _noSpecGlossGLTFExport);
 
     IOFileTypeBase::getOptionAs<bool>(
         optSet, "transformZToYOnExport", _transformZToYOnExport);
@@ -294,6 +299,16 @@ bool AssimpOptions::getForceOpacityCorrection(void) const
 void AssimpOptions::setForceOpacityCorrection(bool value)
 {
     _forceOpacityCorrection = value;
+}
+
+bool AssimpOptions::getNoSpecGlossGLTFExport(void) const
+{
+    return _noSpecGlossGLTFExport;
+}
+
+void AssimpOptions::setNoSpecGlossGLTFExport(bool value)
+{
+    _noSpecGlossGLTFExport = value;
 }
 
 bool AssimpOptions::getForceTexCoord0(void) const

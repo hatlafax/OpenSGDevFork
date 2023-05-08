@@ -764,6 +764,9 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpOptions
     bool                getForceOpacityCorrection(void                    ) const;
     void                setForceOpacityCorrection(bool               value);
 
+    bool                getNoSpecGlossGLTFExport (void                    ) const;
+    void                setNoSpecGlossGLTFExport (bool               value);
+
     bool                getForceTexCoord0        (void                    ) const;
     void                setForceTexCoord0        (bool               value);
 
@@ -813,6 +816,7 @@ class OSG_CONTRIBTECHNIQUES_DLLMAPPING AssimpOptions
     bool        _invertDisplacement;
     bool        _forceTwosided;
     bool        _forceOpacityCorrection;
+    bool        _noSpecGlossGLTFExport;
     bool        _transformZToYOnExport;
     bool        _transformYToZOnImport;
     bool        _forceTexCoord0;

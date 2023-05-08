@@ -1676,8 +1676,12 @@ void AssimpSceneFileType::prepareNonTexMaterialParamsGLTF2(SceneWriteData& data,
 
         if (params.ai_model != aiShadingMode_PBR_BRDF)
         {
-            params.ai_pbr_specular = true;
-            params.ai_model        = aiShadingMode_PBR_BRDF;
+            if (data.options.getNoSpecGlossGLTFExport() == false)
+            {
+                params.ai_pbr_specular = true;
+            }
+
+            params.ai_model = aiShadingMode_PBR_BRDF;
         }
 
         //
@@ -1726,7 +1730,7 @@ void AssimpSceneFileType::handleNonTexMaterialParamsCommon(SceneWriteData& data,
     if (data.vecCorrectFactor[aiTextureType_EMISSIVE ]) params.ai_emissive  = rgb_white;
     if (data.vecCorrectFactor[aiTextureType_SHININESS]) params.ai_shininess = 1.f;
     if (data.vecCorrectFactor[aiTextureType_OPACITY  ]) params.ai_opacity   = 1.f;
-    
+
     ai_mat->AddProperty(&params.ai_name,                  AI_MATKEY_NAME);
     ai_mat->AddProperty(&params.ai_ambient,            1, AI_MATKEY_COLOR_AMBIENT);
     ai_mat->AddProperty(&params.ai_diffuse,            1, AI_MATKEY_COLOR_DIFFUSE);
